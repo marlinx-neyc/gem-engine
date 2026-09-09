@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-GEM-V36D 24H Production Inference Engine (生產環境推論核心 - 防錯強化版)
+GEM-V36D 24H Production Inference Engine (GitHub Local JSON Output Edition)
 """
 import os
 import glob
 import time
 import math
-import requests
+import json
 import numpy as np
 import torch
 import torch.nn as nn
@@ -15,7 +15,7 @@ from pydantic import BaseModel, Field
 from datetime import datetime, timezone, timedelta
 
 # ==============================================================================
-# 1. 核心 Schema 與特徵提取器
+# 1. 核心 Schema 與物理特徵矩陣
 # ==============================================================================
 class UnifiedMarineTelemetry(BaseModel):
     sender_id: str = Field(default="CWA_API_REALTIME")
@@ -129,22 +129,20 @@ class AIClassifierPolicy(nn.Module):
         return self.net(x)
 
 # ==============================================================================
-# 2. 推論與推播執行核心
+# 2. 推論並導出 JSON 檔案
 # ==============================================================================
 class ProductionInferenceEngine:
-    def __init__(self, target_model_name: str, dashboard_url: str):
+    def __init__(self, target_model_name: str, output_json_name: str = "latest_decision.json"):
         self.extractor = GEM36DNormalizedFeatureExtractor()
         self.pinn_engine = PINNPhysicsEngine()
         self.policy_net = AIClassifierPolicy()
-        self.dashboard_url = dashboard_url
+        self.output_json_name = output_json_name
         
-        # 動態尋找權重檔案
         model_path = target_model_name
         if not os.path.exists(model_path):
             pts = glob.glob("*.pt") + glob.glob("checkpoints/*.pt")
             if pts:
                 model_path = pts[0]
-                print(f"🔍 自動搜尋定位到模型檔案: {model_path}")
 
         if os.path.exists(model_path):
             try:
@@ -155,9 +153,9 @@ class ProductionInferenceEngine:
                     self.policy_net.load_state_dict(ckpt)
                 print(f"✅ 成功載入神經網路權重: {model_path}")
             except Exception as e:
-                print(f"⚠️ 載入模型權重失敗，降級為預設策略: {e}")
+                print(f"⚠️ 載入模型失敗，降級為預設權重: {e}")
         else:
-            print(f"⚠️ 尚未找到 .pt 模型檔案，採用預設網路權重。")
+            print(f"⚠️ 未找到 .pt 檔，採用預設權重。")
 
         self.policy_net.eval()
 
@@ -173,7 +171,7 @@ class ProductionInferenceEngine:
             taiyi_cycle_year=9.3, jiazi_cycle_year=30.0, qimen_xun_anomaly=0.1
         )
 
-    def execute_and_push(self):
+    def execute_and_save(self):
         telemetry = self.fetch_realtime_data()
         norm_vec = self.extractor.build_normalized_vector(telemetry)
         metrics = self.pinn_engine.evaluate_physics(telemetry, norm_vec)
@@ -214,14 +212,13 @@ class ProductionInferenceEngine:
         }
 
         try:
-            res = requests.post(self.dashboard_url, json=payload, headers={'Content-Type': 'application/json'}, timeout=15)
-            print(f"📡 成功推播至戰術面板: HTTP {res.status_code} | 決策: {q_mode}")
+            with open(self.output_json_name, "w", encoding="utf-8") as f:
+                json.dump(payload, f, ensure_ascii=False, indent=2)
+            print(f"✅ 成功產出戰術決策 JSON 檔案: {self.output_json_name}")
         except Exception as e:
-            print(f"⚠️ 連線推播提示: {e}")
+            print(f"⚠️ 寫入 JSON 失敗: {e}")
 
 if __name__ == "__main__":
-    GAS_WEBAPP_URL = "https://script.google.com/a/macros/tad.gov.tw/s/AKfycbxPB-oLDRFi2XKUzxWQoGwx6HfXrU4wR89llE4evbUCegJUO9HEVaeI3xYt2AJxHXTCiw/exec"
     MODEL_NAME = "model_v36D.10.1.pt"
-    
-    engine = ProductionInferenceEngine(target_model_name=MODEL_NAME, dashboard_url=GAS_WEBAPP_URL)
-    engine.execute_and_push()
+    engine = ProductionInferenceEngine(target_model_name=MODEL_NAME)
+    engine.execute_and_save()
