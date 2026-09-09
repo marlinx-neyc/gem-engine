@@ -1,0 +1,36 @@
+{
+  "system": {
+    "system_version": "GEM-V36D-PRO-FINAL",
+    "timestamp": "2026-09-09 14:05:33 CST",
+    "knowledge_base_code": "KB_20260908_TACTICAL_TWIN",
+    "ukf_convergence_ratio": 99.8
+  },
+  "veto_matrix": {
+    "hs_pier": {
+      "val": 0.8,
+      "status": "PASS"
+    },
+    "w_local": {
+      "val": 4.66,
+      "status": "PASS"
+    },
+    "ukc": {
+      "val": 7.2,
+      "status": "PASS"
+    },
+    "fb_pier": {
+      "val": 0.7,
+      "status": "PASS"
+    }
+  },
+  "tactical_decision": {
+    "q_mode": "🟢 Q1 允許靠泊",
+    "dispatch_status": "ALLOW_DISPATCH (安全允許靠泊)",
+    "veto_pass": true,
+    "reason": "海象平穩，全項通過剛性防線"
+  },
+  "typhoon_qimen_prediction": {
+    "cyclone_dynamic": "外海即時: 波高 1.09m, 陣風 7.39m/s",
+    "qimen_anomaly_forecast": "太乙 36D 時空引擎穩定運作中。"
+  }
+}
