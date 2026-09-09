@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-GEM-V36D 24H Production Inference Engine (GitHub Local JSON Output Edition)
+GEM-V36D 24H Production Inference Engine (RL Safety Shield Edition)
 """
 import os
 import glob
@@ -15,7 +15,7 @@ from pydantic import BaseModel, Field
 from datetime import datetime, timezone, timedelta
 
 # ==============================================================================
-# 1. 核心 Schema 與物理特徵矩陣
+# 1. 核心 Schema 與 36D 特徵提取器
 # ==============================================================================
 class UnifiedMarineTelemetry(BaseModel):
     sender_id: str = Field(default="CWA_API_REALTIME")
@@ -129,15 +129,16 @@ class AIClassifierPolicy(nn.Module):
         return self.net(x)
 
 # ==============================================================================
-# 2. 推論並導出 JSON 檔案
+# 2. 生產推論引擎 (含 VETO Safety Shield 剛性防衛層)
 # ==============================================================================
 class ProductionInferenceEngine:
-    def __init__(self, target_model_name: str, output_json_name: str = "latest_decision.json"):
+    def __init__(self, target_model_name: str = "model_v36D.10.2.pt", output_json_name: str = "latest_decision.json"):
         self.extractor = GEM36DNormalizedFeatureExtractor()
         self.pinn_engine = PINNPhysicsEngine()
         self.policy_net = AIClassifierPolicy()
         self.output_json_name = output_json_name
         
+        # 動態尋找權重檔案
         model_path = target_model_name
         if not os.path.exists(model_path):
             pts = glob.glob("*.pt") + glob.glob("checkpoints/*.pt")
@@ -151,11 +152,11 @@ class ProductionInferenceEngine:
                     self.policy_net.load_state_dict(ckpt['policy_state_dict'])
                 elif isinstance(ckpt, dict):
                     self.policy_net.load_state_dict(ckpt)
-                print(f"✅ 成功載入神經網路權重: {model_path}")
+                print(f"✅ 成功載入強化學習 Agent 模型權重: {model_path}")
             except Exception as e:
-                print(f"⚠️ 載入模型失敗，降級為預設權重: {e}")
+                print(f"⚠️ 載入模型權重失敗，降級為預設策略: {e}")
         else:
-            print(f"⚠️ 未找到 .pt 檔，採用預設權重。")
+            print(f"⚠️ 尚未找到 .pt 模型檔案，採用預設網路權重。")
 
         self.policy_net.eval()
 
@@ -176,19 +177,29 @@ class ProductionInferenceEngine:
         norm_vec = self.extractor.build_normalized_vector(telemetry)
         metrics = self.pinn_engine.evaluate_physics(telemetry, norm_vec)
         
+        # RL 網路原始預測
         with torch.no_grad():
-            pred_action = int(torch.argmax(self.policy_net(torch.FloatTensor(norm_vec).unsqueeze(0)), dim=1).item())
+            raw_action = int(torch.argmax(self.policy_net(torch.FloatTensor(norm_vec).unsqueeze(0)), dim=1).item())
         
+        # 🛡️ 剛性物理安全防衛層 (Safety Shield)
+        has_veto = (
+            metrics["hs_pier_m"] > 1.20 or
+            metrics["w_local_ms"] > 10.80 or
+            metrics["ukc_m"] < 1.50 or
+            metrics["fb_pier_m"] < 0.50
+        )
+        final_action = 2 if has_veto else raw_action
+
         action_map = {
             0: ("Q1 允許靠泊", True, "海象平穩，全項通過剛性防線"),
             1: ("Q2 限制靠泊", True, "風浪接近邊緣"),
             2: ("Q4 嚴禁靠泊", False, "觸發 VETO 防線或宏觀共振")
         }
-        q_mode, veto_pass, reason = action_map[pred_action]
+        q_mode, veto_pass, reason = action_map[final_action]
 
         payload = {
             "system": {
-                "system_version": "GEM-V36D-PRO-FINAL",
+                "system_version": "GEM-V36D-PRO-RL-EVOLVED",
                 "timestamp": telemetry.sent_at,
                 "knowledge_base_code": "KB_20260908_TACTICAL_TWIN",
                 "ukf_convergence_ratio": 99.8
@@ -200,25 +211,25 @@ class ProductionInferenceEngine:
                 "fb_pier": {"val": metrics["fb_pier_m"], "status": "PASS" if metrics["fb_pier_m"] >= 0.5 else "VETO"}
             },
             "tactical_decision": {
-                "q_mode": f"{'🔴' if pred_action==2 else '🟢'} {q_mode}",
+                "q_mode": f"{'🔴' if final_action==2 else '🟢'} {q_mode}",
                 "dispatch_status": "NO_DISPATCH (雙岸閉塞)" if not veto_pass else "ALLOW_DISPATCH (安全允許靠泊)",
                 "veto_pass": veto_pass,
                 "reason": reason
             },
             "typhoon_qimen_prediction": {
                 "cyclone_dynamic": f"外海即時: 波高 {telemetry.hs_cwa}m, 陣風 {telemetry.w_cwa}m/s",
-                "qimen_anomaly_forecast": "太乙 36D 時空引擎穩定運作中。"
+                "qimen_anomaly_forecast": "太乙 36D RL 剛性防衛引擎穩定運作中。"
             }
         }
 
         try:
             with open(self.output_json_name, "w", encoding="utf-8") as f:
                 json.dump(payload, f, ensure_ascii=False, indent=2)
-            print(f"✅ 成功產出戰術決策 JSON 檔案: {self.output_json_name}")
+            print(f"✅ 成功產出最新 36D 戰術決策 JSON 檔案: {self.output_json_name}")
         except Exception as e:
             print(f"⚠️ 寫入 JSON 失敗: {e}")
 
 if __name__ == "__main__":
-    MODEL_NAME = "model_v36D.10.1.pt"
+    MODEL_NAME = "model_v36D.10.2.pt"
     engine = ProductionInferenceEngine(target_model_name=MODEL_NAME)
     engine.execute_and_save()
