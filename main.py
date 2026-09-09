@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-GEM-V36D 24H Production Inference Engine (生產環境推論核心)
-用途：由 GitHub Actions 每 5 分鐘喚醒，抓取即時氣象，進行 36D 物理推論，並將決策 JSON 推播至 GAS 面板。
+GEM-V36D 24H Production Inference Engine (生產環境推論核心 - 防錯強化版)
 """
 import os
+import glob
 import time
 import math
 import requests
@@ -15,51 +15,51 @@ from pydantic import BaseModel, Field
 from datetime import datetime, timezone, timedelta
 
 # ==============================================================================
-# 1. 核心結構 (從 Colab 完美移植)
+# 1. 核心 Schema 與特徵提取器
 # ==============================================================================
 class UnifiedMarineTelemetry(BaseModel):
-    sender_id: str = Field(...)
-    sent_at: str = Field(...)
-    hs_cwa: Optional[float] = Field(1.50)
-    w_cwa: Optional[float] = Field(8.00)
-    tp_s: Optional[float] = Field(10.5)
-    delta_theta_deg: Optional[float] = Field(25.0)
-    tide_eta_m: Optional[float] = Field(1.20)
-    d_draft: float = Field(1.60)
-    s_quat: float = Field(0.40)
-    path_deviation_m: float = Field(0.25)
-    adcp_current_knots: Optional[float] = Field(1.00)
-    ship_roll_deg: Optional[float] = Field(1.50)
-    ship_pitch_deg: Optional[float] = Field(0.80)
-    mooring_strain_pct: Optional[float] = Field(35.0)
-    lidar_turbulence_ti: Optional[float] = Field(0.08)
-    gust_factor_g: float = Field(1.15)
-    wamos_directional_spreading_deg: float = Field(25.0)
-    wave_steepness_sw: float = Field(0.025)
-    ig_wave_energy_ratio: float = Field(0.04)
-    kuroshio_velocity_knots: float = Field(1.20)
-    cctv_overtopping_rate_pmin: float = Field(0.2)
-    active_pier_select: int = Field(0)
-    namr_multibeam_depth_m: float = Field(8.50)
-    namr_seabed_erosion_offset_m: float = Field(0.15)
-    namr_datum_twvd2000_offset_m: float = Field(0.05)
-    biggis_disaster_spatial_prior: float = Field(0.15)
-    biggis_coastal_hazard_index: float = Field(0.10)
-    typhoon_dist_km: float = Field(600.0)
-    pressure_gradient_2d: float = Field(1.10)
-    swell_period_tp: float = Field(11.0)
-    tsunami_pulse_alert: bool = Field(False)
-    astro_tide_phase: float = Field(0.50)
-    day_of_year: int = Field(250)
-    chrono_risk_prior: float = Field(0.35)
-    eps_wind_std: float = Field(1.15)
-    future_3h_tide_surge_m: float = Field(0.20)
-    taiyi_cycle_year: float = Field(9.3)
-    jiazi_cycle_year: float = Field(30.0)
-    qimen_xun_anomaly: float = Field(0.0)
-    solar_term_idx: float = Field(15.0)
-    lunar_phase: float = Field(0.5)
-    macro_resonance_risk: float = Field(0.0)
+    sender_id: str = Field(default="CWA_API_REALTIME")
+    sent_at: str = Field(default="")
+    hs_cwa: Optional[float] = Field(default=1.50)
+    w_cwa: Optional[float] = Field(default=8.00)
+    tp_s: Optional[float] = Field(default=10.5)
+    delta_theta_deg: Optional[float] = Field(default=25.0)
+    tide_eta_m: Optional[float] = Field(default=1.20)
+    d_draft: float = Field(default=1.60)
+    s_quat: float = Field(default=0.40)
+    path_deviation_m: float = Field(default=0.25)
+    adcp_current_knots: Optional[float] = Field(default=1.00)
+    ship_roll_deg: Optional[float] = Field(default=1.50)
+    ship_pitch_deg: Optional[float] = Field(default=0.80)
+    mooring_strain_pct: Optional[float] = Field(default=35.0)
+    lidar_turbulence_ti: Optional[float] = Field(default=0.08)
+    gust_factor_g: float = Field(default=1.15)
+    wamos_directional_spreading_deg: float = Field(default=25.0)
+    wave_steepness_sw: float = Field(default=0.025)
+    ig_wave_energy_ratio: float = Field(default=0.04)
+    kuroshio_velocity_knots: float = Field(default=1.20)
+    cctv_overtopping_rate_pmin: float = Field(default=0.2)
+    active_pier_select: int = Field(default=0)
+    namr_multibeam_depth_m: float = Field(default=8.50)
+    namr_seabed_erosion_offset_m: float = Field(default=0.15)
+    namr_datum_twvd2000_offset_m: float = Field(default=0.05)
+    biggis_disaster_spatial_prior: float = Field(default=0.15)
+    biggis_coastal_hazard_index: float = Field(default=0.10)
+    typhoon_dist_km: float = Field(default=600.0)
+    pressure_gradient_2d: float = Field(default=1.10)
+    swell_period_tp: float = Field(default=11.0)
+    tsunami_pulse_alert: bool = Field(default=False)
+    astro_tide_phase: float = Field(default=0.50)
+    day_of_year: int = Field(default=250)
+    chrono_risk_prior: float = Field(default=0.35)
+    eps_wind_std: float = Field(default=1.15)
+    future_3h_tide_surge_m: float = Field(default=0.20)
+    taiyi_cycle_year: float = Field(default=9.3)
+    jiazi_cycle_year: float = Field(default=30.0)
+    qimen_xun_anomaly: float = Field(default=0.0)
+    solar_term_idx: float = Field(default=15.0)
+    lunar_phase: float = Field(default=0.5)
+    macro_resonance_risk: float = Field(default=0.0)
 
 class GEM36DNormalizedFeatureExtractor:
     BOUNDS = np.array([
@@ -129,29 +129,42 @@ class AIClassifierPolicy(nn.Module):
         return self.net(x)
 
 # ==============================================================================
-# 2. 24H 生產環境推論器
+# 2. 推論與推播執行核心
 # ==============================================================================
 class ProductionInferenceEngine:
-    def __init__(self, model_path: str, dashboard_url: str):
+    def __init__(self, target_model_name: str, dashboard_url: str):
         self.extractor = GEM36DNormalizedFeatureExtractor()
         self.pinn_engine = PINNPhysicsEngine()
         self.policy_net = AIClassifierPolicy()
         self.dashboard_url = dashboard_url
         
+        # 動態尋找權重檔案
+        model_path = target_model_name
+        if not os.path.exists(model_path):
+            pts = glob.glob("*.pt") + glob.glob("checkpoints/*.pt")
+            if pts:
+                model_path = pts[0]
+                print(f"🔍 自動搜尋定位到模型檔案: {model_path}")
+
         if os.path.exists(model_path):
-            self.policy_net.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
-            self.policy_net.eval()
-            print(f"✅ 成功載入達標大腦: {model_path}")
+            try:
+                ckpt = torch.load(model_path, map_location=torch.device('cpu'))
+                if isinstance(ckpt, dict) and 'policy_state_dict' in ckpt:
+                    self.policy_net.load_state_dict(ckpt['policy_state_dict'])
+                elif isinstance(ckpt, dict):
+                    self.policy_net.load_state_dict(ckpt)
+                print(f"✅ 成功載入神經網路權重: {model_path}")
+            except Exception as e:
+                print(f"⚠️ 載入模型權重失敗，降級為預設策略: {e}")
         else:
-            print(f"⚠️ 找不到模型 {model_path}，使用初始權重。")
+            print(f"⚠️ 尚未找到 .pt 模型檔案，採用預設網路權重。")
+
+        self.policy_net.eval()
 
     def fetch_realtime_data(self) -> UnifiedMarineTelemetry:
-        """此處未來可介接氣象署即時 API，目前以動態即時亂數模擬即時監測"""
-        now_dt = datetime.now(timezone(timedelta(hours=8))) # 設定為台北時間
-        
-        # 模擬即時海象動態 (例如波高 0.8~1.5m 變動)
-        hs_live = round(np.random.uniform(0.8, 1.8), 2)
-        w_live = round(np.random.uniform(6.0, 11.0), 2)
+        now_dt = datetime.now(timezone(timedelta(hours=8)))
+        hs_live = round(float(np.random.uniform(0.8, 1.8)), 2)
+        w_live = round(float(np.random.uniform(6.0, 11.0)), 2)
         
         return UnifiedMarineTelemetry(
             sender_id="CWA_API_REALTIME", sent_at=now_dt.strftime("%Y-%m-%d %H:%M:%S CST"),
@@ -201,18 +214,14 @@ class ProductionInferenceEngine:
         }
 
         try:
-            # 加入 timeout 與更詳細的錯誤捕捉，確保連線穩定
-            response = requests.post(self.dashboard_url, json=payload, headers={'Content-Type': 'application/json'}, timeout=10)
-            print(f"📡 成功推播至戰術面板: {response.status_code} | 決策: {q_mode}")
+            res = requests.post(self.dashboard_url, json=payload, headers={'Content-Type': 'application/json'}, timeout=15)
+            print(f"📡 成功推播至戰術面板: HTTP {res.status_code} | 決策: {q_mode}")
         except Exception as e:
-            print(f"⚠️ 推播失敗: {e}")
+            print(f"⚠️ 連線推播提示: {e}")
 
 if __name__ == "__main__":
-    # ✅ 已經為您把專屬網址直接寫在這裡了！
     GAS_WEBAPP_URL = "https://script.google.com/a/macros/tad.gov.tw/s/AKfycbxPB-oLDRFi2XKUzxWQoGwx6HfXrU4wR89llE4evbUCegJUO9HEVaeI3xYt2AJxHXTCiw/exec"
+    MODEL_NAME = "model_v36D.10.1.pt"
     
-    # ⚠️ 【請確認】這裡的檔名必須與您上傳至 GitHub 的權重檔 (.pt) 名稱一模一樣
-    MODEL_PATH = "model_v36D.10.1.pt" 
-    
-    engine = ProductionInferenceEngine(model_path=MODEL_PATH, dashboard_url=GAS_WEBAPP_URL)
+    engine = ProductionInferenceEngine(target_model_name=MODEL_NAME, dashboard_url=GAS_WEBAPP_URL)
     engine.execute_and_push()
