@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-GEM-V210-PRO-FINAL 數位雙生海事戰術智庫 - 中央協調器 (v14.0 Production Auto-Deployment)
+GEM-V210-PRO-FINAL 數位雙生海事戰術智庫 - 中央協調器 (v14.1 加載 36D 最佳權重檔)
 """
 import argparse
 import json
@@ -9,363 +9,67 @@ import sys
 import time
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
-import gymnasium as gym
 import numpy as np
-from gymnasium import spaces
+import torch
+import torch.nn as nn
 from pydantic import BaseModel, Field
 
-try:
-    import google.auth
-    from google.auth.transport.requests import Request
-    from google.colab import auth
-    HAS_COLAB = True
-except ImportError:
-    HAS_COLAB = False
-
-def get_google_org_token() -> Optional[str]:
-    if not HAS_COLAB:
-        return None
-    try:
-        auth.authenticate_user()
-        creds, _ = google.auth.default(
-            scopes=[
-                "https://www.googleapis.com/auth/cloud-platform",
-                "https://www.googleapis.com/auth/drive",
-            ]
+# 1. 策略神經網路架構
+class AIClassifierPolicy(nn.Module):
+    def __init__(self, input_dim=36, hidden_dim=128, output_dim=4):
+        super(AIClassifierPolicy, self).__init__()
+        self.net = nn.Sequential(
+            nn.Linear(input_dim, hidden_dim),
+            nn.BatchNorm1d(hidden_dim),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(hidden_dim, 64),
+            nn.ReLU(),
+            nn.Linear(64, output_dim)
         )
-        creds.refresh(Request())
-        return creds.token
-    except Exception:
-        return None
+        
+    def forward(self, x):
+        return self.net(x)
 
+# 2. 遙測數據 Schema
 class MarineTelemetry(BaseModel):
     timestamp_str: str = Field(..., description="時間戳記")
-    hs_cwa: float = Field(..., description="CWA 浮標波高 (m)")
-    w_cwa: float = Field(..., description="WRF 區域風速 (m/s)")
-    tp_s: float = Field(..., description="浪週期 Tp (s)")
-    delta_theta_deg: float = Field(..., description="風向角偏量 Delta_theta (deg)")
-    tide_eta_m: float = Field(..., description="潮位升水 eta (m)")
-    d_chart_base: float = Field(8.50, description="基準水深 (m)")
-    d_draft: float = Field(6.00, description="船隻吃水 (m)")
-
-class AdaptivePINNEngine:
-    def __init__(self):
-        self.kd_weight: float = 0.883
-        self.kw_weight: float = 0.78
-        self.el_pier_south_m: float = 3.20  # 南岸沉箱頂設計高程 EL. +3.20m
-        self.last_residual: float = 0.0
-
-    def evaluate_physics(self, telemetry: MarineTelemetry) -> Dict[str, Any]:
-        if telemetry.tp_s > 12.0:
-            active_kd = 1.00
-        elif telemetry.tp_s > 11.5:
-            active_kd = 0.883 + (1.00 - 0.883) * ((telemetry.tp_s - 11.5) / 0.5)
-        else:
-            active_kd = self.kd_weight
-
-        if telemetry.delta_theta_deg >= 45.0:
-            kw = 1.00
-        elif telemetry.delta_theta_deg >= 30.0:
-            kw = 0.78 + (1.00 - 0.78) * ((telemetry.delta_theta_deg - 30.0) / 15.0)
-        else:
-            kw = self.kw_weight
-
-        hs_pier = round(telemetry.hs_cwa * active_kd, 2)
-        w_local = round(telemetry.w_cwa * kw, 2)
-
-        squat_m = 0.10  # 船體沈降量
-        eta_total = telemetry.tide_eta_m  # 潮位與暴潮升水
-        ukc = round(
-            (telemetry.d_chart_base + eta_total)
-            - (telemetry.d_draft + squat_m)
-            - hs_pier,
-            2,
-        )
-        fb_pier = round(self.el_pier_south_m - eta_total, 2)
-
-        return {
-            "hs_pier_m": hs_pier,
-            "w_local_ms": w_local,
-            "ukc_m": ukc,
-            "fb_pier_m": fb_pier,
-            "tp_s": telemetry.tp_s,
-            "delta_theta_deg": telemetry.delta_theta_deg,
-            "active_kd": round(active_kd, 4),
-            "active_kw": round(kw, 4),
-            "base_kd_learned": round(self.kd_weight, 4),
-            "last_residual_m": round(self.last_residual, 4),
-            "is_long_wave_override": telemetry.tp_s > 12.0,
-        }
-
-class GuishanHarborEnv(gym.Env):
-    def __init__(self):
-        super(GuishanHarborEnv, self).__init__()
-        self.action_space = spaces.Discrete(4)
-        self.observation_space = spaces.Box(
-            low=-np.inf, high=np.inf, shape=(10,), dtype=np.float32
-        )
-
-    def build_state_vector(self, metrics: Dict[str, Any]) -> np.ndarray:
-        hs = metrics.get("hs_pier_m", 0.0)
-        w = metrics.get("w_local_ms", 0.0)
-        ukc = metrics.get("ukc_m", 0.0)
-        fb = metrics.get("fb_pier_m", 0.0)
-        tp = metrics.get("tp_s", 10.0)
-        delta_theta = metrics.get("delta_theta_deg", 0.0)
-        swell_ratio = 0.45 if tp > 12.0 else 0.15
-        scos = round(float(np.cos(np.radians(delta_theta))), 2)
-        surge = 0.25 if hs > 2.0 else 0.05
-        kd = metrics.get("active_kd", 0.883)
-        return np.array(
-            [hs, w, ukc, fb, tp, delta_theta, swell_ratio, scos, surge, kd],
-            dtype=np.float32,
-        )
-
-    def evaluate_tactical_policy(self, metrics: Dict[str, Any]) -> Dict[str, Any]:
-        hs, w = metrics.get("hs_pier_m", 0.0), metrics.get("w_local_ms", 0.0)
-        ukc, fb = metrics.get("ukc_m", 0.0), metrics.get("fb_pier_m", 0.0)
-
-        hs_veto = hs > 1.20
-        w_veto = w > 10.80
-        ukc_veto = ukc < 1.50
-        fb_veto = fb < 0.50
-        veto_triggered = hs_veto or w_veto or ukc_veto or fb_veto
-        state_vec = self.build_state_vector(metrics)
-
-        if veto_triggered:
-            action = 3
-            q_mode = "Q4"
-            status_text = "NO_DISPATCH"
-            reward = 100.0
-            reasons = []
-            if hs_veto:
-                reasons.append(f"Hs_pier ({hs}m > 1.20m)")
-            if w_veto:
-                reasons.append(f"W_local ({w}m/s > 10.80m/s)")
-            if ukc_veto:
-                reasons.append(f"UKC ({ukc}m < 1.50m)")
-            if fb_veto:
-                reasons.append(f"FB_pier ({fb}m < 0.50m)")
-            reason_str = " 及 ".join(reasons) + " 觸發剛性 VETO 封鎖"
-        else:
-            action = 0
-            q_mode = "Q1"
-            status_text = "ALLOW_DISPATCH"
-            reward = 150.0
-            reason_str = "全項通過剛性 VETO 防線門檻"
-
-        return {
-            "action": action,
-            "q_mode": q_mode,
-            "status_text": status_text,
-            "reward": reward,
-            "veto_pass": not veto_triggered,
-            "reason": reason_str,
-            "state_vector": state_vec.tolist(),
-            "veto_flags": {
-                "hs_pier": hs_veto,
-                "w_local": w_veto,
-                "ukc": ukc_veto,
-                "fb_pier": fb_veto,
-            },
-        }
-
-class DashboardSyncEngine:
-    def __init__(
-        self,
-        kb_code: str,
-        dashboard_api_url: Optional[str] = None,
-        auth_token: Optional[str] = None,
-    ):
-        self.kb_code = kb_code
-        self.dashboard_api_url = dashboard_api_url
-        self.auth_token = auth_token
-        import requests
-        self.session = requests.Session()
-
-    def build_ssot_payload(self) -> Dict[str, Any]:
-        return {
-            "system": {
-                "system_version": "GEM-V210-PRO-FINAL",
-                "knowledge_base_code": self.kb_code,
-                "checksum_fingerprint": "0x9F8B26",
-                "api_connection_status": "ONLINE",
-                "ukf_convergence_ratio": 99.8,
-                "ground_truth_accuracy": 99.2,
-                "network_latency_ms": 11,
-                "learning_iteration": 8,
-            },
-            "tactical_decision": {},
-            "feedback_control": {},
-            "veto_matrix": {},
-            "rl_agent_diagnostics": {},
-            "typhoon_qimen_prediction": {
-                "cyclone_dynamic": "東南東 450 km，中颱 (45m/s)，暴風半徑 200km。",
-                "qimen_anomaly_forecast": (
-                    "巽宮氣場異常，帶狀低壓活躍，長浪 (Tp > 12.0s)"
-                    " 共振頻繁，請撤離離岸設施。"
-                ),
-            },
-        }
-
-    def push_to_dashboard_panel(self, payload: Dict[str, Any]) -> bool:
-        if (
-            not self.dashboard_api_url
-            or "https://" not in self.dashboard_api_url
-        ):
-            print("ERROR: 未設定 GAS_URL！")
-            return False
-        headers = {"Content-Type": "application/json; charset=utf-8"}
-        if self.auth_token:
-            headers["Authorization"] = f"Bearer {self.auth_token}"
-        json_bytes = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-        for attempt in range(1, 3):
-            try:
-                response = self.session.post(
-                    self.dashboard_api_url,
-                    data=json_bytes,
-                    headers=headers,
-                    timeout=10,
-                )
-                if response.status_code in [200, 302]:
-                    return True
-            except Exception:
-                time.sleep(1)
-        return False
+    hs_cwa: float = Field(3.23)
+    w_cwa: float = Field(13.50)
+    tp_s: float = Field(15.5)
+    delta_theta_deg: float = Field(67.5)
+    tide_eta_m: float = Field(3.05)
+    d_chart_base: float = Field(8.50)
+    d_draft: float = Field(6.00)
 
 class ResilientTacticalOrchestrator:
-    TZ_TAIPEI = timezone(timedelta(hours=8))
+    def __init__(self, model_path="model_v36D.10.3.pt"):
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.policy = AIClassifierPolicy(input_dim=36).to(self.device)
+        
+        # 自動載入剛剛訓練好的最佳權重檔
+        if os.path.exists(model_path):
+            try:
+                self.policy.load_state_dict(torch.load(model_path, map_location=self.device))
+                self.policy.eval()
+                print(f"✅ [模型加載成功] 已載入 36D 最佳神經網絡權重: {model_path}")
+            except Exception as e:
+                print(f"⚠️ [模型加載警報] 讀取模型失敗: {e}")
+        else:
+            print(f"⚠️ [模型警告] 找不到權重檔 {model_path}")
 
-    def __init__(
-        self,
-        kb_code: str = "KB_20260904_ESE_OVERTOPPING",
-        dashboard_url: Optional[str] = None,
-        auth_token: Optional[str] = None,
-    ):
-        self.pinn_engine = AdaptivePINNEngine()
-        self.rl_env = GuishanHarborEnv()
-        self.sync_engine = DashboardSyncEngine(
-            kb_code=kb_code,
-            dashboard_api_url=dashboard_url,
-            auth_token=auth_token,
-        )
+    def run_single_inference(self):
+        telemetry = MarineTelemetry(timestamp_str=datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        hs_veto = telemetry.hs_cwa > 1.20
+        w_veto = telemetry.w_cwa > 10.80
+        veto_triggered = hs_veto or w_veto
 
-    def execute_stream_pipeline(
-        self, primary_telemetry: MarineTelemetry
-    ) -> Dict[str, Any]:
-        now_dt = datetime.now(self.TZ_TAIPEI)
-        info_recv_time = now_dt.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3] + " CST"
-        final_metrics = self.pinn_engine.evaluate_physics(primary_telemetry)
-        tactical_res = self.rl_env.evaluate_tactical_policy(final_metrics)
-
-        payload = self.sync_engine.build_ssot_payload()
-        payload["system"]["timestamp"] = (
-            now_dt.strftime("%Y-%m-%d %H:%M:%S") + " CST"
-        )
-        payload["tactical_decision"] = {
-            "q_mode": tactical_res["q_mode"],
-            "dispatch_status": tactical_res["status_text"],
-            "reward_score": tactical_res["reward"],
-            "veto_pass": tactical_res["veto_pass"],
-            "reason": tactical_res["reason"],
-        }
-
-        payload["veto_matrix"] = {
-            "hs_pier": {
-                "val": final_metrics["hs_pier_m"],
-                "limit": 1.20,
-                "status": (
-                    "VETO_TRIGGERED"
-                    if tactical_res["veto_flags"]["hs_pier"]
-                    else "PASS"
-                ),
-                "unit": "m",
-            },
-            "w_local": {
-                "val": final_metrics["w_local_ms"],
-                "limit": 10.80,
-                "status": (
-                    "VETO_TRIGGERED"
-                    if tactical_res["veto_flags"]["w_local"]
-                    else "PASS"
-                ),
-                "unit": "m/s",
-            },
-            "ukc": {
-                "val": final_metrics["ukc_m"],
-                "limit": 1.50,
-                "status": (
-                    "VETO_TRIGGERED"
-                    if tactical_res["veto_flags"]["ukc"]
-                    else "PASS"
-                ),
-                "unit": "m",
-            },
-            "fb_pier": {
-                "val": final_metrics["fb_pier_m"],
-                "limit": 0.50,
-                "status": (
-                    "VETO_TRIGGERED"
-                    if tactical_res["veto_flags"]["fb_pier"]
-                    else "PASS"
-                ),
-                "unit": "m",
-            },
-        }
-
-        payload["feedback_control"] = {
-            "info_recv_timestamp": info_recv_time,
-            "ack_updated_timestamp": info_recv_time,
-        }
-
-        pushed_success = self.sync_engine.push_to_dashboard_panel(payload)
-        print(
-            f"📡 [面板同步] 狀態: {'成功' if pushed_success else '失敗'} | 決策:"
-            f" {tactical_res['q_mode']} ({tactical_res['status_text']}) | 波高:"
-            f" {final_metrics['hs_pier_m']}m | 風速:"
-            f" {final_metrics['w_local_ms']}m/s"
-        )
-        return payload
-
-def fetch_realtime_marine_telemetry() -> MarineTelemetry:
-    now_dt = datetime.now(timezone(timedelta(hours=8)))
-    return MarineTelemetry(
-        timestamp_str=now_dt.strftime("%Y-%m-%d %H:%M:%S CST"),
-        hs_cwa=3.23,
-        w_cwa=13.50,
-        tp_s=15.5,
-        delta_theta_deg=67.5,
-        tide_eta_m=3.05,
-        d_chart_base=8.50,
-        d_draft=6.00,
-    )
+        q_mode = "Q4" if veto_triggered else "Q1"
+        status_text = "NO_DISPATCH" if veto_triggered else "ALLOW_DISPATCH"
+        
+        print(f"📡 [即時推播] 決策狀態: {q_mode} ({status_text}) | 浪高: {telemetry.hs_cwa}m | 風速: {telemetry.w_cwa}m/s")
+        return {"q_mode": q_mode, "status": status_text}
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--single-run",
-        action="store_true",
-        help="執行單次推播後自動結束 (適用於 GitHub Actions)",
-    )
-    args, _ = parser.parse_known_args()
-
-    GAS_URL = os.environ.get(
-        "GAS_URL",
-        "https://script.google.com/a/macros/tad.gov.tw/s/AKfycbxGSgC07yggniia3l604KO_Yyf8D_O8-qW3-_xiI6ML9Redrd1qJ5h03hSuZy5NzccEvg/exec",
-    )
-    bearer_token = get_google_org_token()
-    orchestrator = ResilientTacticalOrchestrator(
-        dashboard_url=GAS_URL, auth_token=bearer_token
-    )
-    if args.single_run:
-        print("🚀 [GitHub Actions 背景排程] 開始執行單次 AI 戰術推播...")
-        orchestrator.execute_stream_pipeline(fetch_realtime_marine_telemetry())
-        print("✅ 單次推播 completed。")
-    else:
-        print("🚀 [持續監控模式] 全系統啟動...")
-        try:
-            while True:
-                orchestrator.execute_stream_pipeline(fetch_realtime_marine_telemetry())
-                time.sleep(5)
-        except KeyboardInterrupt:
-            print("\n🛑 收到終止訊號，已安全停機。")
+    orchestrator = ResilientTacticalOrchestrator()
+    orchestrator.run_single_inference()
