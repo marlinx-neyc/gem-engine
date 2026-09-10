@@ -43,7 +43,7 @@ class MarineTelemetry(BaseModel):
     d_draft: float = Field(6.00)
 
 class ResilientTacticalOrchestrator:
-    def __init__(self, model_path="model_v36D.10.3.pt"):
+    def __init__(self, model_path="model_v36D.10.6.pt"):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.policy = AIClassifierPolicy(input_dim=36).to(self.device)
         
