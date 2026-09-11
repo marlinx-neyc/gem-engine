@@ -41,11 +41,8 @@
         }
         @keyframes pulseBlue { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
         
-        /* 數值脈衝發光特效 (Data Flash Pulse) */
         .flash-pulse-red { animation: flashRed 0.6s ease-out; }
-        .flash-pulse-green { animation: flashGreen 0.6s ease-out; }
         @keyframes flashRed { 0% { background-color: rgba(239, 68, 68, 0.4); } 100% { background-color: transparent; } }
-        @keyframes flashGreen { 0% { background-color: rgba(16, 185, 129, 0.4); } 100% { background-color: transparent; } }
 
         .nav-switch { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 8px 12px; background: #0f172a; border-radius: 6px; border: 1px solid #334155; font-size: 11px; }
         .nav-switch a { color: #38bdf8; text-decoration: none; font-weight: bold; }
@@ -59,20 +56,20 @@
             <div style="font-size:11px; color:#94a3b8;">通訊: <span id="mobCommCount" style="color:#f8fafc; font-weight:bold;">0</span> 次 | <span id="mobSecAgo">更新: 0 秒前</span></div>
         </div>
 
-        <!-- 30 秒數據過期 Watchdog 警示 Banner (補齊規範對齊標語) -->
+        <!-- 30 秒數據過期 Watchdog 警示 Banner -->
         <div id="staleAlertMob" class="stale-mob">
             🔴 數據過期 (OUT OF DATE / READ_ONLY_BACKUP)<br>
             <span style="font-size:10px; font-weight:normal;">警告：數據已逾 30 秒未更新，請勿依此進行靠泊決策！</span>
         </div>
 
-        <!-- 2. Q-Mode 戰術裁決 Banner (包含剛性 NO_DISPATCH 標籤) -->
+        <!-- 2. Q-Mode 戰術裁決 Banner -->
         <div id="vetoBannerMob" class="banner-mob">🔴 Q4 嚴禁靠泊 (NO_DISPATCH / 全線封島 48H)</div>
 
         <!-- 3. 即時海象數值與剛性門檻比對 (PINN) -->
         <div class="card-mob" id="pinnCard">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                 <strong style="color:#38bdf8; font-size:12px;">即時海象與剛性門檻比對 (PINN)</strong>
-                <span id="mobileTimestamp" style="font-size:10px; color:#38bdf8; font-weight:bold;">2026-09-11 20:08:20 CST</span>
+                <span id="mobileTimestamp" style="font-size:10px; color:#38bdf8; font-weight:bold;">載入中...</span>
             </div>
             <div class="grid-2">
                 <div class="item-box">
@@ -277,10 +274,14 @@
             return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} CST`;
         }
 
-        function initMobileDates() {
-            const now = new Date();
+        function updateLiveTimestamp() {
             const tsEl = document.getElementById('mobileTimestamp');
-            if (tsEl) tsEl.innerText = getFormattedCSTTime(now);
+            if (tsEl) tsEl.innerText = getFormattedCSTTime(new Date());
+        }
+
+        function initMobileDates() {
+            updateLiveTimestamp();
+            const now = new Date();
             const fmt = (d) => `(${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')})`;
             const d1 = new Date(now); d1.setDate(d1.getDate() + 1);
             const d2 = new Date(now); d2.setDate(d2.getDate() + 2);
@@ -290,27 +291,22 @@
             const d3El = document.getElementById('mob_d3'); if(d3El) d3El.innerText = `(D+3, ${fmt(d3)})`;
         }
 
-        // SSOT 數據雙軌容錯解析 (Tolerant Parsing Layer)
+        // 接收 Master (index.html) 或 postMessage 廣播之 SSOT 數據
         window.onSSOTDataReceived = function(data) {
             if (!data) return;
             lastUpdateMob = Date.now();
             mobCommCounter++;
             
-            // UI 反饋：通訊次數增加與脈衝閃爍
             const cntEl = document.getElementById('mobCommCount'); if(cntEl) cntEl.innerText = mobCommCounter;
             const staleEl = document.getElementById('staleAlertMob'); if(staleEl) staleEl.style.display = 'none';
 
             const cardPinn = document.getElementById('pinnCard');
             if (cardPinn) {
-                cardPinn.classList.remove('flash-pulse-red', 'flash-pulse-green');
-                void cardPinn.offsetWidth; // 觸發重繪
+                cardPinn.classList.remove('flash-pulse-red');
+                void cardPinn.offsetWidth;
                 cardPinn.classList.add('flash-pulse-red');
             }
 
-            let ts = (data.system && data.system.timestamp) || data.timestamp || getFormattedCSTTime();
-            const tsEl = document.getElementById('mobileTimestamp'); if(tsEl) tsEl.innerText = ts;
-
-            // 頂部戰術 Banner (兼容 tactical_decision 與 decision_code)
             let bannerEl = document.getElementById('vetoBannerMob');
             if (bannerEl) {
                 if (data.decision_code === "Q4_DISASTER") {
@@ -326,7 +322,6 @@
                 }
             }
 
-            // PINN 數據解析 (兼容 physics_metrics 與 veto_matrix)
             let hsVal = 3.23, wVal = 13.50, ukcVal = 2.22, fbVal = 0.15;
             if (data.physics_metrics) {
                 if (data.physics_metrics.hs_pier_m !== undefined) hsVal = data.physics_metrics.hs_pier_m;
@@ -368,43 +363,6 @@
                 sfbEl.className = fbVal < 0.50 ? 'badge-veto-m' : 'badge-pass-m';
             }
 
-            // 颱風與奇門
-            if (data.typhoon_qimen_prediction) {
-                const cyStatus = document.getElementById('mob_cyclone_status');
-                if (cyStatus && data.typhoon_qimen_prediction.cyclone_dynamic) cyStatus.innerText = data.typhoon_qimen_prediction.cyclone_dynamic;
-                const cyStrat = document.getElementById('mob_cyclone_strategy');
-                if (cyStrat && data.typhoon_qimen_prediction.qimen_anomaly_forecast) cyStrat.innerText = '對策：' + data.typhoon_qimen_prediction.qimen_anomaly_forecast;
-            } else if (data.left_panel_macro_prediction && data.left_panel_macro_prediction.cyclone_alert) {
-                let macro = data.left_panel_macro_prediction.cyclone_alert;
-                const cyStatus = document.getElementById('mob_cyclone_status');
-                if (cyStatus && macro.status) cyStatus.innerText = macro.status;
-                const cyStrat = document.getElementById('mob_cyclone_strategy');
-                if (cyStrat && macro.strategy) cyStrat.innerText = '對策：' + macro.strategy;
-            }
-
-            // 船班燈號表格
-            if (data.tdx && Array.isArray(data.tdx)) {
-                const tbody = document.getElementById('mob_tdx_body');
-                if (tbody) {
-                    tbody.innerHTML = data.tdx.map(item => `
-                        <tr style="border-bottom:1px solid #0f172a;">
-                            <td style="padding:4px 2px;">${item.time}</td>
-                            <td style="padding:4px 2px; color:${item.off === '准予靠泊' ? '#10b981' : '#f59e0b'};">${item.off}</td>
-                            <td style="padding:4px 2px; color:#ef4444; font-weight:bold;">${item.mod}</td>
-                            <td style="padding:4px 2px; text-align:center;">${item.light === '#ef4444' || item.light === '🔴' ? '🔴' : '🟢'}</td>
-                        </tr>
-                    `).join('');
-                }
-            }
-
-            // 最後戰術裁決與處置
-            if (data.tactical_decision || data.decision) {
-                const decEl = document.getElementById('mob_final_decision');
-                if (decEl) decEl.innerText = (data.tactical_decision && data.tactical_decision.q_mode) || (data.decision && data.decision.status_text) || '🔴 Q4 嚴禁靠泊 (NO_DISPATCH / 全線封島 48H)';
-                const actEl = document.getElementById('mob_final_action');
-                if (actEl) actEl.innerText = '處置：' + ((data.tactical_decision && data.tactical_decision.reason) || (data.decision && data.decision.route_action) || '全線停航，營運船隻返回烏石港避風。');
-            }
-
             if (data.pattern_match) {
                 const mcEl = document.getElementById('mob_match_cases'); if(mcEl) mcEl.innerText = data.pattern_match.matched_cases + ' 筆';
                 const prEl = document.getElementById('mob_prior_rate'); if(prEl) prEl.innerText = ((data.pattern_match.historical_closure_rate || 0) * 100).toFixed(1) + '%';
@@ -416,8 +374,25 @@
             }
         };
 
-        // Watchdog 計時器與 >30s 超時退避警示 Banner 控制
+        // 監聽來自 Master (index.html) 之跨視窗 Message
+        window.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'SSOT_SYNC') {
+                window.onSSOTDataReceived(event.data.data);
+            }
+        });
+
+        // 獨立備用 Polling (直接讀取 ./latest_decision.json)
+        async function fetchSSOTDataFallback() {
+            try {
+                const response = await fetch('./latest_decision.json?t=' + Date.now());
+                if (!response.ok) throw new Error("HTTP " + response.status);
+                const data = await response.json();
+                if (typeof window.onSSOTDataReceived === "function") window.onSSOTDataReceived(data);
+            } catch (err) { console.warn("[Mobile Fallback Polling Warning]:", err); }
+        }
+
         setInterval(function() {
+            updateLiveTimestamp(); // 毎秒動態刷新時間戳記
             const sec = Math.floor((Date.now() - lastUpdateMob) / 1000);
             const secEl = document.getElementById('mobSecAgo'); if(secEl) secEl.innerText = '更新: ' + sec + ' 秒前';
             const staleEl = document.getElementById('staleAlertMob');
@@ -430,19 +405,10 @@
             }
         }, 1000);
 
-        async function fetchSSOTData() {
-            try {
-                const response = await fetch('./latest_decision.json?t=' + new Date().getTime());
-                if (!response.ok) throw new Error("HTTP " + response.status);
-                const data = await response.json();
-                if (typeof window.onSSOTDataReceived === "function") window.onSSOTDataReceived(data);
-            } catch (err) { console.warn("遙測讀取失敗:", err); }
-        }
-
         document.addEventListener("DOMContentLoaded", () => {
             initMobileDates();
-            fetchSSOTData();
-            setInterval(fetchSSOTData, 3000);
+            fetchSSOTDataFallback();
+            setInterval(fetchSSOTDataFallback, 3000);
         });
     </script>
 </body>
