@@ -50,13 +50,13 @@
         </div>
 
         <div id="staleAlertMob" class="stale-mob">🔴 數據過期 (READ_ONLY_BACKUP)</div>
-        <div id="vetoBannerMob" class="banner-mob">🔴 Q4 模式 - 觸發 VETO 剛性封鎖</div>
+        <div id="vetoBannerMob" class="banner-mob">🔴 Q4 嚴禁靠泊 (全線封島 48H)</div>
 
         <!-- 2. 即時海象數值與剛性門檻比對 (PINN) -->
         <div class="card-mob">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                 <strong style="color:#38bdf8; font-size:12px;">即時海象與剛性門檻比對 (PINN)</strong>
-                <span id="mobileTimestamp" style="font-size:10px; color:#94a3b8;">載入中...</span>
+                <span id="mobileTimestamp" style="font-size:10px; color:#38bdf8; font-weight:bold;">2026-09-11 20:08:20 CST</span>
             </div>
             <div class="grid-2">
                 <div class="item-box">
@@ -121,12 +121,12 @@
                 </tbody>
             </table>
             <div style="border-top: 1px dashed #334155; padding-top: 6px; font-size: 11px; line-height: 1.5; color: #cbd5e1;">
-                <div><span style="color:#facc15; font-weight:bold;">最後戰術裁決：</span><span id="mob_final_decision" style="color:#ef4444; font-weight:bold;">Q4 嚴禁靠泊 (全線封島)</span></div>
-                <div style="color:#94a3b8; margin-top:2px;" id="mob_final_action">處置：全線停航，營運船隻返回烏石港避風。</div>
+                <div><span style="color:#facc15; font-weight:bold;">最後戰術裁決：</span><span id="mob_final_decision" style="color:#ef4444; font-weight:bold;">🔴 Q4 嚴禁靠泊 (全線封島 48H)</span></div>
+                <div style="color:#94a3b8; margin-top:2px;" id="mob_final_action">處置：Hs_pier (3.23m > 1.20m) 及 W_local (13.50m/s > 10.80m/s) 及 FB_pier (0.15m < 0.50m) 觸發剛性 VETO 封鎖</div>
             </div>
         </div>
 
-        <!-- 4. 🌀 颱風專區 & 奇門宏觀預判 -->
+        <!-- 4. 🌀 颱風專區 & 奇門宏觀預判 (重新補回) -->
         <div class="card-mob" style="border: 1px solid #f59e0b;">
             <strong style="color:#f59e0b; font-size:12px; display:block; margin-bottom:6px;">🌀 颱風專區 & 奇門宏觀預判</strong>
             <div id="mob_cyclone_status" style="font-size:11px; color:#fca5a5; font-weight:bold; margin-bottom:6px; background:rgba(245,158,11,0.1); padding:6px; border-radius:4px;">
@@ -205,7 +205,7 @@
             </div>
         </div>
 
-        <!-- 8. 戰略三方案評估 (Ground Truth) -->
+        <!-- 8. 戰略三方案評估與定量反饋 (Ground Truth) -->
         <div class="card-mob">
             <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">戰略三方案評估 (Ground Truth)</strong>
             <table class="table-full" style="margin-bottom:8px;">
@@ -284,7 +284,6 @@
             let ts = (data.system && data.system.timestamp) || data.timestamp || getFormattedCSTTime();
             const tsEl = document.getElementById('mobileTimestamp'); if(tsEl) tsEl.innerText = ts;
 
-            // 頂部戰術狀態 Banner
             let bannerEl = document.getElementById('vetoBannerMob');
             if (bannerEl) {
                 if (data.decision_code === "Q4_DISASTER") {
@@ -292,15 +291,14 @@
                     bannerEl.style.color = "#ffffff";
                     bannerEl.innerText = "⚠️ " + (data.tier0_reason || "觸發 Tier-0 災難級別，全線強制封島！");
                 } else {
-                    let isVeto = data.physics_metrics && data.physics_metrics.has_veto;
+                    let isVeto = (data.physics_metrics && data.physics_metrics.has_veto) || (data.tactical_decision && !data.tactical_decision.veto_pass);
                     bannerEl.style.background = isVeto ? "rgba(239, 68, 68, 0.2)" : "rgba(16, 185, 129, 0.2)";
                     bannerEl.style.color = isVeto ? "#fca5a5" : "#6ee7b7";
-                    let codeText = data.decision_code || (isVeto ? 'Q4' : 'Q1');
-                    bannerEl.innerText = (isVeto ? "🔴 " : "🟢 ") + codeText + " 模式 - " + (isVeto ? '觸發 VETO 剛性封鎖' : '許可巡航靠泊');
+                    let codeText = (data.tactical_decision && data.tactical_decision.q_mode) || data.decision_code || (isVeto ? '🔴 Q4 嚴禁靠泊 (全線封島 48H)' : '🟢 Q1 允許靠泊');
+                    bannerEl.innerText = codeText;
                 }
             }
 
-            // 即時物理指標數值與剛性比對
             if (data.physics_metrics) {
                 let p = data.physics_metrics;
                 const hsEl = document.getElementById('m_hs'); if(hsEl) hsEl.innerText = (p.hs_pier_m !== undefined ? p.hs_pier_m : '3.23') + 'm';
@@ -321,7 +319,7 @@
                 const sukcEl = document.getElementById('m_stat_ukc');
                 if(sukcEl) {
                     sukcEl.innerText = p.ukc_m < 1.50 ? 'VETO' : 'PASS';
-                    sukcEl.className = p.ukc_m < 1.50 ? 'badge-veto-m' : 'badge-pass-m';
+                    sukcEl.className = p.ukc_m < 1.50 ? 'badge-pass-m' : 'badge-veto-m';
                 }
 
                 const fbEl = document.getElementById('m_fb'); if(fbEl) fbEl.innerText = (p.fb_pier_m !== undefined ? p.fb_pier_m : '0.15') + 'm';
@@ -332,18 +330,19 @@
                 }
             }
 
-            // 動態更新颱風與奇門專區
-            if (data.left_panel_macro_prediction) {
-                let macro = data.left_panel_macro_prediction;
-                if (macro.cyclone_alert) {
-                    const cyStatus = document.getElementById('mob_cyclone_status');
-                    if (cyStatus && macro.cyclone_alert.status) cyStatus.innerText = macro.cyclone_alert.status;
-                    const cyStrat = document.getElementById('mob_cyclone_strategy');
-                    if (cyStrat && macro.cyclone_alert.strategy) cyStrat.innerText = '對策：' + macro.cyclone_alert.strategy;
-                }
+            if (data.typhoon_qimen_prediction) {
+                const cyStatus = document.getElementById('mob_cyclone_status');
+                if (cyStatus && data.typhoon_qimen_prediction.cyclone_dynamic) cyStatus.innerText = data.typhoon_qimen_prediction.cyclone_dynamic;
+                const cyStrat = document.getElementById('mob_cyclone_strategy');
+                if (cyStrat && data.typhoon_qimen_prediction.qimen_anomaly_forecast) cyStrat.innerText = '對策：' + data.typhoon_qimen_prediction.qimen_anomaly_forecast;
+            } else if (data.left_panel_macro_prediction && data.left_panel_macro_prediction.cyclone_alert) {
+                let macro = data.left_panel_macro_prediction.cyclone_alert;
+                const cyStatus = document.getElementById('mob_cyclone_status');
+                if (cyStatus && macro.status) cyStatus.innerText = macro.status;
+                const cyStrat = document.getElementById('mob_cyclone_strategy');
+                if (cyStrat && macro.strategy) cyStrat.innerText = '對策：' + macro.strategy;
             }
 
-            // 動態渲染當日船班官模比對表格
             if (data.tdx && Array.isArray(data.tdx)) {
                 const tbody = document.getElementById('mob_tdx_body');
                 if (tbody) {
@@ -358,12 +357,11 @@
                 }
             }
 
-            // 動態更新最後判斷與處置
-            if (data.decision) {
+            if (data.tactical_decision || data.decision) {
                 const decEl = document.getElementById('mob_final_decision');
-                if (decEl) decEl.innerText = data.decision.status_text || 'Q4 嚴禁靠泊 (全線封島)';
+                if (decEl) decEl.innerText = (data.tactical_decision && data.tactical_decision.q_mode) || (data.decision && data.decision.status_text) || 'Q4 嚴禁靠泊 (全線封島)';
                 const actEl = document.getElementById('mob_final_action');
-                if (actEl) actEl.innerText = '處置：' + (data.decision.route_action || '全線停航，營運船隻返回烏石港避風。');
+                if (actEl) actEl.innerText = '處置：' + ((data.tactical_decision && data.tactical_decision.reason) || (data.decision && data.decision.route_action) || '全線停航，營運船隻返回烏石港避風。');
             }
 
             if (data.pattern_match) {
