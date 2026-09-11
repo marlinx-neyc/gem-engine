@@ -165,3 +165,26 @@
     if (sec > 30) document.getElementById('staleAlertMob').style.display = 'block';
   }, 1000);
 </script>
+<script>
+  // 前面原本寫好的 updateUI(data) 等 UI 渲染函數保留不動
+  function updateUI(data) {
+     // ... 原有的 UI 邏輯 ...
+  }
+
+  // --------------------------------------------------
+  // 👇 把圖片中這段程式碼，貼在最下方（替換掉原本舊的 google.script.run）
+  // --------------------------------------------------
+  async function fetchSSOTData() {
+    try {
+      const response = await fetch('./data.json?t=' + new Date().getTime());
+      const data = await response.json();
+      
+      updateUI(data); 
+    } catch (err) {
+      console.error("遙測數據讀取失敗:", err);
+    }
+  }
+
+  setInterval(fetchSSOTData, 3000);
+  fetchSSOTData();
+</script>
