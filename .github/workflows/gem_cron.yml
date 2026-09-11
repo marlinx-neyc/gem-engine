@@ -27,10 +27,9 @@ jobs:
       - name: 執行中央協調器產出 latest_decision.json
         run: |
           python main_orchestrator.py --single-run
-
-      - name: Commit 並 Push latest_decision.json 回 GitHub
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add latest_decision.json
-          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: auto update latest_decision.json [skip ci]" && git push)
+- name: Commit 並 Push latest_decision.json 回 GitHub
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add latest_decision.json
+        git diff --quiet && git diff --staged --quiet || (git commit -m "chore: auto update latest_decision.json [skip ci]" && git pull origin main --rebase && git push)
