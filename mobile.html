@@ -1,241 +1,263 @@
+%%writefile mobile.html
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <!-- 1. 滿版核心：強制頁面縮放寬度等於裝置寬度，禁止任意縮放導致白邊 -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>GEM Engine Mobile</title>
-  <style>
-    /* 2. 徹底消除瀏覽器預設邊界 */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    html, body {
-      width: 100%;
-      min-height: 100%;
-      min-height: 100dvh; /* 相容手機網址列縮放的動態高度 */
-      background-color: #0b1120;
-      color: #f8fafc;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      overflow-x: hidden; /* 避免橫向溢出 */
-    }
-    
-    .mobile-container {
-      width: 100%;
-      min-height: 100dvh;
-      background-color: #0b1120;
-      color: #f8fafc;
-      padding: 12px;
-      box-sizing: border-box;
-    }
-    
-    .card-mob { 
-      background: #1e293b; 
-      border-radius: 8px; 
-      padding: 12px; 
-      border: 1px solid #334155; 
-      margin-bottom: 10px; 
-      color: #f8fafc; 
-    }
-    .banner-mob {
-      border: 2px solid #ef4444; 
-      background: rgba(239, 68, 68, 0.2); 
-      color: #fca5a5;
-      padding: 10px; 
-      border-radius: 6px; 
-      font-weight: bold; 
-      margin-bottom: 10px; 
-      font-size: 13px; 
-      line-height: 1.4;
-    }
-    .stale-mob { 
-      display: none; 
-      background: #ef4444; 
-      color: #ffffff; 
-      padding: 8px; 
-      text-align: center; 
-      font-weight: bold; 
-      border-radius: 4px; 
-      margin-bottom: 10px; 
-      font-size: 12px; 
-    }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; }
-    .item-box { background: #0f172a; padding: 8px; border-radius: 6px; border: 1px solid #334155; }
-    .badge-veto-m { background: #ef4444; color: #fff; padding: 1px 5px; border-radius: 3px; font-size: 10px; font-weight: bold; }
-    .badge-pass-m { background: #10b981; color: #fff; padding: 1px 5px; border-radius: 3px; font-size: 10px; font-weight: bold; }
-    
-    .table-full { width: 100%; border-collapse: collapse; font-size: 11px; color: #cbd5e1; }
-    .table-full th { color: #94a3b8; font-weight: bold; }
-    .table-full td { padding: 4px 2px; text-align: left; color: #cbd5e1; }
-    
-    .live-dot-blue {
-      display: inline-block; width: 8px; height: 8px; background-color: #3b82f6; border-radius: 50%;
-      margin-right: 6px; box-shadow: 0 0 8px #3b82f6; animation: pulseBlue 1.5s infinite;
-    }
-    @keyframes pulseBlue { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>GEM Engine Mobile V36D</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body {
+            width: 100%; min-height: 100%; min-height: 100dvh;
+            background-color: #0b1120; color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow-x: hidden;
+        }
+        .mobile-container { width: 100%; min-height: 100dvh; padding: 12px; }
+        .card-mob {
+            background: #1e293b; border-radius: 8px; padding: 12px;
+            border: 1px solid #334155; margin-bottom: 10px; color: #f8fafc;
+        }
+        .banner-mob {
+            border: 2px solid #ef4444; background: rgba(239, 68, 68, 0.2); color: #fca5a5;
+            padding: 10px; border-radius: 6px; font-weight: bold; margin-bottom: 10px;
+            font-size: 13px; line-height: 1.4; text-align: center;
+        }
+        .stale-mob {
+            display: none; background: #ef4444; color: #ffffff; padding: 8px;
+            text-align: center; font-weight: bold; border-radius: 4px; margin-bottom: 10px; font-size: 12px;
+        }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; }
+        .item-box { background: #0f172a; padding: 8px; border-radius: 6px; border: 1px solid #334155; }
+        .badge-veto-m { background: #ef4444; color: #fff; padding: 1px 5px; border-radius: 3px; font-size: 10px; font-weight: bold; }
+        .badge-pass-m { background: #10b981; color: #fff; padding: 1px 5px; border-radius: 3px; font-size: 10px; font-weight: bold; }
+        .table-full { width: 100%; border-collapse: collapse; font-size: 11px; color: #cbd5e1; }
+        .table-full td { padding: 4px 2px; text-align: left; }
+        .live-dot-blue {
+            display: inline-block; width: 8px; height: 8px; background-color: #3b82f6;
+            border-radius: 50%; margin-right: 6px; box-shadow: 0 0 8px #3b82f6; animation: pulseBlue 1.5s infinite;
+        }
+        @keyframes pulseBlue { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
+    </style>
 </head>
 <body>
-<div class="mobile-container">
-  <!-- 1. 頂部狀態與通訊次數 -->
-  <div class="card-mob" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-    <div><span class="live-dot-blue"></span><strong style="color:#3b82f6; font-size:12px;">SSOT 實時連線中</strong></div>
-    <div style="font-size:11px; color:#94a3b8;">
-      通訊: <span id="mobCommCount" style="color:#f8fafc; font-weight:bold;">0</span> 次 | <span id="mobSecAgo">更新: 0 秒前</span>
+    <div class="mobile-container">
+        <!-- 1. 頂部狀態與連線脈搏 -->
+        <div class="card-mob" style="display:flex; justify-content:space-between; align-items:center;">
+            <div><span class="live-dot-blue"></span><strong style="color:#3b82f6; font-size:12px;">SSOT 雙生連線中</strong></div>
+            <div style="font-size:11px; color:#94a3b8;">通訊: <span id="mobCommCount" style="color:#f8fafc; font-weight:bold;">0</span> 次 | <span id="mobSecAgo">更新: 0 秒前</span></div>
+        </div>
+
+        <div id="staleAlertMob" class="stale-mob">🔴 數據過期 (READ_ONLY_BACKUP)</div>
+        <div id="vetoBannerMob" class="banner-mob">🔄 戰術決策載入中...</div>
+
+        <!-- 2. 即時物理消能防線 (Physics Metrics) -->
+        <div class="card-mob">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <strong style="color:#38bdf8; font-size:12px;">即時海象與物理防線 (PINN)</strong>
+                <span id="mobileTimestamp" style="font-size:10px; color:#94a3b8;">載入中...</span>
+            </div>
+            <div class="grid-2">
+                <div class="item-box">
+                    <div style="color:#94a3b8; margin-bottom:2px;">Hs (<=1.20m)</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span id="m_hs" style="color:#facc15; font-weight:bold;">-</span>
+                        <span id="m_stat_hs" class="badge-pass-m">-</span>
+                    </div>
+                </div>
+                <div class="item-box">
+                    <div style="color:#94a3b8; margin-bottom:2px;">Wind (<=10.8m/s)</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span id="m_w" style="color:#facc15; font-weight:bold;">-</span>
+                        <span id="m_stat_w" class="badge-pass-m">-</span>
+                    </div>
+                </div>
+                <div class="item-box">
+                    <div style="color:#94a3b8; margin-bottom:2px;">UKC (>=1.50m)</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span id="m_ukc" style="color:#facc15; font-weight:bold;">-</span>
+                        <span id="m_stat_ukc" class="badge-pass-m">-</span>
+                    </div>
+                </div>
+                <div class="item-box">
+                    <div style="color:#94a3b8; margin-bottom:2px;">FB (>=0.50m)</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <span id="m_fb" style="color:#facc15; font-weight:bold;">-</span>
+                        <span id="m_stat_fb" class="badge-pass-m">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. 🧠 雙生大腦認知狀態 (Pattern & Resilience) -->
+        <div class="card-mob" style="border: 1px solid #64748b;">
+            <strong style="color:#c084fc; font-size:12px; display:block; margin-bottom:6px;">🧠 雙生大腦認知與影子學習</strong>
+            <div class="grid-2" style="font-size:11px; line-height:1.5;">
+                <div class="item-box">
+                    <div style="color:#94a3b8;">歷史 20 年同構數</div>
+                    <div id="mob_match_cases" style="color:#38bdf8; font-weight:bold;">-</div>
+                    <div style="color:#94a3b8; margin-top:2px;">先驗封島率</div>
+                    <div id="mob_prior_rate" style="color:#ef4444; font-weight:bold;">-</div>
+                </div>
+                <div class="item-box">
+                    <div style="color:#94a3b8;">RL 大腦直覺</div>
+                    <div id="mob_rl_raw" style="color:#cbd5e1; font-weight:bold;">-</div>
+                    <div style="color:#94a3b8; margin-top:2px;">物理/認知狀態</div>
+                    <div id="mob_rl_conflict" style="color:#10b981; font-weight:bold;">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. 今日營運航班檢核 -->
+        <div class="card-mob">
+            <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">今日營運時段檢核 (6~9月規範)</strong>
+            <div class="grid-2" style="font-size:11px; color:#cbd5e1; line-height:1.6;">
+                <div>海象整備: <span style="color:#f8fafc;">07:30</span></div>
+                <div>首段登島: <span style="color:#f8fafc;">08:30</span></div>
+                <div>區間時段: <span style="color:#f8fafc;">12:30</span></div>
+                <div>末段登島: <span style="color:#f8fafc;">15:30</span></div>
+                <div>前日預警: <span style="color:#f59e0b;">16:30</span></div>
+                <div>離島截止: <span style="color:#ef4444; font-weight:bold;">17:30</span></div>
+            </div>
+        </div>
+
+        <!-- 5. 未來三天戰術預判 -->
+        <div class="card-mob">
+            <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">未來三天戰術預判</strong>
+            <div style="font-size:11px; line-height:1.6; color:#cbd5e1;">
+                <div>明日 <span id="mob_d1"></span>: <span style="color:#ef4444; font-weight:bold;">🔴 Q4 封島</span></div>
+                <div>後日 <span id="mob_d2"></span>: <span style="color:#f59e0b; font-weight:bold;">🟠 Q3 限制</span></div>
+                <div>大後日 <span id="mob_d3"></span>: <span style="color:#10b981; font-weight:bold;">🟢 Q1 恢復</span></div>
+            </div>
+        </div>
+
+        <!-- 6. 戰略三方案評估 -->
+        <div class="card-mob">
+            <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:4px;">戰略三方案評估 (Ground Truth)</strong>
+            <table class="table-full" style="margin-bottom:6px;">
+                <tr style="border-bottom:1px solid #334155;">
+                    <td style="color:#cbd5e1;">A (官方)</td><td style="color:#cbd5e1;">85%</td><td style="color:#fca5a5;">30%</td><td style="color:#cbd5e1;">拒絕</td>
+                </tr>
+                <tr style="border-bottom:1px solid #334155;">
+                    <td style="color:#cbd5e1;">B (監測)</td><td style="color:#cbd5e1;">60%</td><td style="color:#fca5a5;">40%</td><td style="color:#cbd5e1;">拒絕</td>
+                </tr>
+                <tr>
+                    <td style="font-weight:bold; color:#facc15;">C (GEM)</td><td style="color:#10b981;">99%</td><td style="color:#10b981;">0.8%</td><td style="color:#10b981; font-weight:bold;">採納</td>
+                </tr>
+            </table>
+            <div style="border-top: 1px dashed #334155; padding-top: 6px; font-size: 10px; color: #94a3b8; line-height: 1.4;">
+                <span style="color:#facc15; font-weight:bold;">總結裁示：</span>官方預報易生 30% 假警報；GEM 模型以 0.8% 誤判率作為 Ground Truth。
+            </div>
+        </div>
     </div>
-  </div>
 
-  <div id="staleAlertMob" class="stale-mob">🔴 數據過期 (READ_ONLY_BACKUP)</div>
-  <div id="vetoBannerMob" class="banner-mob">🔴 Q4 嚴禁靠泊 (全線封島 48H)</div>
-  
-  <!-- 2. 剛性 VETO 對齊卡片 -->
-  <div class="card-mob">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-      <strong style="color:#38bdf8; font-size:12px;">即時海象與防線門檻 (SSOT)</strong>
-      <span id="mobileTimestamp" style="font-size:10px; color:#94a3b8;">載入中...</span>
-    </div>
-    <div class="grid-2">
-      <div class="item-box">
-        <div style="color:#94a3b8; margin-bottom:2px;">Hs (&lt;=1.20m)</div>
-        <div style="display:flex; justify-content:space-between; align-items:center;"><span id="m_hs" style="color:#facc15; font-weight:bold;">3.23m</span><span id="m_stat_hs" class="badge-veto-m">VETO</span></div>
-      </div>
-      <div class="item-box">
-        <div style="color:#94a3b8; margin-bottom:2px;">Wind (&lt;=10.8m/s)</div>
-        <div style="display:flex; justify-content:space-between; align-items:center;"><span id="m_w" style="color:#facc15; font-weight:bold;">13.50m/s</span><span id="m_stat_w" class="badge-veto-m">VETO</span></div>
-      </div>
-      <div class="item-box">
-        <div style="color:#94a3b8; margin-bottom:2px;">UKC (&gt;=1.50m)</div>
-        <div style="display:flex; justify-content:space-between; align-items:center;"><span id="m_ukc" style="color:#facc15; font-weight:bold;">1.00m</span><span id="m_stat_ukc" class="badge-veto-m">VETO</span></div>
-      </div>
-      <div class="item-box">
-        <div style="color:#94a3b8; margin-bottom:2px;">FB (&gt;=0.50m)</div>
-        <div style="display:flex; justify-content:space-between; align-items:center;"><span id="m_fb" style="color:#facc15; font-weight:bold;">0.15m</span><span id="m_stat_fb" class="badge-veto-m">VETO</span></div>
-      </div>
-    </div>
-  </div>
+    <script>
+        let lastUpdateMob = Date.now();
+        let mobCommCounter = 0;
 
-  <!-- 3. 今日營運航班時段檢核 -->
-  <div class="card-mob">
-    <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">今日營運時段檢核 (6~9月規範)</strong>
-    <div class="grid-2" style="font-size:11px; color:#cbd5e1; line-height:1.6;">
-      <div>海象整備: <span style="color:#f8fafc;">07:30</span></div>
-      <div>首段登島: <span style="color:#f8fafc;">08:30</span></div>
-      <div>區間時段: <span style="color:#f8fafc;">12:30</span></div>
-      <div>末段登島: <span style="color:#f8fafc;">15:30</span></div>
-      <div>前日預警: <span style="color:#f59e0b;">16:30</span></div>
-      <div>離島截止: <span style="color:#ef4444; font-weight:bold;">17:30</span></div>
-    </div>
-  </div>
+        function initMobileDates() {
+            const now = new Date();
+            document.getElementById('mobileTimestamp').innerText = now.toLocaleString('zh-TW', {hour12: false}) + ' CST';
+            const fmt = (d) => `(${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')})`;
+            const d1 = new Date(now); d1.setDate(d1.getDate() + 1);
+            const d2 = new Date(now); d2.setDate(d2.getDate() + 2);
+            const d3 = new Date(now); d3.setDate(d3.getDate() + 3);
+            document.getElementById('mob_d1').innerText = `(D+1, ${fmt(d1)})`;
+            document.getElementById('mob_d2').innerText = `(D+2, ${fmt(d2)})`;
+            document.getElementById('mob_d3').innerText = `(D+3, ${fmt(d3)})`;
+        }
+        initMobileDates();
 
-  <!-- 4. 未來三天戰術預判 -->
-  <div class="card-mob">
-    <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">未來三天戰術預判</strong>
-    <div style="font-size:11px; line-height:1.6; color:#cbd5e1;">
-      <div>明日 <span id="mob_d1"></span>: <span style="color:#ef4444; font-weight:bold;">🔴 Q4 封島</span></div>
-      <div>後日 <span id="mob_d2"></span>: <span style="color:#f59e0b; font-weight:bold;">🟠 Q3 限制</span></div>
-      <div>大後日 <span id="mob_d3"></span>: <span style="color:#10b981; font-weight:bold;">🟢 Q1 恢復</span></div>
-    </div>
-  </div>
+        window.onSSOTDataReceived = function(data) {
+            if (!data) return;
+            lastUpdateMob = Date.now();
+            mobCommCounter++;
+            document.getElementById('mobCommCount').innerText = mobCommCounter;
+            document.getElementById('staleAlertMob').style.display = 'none';
 
-  <!-- 5. 戰略三方案評估 -->
-  <div class="card-mob">
-    <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:4px;">戰略三方案評估 (Ground Truth)</strong>
-    <table class="table-full" style="font-size:10px; margin-bottom:6px;">
-      <tr style="border-bottom:1px solid #334155;"><td style="color:#cbd5e1;">A (官方)</td><td style="color:#cbd5e1;">85%</td><td style="color:#fca5a5;">30%</td><td style="color:#cbd5e1;">拒絕</td></tr>
-      <tr style="border-bottom:1px solid #334155;"><td style="color:#cbd5e1;">B (監測)</td><td style="color:#cbd5e1;">60%</td><td style="color:#fca5a5;">40%</td><td style="color:#cbd5e1;">拒絕</td></tr>
-      <tr><td style="font-weight:bold; color:#facc15;">C (GEM)</td><td style="color:#10b981;">99%</td><td style="color:#10b981;">0.8%</td><td style="color:#10b981; font-weight:bold;">採納</td></tr>
-    </table>
-    <div style="border-top: 1px dashed #334155; padding-top: 6px; font-size: 10px; color: #94a3b8; line-height: 1.4;">
-      <span style="color:#facc15; font-weight:bold;">總結裁示：</span>官方預報易生 30% 假警報；GEM 模型以 0.8% 誤判率作為 Ground Truth。
-    </div>
-  </div>
+            let ts = data.timestamp || (new Date().toLocaleString('zh-TW', {hour12: false}) + ' CST');
+            document.getElementById('mobileTimestamp').innerText = ts;
 
-  <!-- 6. 氣旋預判與宏觀預測 -->
-  <div class="card-mob">
-    <strong style="color: #f59e0b; font-size: 12px; display:block; margin-bottom:4px;">🌀 颱風氣旋與太乙/奇門宏觀預判</strong>
-    <div style="font-size:10px; color:#cbd5e1; line-height:1.5;">
-      <div style="margin-bottom:4px;"><span style="color:#facc15; font-weight:bold;">[微觀]</span> <span id="mobTyphoonInfo">東南東 450 km 中颱，暴風半徑 200km。長浪共振頻繁。</span></div>
-      <div><span style="color:#38bdf8; font-weight:bold;">[宏觀]</span> 同化 18.6 年白道交角與 60 年甲子公度週期，預期兩週進入長浪高發期。</div>
-    </div>
-  </div>
-</div>
+            // 1. 解析 Tier-0 災變與戰術決策 Banner
+            let bannerEl = document.getElementById('vetoBannerMob');
+            if (data.decision_code === "Q4_DISASTER") {
+                bannerEl.style.background = "rgba(239, 68, 68, 0.9)";
+                bannerEl.style.color = "#ffffff";
+                bannerEl.style.border = "2px solid #ef4444";
+                bannerEl.innerText = "⚠️ " + (data.tier0_reason || "觸發 Tier-0 災難級別，全線強制封島！");
+            } else {
+                let isVeto = data.physics_metrics && data.physics_metrics.has_veto;
+                bannerEl.style.background = isVeto ? "rgba(239, 68, 68, 0.2)" : "rgba(16, 185, 129, 0.2)";
+                bannerEl.style.color = isVeto ? "#fca5a5" : "#6ee7b7";
+                bannerEl.style.border = isVeto ? "1px solid #ef4444" : "1px solid #10b981";
+                let codeText = data.decision_code || (isVeto ? 'Q4' : 'Q1');
+                bannerEl.innerText = (isVeto ? "🔴 " : "🟢 ") + codeText + " 模式 - " + (isVeto ? '觸發 VETO 剛性封鎖' : '許可巡航靠泊');
+            }
 
-<script>
-  let lastUpdateMob = Date.now();
-  let mobCommCounter = 0;
+            // 2. 解析即時物理消能數據 (Physics Metrics)
+            if (data.physics_metrics) {
+                let p = data.physics_metrics;
+                document.getElementById('m_hs').innerText = (p.hs_pier_m !== undefined ? p.hs_pier_m : '-') + 'm';
+                let hsVeto = p.hs_pier_m > 1.20;
+                document.getElementById('m_stat_hs').innerText = hsVeto ? 'VETO' : 'PASS';
+                document.getElementById('m_stat_hs').className = hsVeto ? 'badge-veto-m' : 'badge-pass-m';
 
-  function initMobileDates() {
-    const now = new Date();
-    document.getElementById('mobileTimestamp').innerText = now.toLocaleString('zh-TW', {hour12: false}) + ' CST';
-    const fmt = (d) => `(${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')})`;
-    const d1 = new Date(now); d1.setDate(d1.getDate() + 1);
-    const d2 = new Date(now); d2.setDate(d2.getDate() + 2);
-    const d3 = new Date(now); d3.setDate(d3.getDate() + 3);
-    document.getElementById('mob_d1').innerText = `(D+1, ${fmt(d1)})`;
-    document.getElementById('mob_d2').innerText = `(D+2, ${fmt(d2)})`;
-    document.getElementById('mob_d3').innerText = `(D+3, ${fmt(d3)})`;
-  }
-  initMobileDates();
+                document.getElementById('m_w').innerText = (p.w_local_ms !== undefined ? p.w_local_ms : '-') + 'm/s';
+                let wVeto = p.w_local_ms > 10.80;
+                document.getElementById('m_stat_w').innerText = wVeto ? 'VETO' : 'PASS';
+                document.getElementById('m_stat_w').className = wVeto ? 'badge-veto-m' : 'badge-pass-m';
 
-  window.onSSOTDataReceived = function(data) {
-    if (!data) return;
-    lastUpdateMob = Date.now();
-    mobCommCounter++;
-    document.getElementById('mobCommCount').innerText = mobCommCounter;
-    document.getElementById('staleAlertMob').style.display = 'none';
+                document.getElementById('m_ukc').innerText = (p.ukc_m !== undefined ? p.ukc_m : '-') + 'm';
+                let ukcVeto = p.ukc_m < 1.50;
+                document.getElementById('m_stat_ukc').innerText = ukcVeto ? 'VETO' : 'PASS';
+                document.getElementById('m_stat_ukc').className = ukcVeto ? 'badge-veto-m' : 'badge-pass-m';
 
-    let ts = new Date().toLocaleString('zh-TW', {hour12: false}) + ' CST';
-    if (data.system && data.system.timestamp) ts = data.system.timestamp;
-    document.getElementById('mobileTimestamp').innerText = ts;
+                document.getElementById('m_fb').innerText = (p.fb_pier_m !== undefined ? p.fb_pier_m : '-') + 'm';
+                let fbVeto = p.fb_pier_m < 0.50;
+                document.getElementById('m_stat_fb').innerText = fbVeto ? 'VETO' : 'PASS';
+                document.getElementById('m_stat_fb').className = fbVeto ? 'badge-veto-m' : 'badge-pass-m';
+            }
 
-    if (data.tactical_decision) {
-      document.getElementById('vetoBannerMob').innerText = (data.tactical_decision.q_mode || '🔴 Q4 嚴禁靠泊') + ' - ' + (data.tactical_decision.reason || '觸發 VETO 封鎖');
-    }
-    if (data.veto_matrix) {
-      let hs = 3.23, w = 13.50, ukc = 1.00, fb = 0.15;
-      let hs_stat = 'VETO', w_stat = 'VETO', ukc_stat = 'VETO', fb_stat = 'VETO';
-      if (data.veto_matrix.hs_pier) {
-        hs = data.veto_matrix.hs_pier.val; hs_stat = data.veto_matrix.hs_pier.status;
-        w = data.veto_matrix.w_local.val; w_stat = data.veto_matrix.w_local.status;
-        ukc = data.veto_matrix.ukc.val; ukc_stat = data.veto_matrix.ukc.status;
-        fb = data.veto_matrix.fb_pier.val; fb_stat = data.veto_matrix.fb_pier.status;
-      }
-      document.getElementById('m_hs').innerText = hs + 'm'; document.getElementById('m_stat_hs').className = hs_stat === 'PASS' ? 'badge-pass-m' : 'badge-veto-m'; document.getElementById('m_stat_hs').innerText = hs_stat;
-      document.getElementById('m_w').innerText = w + 'm/s'; document.getElementById('m_stat_w').className = w_stat === 'PASS' ? 'badge-pass-m' : 'badge-veto-m'; document.getElementById('m_stat_w').innerText = w_stat;
-      document.getElementById('m_ukc').innerText = ukc + 'm'; document.getElementById('m_stat_ukc').className = ukc_stat === 'PASS' ? 'badge-pass-m' : 'badge-veto-m'; document.getElementById('m_stat_ukc').innerText = ukc_stat;
-      document.getElementById('m_fb').innerText = fb + 'm'; document.getElementById('m_stat_fb').className = fb_stat === 'PASS' ? 'badge-pass-m' : 'badge-veto-m'; document.getElementById('m_stat_fb').innerText = fb_stat;
-    }
-    if (data.typhoon_qimen_prediction && data.typhoon_qimen_prediction.cyclone_dynamic) {
-      document.getElementById('mobTyphoonInfo').innerText = data.typhoon_qimen_prediction.cyclone_dynamic + ' ' + (data.typhoon_qimen_prediction.qimen_anomaly_forecast || '');
-    }
-  };
+            // 3. 解析 Pattern 同化數據
+            if (data.pattern_match) {
+                document.getElementById('mob_match_cases').innerText = data.pattern_match.matched_cases + ' 筆';
+                document.getElementById('mob_prior_rate').innerText = ((data.pattern_match.historical_closure_rate || 0) * 100).toFixed(1) + '%';
+            }
 
-  setInterval(function() {
-    const sec = Math.floor((Date.now() - lastUpdateMob) / 1000);
-    document.getElementById('mobSecAgo').innerText = '更新: ' + sec + ' 秒前';
-    if (sec > 30) document.getElementById('staleAlertMob').style.display = 'block';
-  }, 1000);
+            // 4. 解析 RL 線上反饋狀態
+            if (data.rl_feedback_status) {
+                document.getElementById('mob_rl_raw').innerText = data.rl_feedback_status.raw_rl_prediction || '-';
+                if (data.rl_feedback_status.has_contradiction) {
+                    document.getElementById('mob_rl_conflict').innerHTML = '<span style="color:#ef4444; font-weight:bold;">🚨 矛盾 (Hard Neg)</span>';
+                } else {
+                    document.getElementById('mob_rl_conflict').innerHTML = '<span style="color:#10b981; font-weight:bold;">共識 (PASS)</span>';
+                }
+            }
+        };
 
-  async function fetchSSOTData() {
-    try {
-      const response = await fetch('./latest_decision.json?t=' + new Date().getTime());
-      if (!response.ok) throw new Error("HTTP " + response.status);
-      const data = await response.json();
-      
-      if (typeof window.onSSOTDataReceived === "function") {
-        window.onSSOTDataReceived(data);
-      }
-    } catch (err) {
-      console.warn("遙測數據讀取失敗:", err);
-    }
-  }
+        setInterval(function() {
+            const sec = Math.floor((Date.now() - lastUpdateMob) / 1000);
+            document.getElementById('mobSecAgo').innerText = '更新: ' + sec + ' 秒前';
+            if (sec > 30) document.getElementById('staleAlertMob').style.display = 'block';
+        }, 1000);
 
-  document.addEventListener("DOMContentLoaded", () => {
-    fetchSSOTData();
-    setInterval(fetchSSOTData, 3000);
-  });
-</script>
+        async function fetchSSOTData() {
+            try {
+                const response = await fetch('./latest_decision.json?t=' + new Date().getTime());
+                if (!response.ok) throw new Error("HTTP " + response.status);
+                const data = await response.json();
+                if (typeof window.onSSOTDataReceived === "function") {
+                    window.onSSOTDataReceived(data);
+                }
+            } catch (err) {
+                console.warn("遙測數據讀取失敗:", err);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchSSOTData();
+            setInterval(fetchSSOTData, 3000);
+        });
+    </script>
 </body>
 </html>
