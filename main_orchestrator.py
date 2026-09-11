@@ -1,15 +1,23 @@
 # -*- coding: utf-8 -*-
 """
-GEM-V36D 終極版 數位雙生海事戰術智庫 - 中央協調器 (v16.0 本地 SSOT 獨立版)
-修正說明：徹底脫離 GAS 推播相依，直接產出全套 SSOT 規格之 latest_decision.json
+GEM-V36D 終極版 數位雙生海事戰術智庫 - 中央協調器 (v16.2 完整修正版)
+修正重點：
+1. 完美對齊 model_v36D.10.6.pt 權重張量架構 (36 -> 256 -> 128 -> 3)
+2. 強制 self.policy.eval()，避免推論期報錯
+3. 純靜態 SSOT 解算直接寫入 latest_decision.json (支援 --single-run 指令)
 """
 import os
+import sys
 import json
 import math
+import time
+import argparse
+from datetime import datetime, timezone, timedelta
+from typing import Dict, Any, Optional
+
 import torch
 import torch.nn as nn
 import numpy as np
-from datetime import datetime, timezone, timedelta
 from pydantic import BaseModel, Field
 
 # =====================================================================
@@ -17,8 +25,8 @@ from pydantic import BaseModel, Field
 # =====================================================================
 class UnifiedMarineTelemetry(BaseModel):
     sender_id: str = Field(default="CWA_API_REALTIME")
-    hs_cwa: float = Field(default=3.23)         # 設為颱風波高情境 (對齊雙端)
-    w_cwa: float = Field(default=13.50)        # 設為颱風風速情境 (對齊雙端)
+    hs_cwa: float = Field(default=3.23)         # 颱風波高情境 (對齊雙端)
+    w_cwa: float = Field(default=13.50)        # 颱風風速情境 (對齊雙端)
     tp_s: float = Field(default=14.5)
     delta_theta_deg: float = Field(default=25.0)
     tide_eta_m: float = Field(default=1.20)
@@ -61,7 +69,7 @@ class UnifiedMarineTelemetry(BaseModel):
     local_pga_gal: float = Field(default=0.0)
 
 # =====================================================================
-# 2. 36D 特徵提取與模型架構
+# 2. 36D 特徵提取與神經網路模型 (對齊 checkpoint 結構)
 # =====================================================================
 class GEM36DNormalizedFeatureExtractor:
     BOUNDS = np.array([
@@ -105,21 +113,27 @@ class PINNResidualNet(nn.Module):
     def forward(self, x): return self.net(x)
 
 class AIClassifierPolicy(nn.Module):
-    def __init__(self, input_dim=36, hidden_dim=128, output_dim=4):
+    """
+    對齊 model_v36D.10.6.pt 權重檔結構:
+    net.0: Linear(36, 256)
+    net.1: ReLU()
+    net.2: Linear(256, 128)
+    net.3: ReLU()
+    net.4: Linear(128, 3)
+    """
+    def __init__(self, input_dim=36, hidden1=256, hidden2=128, output_dim=3):
         super().__init__()
         self.net = nn.Sequential(
-            nn.Linear(input_dim, hidden_dim),
-            nn.BatchNorm1d(hidden_dim),
-            nn.ReLU(),
-            nn.Dropout(0.2),
-            nn.Linear(hidden_dim, 64),
-            nn.ReLU(),
-            nn.Linear(64, output_dim)
+            nn.Linear(input_dim, hidden1),   # net.0
+            nn.ReLU(),                        # net.1
+            nn.Linear(hidden1, hidden2),     # net.2
+            nn.ReLU(),                        # net.3
+            nn.Linear(hidden2, output_dim)    # net.4
         )
     def forward(self, x): return self.net(x)
 
 # =====================================================================
-# 3. PINN 物理引擎
+# 3. PINN 物理算子引擎
 # =====================================================================
 class PINNPhysicsEngine:
     def __init__(self):
@@ -160,7 +174,7 @@ class PINNPhysicsEngine:
         }
 
 # =====================================================================
-# 4. 主排程器與 SSOT 本地檔案輸出
+# 4. 主戰術協調器 (解算並生成 SSOT JSON)
 # =====================================================================
 class ResilientTacticalOrchestrator:
     TZ_TAIPEI = timezone(timedelta(hours=8))
@@ -168,13 +182,19 @@ class ResilientTacticalOrchestrator:
     def __init__(self, model_path="model_v36D.10.6.pt", output_filename="latest_decision.json"):
         self.extractor = GEM36DNormalizedFeatureExtractor()
         self.pinn_engine = PINNPhysicsEngine()
-        self.policy = AIClassifierPolicy(input_dim=36)
+        self.policy = AIClassifierPolicy(input_dim=36, hidden1=256, hidden2=128, output_dim=3)
         self.output_filename = output_filename
-        
+
         if os.path.exists(model_path):
-            self.policy.load_state_dict(torch.load(model_path, map_location="cpu"))
-            print(f"✅ 已載入 36D 最佳神經網絡權重: {model_path}")
-        self.policy.eval()
+            try:
+                self.policy.load_state_dict(torch.load(model_path, map_location="cpu"))
+                print(f"✅ 已成功載入 36D 神經網絡權重: {model_path}")
+            except Exception as e:
+                print(f"⚠️ 載入模型權重失敗 ({e})，採用初始化預設權重執行。")
+        else:
+            print(f"⚠️ 未找到模型檔 {model_path}，使用預設權重繼續執行。")
+
+        self.policy.eval()  # 強制評估模式
 
     def execute_cycle(self):
         t = UnifiedMarineTelemetry()
@@ -248,8 +268,24 @@ class ResilientTacticalOrchestrator:
 
         with open(self.output_filename, "w", encoding="utf-8") as f:
             json.dump(ssot_payload, f, indent=2, ensure_ascii=False)
-        print(f"💾 決策已寫入 {self.output_filename} | {timestamp_str} | 狀態: {decision_code} | VETO: {has_veto}")
+        print(f"💾 [SSOT 寫入完成] {timestamp_str} | 裁決: {decision_code} | VETO: {has_veto}")
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--single-run", action="store_true", help="執行單次解算後自動結束 (適用於 GitHub Actions)")
+    args, _ = parser.parse_known_args()
+
     orchestrator = ResilientTacticalOrchestrator(model_path="model_v36D.10.6.pt")
-    orchestrator.execute_cycle()
+
+    if args.single_run:
+        print("🚀 [GitHub Actions] 開始執行單次 SSOT 解算...")
+        orchestrator.execute_cycle()
+        print("✅ 單次解算完成。")
+    else:
+        print("🚀 [持續監控模式] 全系統啟動...")
+        try:
+            while True:
+                orchestrator.execute_cycle()
+                time.sleep(5)
+        except KeyboardInterrupt:
+            print("\n🛑 收到終止訊號，系統安全停機。")
