@@ -28,7 +28,7 @@
             text-align: center; font-weight: bold; border-radius: 6px; margin-bottom: 10px; font-size: 12px;
         }
 
-        /* 剛性 32% / 68% 雙欄切割與 Stretch 對齊 */
+        /* 剛性 32% / 68% 雙欄對齊 (Stretch 填滿不留空) */
         .layout-main { display: flex; gap: 12px; align-items: stretch; }
         .left-col { width: 32%; flex-shrink: 0; display: flex; flex-direction: column; }
         .right-col { width: 68%; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
@@ -46,10 +46,15 @@
         .table-full { width: 100%; border-collapse: collapse; font-size: 11px; color: #cbd5e1; }
         .table-full td, .table-full th { padding: 5px 3px; text-align: left; vertical-align: middle; }
         
-        /* 2x2 ECharts 畫廊最佳化尺寸 */
+        /* 2x2 ECharts 今日圖表矩陣 */
         .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
         .chart-el {
-            width: 100%; height: 310px; min-height: 250px;
+            width: 100%; height: 200px; min-height: 180px;
+            background: #1e293b; border-radius: 8px; border: 1px solid #334155; padding: 8px;
+        }
+        /* 一週趨勢圖卡片專用高度 */
+        .chart-weekly-el {
+            width: 100%; height: 210px; min-height: 190px;
             background: #1e293b; border-radius: 8px; border: 1px solid #334155; padding: 8px;
         }
 
@@ -69,7 +74,7 @@
         <div style="font-size:11px; color:#94a3b8;">通訊: <span id="deskCommCount" style="color:#f8fafc; font-weight:bold;">0</span> 次 | <span id="deskSecAgo">更新: 0 秒前</span></div>
     </div>
 
-    <!-- 備援退避警示 Banner (>30s 自動顯示) -->
+    <!-- 備援退避警示 Banner -->
     <div id="staleAlertDesk" class="stale-desk">🔴 數據過期 (READ_ONLY_BACKUP) - 請勿依此進行靠泊決策</div>
 
     <!-- 頂部 Q-Mode 戰術裁決 Banner -->
@@ -221,14 +226,18 @@
             </div>
         </div>
 
-        <!-- 右側動態圖表陣列 (68% 主畫廊 - 齊平填滿) -->
+        <!-- 右側動態圖表陣列 (68% 主畫廊 - 填滿無空白) -->
         <div class="right-col">
+            <!-- 今日 24 小時 2x2 圖表 -->
             <div class="charts-grid">
                 <div id="chart_hs" class="chart-el"></div>
                 <div id="chart_w" class="chart-el"></div>
                 <div id="chart_ukc" class="chart-el"></div>
                 <div id="chart_tp" class="chart-el"></div>
             </div>
+
+            <!-- 填補空白專用：🌀 一週海氣象雙軸趨勢預判 (7-Day Hs & Wind Trend) -->
+            <div id="chart_weekly" class="chart-weekly-el" style="margin-bottom:10px;"></div>
 
             <!-- 戰略三方案評估 (Ground Truth) -->
             <div class="card-desk" style="margin-bottom:0;">
@@ -280,7 +289,7 @@
     <script>
         let lastUpdateDesk = Date.now();
         let deskCommCounter = 0;
-        let chartHs, chartW, chartUkc, chartTp;
+        let chartHs, chartW, chartUkc, chartTp, chartWeekly;
 
         function getFormattedCSTTime(d = new Date()) {
             const pad = (n) => String(n).padStart(2, '0');
@@ -303,6 +312,7 @@
         function initDesktopCharts() {
             const hours = ['06:00', '08:00', '10:00', '11:00', '13:00', '15:00', '16:00', '18:00'];
 
+            // 1. Hs 港池波高
             chartHs = echarts.init(document.getElementById('chart_hs'));
             chartHs.setOption({
                 title: { text: 'Hs 港池有效波高 (m)', textStyle: { color: '#38bdf8', fontSize: 12 } },
@@ -324,6 +334,7 @@
                 }]
             });
 
+            // 2. Wind 局域陣風
             chartW = echarts.init(document.getElementById('chart_w'));
             chartW.setOption({
                 title: { text: 'Wind 局域陣風 (m/s)', textStyle: { color: '#38bdf8', fontSize: 12 } },
@@ -345,6 +356,7 @@
                 }]
             });
 
+            // 3. UKC 動態裕深
             chartUkc = echarts.init(document.getElementById('chart_ukc'));
             chartUkc.setOption({
                 title: { text: 'UKC 動態裕深 (m)', textStyle: { color: '#38bdf8', fontSize: 12 } },
@@ -366,6 +378,7 @@
                 }]
             });
 
+            // 4. Tp 浪週期
             chartTp = echarts.init(document.getElementById('chart_tp'));
             chartTp.setOption({
                 title: { text: 'Tp 浪週期 (s)', textStyle: { color: '#38bdf8', fontSize: 12 } },
@@ -387,9 +400,36 @@
                 }]
             });
 
+            // 5. 🌀 一週海氣象雙軸趨勢預判 (7-Day Hs & Wind Trend)
+            const days = ['D-3', 'D-2', 'D-1', '今日(09/11)', '明日(09/12)', '後日(09/13)', '大後日(09/14)'];
+            chartWeekly = echarts.init(document.getElementById('chart_weekly'));
+            chartWeekly.setOption({
+                title: { text: '🌀 一週海氣象雙軸趨勢預判 (Hs 波高 & Wind 陣風 7 天走勢)', textStyle: { color: '#f59e0b', fontSize: 12 } },
+                tooltip: { trigger: 'axis' },
+                legend: { data: ['Hs 波高 (m)', 'Wind 陣風 (m/s)'], textStyle: { color: '#cbd5e1' }, right: 10, top: 5 },
+                grid: { top: 40, bottom: 25, left: 40, right: 40 },
+                xAxis: { type: 'category', data: days, axisLine: { lineStyle: { color: '#64748b' } } },
+                yAxis: [
+                    { type: 'value', name: 'Hs (m)', min: 0, max: 4, axisLine: { lineStyle: { color: '#ef4444' } }, splitLine: { lineStyle: { color: '#334155' } } },
+                    { type: 'value', name: 'Wind (m/s)', min: 0, max: 20, axisLine: { lineStyle: { color: '#f59e0b' } }, splitLine: { show: false } }
+                ],
+                series: [
+                    {
+                        name: 'Hs 波高 (m)', type: 'line', data: [1.1, 1.4, 2.3, 3.23, 2.8, 1.6, 0.9],
+                        smooth: true, itemStyle: { color: '#ef4444' },
+                        markLine: { symbol: 'none', data: [{ yAxis: 1.2, name: 'Hs 1.2m VETO', lineStyle: { color: '#ef4444', type: 'dashed' } }] }
+                    },
+                    {
+                        name: 'Wind 陣風 (m/s)', type: 'line', yAxisIndex: 1, data: [7.2, 9.1, 11.5, 13.5, 12.0, 9.8, 6.5],
+                        smooth: true, itemStyle: { color: '#f59e0b' },
+                        markLine: { symbol: 'none', data: [{ yAxis: 10.8, name: 'Wind 10.8m/s VETO', lineStyle: { color: '#f59e0b', type: 'dashed' } }] }
+                    }
+                ]
+            });
+
             window.addEventListener('resize', () => {
                 setTimeout(() => {
-                    chartHs.resize(); chartW.resize(); chartUkc.resize(); chartTp.resize();
+                    chartHs.resize(); chartW.resize(); chartUkc.resize(); chartTp.resize(); chartWeekly.resize();
                 }, 100);
             });
         }
