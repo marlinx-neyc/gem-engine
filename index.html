@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GEM Engine - AI 戰術遙測控制台</title>
+  <script>
+    // 自動依裝置螢幕寬度跳轉至對應版面
+    (function() {
+      const isMobile = window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      if (isMobile) {
+        window.location.replace("./mobile.html");
+      } else {
+        window.location.replace("./desktop.html");
+      }
+    })();
+  </script>
+</head>
+<body style="background-color: #0b1120; color: #f8fafc; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;">
+  <div style="text-align: center;">
+    <h2>🔄 戰術控制台載入中...</h2>
+    <p style="color: #94a3b8; font-size: 14px;">正在為您切換至最適 UI 介面</p>
+    <div style="margin-top: 20px;">
+      <a href="./desktop.html" style="color: #38bdf8; margin-right: 15px;">[桌面端控制台]</a>
+      <a href="./mobile.html" style="color: #10b981;">[手機端儀表板]</a>
+    </div>
+  </div>
+</body>
+</html>
