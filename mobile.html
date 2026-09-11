@@ -1,31 +1,83 @@
-<!-- mobile.html - 手機端 100% 輕量卡片流版 (文字顏色對比優化版) -->
-<style>
-  .mobile-container {
-    width: 100%; min-height: 100vh; background-color: #0b1120; color: #f8fafc;
-    padding: 12px; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  }
-  .card-mob { background: #1e293b; border-radius: 8px; padding: 12px; border: 1px solid #334155; margin-bottom: 10px; color: #f8fafc; }
-  .banner-mob {
-    border: 2px solid #ef4444; background: rgba(239, 68, 68, 0.2); color: #fca5a5;
-    padding: 10px; border-radius: 6px; font-weight: bold; margin-bottom: 10px; font-size: 13px; line-height: 1.4;
-  }
-  .stale-mob { display: none; background: #ef4444; color: #ffffff; padding: 8px; text-align: center; font-weight: bold; border-radius: 4px; margin-bottom: 10px; font-size: 12px; }
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; }
-  .item-box { background: #0f172a; padding: 8px; border-radius: 6px; border: 1px solid #334155; }
-  .badge-veto-m { background: #ef4444; color: #fff; padding: 1px 5px; border-radius: 3px; font-size: 10px; font-weight: bold; }
-  .badge-pass-m { background: #10b981; color: #fff; padding: 1px 5px; border-radius: 3px; font-size: 10px; font-weight: bold; }
-  
-  .table-full { width: 100%; border-collapse: collapse; font-size: 11px; color: #cbd5e1; }
-  .table-full th { color: #94a3b8; font-weight: bold; }
-  .table-full td { padding: 4px 2px; text-align: left; color: #cbd5e1; }
-  
-  .live-dot-blue {
-    display: inline-block; width: 8px; height: 8px; background-color: #3b82f6; border-radius: 50%;
-    margin-right: 6px; box-shadow: 0 0 8px #3b82f6; animation: pulseBlue 1.5s infinite;
-  }
-  @keyframes pulseBlue { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
-</style>
-
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <!-- 1. 滿版核心：強制頁面縮放寬度等於裝置寬度，禁止任意縮放導致白邊 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>GEM Engine Mobile</title>
+  <style>
+    /* 2. 徹底消除瀏覽器預設邊界 */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      width: 100%;
+      min-height: 100%;
+      min-height: 100dvh; /* 相容手機網址列縮放的動態高度 */
+      background-color: #0b1120;
+      color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      overflow-x: hidden; /* 避免橫向溢出 */
+    }
+    
+    .mobile-container {
+      width: 100%;
+      min-height: 100dvh;
+      background-color: #0b1120;
+      color: #f8fafc;
+      padding: 12px;
+      box-sizing: border-box;
+    }
+    
+    .card-mob { 
+      background: #1e293b; 
+      border-radius: 8px; 
+      padding: 12px; 
+      border: 1px solid #334155; 
+      margin-bottom: 10px; 
+      color: #f8fafc; 
+    }
+    .banner-mob {
+      border: 2px solid #ef4444; 
+      background: rgba(239, 68, 68, 0.2); 
+      color: #fca5a5;
+      padding: 10px; 
+      border-radius: 6px; 
+      font-weight: bold; 
+      margin-bottom: 10px; 
+      font-size: 13px; 
+      line-height: 1.4;
+    }
+    .stale-mob { 
+      display: none; 
+      background: #ef4444; 
+      color: #ffffff; 
+      padding: 8px; 
+      text-align: center; 
+      font-weight: bold; 
+      border-radius: 4px; 
+      margin-bottom: 10px; 
+      font-size: 12px; 
+    }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; }
+    .item-box { background: #0f172a; padding: 8px; border-radius: 6px; border: 1px solid #334155; }
+    .badge-veto-m { background: #ef4444; color: #fff; padding: 1px 5px; border-radius: 3px; font-size: 10px; font-weight: bold; }
+    .badge-pass-m { background: #10b981; color: #fff; padding: 1px 5px; border-radius: 3px; font-size: 10px; font-weight: bold; }
+    
+    .table-full { width: 100%; border-collapse: collapse; font-size: 11px; color: #cbd5e1; }
+    .table-full th { color: #94a3b8; font-weight: bold; }
+    .table-full td { padding: 4px 2px; text-align: left; color: #cbd5e1; }
+    
+    .live-dot-blue {
+      display: inline-block; width: 8px; height: 8px; background-color: #3b82f6; border-radius: 50%;
+      margin-right: 6px; box-shadow: 0 0 8px #3b82f6; animation: pulseBlue 1.5s infinite;
+    }
+    @keyframes pulseBlue { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
+  </style>
+</head>
+<body>
 <div class="mobile-container">
   <!-- 1. 頂部狀態與通訊次數 -->
   <div class="card-mob" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -185,3 +237,5 @@
     setInterval(fetchSSOTData, 3000);
   });
 </script>
+</body>
+</html>
