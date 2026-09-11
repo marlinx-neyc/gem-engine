@@ -31,7 +31,7 @@
         .badge-veto-m { background: #ef4444; color: #fff; padding: 1px 5px; border-radius: 3px; font-size: 10px; font-weight: bold; }
         .badge-pass-m { background: #10b981; color: #fff; padding: 1px 5px; border-radius: 3px; font-size: 10px; font-weight: bold; }
         .table-full { width: 100%; border-collapse: collapse; font-size: 11px; color: #cbd5e1; }
-        .table-full td, .table-full th { padding: 5px 3px; text-align: left; }
+        .table-full td, .table-full th { padding: 5px 3px; text-align: left; vertical-align: middle; }
         .live-dot-blue {
             display: inline-block; width: 8px; height: 8px; background-color: #3b82f6;
             border-radius: 50%; margin-right: 6px; box-shadow: 0 0 8px #3b82f6; animation: pulseBlue 1.5s infinite;
@@ -168,22 +168,49 @@
             </div>
         </div>
 
-        <!-- 7. 戰略三方案評估 -->
+        <!-- 7. 戰略三方案評估與定量反饋 (Ground Truth) -->
         <div class="card-mob">
-            <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:4px;">戰略三方案評估 (Ground Truth)</strong>
-            <table class="table-full" style="margin-bottom:6px;">
-                <tr style="border-bottom:1px solid #334155;">
-                    <td style="color:#cbd5e1;">A (官方)</td><td style="color:#cbd5e1;">85%</td><td style="color:#fca5a5;">30%</td><td style="color:#cbd5e1;">拒絕</td>
-                </tr>
-                <tr style="border-bottom:1px solid #334155;">
-                    <td style="color:#cbd5e1;">B (監測)</td><td style="color:#cbd5e1;">60%</td><td style="color:#fca5a5;">40%</td><td style="color:#cbd5e1;">拒絕</td>
-                </tr>
-                <tr>
-                    <td style="font-weight:bold; color:#facc15;">C (GEM)</td><td style="color:#10b981;">99%</td><td style="color:#10b981;">0.8%</td><td style="color:#10b981; font-weight:bold;">採納</td>
-                </tr>
+            <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">戰略三方案評估 (Ground Truth)</strong>
+            <table class="table-full" style="margin-bottom:8px;">
+                <thead>
+                    <tr style="border-bottom:1px solid #334155; color:#94a3b8; font-size:10px;">
+                        <th style="width:20%;">方案</th>
+                        <th style="width:32%;">數值 vs 標準值</th>
+                        <th>差異與缺陷小結</th>
+                        <th style="text-align:center; width:18%;">燈號</th>
+                    </tr>
+                </thead>
+                <tbody id="mob_eval_body">
+                    <tr style="border-bottom:1px solid #0f172a;">
+                        <td style="color:#cbd5e1; font-weight:bold;">A (官方)</td>
+                        <td style="color:#fca5a5;">Hs 3.20m vs ≤1.20m</td>
+                        <td style="color:#94a3b8;">未考慮港池 Kd 屏障，易生過度停航(30%假警報)</td>
+                        <td style="text-align:center; color:#ef4444; font-weight:bold;">🔴 封島</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid #0f172a;">
+                        <td style="color:#cbd5e1; font-weight:bold;">B (監測)</td>
+                        <td style="color:#fca5a5;">W 14.88m/s vs ≤10.8m/s</td>
+                        <td style="color:#94a3b8;">未考量背風 Kw 陰影，弱網斷線機率高</td>
+                        <td style="text-align:center; color:#ef4444; font-weight:bold;">🔴 封島</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight:bold; color:#facc15;">C (GEM)</td>
+                        <td style="color:#10b981;">UKC -0.70m | FB 0.35m</td>
+                        <td style="color:#10b981;">PINN+UKF精算雙重VETO，0.8%極低誤判率</td>
+                        <td style="text-align:center; color:#facc15; font-weight:bold;">🔴 採納</td>
+                    </tr>
+                </tbody>
             </table>
-            <div style="border-top: 1px dashed #334155; padding-top: 6px; font-size: 10px; color: #94a3b8; line-height: 1.4;">
-                <span style="color:#facc15; font-weight:bold;">總結裁示：</span>官方預報易生 30% 假警報；GEM 模型以 0.8% 誤判率作為 Ground Truth。
+            
+            <div style="border-top: 1px dashed #334155; padding-top: 6px; font-size: 10px; line-height: 1.5; color: #cbd5e1;">
+                <div style="margin-bottom: 4px;">
+                    <span style="color:#facc15; font-weight:bold;">📌 定性比較分析：</span>
+                    官方預報 (A) 未考慮港池屏障 $K_d=0.883$ 易過度停航[cite: 1]；現場監測 (B) 無視 401 高地 $K_w$ 局域風場衰減[cite: 1]；GEM 數位雙生 (C) 將智庫先驗權重預編譯為硬性約束，實現本地端 <50ms 零延遲硬阻斷[cite: 1]。
+                </div>
+                <div>
+                    <span style="color:#facc15; font-weight:bold;">📊 定量反饋基準：</span>
+                    方案 C 透過 UKF 狀態同化精確扣合潮位與動態浪高[cite: 1]，精算觸發 $UKC=-0.70\text{m}$ 與 $FB_{pier}=0.35\text{m}$ 雙重 VETO[cite: 1]。此定量結果直接作為自學習引擎微調 UKF 權重之 Ground Truth 基準[cite: 1]。
+                </div>
             </div>
         </div>
 
