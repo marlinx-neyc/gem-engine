@@ -3,65 +3,99 @@
     "system_version": "GEM-V210-PRO-ULTIMATE",
     "knowledge_base_code": "KB_20260908_TACTICAL_TWIN",
     "checksum_fingerprint": "0x9F8B26",
-    "api_connection_status": "ONLINE",
+    "api_connection_status": "ONLINE_LOCAL_SSOT",
     "ukf_convergence_ratio": 99.8,
     "ground_truth_accuracy": 99.2,
-    "network_latency_ms": 11,
+    "network_latency_ms": 0,
     "learning_iteration": 8,
-    "timestamp": "2026-09-11 20:08:20 CST"
+    "timestamp": "2026-09-11 21:37:24 CST"
   },
   "tactical_decision": {
     "q_mode": "🔴 Q4 嚴禁靠泊 (全線封島 48H)",
     "dispatch_status": "NO_DISPATCH",
     "reward_score": 100.0,
     "veto_pass": false,
-    "reason": "Hs_pier (3.23m > 1.20m) 及 W_local (13.50m/s > 10.80m/s) 及 FB_pier (0.15m < 0.50m) 觸發剛性 VETO 封鎖"
+    "reason": "Hs_pier (3.16m > 1.20m) 及 W_local (8.76m/s > 10.80m/s) 觸發剛性 VETO"
   },
   "physics_metrics": {
-    "hs_pier_m": 3.23,
-    "w_local_ms": 13.50,
-    "ukc_m": 2.22,
-    "fb_pier_m": 0.15,
-    "tp_s": 15.5,
-    "delta_theta_deg": 67.5,
-    "active_kd": 1.0,
-    "active_kw": 1.0,
-    "has_veto": true
+    "hs_pier_m": 3.16,
+    "w_local_ms": 8.76,
+    "ukc_m": 5.97,
+    "fb_pier_m": 0.7,
+    "has_veto": true,
+    "reason": "物理門檻超標",
+    "is_tier0": false
   },
   "veto_matrix": {
-    "hs_pier": { "val": 3.23, "limit": 1.20, "status": "VETO_TRIGGERED", "unit": "m" },
-    "w_local": { "val": 13.50, "limit": 10.80, "status": "VETO_TRIGGERED", "unit": "m/s" },
-    "ukc": { "val": 2.22, "limit": 1.50, "status": "PASS", "unit": "m" },
-    "fb_pier": { "val": 0.15, "limit": 0.50, "status": "VETO_TRIGGERED", "unit": "m" }
+    "hs_pier": {
+      "val": 3.16,
+      "limit": 1.2,
+      "status": "VETO_TRIGGERED",
+      "unit": "m"
+    },
+    "w_local": {
+      "val": 8.76,
+      "limit": 10.8,
+      "status": "PASS",
+      "unit": "m/s"
+    },
+    "ukc": {
+      "val": 5.97,
+      "limit": 1.5,
+      "status": "PASS",
+      "unit": "m"
+    },
+    "fb_pier": {
+      "val": 0.7,
+      "limit": 0.5,
+      "status": "PASS",
+      "unit": "m"
+    }
   },
   "decision_code": "Q4",
-  "decision": {
-    "status_text": "Q4 嚴禁靠泊 (全線封島)",
-    "route_action": "全線停航，營運船隻返回烏石港避風。"
-  },
   "typhoon_qimen_prediction": {
     "cyclone_dynamic": "[氣旋警戒] 東南東 450 km，中颱 (45m/s)，暴風半徑 200km。",
     "qimen_anomaly_forecast": "巽宮氣場異常，帶狀低壓活躍，長浪 (Tp > 12.0s) 共振頻繁，請撤離離岸設施。"
   },
-  "left_panel_macro_prediction": {
-    "cyclone_alert": {
-      "status": "[氣旋警戒] 東南東 450 km，中颱 (45m/s)，暴風半徑 200km。",
-      "strategy": "巽宮氣場異常，帶狀低壓活躍，長浪 (Tp > 12.0s) 共振頻繁，請撤離離岸設施。"
-    }
-  },
   "tdx": [
-    { "time": "07:30", "off": "准予靠泊", "mod": "Q4 嚴禁靠泊", "light": "🔴" },
-    { "time": "09:00", "off": "准予靠泊", "mod": "Q4 嚴禁靠泊", "light": "🔴" },
-    { "time": "11:00", "off": "觀察靠泊", "mod": "Q4 嚴禁靠泊", "light": "🔴" },
-    { "time": "14:00", "off": "准予靠泊", "mod": "Q4 嚴禁靠泊", "light": "🔴" },
-    { "time": "15:00", "off": "准予靠泊", "mod": "Q4 嚴禁靠泊", "light": "🔴" }
+    {
+      "time": "07:30",
+      "off": "准予靠泊",
+      "mod": "Q4 嚴禁靠泊",
+      "light": "🔴"
+    },
+    {
+      "time": "09:00",
+      "off": "准予靠泊",
+      "mod": "Q4 嚴禁靠泊",
+      "light": "🔴"
+    },
+    {
+      "time": "11:00",
+      "off": "觀察靠泊",
+      "mod": "Q4 嚴禁靠泊",
+      "light": "🔴"
+    },
+    {
+      "time": "14:00",
+      "off": "准予靠泊",
+      "mod": "Q4 嚴禁靠泊",
+      "light": "🔴"
+    },
+    {
+      "time": "15:00",
+      "off": "准予靠泊",
+      "mod": "Q4 嚴禁靠泊",
+      "light": "🔴"
+    }
   ],
   "pattern_match": {
     "matched_cases": 12,
-    "historical_closure_rate": 0.35
+    "historical_closure_rate": 0.35,
+    "max_similarity_score": 0.9123
   },
   "rl_feedback_status": {
-    "raw_rl_prediction": "Q1",
-    "has_contradiction": false
+    "has_contradiction": false,
+    "raw_rl_prediction": "Q4"
   }
 }
