@@ -22,12 +22,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests pydantic numpy gymnasium
 
+      # 🔄【動態自動化】每次排程啟動時，自動向 Google 申請最新 Access Token
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          token_format: 'access_token'
+
       - name: Run AI Orchestrator Single Pipeline
         env:
           GAS_URL: ${{ secrets.GAS_URL }}
+          AUTH_TOKEN: ${{ steps.auth.outputs.access_token }}
         run: |
-          if [ -f "main_orchestrator.py" ]; then
-            python main_orchestrator.py --single-run
-          elif [ -f "main.py" ]; then
-            python main.py --single-run
-          fi
+          python main_orchestrator.py --single-run
