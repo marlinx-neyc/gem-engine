@@ -47,7 +47,7 @@
         <div style="font-size:12px; color:#94a3b8;">通訊: <span id="deskCommCount" style="color:#f8fafc; font-weight:bold;">0</span> 次 | <span id="deskSecAgo">更新: 0 秒前</span></div>
     </div>
 
-    <div id="vetoBannerDesk" class="banner-desk">🔴 Q4 模式 - 觸發 VETO 剛性封鎖</div>
+    <div id="vetoBannerDesk" class="banner-desk">🔴 Q4 嚴禁靠泊 (全線封島 48H)</div>
 
     <div class="grid-3">
         <!-- 欄位 1: 即時物理數值與當日船班 -->
@@ -116,8 +116,8 @@
                     </tbody>
                 </table>
                 <div style="border-top:1px dashed #334155; padding-top:8px; font-size:12px; line-height:1.5;">
-                    <div><span style="color:#facc15; font-weight:bold;">最後戰術裁決：</span><span id="desk_final_decision" style="color:#ef4444; font-weight:bold;">Q4 嚴禁靠泊 (全線封島)</span></div>
-                    <div style="color:#94a3b8; margin-top:3px;" id="desk_final_action">處置：全線停航，營運船隻返回烏石港避風。</div>
+                    <div><span style="color:#facc15; font-weight:bold;">最後戰術裁決：</span><span id="desk_final_decision" style="color:#ef4444; font-weight:bold;">🔴 Q4 嚴禁靠泊 (全線封島 48H)</span></div>
+                    <div style="color:#94a3b8; margin-top:3px;" id="desk_final_action">處置：Hs_pier (3.23m > 1.20m) 及 W_local (13.50m/s > 10.80m/s) 及 FB_pier (0.15m < 0.50m) 觸發剛性 VETO 封鎖</div>
                 </div>
             </div>
         </div>
@@ -280,40 +280,61 @@
                     let isVeto = (data.physics_metrics && data.physics_metrics.has_veto) || (data.tactical_decision && !data.tactical_decision.veto_pass);
                     bannerEl.style.background = isVeto ? "rgba(239, 68, 68, 0.2)" : "rgba(16, 185, 129, 0.2)";
                     bannerEl.style.color = isVeto ? "#fca5a5" : "#6ee7b7";
-                    let codeText = (data.tactical_decision && data.tactical_decision.q_mode) || data.decision_code || (isVeto ? 'Q4' : 'Q1');
+                    let codeText = (data.tactical_decision && data.tactical_decision.q_mode) || data.decision_code || (isVeto ? '🔴 Q4 嚴禁靠泊 (全線封島 48H)' : '🟢 Q1 允許靠泊');
                     bannerEl.innerText = codeText;
                 }
             }
 
             if (data.physics_metrics) {
                 let p = data.physics_metrics;
-                const hsEl = document.getElementById('d_hs'); if(hsEl) hsEl.innerText = (p.hs_pier_m !== undefined ? p.hs_pier_m : '3.23') + 'm';
+                const hsEl = document.getElementById('d_hs'); if(hsEl) hsEl.innerText = (p.hs_pier_m !== undefined ? Number(p.hs_pier_m).toFixed(2) : '3.23') + 'm';
                 const shsEl = document.getElementById('d_stat_hs');
                 if(shsEl) {
                     shsEl.innerText = p.hs_pier_m > 1.20 ? 'VETO' : 'PASS';
                     shsEl.className = p.hs_pier_m > 1.20 ? 'badge-veto' : 'badge-pass';
                 }
 
-                const wEl = document.getElementById('d_w'); if(wEl) wEl.innerText = (p.w_local_ms !== undefined ? p.w_local_ms : '13.50') + 'm/s';
+                const wEl = document.getElementById('d_w'); if(wEl) wEl.innerText = (p.w_local_ms !== undefined ? Number(p.w_local_ms).toFixed(2) : '13.50') + 'm/s';
                 const swEl = document.getElementById('d_stat_w');
                 if(swEl) {
                     swEl.innerText = p.w_local_ms > 10.80 ? 'VETO' : 'PASS';
                     swEl.className = p.w_local_ms > 10.80 ? 'badge-veto' : 'badge-pass';
                 }
 
-                const ukcEl = document.getElementById('d_ukc'); if(ukcEl) ukcEl.innerText = (p.ukc_m !== undefined ? p.ukc_m : '2.22') + 'm';
+                const ukcEl = document.getElementById('d_ukc'); if(ukcEl) ukcEl.innerText = (p.ukc_m !== undefined ? Number(p.ukc_m).toFixed(2) : '2.22') + 'm';
                 const sukcEl = document.getElementById('d_stat_ukc');
                 if(sukcEl) {
                     sukcEl.innerText = p.ukc_m < 1.50 ? 'VETO' : 'PASS';
-                    sukcEl.className = p.ukc_m < 1.50 ? 'badge-veto' : 'badge-pass';
+                    sukcEl.className = p.ukc_m < 1.50 ? 'badge-pass' : 'badge-veto';
                 }
 
-                const fbEl = document.getElementById('d_fb'); if(fbEl) fbEl.innerText = (p.fb_pier_m !== undefined ? p.fb_pier_m : '0.15') + 'm';
+                const fbEl = document.getElementById('d_fb'); if(fbEl) fbEl.innerText = (p.fb_pier_m !== undefined ? Number(p.fb_pier_m).toFixed(2) : '0.15') + 'm';
                 const sfbEl = document.getElementById('d_stat_fb');
                 if(sfbEl) {
                     sfbEl.innerText = p.fb_pier_m < 0.50 ? 'VETO' : 'PASS';
                     sfbEl.className = p.fb_pier_m < 0.50 ? 'badge-veto' : 'badge-pass';
                 }
+            }
+
+            if (data.tdx && Array.isArray(data.tdx)) {
+                const tbody = document.getElementById('desk_tdx_body');
+                if (tbody) {
+                    tbody.innerHTML = data.tdx.map(item => `
+                        <tr style="border-bottom:1px solid #0f172a;">
+                            <td>${item.time}</td>
+                            <td style="color:${item.off === '准予靠泊' ? '#10b981' : '#f59e0b'};">${item.off}</td>
+                            <td style="color:#ef4444; font-weight:bold;">${item.mod}</td>
+                            <td style="text-align:center;">${item.light === '#ef4444' || item.light === '🔴' ? '🔴' : '🟢'}</td>
+                        </tr>
+                    `).join('');
+                }
+            }
+
+            if (data.tactical_decision || data.decision) {
+                const decEl = document.getElementById('desk_final_decision');
+                if (decEl) decEl.innerText = (data.tactical_decision && data.tactical_decision.q_mode) || (data.decision && data.decision.status_text) || '🔴 Q4 嚴禁靠泊 (全線封島 48H)';
+                const actEl = document.getElementById('desk_final_action');
+                if (actEl) actEl.innerText = '處置：' + ((data.tactical_decision && data.tactical_decision.reason) || (data.decision && data.decision.route_action) || '全線停航，營運船隻返回烏石港避風。');
             }
 
             if (data.typhoon_qimen_prediction) {
@@ -327,6 +348,16 @@
                 if (cyStatus && cy.status) cyStatus.innerText = cy.status;
                 const cyStrat = document.getElementById('desk_cyclone_strategy');
                 if (cyStrat && cy.strategy) cyStrat.innerText = '對策：' + cy.strategy;
+            }
+
+            if (data.pattern_match) {
+                const mcEl = document.getElementById('desk_match_cases'); if(mcEl) mcEl.innerText = data.pattern_match.matched_cases + ' 筆';
+                const prEl = document.getElementById('desk_prior_rate'); if(prEl) prEl.innerText = ((data.pattern_match.historical_closure_rate || 0) * 100).toFixed(1) + '%';
+            }
+
+            if (data.rl_feedback_status) {
+                const rlEl = document.getElementById('desk_rl_raw'); if(rlEl) rlEl.innerText = data.rl_feedback_status.raw_rl_prediction || '-';
+                const rlcEl = document.getElementById('desk_rl_conflict'); if(rlcEl) rlcEl.innerHTML = data.rl_feedback_status.has_contradiction ? '<span style="color:#ef4444;">🚨 矛盾</span>' : '<span style="color:#10b981;">共識</span>';
             }
         };
 
