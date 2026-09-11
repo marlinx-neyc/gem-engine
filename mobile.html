@@ -16,6 +16,7 @@
         .card-mob {
             background: #1e293b; border-radius: 8px; padding: 12px;
             border: 1px solid #334155; margin-bottom: 10px; color: #f8fafc;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
         .banner-mob {
             border: 2px solid #ef4444; background: rgba(239, 68, 68, 0.2); color: #fca5a5;
@@ -23,8 +24,9 @@
             font-size: 13px; line-height: 1.4; text-align: center;
         }
         .stale-mob {
-            display: none; background: #ef4444; color: #ffffff; padding: 8px;
-            text-align: center; font-weight: bold; border-radius: 4px; margin-bottom: 10px; font-size: 12px;
+            display: none; background: #ef4444; color: #ffffff; padding: 8px 10px;
+            text-align: center; font-weight: bold; border-radius: 6px; margin-bottom: 10px; font-size: 11px;
+            line-height: 1.4; box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
         }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; }
         .item-box { background: #0f172a; padding: 8px; border-radius: 6px; border: 1px solid #334155; }
@@ -32,28 +34,42 @@
         .badge-pass-m { background: #10b981; color: #fff; padding: 1px 5px; border-radius: 3px; font-size: 10px; font-weight: bold; }
         .table-full { width: 100%; border-collapse: collapse; font-size: 11px; color: #cbd5e1; }
         .table-full td, .table-full th { padding: 5px 3px; text-align: left; vertical-align: middle; }
+        
         .live-dot-blue {
             display: inline-block; width: 8px; height: 8px; background-color: #3b82f6;
             border-radius: 50%; margin-right: 6px; box-shadow: 0 0 8px #3b82f6; animation: pulseBlue 1.5s infinite;
         }
         @keyframes pulseBlue { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
+        
+        /* 數值脈衝發光特效 (Data Flash Pulse) */
+        .flash-pulse-red { animation: flashRed 0.6s ease-out; }
+        .flash-pulse-green { animation: flashGreen 0.6s ease-out; }
+        @keyframes flashRed { 0% { background-color: rgba(239, 68, 68, 0.4); } 100% { background-color: transparent; } }
+        @keyframes flashGreen { 0% { background-color: rgba(16, 185, 129, 0.4); } 100% { background-color: transparent; } }
+
         .nav-switch { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 8px 12px; background: #0f172a; border-radius: 6px; border: 1px solid #334155; font-size: 11px; }
         .nav-switch a { color: #38bdf8; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="mobile-container">
-        <!-- 1. 頂部狀態 -->
-        <div class="card-mob" style="display:flex; justify-content:space-between; align-items:center;">
-            <div><span class="live-dot-blue"></span><strong style="color:#3b82f6; font-size:12px;">SSOT 雙生連線中</strong></div>
+        <!-- 1. 頂部狀態卡片 -->
+        <div class="card-mob" id="topStatusCard" style="display:flex; justify-content:space-between; align-items:center;">
+            <div><span class="live-dot-blue" id="liveDot"></span><strong style="color:#3b82f6; font-size:12px;">● LIVE SSOT 雙生連線中</strong></div>
             <div style="font-size:11px; color:#94a3b8;">通訊: <span id="mobCommCount" style="color:#f8fafc; font-weight:bold;">0</span> 次 | <span id="mobSecAgo">更新: 0 秒前</span></div>
         </div>
 
-        <div id="staleAlertMob" class="stale-mob">🔴 數據過期 (READ_ONLY_BACKUP)</div>
-        <div id="vetoBannerMob" class="banner-mob">🔴 Q4 嚴禁靠泊 (全線封島 48H)</div>
+        <!-- 30 秒數據過期 Watchdog 警示 Banner (補齊規範對齊標語) -->
+        <div id="staleAlertMob" class="stale-mob">
+            🔴 數據過期 (OUT OF DATE / READ_ONLY_BACKUP)<br>
+            <span style="font-size:10px; font-weight:normal;">警告：數據已逾 30 秒未更新，請勿依此進行靠泊決策！</span>
+        </div>
 
-        <!-- 2. 即時海象數值與剛性門檻比對 (PINN) -->
-        <div class="card-mob">
+        <!-- 2. Q-Mode 戰術裁決 Banner (包含剛性 NO_DISPATCH 標籤) -->
+        <div id="vetoBannerMob" class="banner-mob">🔴 Q4 嚴禁靠泊 (NO_DISPATCH / 全線封島 48H)</div>
+
+        <!-- 3. 即時海象數值與剛性門檻比對 (PINN) -->
+        <div class="card-mob" id="pinnCard">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                 <strong style="color:#38bdf8; font-size:12px;">即時海象與剛性門檻比對 (PINN)</strong>
                 <span id="mobileTimestamp" style="font-size:10px; color:#38bdf8; font-weight:bold;">2026-09-11 20:08:20 CST</span>
@@ -90,7 +106,7 @@
             </div>
         </div>
 
-        <!-- 3. 各船班時間點官模燈號比對與最後判斷 -->
+        <!-- 4. 當日船班官模燈號比對與最後判斷 -->
         <div class="card-mob">
             <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">當日船班官模燈號比對與最後判斷</strong>
             <table class="table-full" style="margin-bottom:8px;">
@@ -121,12 +137,12 @@
                 </tbody>
             </table>
             <div style="border-top: 1px dashed #334155; padding-top: 6px; font-size: 11px; line-height: 1.5; color: #cbd5e1;">
-                <div><span style="color:#facc15; font-weight:bold;">最後戰術裁決：</span><span id="mob_final_decision" style="color:#ef4444; font-weight:bold;">🔴 Q4 嚴禁靠泊 (全線封島 48H)</span></div>
-                <div style="color:#94a3b8; margin-top:2px;" id="mob_final_action">處置：Hs_pier (3.23m > 1.20m) 及 W_local (13.50m/s > 10.80m/s) 及 FB_pier (0.15m < 0.50m) 觸發剛性 VETO 封鎖</div>
+                <div><span style="color:#facc15; font-weight:bold;">最後戰術裁決：</span><span id="mob_final_decision" style="color:#ef4444; font-weight:bold;">🔴 Q4 嚴禁靠泊 (NO_DISPATCH / 全線封島 48H)</span></div>
+                <div style="color:#94a3b8; margin-top:2px;" id="mob_final_action">處置：Hs_pier (3.23m > 1.20m) 及 W_local (13.50m/s > 10.80m/s) 觸發剛性 VETO 封鎖</div>
             </div>
         </div>
 
-        <!-- 4. 🌀 颱風專區 & 奇門宏觀預判 (重新補回) -->
+        <!-- 5. 🌀 颱風專區 & 奇門宏觀預判 -->
         <div class="card-mob" style="border: 1px solid #f59e0b;">
             <strong style="color:#f59e0b; font-size:12px; display:block; margin-bottom:6px;">🌀 颱風專區 & 奇門宏觀預判</strong>
             <div id="mob_cyclone_status" style="font-size:11px; color:#fca5a5; font-weight:bold; margin-bottom:6px; background:rgba(245,158,11,0.1); padding:6px; border-radius:4px;">
@@ -144,12 +160,12 @@
                     <tr style="border-bottom:1px solid #0f172a;">
                         <td style="color:#cbd5e1;">奇門氣場</td>
                         <td style="color:#facc15;">巽宮風陣</td>
-                        <td style="color:#cbd5e1;">W_local ≥ 10.8m/s (背風失效)</td>
+                        <td style="color:#cbd5e1;">W_local >= 10.8m/s (背風失效)</td>
                     </tr>
                     <tr style="border-bottom:1px solid #0f172a;">
                         <td style="color:#cbd5e1;">天文分野</td>
                         <td style="color:#facc15;">大潮末段</td>
-                        <td style="color:#cbd5e1;">FB ≤ 0.50m (乾舷監控)</td>
+                        <td style="color:#cbd5e1;">FB <= 0.50m (乾舷監控)</td>
                     </tr>
                     <tr>
                         <td style="color:#cbd5e1;">宏觀波浪</td>
@@ -163,7 +179,7 @@
             </div>
         </div>
 
-        <!-- 5. 🧠 雙生大腦認知與影子學習 -->
+        <!-- 6. 🧠 雙生大腦認知與影子學習 -->
         <div class="card-mob" style="border: 1px solid #64748b;">
             <strong style="color:#c084fc; font-size:12px; display:block; margin-bottom:6px;">🧠 雙生大腦認知與影子學習</strong>
             <div class="grid-2" style="font-size:11px; line-height:1.5;">
@@ -182,7 +198,7 @@
             </div>
         </div>
 
-        <!-- 6. 今日營運航班規範時間點 -->
+        <!-- 7. 今日營運航班規範時間點 -->
         <div class="card-mob">
             <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">今日營運時段檢核 (6~9月規範)</strong>
             <div class="grid-2" style="font-size:11px; color:#cbd5e1; line-height:1.6;">
@@ -195,7 +211,7 @@
             </div>
         </div>
 
-        <!-- 7. 未來三天戰術預判 -->
+        <!-- 8. 未來三天戰術預判 -->
         <div class="card-mob">
             <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">未來三天戰術預判</strong>
             <div style="font-size:11px; line-height:1.6; color:#cbd5e1;">
@@ -205,7 +221,7 @@
             </div>
         </div>
 
-        <!-- 8. 戰略三方案評估與定量反饋 (Ground Truth) -->
+        <!-- 9. 戰略三方案評估 (Ground Truth) -->
         <div class="card-mob">
             <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">戰略三方案評估 (Ground Truth)</strong>
             <table class="table-full" style="margin-bottom:8px;">
@@ -219,12 +235,12 @@
                 <tbody id="mob_eval_body">
                     <tr style="border-bottom:1px solid #0f172a;">
                         <td style="color:#cbd5e1; font-weight:bold;">A (官方)</td>
-                        <td style="color:#fca5a5;">Hs 3.23m [≤1.20m]</td>
+                        <td style="color:#fca5a5;">Hs 3.23m [<=1.20m]</td>
                         <td style="text-align:center; color:#ef4444; font-weight:bold;">🔴 封島</td>
                     </tr>
                     <tr style="border-bottom:1px solid #0f172a;">
                         <td style="color:#cbd5e1; font-weight:bold;">B (監測)</td>
-                        <td style="color:#fca5a5;">W 13.50m/s [≤10.80m/s]</td>
+                        <td style="color:#fca5a5;">W 13.50m/s [<=10.80m/s]</td>
                         <td style="text-align:center; color:#ef4444; font-weight:bold;">🔴 封島</td>
                     </tr>
                     <tr>
@@ -245,7 +261,7 @@
             </div>
         </div>
 
-        <!-- 9. 裝置視角切換器 -->
+        <!-- 10. 裝置視角切換器 -->
         <div class="nav-switch">
             <span style="color:#94a3b8;">當前視角：📱 手機版控制台</span>
             <a href="desktop.html">💻 切換至桌面版</a>
@@ -274,16 +290,27 @@
             const d3El = document.getElementById('mob_d3'); if(d3El) d3El.innerText = `(D+3, ${fmt(d3)})`;
         }
 
+        // SSOT 數據雙軌容錯解析 (Tolerant Parsing Layer)
         window.onSSOTDataReceived = function(data) {
             if (!data) return;
             lastUpdateMob = Date.now();
             mobCommCounter++;
+            
+            // UI 反饋：通訊次數增加與脈衝閃爍
             const cntEl = document.getElementById('mobCommCount'); if(cntEl) cntEl.innerText = mobCommCounter;
             const staleEl = document.getElementById('staleAlertMob'); if(staleEl) staleEl.style.display = 'none';
+
+            const cardPinn = document.getElementById('pinnCard');
+            if (cardPinn) {
+                cardPinn.classList.remove('flash-pulse-red', 'flash-pulse-green');
+                void cardPinn.offsetWidth; // 觸發重繪
+                cardPinn.classList.add('flash-pulse-red');
+            }
 
             let ts = (data.system && data.system.timestamp) || data.timestamp || getFormattedCSTTime();
             const tsEl = document.getElementById('mobileTimestamp'); if(tsEl) tsEl.innerText = ts;
 
+            // 頂部戰術 Banner (兼容 tactical_decision 與 decision_code)
             let bannerEl = document.getElementById('vetoBannerMob');
             if (bannerEl) {
                 if (data.decision_code === "Q4_DISASTER") {
@@ -294,42 +321,54 @@
                     let isVeto = (data.physics_metrics && data.physics_metrics.has_veto) || (data.tactical_decision && !data.tactical_decision.veto_pass);
                     bannerEl.style.background = isVeto ? "rgba(239, 68, 68, 0.2)" : "rgba(16, 185, 129, 0.2)";
                     bannerEl.style.color = isVeto ? "#fca5a5" : "#6ee7b7";
-                    let codeText = (data.tactical_decision && data.tactical_decision.q_mode) || data.decision_code || (isVeto ? '🔴 Q4 嚴禁靠泊 (全線封島 48H)' : '🟢 Q1 允許靠泊');
+                    let codeText = (data.tactical_decision && data.tactical_decision.q_mode) || data.decision_code || (isVeto ? '🔴 Q4 嚴禁靠泊 (NO_DISPATCH / 全線封島 48H)' : '🟢 Q1 允許靠泊');
                     bannerEl.innerText = codeText;
                 }
             }
 
+            // PINN 數據解析 (兼容 physics_metrics 與 veto_matrix)
+            let hsVal = 3.23, wVal = 13.50, ukcVal = 2.22, fbVal = 0.15;
             if (data.physics_metrics) {
-                let p = data.physics_metrics;
-                const hsEl = document.getElementById('m_hs'); if(hsEl) hsEl.innerText = (p.hs_pier_m !== undefined ? p.hs_pier_m : '3.23') + 'm';
-                const shsEl = document.getElementById('m_stat_hs');
-                if(shsEl) {
-                    shsEl.innerText = p.hs_pier_m > 1.20 ? 'VETO' : 'PASS';
-                    shsEl.className = p.hs_pier_m > 1.20 ? 'badge-veto-m' : 'badge-pass-m';
-                }
-
-                const wEl = document.getElementById('m_w'); if(wEl) wEl.innerText = (p.w_local_ms !== undefined ? p.w_local_ms : '13.50') + 'm/s';
-                const swEl = document.getElementById('m_stat_w');
-                if(swEl) {
-                    swEl.innerText = p.w_local_ms > 10.80 ? 'VETO' : 'PASS';
-                    swEl.className = p.w_local_ms > 10.80 ? 'badge-veto-m' : 'badge-pass-m';
-                }
-
-                const ukcEl = document.getElementById('m_ukc'); if(ukcEl) ukcEl.innerText = (p.ukc_m !== undefined ? p.ukc_m : '2.22') + 'm';
-                const sukcEl = document.getElementById('m_stat_ukc');
-                if(sukcEl) {
-                    sukcEl.innerText = p.ukc_m < 1.50 ? 'VETO' : 'PASS';
-                    sukcEl.className = p.ukc_m < 1.50 ? 'badge-pass-m' : 'badge-veto-m';
-                }
-
-                const fbEl = document.getElementById('m_fb'); if(fbEl) fbEl.innerText = (p.fb_pier_m !== undefined ? p.fb_pier_m : '0.15') + 'm';
-                const sfbEl = document.getElementById('m_stat_fb');
-                if(sfbEl) {
-                    sfbEl.innerText = p.fb_pier_m < 0.50 ? 'VETO' : 'PASS';
-                    sfbEl.className = p.fb_pier_m < 0.50 ? 'badge-veto-m' : 'badge-pass-m';
-                }
+                if (data.physics_metrics.hs_pier_m !== undefined) hsVal = data.physics_metrics.hs_pier_m;
+                if (data.physics_metrics.w_local_ms !== undefined) wVal = data.physics_metrics.w_local_ms;
+                if (data.physics_metrics.ukc_m !== undefined) ukcVal = data.physics_metrics.ukc_m;
+                if (data.physics_metrics.fb_pier_m !== undefined) fbVal = data.physics_metrics.fb_pier_m;
+            } else if (data.veto_matrix) {
+                if (data.veto_matrix.hs_pier && data.veto_matrix.hs_pier.val !== undefined) hsVal = data.veto_matrix.hs_pier.val;
+                if (data.veto_matrix.w_local && data.veto_matrix.w_local.val !== undefined) wVal = data.veto_matrix.w_local.val;
+                if (data.veto_matrix.ukc && data.veto_matrix.ukc.val !== undefined) ukcVal = data.veto_matrix.ukc.val;
+                if (data.veto_matrix.fb_pier && data.veto_matrix.fb_pier.val !== undefined) fbVal = data.veto_matrix.fb_pier.val;
             }
 
+            const hsEl = document.getElementById('m_hs'); if(hsEl) hsEl.innerText = Number(hsVal).toFixed(2) + 'm';
+            const shsEl = document.getElementById('m_stat_hs');
+            if(shsEl) {
+                shsEl.innerText = hsVal > 1.20 ? 'VETO' : 'PASS';
+                shsEl.className = hsVal > 1.20 ? 'badge-veto-m' : 'badge-pass-m';
+            }
+
+            const wEl = document.getElementById('m_w'); if(wEl) wEl.innerText = Number(wVal).toFixed(2) + 'm/s';
+            const swEl = document.getElementById('m_stat_w');
+            if(swEl) {
+                swEl.innerText = wVal > 10.80 ? 'VETO' : 'PASS';
+                swEl.className = wVal > 10.80 ? 'badge-veto-m' : 'badge-pass-m';
+            }
+
+            const ukcEl = document.getElementById('m_ukc'); if(ukcEl) ukcEl.innerText = Number(ukcVal).toFixed(2) + 'm';
+            const sukcEl = document.getElementById('m_stat_ukc');
+            if(sukcEl) {
+                sukcEl.innerText = ukcVal < 1.50 ? 'VETO' : 'PASS';
+                sukcEl.className = ukcVal < 1.50 ? 'badge-pass-m' : 'badge-veto-m';
+            }
+
+            const fbEl = document.getElementById('m_fb'); if(fbEl) fbEl.innerText = Number(fbVal).toFixed(2) + 'm';
+            const sfbEl = document.getElementById('m_stat_fb');
+            if(sfbEl) {
+                sfbEl.innerText = fbVal < 0.50 ? 'VETO' : 'PASS';
+                sfbEl.className = fbVal < 0.50 ? 'badge-veto-m' : 'badge-pass-m';
+            }
+
+            // 颱風與奇門
             if (data.typhoon_qimen_prediction) {
                 const cyStatus = document.getElementById('mob_cyclone_status');
                 if (cyStatus && data.typhoon_qimen_prediction.cyclone_dynamic) cyStatus.innerText = data.typhoon_qimen_prediction.cyclone_dynamic;
@@ -343,6 +382,7 @@
                 if (cyStrat && macro.strategy) cyStrat.innerText = '對策：' + macro.strategy;
             }
 
+            // 船班燈號表格
             if (data.tdx && Array.isArray(data.tdx)) {
                 const tbody = document.getElementById('mob_tdx_body');
                 if (tbody) {
@@ -357,9 +397,10 @@
                 }
             }
 
+            // 最後戰術裁決與處置
             if (data.tactical_decision || data.decision) {
                 const decEl = document.getElementById('mob_final_decision');
-                if (decEl) decEl.innerText = (data.tactical_decision && data.tactical_decision.q_mode) || (data.decision && data.decision.status_text) || 'Q4 嚴禁靠泊 (全線封島)';
+                if (decEl) decEl.innerText = (data.tactical_decision && data.tactical_decision.q_mode) || (data.decision && data.decision.status_text) || '🔴 Q4 嚴禁靠泊 (NO_DISPATCH / 全線封島 48H)';
                 const actEl = document.getElementById('mob_final_action');
                 if (actEl) actEl.innerText = '處置：' + ((data.tactical_decision && data.tactical_decision.reason) || (data.decision && data.decision.route_action) || '全線停航，營運船隻返回烏石港避風。');
             }
@@ -375,11 +416,18 @@
             }
         };
 
+        // Watchdog 計時器與 >30s 超時退避警示 Banner 控制
         setInterval(function() {
             const sec = Math.floor((Date.now() - lastUpdateMob) / 1000);
             const secEl = document.getElementById('mobSecAgo'); if(secEl) secEl.innerText = '更新: ' + sec + ' 秒前';
             const staleEl = document.getElementById('staleAlertMob');
-            if (staleEl && sec > 30) staleEl.style.display = 'block';
+            if (staleEl) {
+                if (sec > 30) {
+                    staleEl.style.display = 'block';
+                } else {
+                    staleEl.style.display = 'none';
+                }
+            }
         }, 1000);
 
         async function fetchSSOTData() {
