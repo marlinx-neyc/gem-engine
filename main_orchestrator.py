@@ -10,10 +10,17 @@ import time
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
 import numpy as np
-import torch
-import torch.nn as nn
-from pydantic import BaseModel, Field
-
+try:
+    import torch
+    import torch.nn as nn
+    HAS_TORCH = True
+except ImportError:
+    HAS_TORCH = False
+    class DummyModule:
+        pass
+    class DummyNN:
+        Module = DummyModule
+    nn = DummyNN()
 # 1. 策略神經網路架構
 class AIClassifierPolicy(nn.Module):
     def __init__(self, input_dim=36, hidden_dim=128, output_dim=4):
