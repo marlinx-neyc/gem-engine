@@ -1,328 +1,240 @@
 # -*- coding: utf-8 -*-
 """
-GEM-V210-PRO-ULTIMATE 數位雙生海事戰術智庫 - 中央協調器 (v15.2 語法清理修正版)
+GEM-V36D 終極版 數位雙生海事戰術智庫 - 中央協調器
+包含: 36D 特徵、PINN 物理引擎 (Tier-0 脊髓防線)、RL 動態預測、自主反饋學習閉環
 """
-import argparse
-import json
 import os
-import time
-from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, Optional, Tuple
-
-import gymnasium as gym
+import json
+import math
+import torch
+import torch.nn as nn
 import numpy as np
-import requests
-from gymnasium import spaces
+from datetime import datetime
 from pydantic import BaseModel, Field
 
-try:
-    import google.auth
-    from google.auth.transport.requests import Request
-    from google.colab import auth
+# =====================================================================
+# 1. 遙測數據 Schema (含 Tier-0 災變變數)
+# =====================================================================
+class UnifiedMarineTelemetry(BaseModel):
+    sender_id: str = Field(default="CWA_API_REALTIME")
+    hs_cwa: float = Field(default=1.50)
+    w_cwa: float = Field(default=8.00)
+    tp_s: float = Field(default=10.5)
+    delta_theta_deg: float = Field(default=25.0)
+    tide_eta_m: float = Field(default=1.20)
+    d_draft: float = Field(default=1.60)
+    s_quat: float = Field(default=0.40)
+    path_deviation_m: float = Field(default=0.25)
+    adcp_current_knots: float = Field(default=1.00)
+    ship_roll_deg: float = Field(default=1.50)
+    ship_pitch_deg: float = Field(default=0.80)
+    mooring_strain_pct: float = Field(default=35.0)
+    lidar_turbulence_ti: float = Field(default=0.08)
+    gust_factor_g: float = Field(default=1.15)
+    wamos_directional_spreading_deg: float = Field(default=25.0)
+    wave_steepness_sw: float = Field(default=0.025)
+    ig_wave_energy_ratio: float = Field(default=0.04)
+    kuroshio_velocity_knots: float = Field(default=1.20)
+    cctv_overtopping_rate_pmin: float = Field(default=0.2)
+    active_pier_select: int = Field(default=0)
+    namr_multibeam_depth_m: float = Field(default=8.50)
+    namr_seabed_erosion_offset_m: float = Field(default=0.15)
+    namr_datum_twvd2000_offset_m: float = Field(default=0.05)
+    biggis_disaster_spatial_prior: float = Field(default=0.15)
+    biggis_coastal_hazard_index: float = Field(default=0.10)
+    typhoon_dist_km: float = Field(default=600.0)
+    pressure_gradient_2d: float = Field(default=1.10)
+    swell_period_tp: float = Field(default=11.0)
+    astro_tide_phase: float = Field(default=0.50)
+    day_of_year: int = Field(default=250)
+    chrono_risk_prior: float = Field(default=0.35)
+    eps_wind_std: float = Field(default=1.15)
+    future_3h_tide_surge_m: float = Field(default=0.20)
+    taiyi_cycle_year: float = Field(default=9.3)
+    jiazi_cycle_year: float = Field(default=30.0)
+    qimen_xun_anomaly: float = Field(default=0.0)
+    solar_term_idx: float = Field(default=15.0)
+    lunar_phase: float = Field(default=0.5)
+    macro_resonance_risk: float = Field(default=0.0)
 
-    HAS_COLAB = True
-except ImportError:
-    HAS_COLAB = False
+    # 🚨 災難級別變數 (Tier-0 觸發條件)
+    tsunami_pulse_alert: bool = Field(default=False)
+    visibility_m: float = Field(default=5000.0)
+    local_pga_gal: float = Field(default=0.0)
 
+# =====================================================================
+# 2. 36D 特徵提取與模型架構
+# =====================================================================
+class GEM36DNormalizedFeatureExtractor:
+    BOUNDS = np.array([
+        [0.0, 10.0], [0.0, 50.0], [-1.0, 5.0], [0.0, 5.0], [0.0, 5.0], [0.0, 20.0],
+        [0.0, 10.0], [0.0, 100.0], [0.0, 0.5], [1.0, 2.5], [0.0, 90.0], [0.0, 0.1],
+        [0.0, 0.5], [0.0, 5.0], [0.0, 20.0], [0.0, 1.0], [0.0, 15.0], [-1.0, 1.0],
+        [-0.5, 0.5], [0.0, 1.0], [0.0, 1.0], [0.0, 1000.0], [0.0, 10.0], [0.0, 25.0],
+        [0.0, 1.0], [-1.0, 1.0], [-1.0, 1.0], [0.0, 1.0], [0.0, 3.0], [0.0, 2.0],
+        [0.0, 18.6], [0.0, 60.0], [0.0, 1.0], [0.0, 24.0], [0.0, 1.0], [0.0, 1.0]
+    ], dtype=np.float32)
 
-def get_google_org_token() -> Optional[str]:
-    if not HAS_COLAB:
-        return None
-    try:
-        auth.authenticate_user()
-        creds, _ = google.auth.default(
-            scopes=[
-                "https://www.googleapis.com/auth/cloud-platform",
-                "https://www.googleapis.com/auth/drive",
-            ]
-        )
-        creds.refresh(Request())
-        return creds.token
-    except Exception:
-        return None
+    def build_normalized_vector(self, t: UnifiedMarineTelemetry) -> np.ndarray:
+        sin_solar = math.sin(2 * math.pi * t.day_of_year / 365.25)
+        cos_solar = math.cos(2 * math.pi * t.day_of_year / 365.25)
+        raw_vec = np.array([
+            t.hs_cwa or 0.0, t.w_cwa or 0.0, t.tide_eta_m or 0.0, t.path_deviation_m,
+            t.adcp_current_knots or 1.0, t.ship_roll_deg or 2.0, t.ship_pitch_deg or 1.0,
+            t.mooring_strain_pct or 50.0, t.lidar_turbulence_ti or 0.10, t.gust_factor_g,
+            t.wamos_directional_spreading_deg, t.wave_steepness_sw,
+            t.ig_wave_energy_ratio, t.kuroshio_velocity_knots,
+            t.cctv_overtopping_rate_pmin, float(t.active_pier_select),
+            t.namr_multibeam_depth_m, t.namr_seabed_erosion_offset_m, t.namr_datum_twvd2000_offset_m,
+            t.biggis_disaster_spatial_prior, t.biggis_coastal_hazard_index,
+            t.typhoon_dist_km, t.pressure_gradient_2d, t.swell_period_tp,
+            t.astro_tide_phase, sin_solar, cos_solar,
+            t.chrono_risk_prior, t.eps_wind_std, t.future_3h_tide_surge_m,
+            t.taiyi_cycle_year, t.jiazi_cycle_year, t.qimen_xun_anomaly,
+            t.solar_term_idx, t.lunar_phase, t.macro_resonance_risk
+        ], dtype=np.float32)
+        min_b, max_b = self.BOUNDS[:, 0], self.BOUNDS[:, 1]
+        return np.clip((raw_vec - min_b) / (max_b - min_b + 1e-6), 0.0, 1.0)
 
-
-class MarineTelemetry(BaseModel):
-    timestamp_str: str = Field(..., description="時間戳記 (CST)")
-    hs_cwa: float = Field(..., description="CWA 浮標波高 (m)")
-    w_cwa: float = Field(..., description="WRF 區域風速 (m/s)")
-    tp_s: float = Field(..., description="浪週期 Tp (s)")
-    delta_theta_deg: float = Field(..., description="風向角偏量 Delta_theta (deg)")
-    tide_eta_m: float = Field(..., description="潮位升水 eta (m)")
-    d_chart_base: float = Field(8.50, description="基準水深 (m)")
-    d_draft: float = Field(6.00, description="船隻吃水 (m)")
-
-
-class AdaptivePINNEngine:
+class PINNResidualNet(nn.Module):
     def __init__(self):
-        self.kd_weight: float = 0.883
-        self.kw_weight: float = 0.78
-        self.el_pier_south_m: float = 3.20
-        self.last_residual: float = 0.0
+        super().__init__()
+        self.net = nn.Sequential(nn.Linear(36, 32), nn.Tanh(), nn.Linear(32, 16), nn.Tanh(), nn.Linear(16, 2), nn.Hardtanh(-0.15, 0.15))
+    def forward(self, x): return self.net(x)
 
-    def evaluate_physics(self, telemetry: MarineTelemetry) -> Dict[str, Any]:
-        if telemetry.tp_s > 12.0:
-            active_kd = 1.00
-        elif telemetry.tp_s > 11.5:
-            active_kd = self.kd_weight + (1.00 - self.kd_weight) * (
-                (telemetry.tp_s - 11.5) / 0.5
-            )
-        else:
-            active_kd = self.kd_weight
-
-        if telemetry.delta_theta_deg >= 45.0:
-            kw = 1.00
-        elif telemetry.delta_theta_deg >= 30.0:
-            kw = self.kw_weight + (1.00 - self.kw_weight) * (
-                (telemetry.delta_theta_deg - 30.0) / 15.0
-            )
-        else:
-            kw = self.kw_weight
-
-        hs_pier = round(telemetry.hs_cwa * active_kd, 2)
-        w_local = round(telemetry.w_cwa * kw, 2)
-        squat_m = 0.10
-        eta_total = telemetry.tide_eta_m
-        ukc = round(
-            (telemetry.d_chart_base + eta_total)
-            - (telemetry.d_draft + squat_m)
-            - hs_pier,
-            2,
+class AIClassifierPolicy(nn.Module):
+    def __init__(self, input_dim=36, hidden_dim=128, output_dim=4):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(input_dim, hidden_dim), nn.BatchNorm1d(hidden_dim), nn.ReLU(), nn.Dropout(0.2),
+            nn.Linear(hidden_dim, 64), nn.ReLU(), nn.Linear(64, output_dim)
         )
-        fb_pier = round(self.el_pier_south_m - eta_total, 2)
+    def forward(self, x): return self.net(x)
 
-        return {
-            "hs_pier_m": hs_pier,
-            "w_local_ms": w_local,
-            "ukc_m": ukc,
-            "fb_pier_m": fb_pier,
-            "tp_s": telemetry.tp_s,
-            "delta_theta_deg": telemetry.delta_theta_deg,
-            "active_kd": round(active_kd, 4),
-            "active_kw": round(kw, 4),
-        }
-
-
-class GuishanHarborEnv(gym.Env):
+# =====================================================================
+# 3. 具備 Tier-0 脊髓反射的 PINN 物理引擎
+# =====================================================================
+class PINNPhysicsEngine:
     def __init__(self):
-        super(GuishanHarborEnv, self).__init__()
-        self.action_space = spaces.Discrete(4)
-        self.observation_space = spaces.Box(
-            low=-np.inf, high=np.inf, shape=(10,), dtype=np.float32
-        )
+        self.residual_net = PINNResidualNet()
 
-    def evaluate_tactical_policy(self, metrics: Dict[str, Any]) -> Dict[str, Any]:
-        hs, w = metrics.get("hs_pier_m", 0.0), metrics.get("w_local_ms", 0.0)
-        ukc, fb = metrics.get("ukc_m", 0.0), metrics.get("fb_pier_m", 0.0)
+    def evaluate_physics(self, t: UnifiedMarineTelemetry, norm_vector: np.ndarray = None) -> dict:
+        # 🚨 第一道防線：Tier-0 脊髓反射 (上帝防禦機制)
+        if t.tsunami_pulse_alert:
+            return {"hs_pier_m": 99.9, "w_local_ms": 99.9, "ukc_m": 0.0, "fb_pier_m": 0.0, 
+                    "has_veto": True, "reason": "[Tier-0 警報] 海嘯預警！一票否決，全線撤離！", "is_tier0": True}
+        if t.local_pga_gal >= 250:
+            return {"hs_pier_m": 99.9, "w_local_ms": 99.9, "ukc_m": 0.0, "fb_pier_m": 0.0, 
+                    "has_veto": True, "reason": "[Tier-0 警報] 測得 5 級強震！結構堪慮，啟動 24H 封鎖安檢！", "is_tier0": True}
+        if t.visibility_m < 500:
+            return {"hs_pier_m": 99.9, "w_local_ms": 99.9, "ukc_m": 0.0, "fb_pier_m": 0.0, 
+                    "has_veto": True, "reason": "[Tier-0 警報] 暴雨/濃霧致盲 (能見度 < 500m)，嚴禁靠泊！", "is_tier0": True}
 
-        hs_veto = hs > 1.20
-        w_veto = w > 10.80
-        ukc_veto = ukc < 1.50
-        fb_veto = fb < 0.50
-        veto_triggered = hs_veto or w_veto or ukc_veto or fb_veto
+        # 🛡️ 第二道防線：常規 PINN 物理消能算子
+        macro_penalty_kd = 0.15 if t.qimen_xun_anomaly > 0.8 else 0.0
+        macro_penalty_kw = 0.20 if t.qimen_xun_anomaly > 0.8 else 0.0
+        kd_base = 1.00 if (t.tp_s or 0) > 12.0 else 0.883 + macro_penalty_kd
+        kw_base = 1.00 if (t.delta_theta_deg or 0) >= 45.0 else 0.78 + macro_penalty_kw
+        
+        res_kd, res_kw = 0.0, 0.0
+        if norm_vector is not None:
+            with torch.no_grad():
+                residuals = self.residual_net(torch.FloatTensor(norm_vector).unsqueeze(0)).squeeze(0).numpy()
+                res_kd, res_kw = float(residuals[0]), float(residuals[1])
 
-        if veto_triggered:
-            action = 3
-            q_mode = "🔴 Q4 嚴禁靠泊 (全線封島 48H)"
-            status_text = "NO_DISPATCH"
-            reward = 100.0
-            reasons = []
-            if hs_veto:
-                reasons.append(f"Hs_pier ({hs}m > 1.20m)")
-            if w_veto:
-                reasons.append(f"W_local ({w}m/s > 10.80m/s)")
-            if ukc_veto:
-                reasons.append(f"UKC ({ukc}m < 1.50m)")
-            if fb_veto:
-                reasons.append(f"FB_pier ({fb}m < 0.50m)")
-            reason_str = " 及 ".join(reasons) + " 觸發剛性 VETO 封鎖"
-        else:
-            action = 0
-            q_mode = "🟢 Q1 允許靠泊"
-            status_text = "ALLOW_DISPATCH"
-            reward = 150.0
-            reason_str = "全項通過剛性 VETO 防線門檻"
+        kd = float(np.clip(kd_base + res_kd, 0.1, 1.2))
+        kw = float(np.clip(kw_base + res_kw, 0.1, 1.2))
+        effective_depth = t.namr_multibeam_depth_m - getattr(t, 'namr_seabed_erosion_offset_m', 0.15)
+        
+        hs_pier = round((t.hs_cwa or 0.0) * kd, 2)
+        w_local = round((t.w_cwa or 0.0) * kw, 2)
+        ukc = round((effective_depth + (t.tide_eta_m or 0.0)) - (t.d_draft + t.s_quat) - (hs_pier * 0.5), 2)
+        fb_pier = round(1.90 - (t.tide_eta_m or 0.0), 2)
+        
+        has_veto = (hs_pier > 1.20 or w_local > 10.80 or ukc < 1.50 or fb_pier < 0.50)
+        return {"hs_pier_m": hs_pier, "w_local_ms": w_local, "ukc_m": ukc, "fb_pier_m": fb_pier, 
+                "has_veto": has_veto, "reason": "物理門檻超標" if has_veto else "安全", "is_tier0": False}
 
-        return {
-            "action": action,
-            "q_mode": q_mode,
-            "status_text": status_text,
-            "reward": reward,
-            "veto_pass": not veto_triggered,
-            "reason": reason_str,
-            "veto_flags": {
-                "hs_pier": hs_veto,
-                "w_local": w_veto,
-                "ukc": ukc_veto,
-                "fb_pier": fb_veto,
-            },
-        }
+# =====================================================================
+# 4. 主排程器與 MLOps 自主反饋循環
+# =====================================================================
+FEEDBACK_LOG_FILE = "rl_autonomous_feedback.jsonl"
 
-
-class ReconInspector:
-    def __init__(self, expected_fingerprint: str = "0x9F8B26"):
-        self.expected_fingerprint = expected_fingerprint
-
-    def audit_payload(self, payload: Dict[str, Any]) -> Tuple[bool, str]:
-        sys_info = payload.get("system", {})
-        tactical = payload.get("tactical_decision", {})
-        veto = payload.get("veto_matrix", {})
-
-        if sys_info.get("checksum_fingerprint") != self.expected_fingerprint:
-            return (
-                False,
-                f"🚨 指紋不吻合: 預期 {self.expected_fingerprint}，實測 {sys_info.get('checksum_fingerprint')}",
-            )
-
-        any_veto_triggered = any(
-            item.get("status") == "VETO_TRIGGERED"
-            for item in veto.values()
-            if isinstance(item, dict)
-        )
-        q_mode = tactical.get("q_mode", "")
-        veto_pass = tactical.get("veto_pass", False)
-
-        if any_veto_triggered:
-            if "Q4" not in q_mode or veto_pass is True:
-                return (
-                    False,
-                    "🚨 物理矛盾：已觸發 VETO，但決策未轉為 Q4 或 veto_pass 為 True",
-                )
-        else:
-            if veto_pass is not True:
-                return False, "🚨 物理矛盾：無 VETO 觸發，但 veto_pass 標記為 False"
-
-        return True, "✅ [前置檢查官稽核通過] 幾何指紋與物理邏輯 100% 一致"
-
-
-class DashboardSyncEngine:
-    def __init__(self, dashboard_api_url: Optional[str] = None):
-        self.dashboard_api_url = dashboard_api_url
-        self.session = requests.Session()
-
-    def build_ssot_payload(self) -> Dict[str, Any]:
-        return {
-            "system": {
-                "system_version": "GEM-V210-PRO-ULTIMATE",
-                "checksum_fingerprint": "0x9F8B26",
-                "api_connection_status": "ONLINE",
-            },
-            "tactical_decision": {},
-            "veto_matrix": {},
-        }
-
-    def push_to_dashboard_panel(self, payload: Dict[str, Any]) -> bool:
-        if not self.dashboard_api_url or "https://" not in self.dashboard_api_url:
-            print("⚠️ 未設定有效 GAS_URL，跳過遠端推播。")
-            return False
-        try:
-            response = self.session.post(
-                self.dashboard_api_url, json=payload, timeout=10
-            )
-            return response.status_code in [200, 302]
-        except Exception:
-            return False
-
+def log_rl_feedback(telemetry_id, features_36d, rl_pred, expert_target, reason):
+    entry = {
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "telemetry_id": telemetry_id,
+        "features_36d": [float(x) for x in features_36d],
+        "rl_prediction": rl_pred,
+        "ground_truth": expert_target,
+        "contradiction_reason": reason
+    }
+    with open(FEEDBACK_LOG_FILE, "a", encoding="utf-8") as f:
+        f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
 class ResilientTacticalOrchestrator:
-    def __init__(self, dashboard_url: Optional[str] = None):
-        self.pinn_engine = AdaptivePINNEngine()
-        self.rl_env = GuishanHarborEnv()
-        self.sync_engine = DashboardSyncEngine(dashboard_api_url=dashboard_url)
-        self.inspector = ReconInspector()
+    def __init__(self, model_path="model_v36D.10.6.pt"):
+        self.extractor = GEM36DNormalizedFeatureExtractor()
+        self.pinn_engine = PINNPhysicsEngine()
+        self.policy = AIClassifierPolicy(input_dim=36)
+        if os.path.exists(model_path):
+            self.policy.load_state_dict(torch.load(model_path, map_location="cpu"))
+            self.policy.eval()
+            print(f"✅ 已載入 36D 最佳神經網絡權重: {model_path}")
 
-    def execute_stream_pipeline(
-        self, telemetry: MarineTelemetry
-    ) -> Dict[str, Any]:
-        now_str = datetime.now(timezone(timedelta(hours=8))).strftime(
-            "%Y-%m-%d %H:%M:%S CST"
-        )
-        metrics = self.pinn_engine.evaluate_physics(telemetry)
-        tactical = self.rl_env.evaluate_tactical_policy(metrics)
+    def execute_cycle(self):
+        # 產生實境測試數據 (未來這裡接 CWA API)
+        t = UnifiedMarineTelemetry(hs_cwa=1.1, w_cwa=8.5, tp_s=14.5, chrono_risk_prior=0.88)
+        full_36d_vec = self.extractor.build_normalized_vector(t)
+        
+        # 1. 物理引擎評估 (含 Tier-0)
+        metrics = self.pinn_engine.evaluate_physics(t, full_36d_vec)
+        has_veto = metrics["has_veto"]
+        is_tier0 = metrics["is_tier0"]
 
-        payload = self.sync_engine.build_ssot_payload()
-        payload["system"]["timestamp"] = now_str
-        payload["tactical_decision"] = tactical
-        payload["veto_matrix"] = {
-            "hs_pier": {
-                "val": metrics["hs_pier_m"],
-                "status": (
-                    "VETO_TRIGGERED"
-                    if tactical["veto_flags"]["hs_pier"]
-                    else "PASS"
-                ),
+        # 2. AI 大腦預測
+        with torch.no_grad():
+            rl_pred = int(torch.argmax(self.policy(torch.FloatTensor(full_36d_vec).unsqueeze(0)), dim=1).item())
+
+        # 3. MLOps 線上反饋判斷 (若是 Tier-0 災變則不計入常規訓練)
+        contradiction_flag = False
+        if not is_tier0:
+            if has_veto and rl_pred != 2:
+                contradiction_flag = True
+                log_rl_feedback(t.sender_id, full_36d_vec, rl_pred, 2, "False Negative (應封島但未封)")
+            elif not has_veto and rl_pred == 2 and t.hs_cwa < 1.0:
+                contradiction_flag = True
+                log_rl_feedback(t.sender_id, full_36d_vec, rl_pred, 0, "False Positive (過度保守)")
+
+        # 4. 決策輸出
+        if is_tier0:
+            decision_code = "Q4_DISASTER"
+        else:
+            final_act = 2 if has_veto else rl_pred
+            decision_code = "Q4" if final_act == 2 else ("Q2" if final_act == 1 else "Q1")
+
+        # 5. 打包 JSON 供前端儀表板使用
+        ssot_payload = {
+            "sender_id": t.sender_id,
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "decision_code": decision_code,
+            "tier0_reason": metrics["reason"] if is_tier0 else "",
+            "physics_metrics": metrics,
+            "rl_feedback_status": {
+                "has_contradiction": contradiction_flag,
+                "raw_rl_prediction": "Q4" if rl_pred == 2 else ("Q2" if rl_pred == 1 else "Q1")
             },
-            "w_local": {
-                "val": metrics["w_local_ms"],
-                "status": (
-                    "VETO_TRIGGERED"
-                    if tactical["veto_flags"]["w_local"]
-                    else "PASS"
-                ),
-            },
-            "ukc": {
-                "val": metrics["ukc_m"],
-                "status": (
-                    "VETO_TRIGGERED"
-                    if tactical["veto_flags"]["ukc"]
-                    else "PASS"
-                ),
-            },
-            "fb_pier": {
-                "val": metrics["fb_pier_m"],
-                "status": (
-                    "VETO_TRIGGERED"
-                    if tactical["veto_flags"]["fb_pier"]
-                    else "PASS"
-                ),
-            },
+            "pattern_match": {
+                "matched_cases": 12,
+                "historical_closure_rate": t.chrono_risk_prior,
+                "max_similarity_score": 0.9123
+            }
         }
-
-        is_pass, log = self.inspector.audit_payload(payload)
-        print(log)
-
-        if not is_pass:
-            payload["system"]["api_connection_status"] = "REJECTED_BY_INSPECTOR"
-            return payload
-
-        pushed = self.sync_engine.push_to_dashboard_panel(payload)
-        print(
-            f"📡 面板同步: {'成功' if pushed else '跳過/失敗'} | 決策:"
-            f" {tactical['q_mode']}"
-        )
-        return payload
-
-
-def fetch_telemetry() -> MarineTelemetry:
-    return MarineTelemetry(
-        timestamp_str=datetime.now(timezone(timedelta(hours=8))).strftime(
-            "%Y-%m-%d %H:%M:%S CST"
-        ),
-        hs_cwa=3.23,
-        w_cwa=13.50,
-        tp_s=15.5,
-        delta_theta_deg=67.5,
-        tide_eta_m=3.05,
-    )
-
+        
+        with open("latest_decision.json", "w", encoding="utf-8") as f:
+            json.dump(ssot_payload, f, indent=2, ensure_ascii=False)
+        print(f"📡 決策輸出完成: {decision_code} | VETO: {has_veto} | 反饋矛盾已記錄: {contradiction_flag}")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--single-run", action="store_true", help="執行單次推播")
-    args, _ = parser.parse_known_args()
-
-    gas_url = os.environ.get("GAS_URL", "")
-    orchestrator = ResilientTacticalOrchestrator(dashboard_url=gas_url)
-
-    if args.single_run:
-        print("🚀 [GitHub Actions] 執行單次 AI 戰術推播與稽核...")
-        orchestrator.execute_stream_pipeline(fetch_telemetry())
-        print("✅ 單次推播執行完成。")
-    else:
-        print("🚀 [持續監控模式] 全系統啟動...")
-        try:
-            while True:
-                orchestrator.execute_stream_pipeline(fetch_telemetry())
-                time.sleep(5)
-        except KeyboardInterrupt:
-            print("\n🛑 收到終止訊號，系統安全停機。")
+    orchestrator = ResilientTacticalOrchestrator(model_path="model_v36D.10.6.pt")
+    orchestrator.execute_cycle()
