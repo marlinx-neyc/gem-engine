@@ -3,33 +3,39 @@ name: GEM Engine Autonomous Cron Workflow
 on:
   workflow_dispatch:
   schedule:
-    - cron: '*/5 * * * *'  # 每 5 分鐘自動執行一次解算
+    - cron: '0 */4 * * *'
 
 jobs:
-  run-pipeline:
+  run-engine:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write  # 賦予寫入權限以 commit latest_decision.json
 
     steps:
-      - name: 檢出最新程式碼
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: 配置 Python 3.10 環境
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: 安裝必要 AI 與海象計算套件
+      - name: Install dependencies
         run: |
-          pip install pydantic torch numpy gymnasium requests
+          python -m pip install --upgrade pip
+          pip install torch numpy pydantic
 
-      - name: 執行中央協調器產出 latest_decision.json
+      - name: Run Single Execution
         run: |
           python main_orchestrator.py --single-run
-- name: Commit 並 Push latest_decision.json 回 GitHub
-      run: |
-        git config --local user.email "github-actions[bot]@users.noreply.github.com"
-        git config --local user.name "github-actions[bot]"
-        git add latest_decision.json
-        git diff --quiet && git diff --staged --quiet || (git commit -m "chore: auto update latest_decision.json [skip ci]" && git pull origin main --rebase && git push)
+
+      - name: Commit and Push latest_decision.json
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add latest_decision.json
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: auto update latest_decision.json [skip ci]"
+            git pull origin main --rebase
+            git push origin main
+          else
+            echo "No changes to commit"
+          fi
