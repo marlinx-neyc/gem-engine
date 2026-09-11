@@ -8,25 +8,25 @@
     "ground_truth_accuracy": 99.2,
     "network_latency_ms": 0,
     "learning_iteration": 11,
-    "timestamp": "2026-09-12 03:03:58 CST"
+    "timestamp": "2026-09-12 06:21:31 CST"
   },
   "tactical_decision": {
     "q_mode": "🔴 Q4 嚴禁靠泊 (全線封島 48H)",
     "dispatch_status": "NO_DISPATCH",
     "reward_score": 100.0,
     "veto_pass": false,
-    "reason": "Hs_pier (3.71m > 1.20m) 及 W_local (12.56m/s > 10.80m/s) 觸發剛性 VETO"
+    "reason": "Hs_pier (2.98m > 1.20m) 及 W_local (12.23m/s > 10.80m/s) 觸發剛性 VETO"
   },
   "dialectical_attention": {
-    "micro_physics_weight": 0.4527,
-    "macro_qimen_weight": 0.5473,
+    "micro_physics_weight": 0.4693,
+    "macro_qimen_weight": 0.5307,
     "micro_prediction": "Q3",
-    "macro_prediction": "Q2"
+    "macro_prediction": "Q1"
   },
   "physics_metrics": {
-    "hs_pier_m": 3.71,
-    "w_local_ms": 12.56,
-    "ukc_m": 5.69,
+    "hs_pier_m": 2.98,
+    "w_local_ms": 12.23,
+    "ukc_m": 6.06,
     "fb_pier_m": 0.7,
     "has_veto": true,
     "reason": "物理門檻超標",
@@ -34,19 +34,19 @@
   },
   "veto_matrix": {
     "hs_pier": {
-      "val": 3.71,
+      "val": 2.98,
       "limit": 1.2,
       "status": "VETO_TRIGGERED",
       "unit": "m"
     },
     "w_local": {
-      "val": 12.56,
+      "val": 12.23,
       "limit": 10.8,
       "status": "VETO_TRIGGERED",
       "unit": "m/s"
     },
     "ukc": {
-      "val": 5.69,
+      "val": 6.06,
       "limit": 1.5,
       "status": "PASS",
       "unit": "m"
@@ -70,6 +70,6 @@
   },
   "rl_feedback_status": {
     "has_contradiction": true,
-    "raw_rl_prediction": "Q3"
+    "raw_rl_prediction": "Q2"
   }
 }
