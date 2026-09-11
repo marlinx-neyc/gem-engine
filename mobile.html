@@ -1,10 +1,10 @@
-<!-- mobile.html - 手機端 100% 輕量卡片流版 (完整補齊營運航班時段) -->
+<!-- mobile.html - 手機端 100% 輕量卡片流版 (文字顏色對比優化版) -->
 <style>
   .mobile-container {
     width: 100%; min-height: 100vh; background-color: #0b1120; color: #f8fafc;
     padding: 12px; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
-  .card-mob { background: #1e293b; border-radius: 8px; padding: 12px; border: 1px solid #334155; margin-bottom: 10px; }
+  .card-mob { background: #1e293b; border-radius: 8px; padding: 12px; border: 1px solid #334155; margin-bottom: 10px; color: #f8fafc; }
   .banner-mob {
     border: 2px solid #ef4444; background: rgba(239, 68, 68, 0.2); color: #fca5a5;
     padding: 10px; border-radius: 6px; font-weight: bold; margin-bottom: 10px; font-size: 13px; line-height: 1.4;
@@ -14,10 +14,11 @@
   .item-box { background: #0f172a; padding: 8px; border-radius: 6px; border: 1px solid #334155; }
   .badge-veto-m { background: #ef4444; color: #fff; padding: 1px 5px; border-radius: 3px; font-size: 10px; font-weight: bold; }
   .badge-pass-m { background: #10b981; color: #fff; padding: 1px 5px; border-radius: 3px; font-size: 10px; font-weight: bold; }
-  .table-full { width: 100%; border-collapse: collapse; font-size: 11px; }
-  .table-full th, .table-full td { padding: 4px 2px; text-align: left; }
   
-  /* 藍色心跳燈動畫 */
+  .table-full { width: 100%; border-collapse: collapse; font-size: 11px; color: #cbd5e1; }
+  .table-full th { color: #94a3b8; font-weight: bold; }
+  .table-full td { padding: 4px 2px; text-align: left; color: #cbd5e1; }
+  
   .live-dot-blue {
     display: inline-block; width: 8px; height: 8px; background-color: #3b82f6; border-radius: 50%;
     margin-right: 6px; box-shadow: 0 0 8px #3b82f6; animation: pulseBlue 1.5s infinite;
@@ -63,7 +64,7 @@
     </div>
   </div>
 
-  <!-- 3. 今日營運航班時段檢核 (獨立卡片補齊) -->
+  <!-- 3. 今日營運航班時段檢核 -->
   <div class="card-mob">
     <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">今日營運時段檢核 (6~9月規範)</strong>
     <div class="grid-2" style="font-size:11px; color:#cbd5e1; line-height:1.6;">
@@ -90,8 +91,8 @@
   <div class="card-mob">
     <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:4px;">戰略三方案評估 (Ground Truth)</strong>
     <table class="table-full" style="font-size:10px; margin-bottom:6px;">
-      <tr style="border-bottom:1px solid #334155;"><td>A (官方)</td><td>85%</td><td style="color:#fca5a5;">30%</td><td>拒絕</td></tr>
-      <tr style="border-bottom:1px solid #334155;"><td>B (監測)</td><td>60%</td><td style="color:#fca5a5;">40%</td><td>拒絕</td></tr>
+      <tr style="border-bottom:1px solid #334155;"><td style="color:#cbd5e1;">A (官方)</td><td style="color:#cbd5e1;">85%</td><td style="color:#fca5a5;">30%</td><td style="color:#cbd5e1;">拒絕</td></tr>
+      <tr style="border-bottom:1px solid #334155;"><td style="color:#cbd5e1;">B (監測)</td><td style="color:#cbd5e1;">60%</td><td style="color:#fca5a5;">40%</td><td style="color:#cbd5e1;">拒絕</td></tr>
       <tr><td style="font-weight:bold; color:#facc15;">C (GEM)</td><td style="color:#10b981;">99%</td><td style="color:#10b981;">0.8%</td><td style="color:#10b981; font-weight:bold;">採納</td></tr>
     </table>
     <div style="border-top: 1px dashed #334155; padding-top: 6px; font-size: 10px; color: #94a3b8; line-height: 1.4;">
@@ -165,14 +166,12 @@
     if (sec > 30) document.getElementById('staleAlertMob').style.display = 'block';
   }, 1000);
 
-  // 讀取 GitHub Pages 同目錄下的 latest_decision.json 數據
   async function fetchSSOTData() {
     try {
       const response = await fetch('./latest_decision.json?t=' + new Date().getTime());
       if (!response.ok) throw new Error("HTTP " + response.status);
       const data = await response.json();
       
-      // 觸發 mobile 介面刷新
       if (typeof window.onSSOTDataReceived === "function") {
         window.onSSOTDataReceived(data);
       }
@@ -181,7 +180,6 @@
     }
   }
 
-  // 網頁載入後立即執行，並每 3 秒自動輪詢一次
   document.addEventListener("DOMContentLoaded", () => {
     fetchSSOTData();
     setInterval(fetchSSOTData, 3000);
