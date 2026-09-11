@@ -1,4 +1,4 @@
-<!-- desktop.html - 桌面端 32%/68% 戰術控制台 (補齊藍色心跳燈與宏觀預判) -->
+<!-- desktop.html - 桌面端 32%/68% 戰術控制台 (文字顏色對比優化版) -->
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 <style>
   .desktop-container {
@@ -10,7 +10,7 @@
     width: 68%; padding: 12px; box-sizing: border-box; display: grid;
     grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 12px; height: 100vh;
   }
-  .card-desk { background: #1e293b; border-radius: 8px; padding: 10px 12px; border: 1px solid #334155; margin-bottom: 8px; }
+  .card-desk { background: #1e293b; border-radius: 8px; padding: 10px 12px; border: 1px solid #334155; margin-bottom: 8px; color: #f8fafc; }
   .card-chart { background: #1e293b; border-radius: 8px; padding: 10px; border: 1px solid #334155; position: relative; overflow: hidden; display: flex; flex-direction: column; }
   .banner-veto-desk {
     border: 2px solid #ef4444; background: rgba(239, 68, 68, 0.15); color: #fca5a5;
@@ -27,8 +27,11 @@
   .scheme-tag { font-size: 10px; padding: 1px 5px; border-radius: 3px; font-weight: bold; }
   .scheme-adopted { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
   .scheme-rejected { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid #ef4444; }
-  .table-full { width: 100%; border-collapse: collapse; font-size: 11px; }
-  .table-full th, .table-full td { padding: 4px 2px; text-align: left; }
+  
+  /* 全局表格與文字顏色優化 */
+  .table-full { width: 100%; border-collapse: collapse; font-size: 11px; color: #cbd5e1; }
+  .table-full th { color: #94a3b8; font-weight: bold; }
+  .table-full td { padding: 4px 2px; text-align: left; color: #cbd5e1; }
   
   /* 藍色心跳燈動畫 */
   .live-dot-blue {
@@ -58,22 +61,22 @@
       </div>
       <table class="table-full">
         <thead>
-          <tr style="border-bottom: 1px solid #334155; color: #94a3b8;">
+          <tr style="border-bottom: 1px solid #334155;">
             <th>算子</th><th style="text-align:right;">門檻</th><th style="text-align:right;">實測</th><th style="text-align:center;">狀態</th>
           </tr>
         </thead>
         <tbody>
           <tr style="border-bottom: 1px solid #1e293b;">
-            <td>Hs_pier</td><td style="text-align:right; color:#94a3b8;">&lt;= 1.20m</td><td style="text-align:right;" id="val_hs" class="metric-val">3.23m</td><td style="text-align:center;" id="stat_hs"><span class="badge-veto">VETO</span></td>
+            <td style="color:#f8fafc;">Hs_pier</td><td style="text-align:right; color:#94a3b8;">&lt;= 1.20m</td><td style="text-align:right;" id="val_hs" class="metric-val">3.23m</td><td style="text-align:center;" id="stat_hs"><span class="badge-veto">VETO</span></td>
           </tr>
           <tr style="border-bottom: 1px solid #1e293b;">
-            <td>W_local</td><td style="text-align:right; color:#94a3b8;">&lt;= 10.80m/s</td><td style="text-align:right;" id="val_w" class="metric-val">13.50m/s</td><td style="text-align:center;" id="stat_w"><span class="badge-veto">VETO</span></td>
+            <td style="color:#f8fafc;">W_local</td><td style="text-align:right; color:#94a3b8;">&lt;= 10.80m/s</td><td style="text-align:right;" id="val_w" class="metric-val">13.50m/s</td><td style="text-align:center;" id="stat_w"><span class="badge-veto">VETO</span></td>
           </tr>
           <tr style="border-bottom: 1px solid #1e293b;">
-            <td>UKC</td><td style="text-align:right; color:#94a3b8;">&gt;= 1.50m</td><td style="text-align:right;" id="val_ukc" class="metric-val">1.00m</td><td style="text-align:center;" id="stat_ukc"><span class="badge-veto">VETO</span></td>
+            <td style="color:#f8fafc;">UKC</td><td style="text-align:right; color:#94a3b8;">&gt;= 1.50m</td><td style="text-align:right;" id="val_ukc" class="metric-val">1.00m</td><td style="text-align:center;" id="stat_ukc"><span class="badge-veto">VETO</span></td>
           </tr>
           <tr>
-            <td>FB_pier</td><td style="text-align:right; color:#94a3b8;">&gt;= 0.50m</td><td style="text-align:right;" id="val_fb" class="metric-val">0.15m</td><td style="text-align:center;" id="stat_fb"><span class="badge-veto">VETO</span></td>
+            <td style="color:#f8fafc;">FB_pier</td><td style="text-align:right; color:#94a3b8;">&gt;= 0.50m</td><td style="text-align:right;" id="val_fb" class="metric-val">0.15m</td><td style="text-align:center;" id="stat_fb"><span class="badge-veto">VETO</span></td>
           </tr>
         </tbody>
       </table>
@@ -114,16 +117,16 @@
       <strong style="color: #38bdf8; font-size: 12px; display:block; margin-bottom:4px;">戰略三方案評估 (Ground Truth)</strong>
       <table class="table-full" style="font-size:10px; margin-bottom: 6px;">
         <thead>
-          <tr style="border-bottom:1px solid #334155; color:#94a3b8;">
+          <tr style="border-bottom:1px solid #334155;">
             <th>方案</th><th>覆蓋</th><th>誤判</th><th>評分</th><th>結論</th>
           </tr>
         </thead>
         <tbody>
           <tr style="border-bottom:1px solid #1e293b;">
-            <td>A (官方預報)</td><td>85%</td><td style="color:#fca5a5;">30%</td><td>10分</td><td><span class="scheme-tag scheme-rejected">拒絕</span></td>
+            <td style="color:#cbd5e1;">A (官方預報)</td><td style="color:#cbd5e1;">85%</td><td style="color:#fca5a5;">30%</td><td style="color:#cbd5e1;">10分</td><td><span class="scheme-tag scheme-rejected">拒絕</span></td>
           </tr>
           <tr style="border-bottom:1px solid #1e293b;">
-            <td>B (單點監測)</td><td>60%</td><td style="color:#fca5a5;">40%</td><td>45分</td><td><span class="scheme-tag scheme-rejected">拒絕</span></td>
+            <td style="color:#cbd5e1;">B (單點監測)</td><td style="color:#cbd5e1;">60%</td><td style="color:#fca5a5;">40%</td><td style="color:#cbd5e1;">45分</td><td><span class="scheme-tag scheme-rejected">拒絕</span></td>
           </tr>
           <tr>
             <td style="font-weight:bold; color:#facc15;">C (GEM 模型)</td><td style="color:#10b981;">99%</td><td style="color:#10b981;">0.8%</td><td style="color:#facc15; font-weight:bold;">100分</td><td><span class="scheme-tag scheme-adopted">採納</span></td>
@@ -135,7 +138,7 @@
       </div>
     </div>
 
-    <!-- 6. 氣旋預判與宏觀預測 (擴展太乙/奇門) -->
+    <!-- 6. 氣旋預判與宏觀預測 -->
     <div class="card-desk">
       <strong style="color: #f59e0b; font-size: 12px; display:block; margin-bottom:4px;">🌀 颱風氣旋與太乙/奇門宏觀預判</strong>
       <div style="font-size:10px; color:#cbd5e1; line-height:1.5;">
@@ -165,7 +168,6 @@
   let chartHs, chartWind, chartUkc, chartTp;
   let lastUpdateDesk = Date.now();
 
-  // 初始化動態日期與時間戳記
   function initDynamicDates() {
     const now = new Date();
     document.getElementById('deskTimestamp').innerText = now.toLocaleString('zh-TW', {hour12: false}) + ' CST';
@@ -311,18 +313,15 @@
 
   async function fetchSSOTData() {
     try {
-      // 抓取 GitHub Pages 根目錄下的 latest_decision.json (加時間戳記避快取)
       const response = await fetch('./latest_decision.json?t=' + new Date().getTime());
       if (!response.ok) throw new Error("HTTP Status: " + response.status);
       
       const data = await response.json();
       commCount++;
 
-      // 1. 更新頁面通訊次數
       const commEl = document.getElementById('deskCommCount');
       if (commEl) commEl.innerText = commCount;
 
-      // 2. 呼叫原本寫好的頁面渲染函數
       if (typeof window.onSSOTDataReceived === "function") {
         window.onSSOTDataReceived(data);
       }
@@ -331,7 +330,6 @@
     }
   }
 
-  // 網頁載入後立即執行，並每 3 秒自動輪詢一次
   document.addEventListener("DOMContentLoaded", () => {
     fetchSSOTData();
     setInterval(fetchSSOTData, 3000);
