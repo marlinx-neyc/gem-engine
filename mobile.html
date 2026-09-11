@@ -37,6 +37,8 @@
             border-radius: 50%; margin-right: 6px; box-shadow: 0 0 8px #3b82f6; animation: pulseBlue 1.5s infinite;
         }
         @keyframes pulseBlue { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
+        .nav-switch { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 8px 12px; background: #0f172a; border-radius: 6px; border: 1px solid #334155; font-size: 11px; }
+        .nav-switch a { color: #38bdf8; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -148,6 +150,12 @@
                 <span style="color:#facc15; font-weight:bold;">總結裁示：</span>官方預報易生 30% 假警報；GEM 模型以 0.8% 誤判率作為 Ground Truth。
             </div>
         </div>
+
+        <!-- 7. 裝置視角切換器 -->
+        <div class="nav-switch">
+            <span style="color:#94a3b8;">當前視角：📱 手機版控制台</span>
+            <a href="desktop.html">💻 切換至桌面版</a>
+        </div>
     </div>
 
     <script>
@@ -156,73 +164,89 @@
 
         function initMobileDates() {
             const now = new Date();
-            document.getElementById('mobileTimestamp').innerText = now.toLocaleString('zh-TW', {hour12: false}) + ' CST';
+            const tsEl = document.getElementById('mobileTimestamp');
+            if (tsEl) tsEl.innerText = now.toLocaleString('zh-TW', {hour12: false}) + ' CST';
             const fmt = (d) => `(${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')})`;
             const d1 = new Date(now); d1.setDate(d1.getDate() + 1);
             const d2 = new Date(now); d2.setDate(d2.getDate() + 2);
             const d3 = new Date(now); d3.setDate(d3.getDate() + 3);
-            document.getElementById('mob_d1').innerText = `(D+1, ${fmt(d1)})`;
-            document.getElementById('mob_d2').innerText = `(D+2, ${fmt(d2)})`;
-            document.getElementById('mob_d3').innerText = `(D+3, ${fmt(d3)})`;
+            const d1El = document.getElementById('mob_d1'); if(d1El) d1El.innerText = `(D+1, ${fmt(d1)})`;
+            const d2El = document.getElementById('mob_d2'); if(d2El) d2El.innerText = `(D+2, ${fmt(d2)})`;
+            const d3El = document.getElementById('mob_d3'); if(d3El) d3El.innerText = `(D+3, ${fmt(d3)})`;
         }
 
         window.onSSOTDataReceived = function(data) {
             if (!data) return;
             lastUpdateMob = Date.now();
             mobCommCounter++;
-            document.getElementById('mobCommCount').innerText = mobCommCounter;
-            document.getElementById('staleAlertMob').style.display = 'none';
+            const cntEl = document.getElementById('mobCommCount'); if(cntEl) cntEl.innerText = mobCommCounter;
+            const staleEl = document.getElementById('staleAlertMob'); if(staleEl) staleEl.style.display = 'none';
 
             let ts = data.timestamp || (new Date().toLocaleString('zh-TW', {hour12: false}) + ' CST');
-            document.getElementById('mobileTimestamp').innerText = ts;
+            const tsEl = document.getElementById('mobileTimestamp'); if(tsEl) tsEl.innerText = ts;
 
             let bannerEl = document.getElementById('vetoBannerMob');
-            if (data.decision_code === "Q4_DISASTER") {
-                bannerEl.style.background = "rgba(239, 68, 68, 0.9)";
-                bannerEl.style.color = "#ffffff";
-                bannerEl.innerText = "⚠️ " + (data.tier0_reason || "觸發 Tier-0 災難級別，全線強制封島！");
-            } else {
-                let isVeto = data.physics_metrics && data.physics_metrics.has_veto;
-                bannerEl.style.background = isVeto ? "rgba(239, 68, 68, 0.2)" : "rgba(16, 185, 129, 0.2)";
-                bannerEl.style.color = isVeto ? "#fca5a5" : "#6ee7b7";
-                let codeText = data.decision_code || (isVeto ? 'Q4' : 'Q1');
-                bannerEl.innerText = (isVeto ? "🔴 " : "🟢 ") + codeText + " 模式 - " + (isVeto ? '觸發 VETO 剛性封鎖' : '許可巡航靠泊');
+            if (bannerEl) {
+                if (data.decision_code === "Q4_DISASTER") {
+                    bannerEl.style.background = "rgba(239, 68, 68, 0.9)";
+                    bannerEl.style.color = "#ffffff";
+                    bannerEl.innerText = "⚠️ " + (data.tier0_reason || "觸發 Tier-0 災難級別，全線強制封島！");
+                } else {
+                    let isVeto = data.physics_metrics && data.physics_metrics.has_veto;
+                    bannerEl.style.background = isVeto ? "rgba(239, 68, 68, 0.2)" : "rgba(16, 185, 129, 0.2)";
+                    bannerEl.style.color = isVeto ? "#fca5a5" : "#6ee7b7";
+                    let codeText = data.decision_code || (isVeto ? 'Q4' : 'Q1');
+                    bannerEl.innerText = (isVeto ? "🔴 " : "🟢 ") + codeText + " 模式 - " + (isVeto ? '觸發 VETO 剛性封鎖' : '許可巡航靠泊');
+                }
             }
 
             if (data.physics_metrics) {
                 let p = data.physics_metrics;
-                document.getElementById('m_hs').innerText = (p.hs_pier_m !== undefined ? p.hs_pier_m : '-') + 'm';
-                document.getElementById('m_stat_hs').innerText = p.hs_pier_m > 1.20 ? 'VETO' : 'PASS';
-                document.getElementById('m_stat_hs').className = p.hs_pier_m > 1.20 ? 'badge-veto-m' : 'badge-pass-m';
+                const hsEl = document.getElementById('m_hs'); if(hsEl) hsEl.innerText = (p.hs_pier_m !== undefined ? p.hs_pier_m : '-') + 'm';
+                const shsEl = document.getElementById('m_stat_hs');
+                if(shsEl) {
+                    shsEl.innerText = p.hs_pier_m > 1.20 ? 'VETO' : 'PASS';
+                    shsEl.className = p.hs_pier_m > 1.20 ? 'badge-veto-m' : 'badge-pass-m';
+                }
 
-                document.getElementById('m_w').innerText = (p.w_local_ms !== undefined ? p.w_local_ms : '-') + 'm/s';
-                document.getElementById('m_stat_w').innerText = p.w_local_ms > 10.80 ? 'VETO' : 'PASS';
-                document.getElementById('m_stat_w').className = p.w_local_ms > 10.80 ? 'badge-veto-m' : 'badge-pass-m';
+                const wEl = document.getElementById('m_w'); if(wEl) wEl.innerText = (p.w_local_ms !== undefined ? p.w_local_ms : '-') + 'm/s';
+                const swEl = document.getElementById('m_stat_w');
+                if(swEl) {
+                    swEl.innerText = p.w_local_ms > 10.80 ? 'VETO' : 'PASS';
+                    swEl.className = p.w_local_ms > 10.80 ? 'badge-veto-m' : 'badge-pass-m';
+                }
 
-                document.getElementById('m_ukc').innerText = (p.ukc_m !== undefined ? p.ukc_m : '-') + 'm';
-                document.getElementById('m_stat_ukc').innerText = p.ukc_m < 1.50 ? 'VETO' : 'PASS';
-                document.getElementById('m_stat_ukc').className = p.ukc_m < 1.50 ? 'badge-veto-m' : 'badge-pass-m';
+                const ukcEl = document.getElementById('m_ukc'); if(ukcEl) ukcEl.innerText = (p.ukc_m !== undefined ? p.ukc_m : '-') + 'm';
+                const sukcEl = document.getElementById('m_stat_ukc');
+                if(sukcEl) {
+                    sukcEl.innerText = p.ukc_m < 1.50 ? 'VETO' : 'PASS';
+                    sukcEl.className = p.ukc_m < 1.50 ? 'badge-veto-m' : 'badge-pass-m';
+                }
 
-                document.getElementById('m_fb').innerText = (p.fb_pier_m !== undefined ? p.fb_pier_m : '-') + 'm';
-                document.getElementById('m_stat_fb').innerText = p.fb_pier_m < 0.50 ? 'VETO' : 'PASS';
-                document.getElementById('m_stat_fb').className = p.fb_pier_m < 0.50 ? 'badge-veto-m' : 'badge-pass-m';
+                const fbEl = document.getElementById('m_fb'); if(fbEl) fbEl.innerText = (p.fb_pier_m !== undefined ? p.fb_pier_m : '-') + 'm';
+                const sfbEl = document.getElementById('m_stat_fb');
+                if(sfbEl) {
+                    sfbEl.innerText = p.fb_pier_m < 0.50 ? 'VETO' : 'PASS';
+                    sfbEl.className = p.fb_pier_m < 0.50 ? 'badge-veto-m' : 'badge-pass-m';
+                }
             }
 
             if (data.pattern_match) {
-                document.getElementById('mob_match_cases').innerText = data.pattern_match.matched_cases + ' 筆';
-                document.getElementById('mob_prior_rate').innerText = ((data.pattern_match.historical_closure_rate || 0) * 100).toFixed(1) + '%';
+                const mcEl = document.getElementById('mob_match_cases'); if(mcEl) mcEl.innerText = data.pattern_match.matched_cases + ' 筆';
+                const prEl = document.getElementById('mob_prior_rate'); if(prEl) prEl.innerText = ((data.pattern_match.historical_closure_rate || 0) * 100).toFixed(1) + '%';
             }
 
             if (data.rl_feedback_status) {
-                document.getElementById('mob_rl_raw').innerText = data.rl_feedback_status.raw_rl_prediction || '-';
-                document.getElementById('mob_rl_conflict').innerHTML = data.rl_feedback_status.has_contradiction ? '<span style="color:#ef4444;">🚨 矛盾</span>' : '<span style="color:#10b981;">共識</span>';
+                const rlEl = document.getElementById('mob_rl_raw'); if(rlEl) rlEl.innerText = data.rl_feedback_status.raw_rl_prediction || '-';
+                const rlcEl = document.getElementById('mob_rl_conflict'); if(rlcEl) rlcEl.innerHTML = data.rl_feedback_status.has_contradiction ? '<span style="color:#ef4444;">🚨 矛盾</span>' : '<span style="color:#10b981;">共識</span>';
             }
         };
 
         setInterval(function() {
             const sec = Math.floor((Date.now() - lastUpdateMob) / 1000);
-            document.getElementById('mobSecAgo').innerText = '更新: ' + sec + ' 秒前';
-            if (sec > 30) document.getElementById('staleAlertMob').style.display = 'block';
+            const secEl = document.getElementById('mobSecAgo'); if(secEl) secEl.innerText = '更新: ' + sec + ' 秒前';
+            const staleEl = document.getElementById('staleAlertMob');
+            if (staleEl && sec > 30) staleEl.style.display = 'block';
         }, 1000);
 
         async function fetchSSOTData() {
