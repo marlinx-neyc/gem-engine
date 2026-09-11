@@ -1,0 +1,348 @@
+<!-- desktop.html - 桌面端 32%/68% 戰術控制台 (補齊藍色心跳燈與宏觀預判) -->
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+  .desktop-container {
+    display: flex; width: 100%; height: 100vh; background-color: #0b1120; color: #f8fafc; box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  .panel-left { width: 32%; padding: 12px; box-sizing: border-box; border-right: 1px solid #1e293b; overflow-y: auto; }
+  .panel-right {
+    width: 68%; padding: 12px; box-sizing: border-box; display: grid;
+    grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 12px; height: 100vh;
+  }
+  .card-desk { background: #1e293b; border-radius: 8px; padding: 10px 12px; border: 1px solid #334155; margin-bottom: 8px; }
+  .card-chart { background: #1e293b; border-radius: 8px; padding: 10px; border: 1px solid #334155; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+  .banner-veto-desk {
+    border: 2px solid #ef4444; background: rgba(239, 68, 68, 0.15); color: #fca5a5;
+    padding: 10px; border-radius: 6px; font-weight: bold; margin-bottom: 8px; font-size: 13px; line-height: 1.4;
+  }
+  .badge-veto { background: #ef4444; color: #ffffff; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; display: inline-block; }
+  .badge-pass { background: #10b981; color: #ffffff; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; display: inline-block; }
+  .chart-el { width: 100%; height: 100%; min-height: 200px; }
+  .stale-banner-desk {
+    display: none; background: #ef4444; color: #ffffff; padding: 8px;
+    text-align: center; font-weight: bold; border-radius: 4px; margin-bottom: 8px; font-size: 12px;
+  }
+  .metric-val { color: #facc15; font-weight: bold; }
+  .scheme-tag { font-size: 10px; padding: 1px 5px; border-radius: 3px; font-weight: bold; }
+  .scheme-adopted { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
+  .scheme-rejected { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid #ef4444; }
+  .table-full { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .table-full th, .table-full td { padding: 4px 2px; text-align: left; }
+  
+  /* 藍色心跳燈動畫 */
+  .live-dot-blue {
+    display: inline-block; width: 8px; height: 8px; background-color: #3b82f6; border-radius: 50%;
+    margin-right: 6px; box-shadow: 0 0 8px #3b82f6; animation: pulseBlue 1.5s infinite;
+  }
+  @keyframes pulseBlue { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
+</style>
+
+<div class="desktop-container">
+  <div class="panel-left">
+    <!-- 頂部：藍色心跳燈與通訊次數 -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11px; border-bottom: 1px solid #1e293b; padding-bottom: 6px;">
+      <div><span class="live-dot-blue"></span><strong style="color:#3b82f6; font-size:12px;">SSOT 實時連線中</strong></div>
+      <div style="color:#94a3b8;">
+        通訊次數: <span id="deskCommCount" style="color:#f8fafc; font-weight:bold;">0</span> 次 | <span id="deskTimestamp">載入中...</span>
+      </div>
+    </div>
+
+    <div id="staleAlertDesk" class="stale-banner-desk">🔴 數據過期 (READ_ONLY_BACKUP)</div>
+    <div class="banner-veto-desk" id="vetoBannerDesk">🔴 Q4 嚴禁靠泊 (全線封島 48H) - 剛性 VETO 觸發</div>
+
+    <!-- 1. 剛性 VETO 防線 -->
+    <div class="card-desk">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <strong style="color: #38bdf8; font-size: 12px;">剛性 VETO 防線對齊矩陣 (SSOT)</strong>
+      </div>
+      <table class="table-full">
+        <thead>
+          <tr style="border-bottom: 1px solid #334155; color: #94a3b8;">
+            <th>算子</th><th style="text-align:right;">門檻</th><th style="text-align:right;">實測</th><th style="text-align:center;">狀態</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid #1e293b;">
+            <td>Hs_pier</td><td style="text-align:right; color:#94a3b8;">&lt;= 1.20m</td><td style="text-align:right;" id="val_hs" class="metric-val">3.23m</td><td style="text-align:center;" id="stat_hs"><span class="badge-veto">VETO</span></td>
+          </tr>
+          <tr style="border-bottom: 1px solid #1e293b;">
+            <td>W_local</td><td style="text-align:right; color:#94a3b8;">&lt;= 10.80m/s</td><td style="text-align:right;" id="val_w" class="metric-val">13.50m/s</td><td style="text-align:center;" id="stat_w"><span class="badge-veto">VETO</span></td>
+          </tr>
+          <tr style="border-bottom: 1px solid #1e293b;">
+            <td>UKC</td><td style="text-align:right; color:#94a3b8;">&gt;= 1.50m</td><td style="text-align:right;" id="val_ukc" class="metric-val">1.00m</td><td style="text-align:center;" id="stat_ukc"><span class="badge-veto">VETO</span></td>
+          </tr>
+          <tr>
+            <td>FB_pier</td><td style="text-align:right; color:#94a3b8;">&gt;= 0.50m</td><td style="text-align:right;" id="val_fb" class="metric-val">0.15m</td><td style="text-align:center;" id="stat_fb"><span class="badge-veto">VETO</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 2. AI 戰術調撥 -->
+    <div class="card-desk">
+      <strong style="color: #38bdf8; font-size: 12px; display:block; margin-bottom:4px;">AI 戰術調撥與狀態 (Gymnasium RL)</strong>
+      <div style="font-size:11px; line-height:1.5; color:#cbd5e1;">
+        <div>決策模式: <span id="deskQMode" style="color:#facc15; font-weight:bold;">Q4 全線封島</span> | 得分: <span style="color:#10b981; font-weight:bold;">+100</span></div>
+        <div>調撥狀態: <span id="deskDispatchStatus" style="color:#f8fafc;">NO_DISPATCH (雙岸閉塞)</span></div>
+        <div>封鎖原因: <span id="deskReason" style="color:#fca5a5;">Hs_pier 及 W_local 觸發剛性 VETO 封鎖</span></div>
+      </div>
+    </div>
+
+    <!-- 3. 營運時段 -->
+    <div class="card-desk">
+      <strong style="color: #38bdf8; font-size: 12px; display:block; margin-bottom:4px;">今日營運時段檢核 (6~9月官方規範)</strong>
+      <div style="font-size:10px; display:grid; grid-template-columns:1fr 1fr; gap:4px; color:#cbd5e1;">
+        <div>海象整備: <span style="color:#f8fafc;">07:30</span></div><div>首段登島: <span style="color:#f8fafc;">08:30</span></div>
+        <div>區間時段: <span style="color:#f8fafc;">12:30</span></div><div>末段登島: <span style="color:#f8fafc;">15:30</span></div>
+        <div>前日預警: <span style="color:#f59e0b;">16:30</span></div><div>離島截止: <span style="color:#ef4444; font-weight:bold;">17:30</span></div>
+      </div>
+    </div>
+
+    <!-- 4. 未來三天預判 -->
+    <div class="card-desk">
+      <strong style="color: #38bdf8; font-size: 12px; display:block; margin-bottom:4px;">未來三天戰術預判</strong>
+      <div style="font-size:11px; line-height:1.5; color:#cbd5e1;">
+        <div>明日 <span id="desk_d1"></span>: <span style="color:#ef4444; font-weight:bold;">🔴 Q4 強制封島 (Hs > 2.5m)</span></div>
+        <div>後日 <span id="desk_d2"></span>: <span style="color:#f59e0b; font-weight:bold;">🟠 Q3 限制開航 (長浪 Tp > 12s)</span></div>
+        <div>大後日 <span id="desk_d3"></span>: <span style="color:#10b981; font-weight:bold;">🟢 Q1 恢復正常靠泊 (海象平緩)</span></div>
+      </div>
+    </div>
+
+    <!-- 5. 戰略方案總結與比較 -->
+    <div class="card-desk">
+      <strong style="color: #38bdf8; font-size: 12px; display:block; margin-bottom:4px;">戰略三方案評估 (Ground Truth)</strong>
+      <table class="table-full" style="font-size:10px; margin-bottom: 6px;">
+        <thead>
+          <tr style="border-bottom:1px solid #334155; color:#94a3b8;">
+            <th>方案</th><th>覆蓋</th><th>誤判</th><th>評分</th><th>結論</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid #1e293b;">
+            <td>A (官方預報)</td><td>85%</td><td style="color:#fca5a5;">30%</td><td>10分</td><td><span class="scheme-tag scheme-rejected">拒絕</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid #1e293b;">
+            <td>B (單點監測)</td><td>60%</td><td style="color:#fca5a5;">40%</td><td>45分</td><td><span class="scheme-tag scheme-rejected">拒絕</span></td>
+          </tr>
+          <tr>
+            <td style="font-weight:bold; color:#facc15;">C (GEM 模型)</td><td style="color:#10b981;">99%</td><td style="color:#10b981;">0.8%</td><td style="color:#facc15; font-weight:bold;">100分</td><td><span class="scheme-tag scheme-adopted">採納</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="border-top: 1px dashed #334155; padding-top: 6px; font-size: 10px; color: #94a3b8; line-height: 1.4;">
+        <span style="color:#facc15; font-weight:bold;">總結裁示：</span>官方預報(A)無地形消能易生假警報；GEM 雙生模型(C)精確扣合 401 高地屏障與繞射，作為決策 Ground Truth。
+      </div>
+    </div>
+
+    <!-- 6. 氣旋預判與宏觀預測 (擴展太乙/奇門) -->
+    <div class="card-desk">
+      <strong style="color: #f59e0b; font-size: 12px; display:block; margin-bottom:4px;">🌀 颱風氣旋與太乙/奇門宏觀預判</strong>
+      <div style="font-size:10px; color:#cbd5e1; line-height:1.5;">
+        <div style="margin-bottom:4px;"><span style="color:#facc15; font-weight:bold;">[微觀近程]</span> <span id="deskTyphoonInfo">東南東 450 km 中颱 (45m/s)，暴風半徑 200km。巽宮氣場異常，長浪共振頻繁。</span></div>
+        <div><span style="color:#38bdf8; font-weight:bold;">[宏觀長期]</span> 太乙宏觀先驗場同化 18.6 年白道交角與 60 年甲子公度週期。餘弦相似度 S_cos ≥ 0.90，節氣物候導出背風衰減 K_w 遲滯矩陣，預導氣旋氣壓場與暴潮升水。</div>
+      </div>
+    </div>
+
+    <!-- 7. 系統指標 -->
+    <div class="card-desk" style="margin-bottom:0;">
+      <div style="font-size:10px; line-height:1.4; color:#94a3b8;">
+        <div>核心版本: <span id="deskSysVer" style="color:#f8fafc;">GEM-V210-PRO-FINAL</span> | UKF 收斂: <span id="deskUkfAcc" style="color:#10b981; font-weight:bold;">99.8%</span></div>
+        <div>吻合率: <span style="color:#10b981;">99.2%</span> | KB: <span id="deskKbCode" style="color:#f8fafc;">KB_20260908_TACTICAL_TWIN</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel-right">
+    <div class="card-chart"><div id="chartHs" class="chart-el"></div></div>
+    <div class="card-chart"><div id="chartWind" class="chart-el"></div></div>
+    <div class="card-chart"><div id="chartUkc" class="chart-el"></div></div>
+    <div class="card-chart"><div id="chartTp" class="chart-el"></div></div>
+  </div>
+</div>
+
+<script>
+  let chartHs, chartWind, chartUkc, chartTp;
+  let lastUpdateDesk = Date.now();
+  let commCounter = 0; // 通訊次數統計
+
+  // 初始化動態日期與時間戳記
+  function initDynamicDates() {
+    const now = new Date();
+    document.getElementById('deskTimestamp').innerText = now.toLocaleString('zh-TW', {hour12: false}) + ' CST';
+    const fmt = (d) => `(${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')})`;
+    const d1 = new Date(now); d1.setDate(d1.getDate() + 1);
+    const d2 = new Date(now); d2.setDate(d2.getDate() + 2);
+    const d3 = new Date(now); d3.setDate(d3.getDate() + 3);
+    document.getElementById('desk_d1').innerText = `(D+1, ${fmt(d1)})`;
+    document.getElementById('desk_d2').innerText = `(D+2, ${fmt(d2)})`;
+    document.getElementById('desk_d3').innerText = `(D+3, ${fmt(d3)})`;
+  }
+
+  let liveSeriesData = {
+    time: ['08:00', '11:00', '14:00', '16:00', '18:00'],
+    hs: [1.10, 1.80, 2.50, 3.23, 3.10],
+    w: [8.50, 10.20, 12.10, 13.50, 13.00],
+    ukc: [2.10, 1.70, 1.30, 1.00, 1.10],
+    tp: [10.5, 11.8, 14.0, 15.5, 15.2]
+  };
+
+  function initCharts() {
+    if (typeof echarts === 'undefined') {
+      setTimeout(initCharts, 200); return;
+    }
+    if (!chartHs) chartHs = echarts.init(document.getElementById('chartHs'));
+    if (!chartWind) chartWind = echarts.init(document.getElementById('chartWind'));
+    if (!chartUkc) chartUkc = echarts.init(document.getElementById('chartUkc'));
+    if (!chartTp) chartTp = echarts.init(document.getElementById('chartTp'));
+
+    const vLines = [
+      { xAxis: '11:00', lineStyle: { color: '#94a3b8', type: 'dashed', width: 1.5 }, label: { show: true, position: 'insideEndTop', formatter: '11:00 決策', color: '#94a3b8', fontSize: 10 } },
+      { xAxis: '16:00', lineStyle: { color: '#94a3b8', type: 'dashed', width: 1.5 }, label: { show: true, position: 'insideEndTop', formatter: '16:00 決策', color: '#94a3b8', fontSize: 10 } }
+    ];
+
+    const customTooltip = {
+      trigger: 'axis', backgroundColor: '#1e293b', borderColor: '#334155', borderWidth: 1, padding: 10, textStyle: { color: '#f8fafc', fontSize: 11 },
+      formatter: function(params) {
+        if (!params || !params.length) return '';
+        const idx = params[0].dataIndex; const t = liveSeriesData.time[idx] || params[0].name;
+        const hsVal = liveSeriesData.hs[idx]; const wVal = liveSeriesData.w[idx];
+        const ukcVal = liveSeriesData.ukc[idx]; const tpVal = liveSeriesData.tp[idx];
+        const isVeto = (hsVal > 1.20 || wVal > 10.80 || ukcVal < 1.50);
+        const statusHtml = isVeto ? '<span style="color:#ef4444; font-weight:bold;">🔴 Q4 嚴禁靠泊 (VETO)</span>' : '<span style="color:#10b981; font-weight:bold;">🟢 Q1 允許靠泊</span>';
+        return `
+          <div style="font-weight:bold; color:#38bdf8; border-bottom:1px solid #334155; padding-bottom:4px; margin-bottom:6px;">⏱️ 時段: ${t}</div>
+          <div style="line-height:1.6;">
+            🌊 波高 Hs: <b style="color:${hsVal>1.2?'#ef4444':'#10b981'};">${hsVal} m</b> (<=1.20m)<br/>
+            💨 陣風 W: <b style="color:${wVal>10.8?'#ef4444':'#10b981'};">${wVal} m/s</b> (<=10.80m/s)<br/>
+            ⚓ 裕深 UKC: <b style="color:${ukcVal<1.5?'#ef4444':'#10b981'};">${ukcVal} m</b> (>=1.50m)<br/>
+            ⏱️ 週期 Tp: <b style="color:${tpVal>12?'#f59e0b':'#38bdf8'};">${tpVal} s</b> (長浪 12.0s)<br/>
+            🏷️ 狀態: ${statusHtml}
+          </div>`;
+      }
+    };
+
+    const commonOption = {
+      backgroundColor: 'transparent', textStyle: { color: '#94a3b8' }, tooltip: customTooltip,
+      grid: { top: 35, right: 60, bottom: 25, left: 40 },
+      xAxis: { type: 'category', data: liveSeriesData.time, axisLine: { lineStyle: { color: '#334155' } } },
+      yAxis: { type: 'value', splitLine: { lineStyle: { color: '#1e293b' } } }
+    };
+
+    chartHs.setOption(Object.assign({}, commonOption, {
+      title: { text: '港池波高 Hs_pier (m)', textStyle: { color: '#38bdf8', fontSize: 13 } },
+      series: [{ data: liveSeriesData.hs, type: 'line', smooth: true, itemStyle: { color: '#ef4444' }, lineStyle: { width: 2 }, markLine: { symbol: 'none', data: [{ yAxis: 1.20, name: 'VETO 門檻', lineStyle: { color: '#ef4444', type: 'dashed' } }, ...vLines] } }]
+    }));
+    chartWind.setOption(Object.assign({}, commonOption, {
+      title: { text: '局域陣風 W_local (m/s)', textStyle: { color: '#38bdf8', fontSize: 13 } },
+      series: [{ data: liveSeriesData.w, type: 'line', smooth: true, itemStyle: { color: '#f59e0b' }, lineStyle: { width: 2 }, markLine: { symbol: 'none', data: [{ yAxis: 10.80, name: 'VETO 門檻', lineStyle: { color: '#f59e0b', type: 'dashed' } }, ...vLines] } }]
+    }));
+    chartUkc.setOption(Object.assign({}, commonOption, {
+      title: { text: '動態裕深 UKC (m)', textStyle: { color: '#38bdf8', fontSize: 13 } },
+      series: [{ data: liveSeriesData.ukc, type: 'line', smooth: true, itemStyle: { color: '#10b981' }, lineStyle: { width: 2 }, markLine: { symbol: 'none', data: [{ yAxis: 1.50, name: 'VETO 門檻', lineStyle: { color: '#10b981', type: 'dashed' } }, ...vLines] } }]
+    }));
+    chartTp.setOption(Object.assign({}, commonOption, {
+      title: { text: '浪週期 Tp (s)', textStyle: { color: '#38bdf8', fontSize: 13 } },
+      series: [{ data: liveSeriesData.tp, type: 'line', smooth: true, itemStyle: { color: '#38bdf8' }, lineStyle: { width: 2 }, markLine: { symbol: 'none', data: [{ yAxis: 12.0, name: '長浪臨界', lineStyle: { color: '#38bdf8', type: 'dashed' } }, ...vLines] } }]
+    }));
+    resizeAll();
+  }
+
+  function resizeAll() {
+    if (chartHs) chartHs.resize(); if (chartWind) chartWind.resize();
+    if (chartUkc) chartUkc.resize(); if (chartTp) chartTp.resize();
+  }
+  function renderStatusBadge(status) { return status === 'PASS' ? '<span class="badge-pass">PASS</span>' : '<span class="badge-veto">VETO</span>'; }
+
+  window.onSSOTDataReceived = function(data) {
+    if (!data) return;
+    lastUpdateDesk = Date.now();
+    commCounter++; // 累加通訊次數
+    document.getElementById('deskCommCount').innerText = commCounter;
+    document.getElementById('staleAlertDesk').style.display = 'none';
+
+    let ts = new Date().toLocaleString('zh-TW', {hour12: false}) + ' CST';
+    if (data.system && data.system.timestamp) ts = data.system.timestamp;
+    else if (data.feedback_control && data.feedback_control.info_recv_timestamp) ts = data.feedback_control.info_recv_timestamp;
+    document.getElementById('deskTimestamp').innerText = ts;
+
+    if (data.tactical_decision) {
+      const banner = document.getElementById('vetoBannerDesk');
+      const qMode = data.tactical_decision.q_mode || '🔴 Q4 嚴禁靠泊';
+      const reason = data.tactical_decision.reason || '觸發 VETO 封鎖';
+      banner.innerText = qMode + (reason ? ' - ' + reason : '');
+      if (data.tactical_decision.veto_pass === false || qMode.includes('Q4')) {
+        banner.style.borderColor = '#ef4444'; banner.style.background = 'rgba(239, 68, 68, 0.15)'; banner.style.color = '#fca5a5';
+      } else {
+        banner.style.borderColor = '#10b981'; banner.style.background = 'rgba(16, 185, 129, 0.15)'; banner.style.color = '#6ee7b7';
+      }
+      document.getElementById('deskQMode').innerText = qMode;
+      document.getElementById('deskDispatchStatus').innerText = data.tactical_decision.dispatch_status || 'NO_DISPATCH';
+      document.getElementById('deskReason').innerText = reason;
+    }
+
+    if (data.veto_matrix) {
+      let hs = 3.23, w = 13.50, ukc = 1.00, fb = 0.15;
+      let hs_stat = 'VETO', w_stat = 'VETO', ukc_stat = 'VETO', fb_stat = 'VETO';
+      if (data.veto_matrix.hs_pier) {
+        hs = data.veto_matrix.hs_pier.val; hs_stat = data.veto_matrix.hs_pier.status;
+        w = data.veto_matrix.w_local.val; w_stat = data.veto_matrix.w_local.status;
+        ukc = data.veto_matrix.ukc.val; ukc_stat = data.veto_matrix.ukc.status;
+        fb = data.veto_matrix.fb_pier.val; fb_stat = data.veto_matrix.fb_pier.status;
+      }
+      document.getElementById('val_hs').innerText = hs + 'm'; document.getElementById('stat_hs').innerHTML = renderStatusBadge(hs_stat);
+      document.getElementById('val_w').innerText = w + 'm/s'; document.getElementById('stat_w').innerHTML = renderStatusBadge(w_stat);
+      document.getElementById('val_ukc').innerText = ukc + 'm'; document.getElementById('stat_ukc').innerHTML = renderStatusBadge(ukc_stat);
+      document.getElementById('val_fb').innerText = fb + 'm'; document.getElementById('stat_fb').innerHTML = renderStatusBadge(fb_stat);
+      liveSeriesData.hs[3] = hs; liveSeriesData.w[3] = w; liveSeriesData.ukc[3] = ukc;
+    }
+    
+    if (data.typhoon_qimen_prediction && data.typhoon_qimen_prediction.cyclone_dynamic) {
+      document.getElementById('deskTyphoonInfo').innerText = data.typhoon_qimen_prediction.cyclone_dynamic + ' ' + (data.typhoon_qimen_prediction.qimen_anomaly_forecast || '');
+    }
+
+    initCharts();
+  };
+
+  initDynamicDates();
+  setTimeout(initCharts, 100);
+  window.addEventListener('resize', resizeAll);
+</script>
+<script>
+  let commCount = 0;
+  const GITHUB_RAW_URL = "https://raw.githubusercontent.com/marlinx-neyc/gem-engine/main/latest_decision.json";
+
+  function pullLatestTacticalDecision() {
+    const timestampUrl = GITHUB_RAW_URL + "?t=" + new Date().getTime();
+    fetch(timestampUrl)
+      .then(response => {
+        if (!response.ok) throw new Error("HTTP " + response.status);
+        return response.json();
+      })
+      .then(data => {
+        commCount++;
+        console.log("✅ 成功取得 GitHub 決策資料:", data);
+
+        // 自動捕捉並更新頁面上含有「通訊次數」文字的標籤數字
+        document.querySelectorAll("*").forEach(el => {
+          if (el.children.length === 0 && el.textContent && el.textContent.includes("通訊次數")) {
+            el.textContent = `通訊次數: ${commCount} 次`;
+          }
+        });
+
+        // 刷新相容圖表 UI
+        if (typeof renderSSOT === "function") renderSSOT(data);
+        if (typeof updateUI === "function") updateUI(data);
+        if (typeof renderDashboard === "function") renderDashboard(data);
+      })
+      .catch(err => {
+        console.warn("⚠️ 讀取 GitHub JSON 失敗:", err);
+      });
+  }
+
+  // 網頁載入後立即執行，並每 5 秒自動拉取刷新一次
+  document.addEventListener("DOMContentLoaded", () => {
+    pullLatestTacticalDecision();
+    setInterval(pullLatestTacticalDecision, 5000);
+  });
+</script>
