@@ -30,14 +30,13 @@
 
         /* 剛性 32% / 68% 雙欄對齊 (Stretch 填滿不留空) */
         .layout-main { display: flex; gap: 12px; align-items: stretch; }
-        .left-col { width: 32%; flex-shrink: 0; display: flex; flex-direction: column; }
-        .right-col { width: 68%; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .left-col { width: 32%; flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; }
+        .right-col { width: 68%; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; gap: 10px; }
 
         .card-desk {
             background: #1e293b; border-radius: 8px; padding: 12px;
-            border: 1px solid #334155; margin-bottom: 10px;
+            border: 1px solid #334155;
         }
-        .left-col .card-desk:last-child { margin-bottom: 0; }
 
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .item-box { background: #0f172a; padding: 8px; border-radius: 6px; border: 1px solid #334155; }
@@ -47,15 +46,15 @@
         .table-full td, .table-full th { padding: 5px 3px; text-align: left; vertical-align: middle; }
         
         /* 2x2 ECharts 今日圖表矩陣 */
-        .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .chart-el {
-            width: 100%; height: 200px; min-height: 180px;
-            background: #1e293b; border-radius: 8px; border: 1px solid #334155; padding: 8px;
+            width: 100%; height: 210px;
+            background: #1e293b; border-radius: 8px; border: 1px solid #334155; padding: 6px;
         }
         /* 一週趨勢圖卡片專用高度 */
         .chart-weekly-el {
-            width: 100%; height: 210px; min-height: 190px;
-            background: #1e293b; border-radius: 8px; border: 1px solid #334155; padding: 8px;
+            width: 100%; height: 220px;
+            background: #1e293b; border-radius: 8px; border: 1px solid #334155; padding: 6px;
         }
 
         .live-dot-blue {
@@ -228,7 +227,7 @@
 
         <!-- 右側動態圖表陣列 (68% 主畫廊 - 填滿無空白) -->
         <div class="right-col">
-            <!-- 今日 24 小時 2x2 圖表 -->
+            <!-- 今日 24 小時 2x2 圖表矩陣 -->
             <div class="charts-grid">
                 <div id="chart_hs" class="chart-el"></div>
                 <div id="chart_w" class="chart-el"></div>
@@ -236,11 +235,11 @@
                 <div id="chart_tp" class="chart-el"></div>
             </div>
 
-            <!-- 填補空白專用：🌀 一週海氣象雙軸趨勢預判 (7-Day Hs & Wind Trend) -->
-            <div id="chart_weekly" class="chart-weekly-el" style="margin-bottom:10px;"></div>
+            <!-- 🌀 未來七天海氣象雙軸趨勢預判 (7-Day Hs & Wind Trend) -->
+            <div id="chart_weekly" class="chart-weekly-el"></div>
 
             <!-- 戰略三方案評估 (Ground Truth) -->
-            <div class="card-desk" style="margin-bottom:0;">
+            <div class="card-desk">
                 <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">戰略三方案評估 (Ground Truth)</strong>
                 <table class="table-full" style="margin-bottom:8px;">
                     <thead>
@@ -291,9 +290,77 @@
         let deskCommCounter = 0;
         let chartHs, chartW, chartUkc, chartTp, chartWeekly;
 
+        // 時段與一週海氣象資料庫映射 (對齊風、浪、流、汐、向量、燈號游標規範)
+        const timelineData = {
+            '06:00': { wind: '8.50 m/s', wave: '1.80 m', current: '0.25 m/s', tide: '1.20 m', vector: 'Δθ 25.0°', light: '🟢 Q1 允許靠泊' },
+            '08:00': { wind: '10.20 m/s', wave: '2.20 m', current: '0.31 m/s', tide: '2.10 m', vector: 'Δθ 35.0°', light: '🔴 Q4 嚴禁靠泊' },
+            '10:00': { wind: '12.10 m/s', wave: '2.90 m', current: '0.38 m/s', tide: '2.80 m', vector: 'Δθ 52.0°', light: '🔴 Q4 嚴禁靠泊' },
+            '11:00': { wind: '13.50 m/s', wave: '3.23 m', current: '0.42 m/s', tide: '3.05 m', vector: 'Δθ 67.5°', light: '🔴 Q4 嚴禁靠泊' },
+            '13:00': { wind: '13.00 m/s', wave: '3.10 m', current: '0.40 m/s', tide: '2.60 m', vector: 'Δθ 62.0°', light: '🔴 Q4 嚴禁靠泊' },
+            '15:00': { wind: '12.80 m/s', wave: '3.00 m', current: '0.36 m/s', tide: '2.20 m', vector: 'Δθ 58.0°', light: '🔴 Q4 嚴禁靠泊' },
+            '16:00': { wind: '13.20 m/s', wave: '3.20 m', current: '0.39 m/s', tide: '1.80 m', vector: 'Δθ 65.0°', light: '🔴 Q4 嚴禁靠泊' },
+            '18:00': { wind: '14.00 m/s', wave: '3.40 m', current: '0.45 m/s', tide: '1.10 m', vector: 'Δθ 70.0°', light: '🔴 Q4 嚴禁靠泊' }
+        };
+
+        // 游標懸浮 Tooltip 綜合資訊客製化渲染 (風、浪、流、汐、向量、判準燈號)
+        function getCustomTooltip(params) {
+            if (!params || !params.length) return '';
+            const itemKey = params[0].name;
+            const d = timelineData[itemKey] || {
+                wind: '13.50 m/s', wave: '3.23 m', current: '0.42 m/s', tide: '3.05 m', vector: 'Δθ 67.5°', light: '🔴 Q4 嚴禁靠泊'
+            };
+            return `
+                <div style="font-weight:bold; color:#38bdf8; border-bottom:1px solid #334155; padding-bottom:3px; margin-bottom:4px;">⏱️ 時段：${itemKey}</div>
+                <div style="font-size:11px; line-height:1.6; color:#cbd5e1;">
+                    💨 <b>風速 (Wind)：</b> <span style="color:#facc15;">${d.wind}</span><br>
+                    🌊 <b>波高 (Wave/Hs)：</b> <span style="color:#facc15;">${d.wave}</span><br>
+                    🌊 <b>海流 (Current)：</b> <span style="color:#38bdf8;">${d.current}</span><br>
+                    🌊 <b>潮位 (Tide)：</b> <span style="color:#38bdf8;">${d.tide}</span><br>
+                    🧭 <b>向量 (Vector)：</b> <span style="color:#cbd5e1;">${d.vector}</span><br>
+                    🚦 <b>判準燈號：</b> <span style="font-weight:bold;">${d.light}</span>
+                </div>
+            `;
+        }
+
+        // 未來七天圖表游標 Tooltip 綜合資訊渲染
+        function getWeeklyTooltip(params) {
+            if (!params || !params.length) return '';
+            const itemKey = params[0].name;
+            let hsVal = '3.23 m', wVal = '13.50 m/s';
+            params.forEach(p => {
+                if (p.seriesName.includes('Hs')) hsVal = p.value + ' m';
+                if (p.seriesName.includes('Wind')) wVal = p.value + ' m/s';
+            });
+            const isVeto = parseFloat(hsVal) > 1.20 || parseFloat(wVal) > 10.80;
+            return `
+                <div style="font-weight:bold; color:#f59e0b; border-bottom:1px solid #334155; padding-bottom:3px; margin-bottom:4px;">🌀 預測日期：${itemKey}</div>
+                <div style="font-size:11px; line-height:1.6; color:#cbd5e1;">
+                    💨 <b>風速 (Wind)：</b> <span style="color:#facc15;">${wVal}</span><br>
+                    🌊 <b>波高 (Wave/Hs)：</b> <span style="color:#facc15;">${hsVal}</span><br>
+                    🌊 <b>海流 (Current)：</b> <span style="color:#38bdf8;">0.42 m/s</span><br>
+                    🌊 <b>潮位 (Tide)：</b> <span style="color:#38bdf8;">3.05 m</span><br>
+                    🧭 <b>向量 (Vector)：</b> <span style="color:#cbd5e1;">Δθ 67.5°</span><br>
+                    🚦 <b>判準燈號：</b> <span style="font-weight:bold;">${isVeto ? '🔴 Q4 封島' : '🟢 Q1 放行'}</span>
+                </div>
+            `;
+        }
+
         function getFormattedCSTTime(d = new Date()) {
             const pad = (n) => String(n).padStart(2, '0');
             return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} CST`;
+        }
+
+        function get7FutureDays() {
+            const now = new Date();
+            const days = [];
+            const fmt = (d) => `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
+            const labels = ['今日', '明日', '後日', 'D+3', 'D+4', 'D+5', 'D+6'];
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(now);
+                d.setDate(d.getDate() + i);
+                days.push(`${labels[i]}(${fmt(d)})`);
+            }
+            return days;
         }
 
         function initDesktopDates() {
@@ -316,8 +383,9 @@
             chartHs = echarts.init(document.getElementById('chart_hs'));
             chartHs.setOption({
                 title: { text: 'Hs 港池有效波高 (m)', textStyle: { color: '#38bdf8', fontSize: 12 } },
-                tooltip: { trigger: 'axis' },
-                grid: { top: 35, bottom: 25, left: 35, right: 15 },
+                legend: { data: ['Hs 波高'], textStyle: { color: '#cbd5e1' }, right: 10, top: 0 },
+                tooltip: { trigger: 'axis', formatter: getCustomTooltip },
+                grid: { top: 30, bottom: 25, left: 35, right: 15 },
                 xAxis: { type: 'category', data: hours, axisLine: { lineStyle: { color: '#64748b' } } },
                 yAxis: { type: 'value', min: 0, max: 4, axisLine: { lineStyle: { color: '#64748b' } }, splitLine: { lineStyle: { color: '#334155' } } },
                 series: [{
@@ -326,7 +394,7 @@
                     markLine: {
                         symbol: 'none',
                         data: [
-                            { yAxis: 1.2, name: 'VETO 限值', lineStyle: { color: '#ef4444', type: 'dashed' } },
+                            { yAxis: 1.2, name: 'Hs 限值', lineStyle: { color: '#ef4444', type: 'dashed', width: 1.5 } },
                             { xAxis: '11:00', lineStyle: { color: '#94a3b8', type: 'dotted' } },
                             { xAxis: '16:00', lineStyle: { color: '#94a3b8', type: 'dotted' } }
                         ]
@@ -338,8 +406,9 @@
             chartW = echarts.init(document.getElementById('chart_w'));
             chartW.setOption({
                 title: { text: 'Wind 局域陣風 (m/s)', textStyle: { color: '#38bdf8', fontSize: 12 } },
-                tooltip: { trigger: 'axis' },
-                grid: { top: 35, bottom: 25, left: 35, right: 15 },
+                legend: { data: ['Wind 陣風'], textStyle: { color: '#cbd5e1' }, right: 10, top: 0 },
+                tooltip: { trigger: 'axis', formatter: getCustomTooltip },
+                grid: { top: 30, bottom: 25, left: 35, right: 15 },
                 xAxis: { type: 'category', data: hours, axisLine: { lineStyle: { color: '#64748b' } } },
                 yAxis: { type: 'value', min: 0, max: 20, axisLine: { lineStyle: { color: '#64748b' } }, splitLine: { lineStyle: { color: '#334155' } } },
                 series: [{
@@ -348,7 +417,7 @@
                     markLine: {
                         symbol: 'none',
                         data: [
-                            { yAxis: 10.8, name: 'VETO 限值', lineStyle: { color: '#ef4444', type: 'dashed' } },
+                            { yAxis: 10.8, name: 'Wind 限值', lineStyle: { color: '#f59e0b', type: 'dashed', width: 1.5 } },
                             { xAxis: '11:00', lineStyle: { color: '#94a3b8', type: 'dotted' } },
                             { xAxis: '16:00', lineStyle: { color: '#94a3b8', type: 'dotted' } }
                         ]
@@ -360,8 +429,9 @@
             chartUkc = echarts.init(document.getElementById('chart_ukc'));
             chartUkc.setOption({
                 title: { text: 'UKC 動態裕深 (m)', textStyle: { color: '#38bdf8', fontSize: 12 } },
-                tooltip: { trigger: 'axis' },
-                grid: { top: 35, bottom: 25, left: 35, right: 15 },
+                legend: { data: ['UKC 裕深'], textStyle: { color: '#cbd5e1' }, right: 10, top: 0 },
+                tooltip: { trigger: 'axis', formatter: getCustomTooltip },
+                grid: { top: 30, bottom: 25, left: 35, right: 15 },
                 xAxis: { type: 'category', data: hours, axisLine: { lineStyle: { color: '#64748b' } } },
                 yAxis: { type: 'value', min: 0, max: 4, axisLine: { lineStyle: { color: '#64748b' } }, splitLine: { lineStyle: { color: '#334155' } } },
                 series: [{
@@ -370,7 +440,7 @@
                     markLine: {
                         symbol: 'none',
                         data: [
-                            { yAxis: 1.5, name: 'VETO 限值', lineStyle: { color: '#ef4444', type: 'dashed' } },
+                            { yAxis: 1.5, name: 'UKC 限值', lineStyle: { color: '#10b981', type: 'dashed', width: 1.5 } },
                             { xAxis: '11:00', lineStyle: { color: '#94a3b8', type: 'dotted' } },
                             { xAxis: '16:00', lineStyle: { color: '#94a3b8', type: 'dotted' } }
                         ]
@@ -382,8 +452,9 @@
             chartTp = echarts.init(document.getElementById('chart_tp'));
             chartTp.setOption({
                 title: { text: 'Tp 浪週期 (s)', textStyle: { color: '#38bdf8', fontSize: 12 } },
-                tooltip: { trigger: 'axis' },
-                grid: { top: 35, bottom: 25, left: 35, right: 15 },
+                legend: { data: ['浪週期 Tp'], textStyle: { color: '#cbd5e1' }, right: 10, top: 0 },
+                tooltip: { trigger: 'axis', formatter: getCustomTooltip },
+                grid: { top: 30, bottom: 25, left: 35, right: 15 },
                 xAxis: { type: 'category', data: hours, axisLine: { lineStyle: { color: '#64748b' } } },
                 yAxis: { type: 'value', min: 5, max: 20, axisLine: { lineStyle: { color: '#64748b' } }, splitLine: { lineStyle: { color: '#334155' } } },
                 series: [{
@@ -392,7 +463,7 @@
                     markLine: {
                         symbol: 'none',
                         data: [
-                            { yAxis: 12.0, name: '長浪臨界', lineStyle: { color: '#ef4444', type: 'dashed' } },
+                            { yAxis: 12.0, name: '長浪臨界', lineStyle: { color: '#c084fc', type: 'dashed', width: 1.5 } },
                             { xAxis: '11:00', lineStyle: { color: '#94a3b8', type: 'dotted' } },
                             { xAxis: '16:00', lineStyle: { color: '#94a3b8', type: 'dotted' } }
                         ]
@@ -400,29 +471,29 @@
                 }]
             });
 
-            // 5. 🌀 一週海氣象雙軸趨勢預判 (7-Day Hs & Wind Trend)
-            const days = ['D-3', 'D-2', 'D-1', '今日(09/11)', '明日(09/12)', '後日(09/13)', '大後日(09/14)'];
+            // 5. 🌀 未來七天海氣象雙軸趨勢預判
+            const future7Days = get7FutureDays();
             chartWeekly = echarts.init(document.getElementById('chart_weekly'));
             chartWeekly.setOption({
-                title: { text: '🌀 一週海氣象雙軸趨勢預判 (Hs 波高 & Wind 陣風 7 天走勢)', textStyle: { color: '#f59e0b', fontSize: 12 } },
-                tooltip: { trigger: 'axis' },
-                legend: { data: ['Hs 波高 (m)', 'Wind 陣風 (m/s)'], textStyle: { color: '#cbd5e1' }, right: 10, top: 5 },
-                grid: { top: 40, bottom: 25, left: 40, right: 40 },
-                xAxis: { type: 'category', data: days, axisLine: { lineStyle: { color: '#64748b' } } },
+                title: { text: '🌀 未來七天海氣象雙軸趨勢預判 (Hs 波高 & Wind 陣風)', textStyle: { color: '#f59e0b', fontSize: 12 } },
+                tooltip: { trigger: 'axis', formatter: getWeeklyTooltip },
+                legend: { data: ['Hs 波高 (m)', 'Wind 陣風 (m/s)'], textStyle: { color: '#cbd5e1' }, right: 10, top: 0 },
+                grid: { top: 35, bottom: 25, left: 40, right: 40 },
+                xAxis: { type: 'category', data: future7Days, axisLine: { lineStyle: { color: '#64748b' } } },
                 yAxis: [
                     { type: 'value', name: 'Hs (m)', min: 0, max: 4, axisLine: { lineStyle: { color: '#ef4444' } }, splitLine: { lineStyle: { color: '#334155' } } },
                     { type: 'value', name: 'Wind (m/s)', min: 0, max: 20, axisLine: { lineStyle: { color: '#f59e0b' } }, splitLine: { show: false } }
                 ],
                 series: [
                     {
-                        name: 'Hs 波高 (m)', type: 'line', data: [1.1, 1.4, 2.3, 3.23, 2.8, 1.6, 0.9],
+                        name: 'Hs 波高 (m)', type: 'line', data: [3.23, 2.8, 1.6, 0.9, 0.8, 1.1, 1.3],
                         smooth: true, itemStyle: { color: '#ef4444' },
-                        markLine: { symbol: 'none', data: [{ yAxis: 1.2, name: 'Hs 1.2m VETO', lineStyle: { color: '#ef4444', type: 'dashed' } }] }
+                        markLine: { symbol: 'none', data: [{ yAxis: 1.2, name: 'Hs VETO (1.2m)', lineStyle: { color: '#ef4444', type: 'dashed', width: 1.5 } }] }
                     },
                     {
-                        name: 'Wind 陣風 (m/s)', type: 'line', yAxisIndex: 1, data: [7.2, 9.1, 11.5, 13.5, 12.0, 9.8, 6.5],
+                        name: 'Wind 陣風 (m/s)', type: 'line', yAxisIndex: 1, data: [13.5, 12.0, 9.8, 6.5, 5.8, 7.5, 8.2],
                         smooth: true, itemStyle: { color: '#f59e0b' },
-                        markLine: { symbol: 'none', data: [{ yAxis: 10.8, name: 'Wind 10.8m/s VETO', lineStyle: { color: '#f59e0b', type: 'dashed' } }] }
+                        markLine: { symbol: 'none', data: [{ yAxis: 10.8, name: 'Wind VETO (10.8m/s)', lineStyle: { color: '#f59e0b', type: 'dashed', width: 1.5 } }] }
                     }
                 ]
             });
