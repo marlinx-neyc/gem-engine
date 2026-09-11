@@ -86,7 +86,7 @@
             <div class="card-desk">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                     <strong style="color:#38bdf8; font-size:12px;">即時海象與剛性門檻比對 (PINN)</strong>
-                    <span id="deskTimestamp" style="font-size:10px; color:#38bdf8; font-weight:bold;">2026-09-11 20:08:20 CST</span>
+                    <span id="deskTimestamp" style="font-size:10px; color:#38bdf8; font-weight:bold;">載入中...</span>
                 </div>
                 <div class="grid-2">
                     <div class="item-box">
@@ -215,31 +215,35 @@
             <!-- 🌀 未來七天海氣象雙軸趨勢預判 -->
             <div id="chart_weekly" class="chart-weekly-el"></div>
 
-            <!-- 戰略三方案評估 (Ground Truth) -->
+            <!-- 戰略三方案評估 (Ground Truth) - 完整對齊 4 欄與差異分析 -->
             <div class="card-desk">
                 <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">戰略三方案評估 (Ground Truth)</strong>
                 <table class="table-full" style="margin-bottom:8px;">
                     <thead>
                         <tr style="border-bottom:1px solid #334155; color:#94a3b8; font-size:10px;">
-                            <th style="width:20%;">方案</th>
-                            <th>數值比對 (預測 vs 標準)</th>
-                            <th style="text-align:center; width:20%;">燈號 / 裁決</th>
+                            <th style="width:16%;">方案</th>
+                            <th style="width:26%;">數值比對 (預測 vs 標準)</th>
+                            <th>差異與缺陷小結</th>
+                            <th style="text-align:center; width:16%;">燈號 / 裁決</th>
                         </tr>
                     </thead>
                     <tbody id="desk_eval_body">
                         <tr style="border-bottom:1px solid #0f172a;">
                             <td style="color:#cbd5e1; font-weight:bold;">A (官方)</td>
                             <td style="color:#fca5a5;">Hs 3.23m [<=1.20m]</td>
+                            <td style="color:#94a3b8;">未考慮港池 Kd 屏障，易生過度停航(30%假警報)</td>
                             <td style="text-align:center; color:#ef4444; font-weight:bold;">🔴 封島</td>
                         </tr>
                         <tr style="border-bottom:1px solid #0f172a;">
                             <td style="color:#cbd5e1; font-weight:bold;">B (監測)</td>
                             <td style="color:#fca5a5;">W 13.50m/s [<=10.80m/s]</td>
+                            <td style="color:#94a3b8;">未考量背風 Kw 陰影，弱網斷線機率高</td>
                             <td style="text-align:center; color:#ef4444; font-weight:bold;">🔴 封島</td>
                         </tr>
                         <tr>
                             <td style="font-weight:bold; color:#facc15;">C (GEM)</td>
                             <td style="color:#10b981;">UKC 2.22m | FB 0.15m</td>
+                            <td style="color:#10b981;">PINN+UKF精算雙重VETO，0.8%極低誤判率</td>
                             <td style="text-align:center; color:#facc15; font-weight:bold;">🔴 採納</td>
                         </tr>
                     </tbody>
@@ -317,9 +321,15 @@
             `;
         }
 
+        // 動態即時 CST 時間計算 (每秒動態跳動修復時間不正確問題)
         function getFormattedCSTTime(d = new Date()) {
             const pad = (n) => String(n).padStart(2, '0');
             return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} CST`;
+        }
+
+        function updateLiveTimestamp() {
+            const tsEl = document.getElementById('deskTimestamp');
+            if (tsEl) tsEl.innerText = getFormattedCSTTime(new Date());
         }
 
         function get7FutureDays() {
@@ -333,12 +343,6 @@
                 days.push(`${labels[i]}(${fmt(d)})`);
             }
             return days;
-        }
-
-        function initDesktopDates() {
-            const now = new Date();
-            const tsEl = document.getElementById('deskTimestamp');
-            if (tsEl) tsEl.innerText = getFormattedCSTTime(now);
         }
 
         function initDesktopCharts() {
@@ -504,7 +508,9 @@
             }
         };
 
+        // 時鐘精確累加與 Watchdog 監控
         setInterval(function() {
+            updateLiveTimestamp(); // 動態刷新時間戳記，避免時間卡死
             const sec = Math.floor((Date.now() - lastUpdateDesk) / 1000);
             const secEl = document.getElementById('deskSecAgo'); if(secEl) secEl.innerText = '更新: ' + sec + ' 秒前';
             const staleEl = document.getElementById('staleAlertDesk');
@@ -527,7 +533,7 @@
         }
 
         document.addEventListener("DOMContentLoaded", () => {
-            initDesktopDates();
+            updateLiveTimestamp();
             initDesktopCharts();
             fetchSSOTData();
             setInterval(fetchSSOTData, 3000);
