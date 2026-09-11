@@ -27,15 +27,18 @@
             display: none; background: #ef4444; color: #ffffff; padding: 8px;
             text-align: center; font-weight: bold; border-radius: 6px; margin-bottom: 10px; font-size: 12px;
         }
-        /* 剛性 32% / 68% 雙欄切割 */
-        .layout-main { display: flex; gap: 12px; }
-        .left-col { width: 32%; flex-shrink: 0; }
-        .right-col { width: 68%; flex-grow: 1; }
+
+        /* 剛性 32% / 68% 雙欄切割與 Stretch 對齊 */
+        .layout-main { display: flex; gap: 12px; align-items: stretch; }
+        .left-col { width: 32%; flex-shrink: 0; display: flex; flex-direction: column; }
+        .right-col { width: 68%; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
 
         .card-desk {
             background: #1e293b; border-radius: 8px; padding: 12px;
             border: 1px solid #334155; margin-bottom: 10px;
         }
+        .left-col .card-desk:last-child { margin-bottom: 0; }
+
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .item-box { background: #0f172a; padding: 8px; border-radius: 6px; border: 1px solid #334155; }
         .badge-veto { background: #ef4444; color: #fff; padding: 2px 5px; border-radius: 3px; font-size: 10px; font-weight: bold; }
@@ -43,11 +46,11 @@
         .table-full { width: 100%; border-collapse: collapse; font-size: 11px; color: #cbd5e1; }
         .table-full td, .table-full th { padding: 5px 3px; text-align: left; vertical-align: middle; }
         
-        /* 2x2 ECharts 畫廊樣式 */
-        .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        /* 2x2 ECharts 畫廊最佳化尺寸 */
+        .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
         .chart-el {
-            width: 100%; height: 215px; min-height: 180px;
-            background: #1e293b; border-radius: 8px; border: 1px solid #334155; padding: 6px;
+            width: 100%; height: 310px; min-height: 250px;
+            background: #1e293b; border-radius: 8px; border: 1px solid #334155; padding: 8px;
         }
 
         .live-dot-blue {
@@ -218,7 +221,7 @@
             </div>
         </div>
 
-        <!-- 右側動態圖表陣列 (68% 主畫廊 - 2x2 ECharts 矩陣) -->
+        <!-- 右側動態圖表陣列 (68% 主畫廊 - 齊平填滿) -->
         <div class="right-col">
             <div class="charts-grid">
                 <div id="chart_hs" class="chart-el"></div>
@@ -228,7 +231,7 @@
             </div>
 
             <!-- 戰略三方案評估 (Ground Truth) -->
-            <div class="card-desk" style="margin-top:10px;">
+            <div class="card-desk" style="margin-bottom:0;">
                 <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">戰略三方案評估 (Ground Truth)</strong>
                 <table class="table-full" style="margin-bottom:8px;">
                     <thead>
@@ -397,7 +400,6 @@
             deskCommCounter++;
             const cntEl = document.getElementById('deskCommCount'); if(cntEl) cntEl.innerText = deskCommCounter;
 
-            // 清除/隱藏數據過期警示
             const staleEl = document.getElementById('staleAlertDesk'); if(staleEl) staleEl.style.display = 'none';
 
             let ts = (data.system && data.system.timestamp) || data.timestamp || getFormattedCSTTime();
@@ -431,7 +433,6 @@
             }
         };
 
-        // 每秒進行 Timer 累加與 30 秒數據超時 Watchdog 檢查
         setInterval(function() {
             const sec = Math.floor((Date.now() - lastUpdateDesk) / 1000);
             const secEl = document.getElementById('deskSecAgo'); if(secEl) secEl.innerText = '更新: ' + sec + ' 秒前';
