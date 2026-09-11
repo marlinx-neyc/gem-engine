@@ -60,28 +60,28 @@
             </div>
             <div class="grid-2">
                 <div class="item-box">
-                    <div style="color:#94a3b8; margin-bottom:2px;">Hs 波高 (<=1.20m)</div>
+                    <div style="color:#94a3b8; margin-bottom:2px;">Hs 波高 (&lt;=1.20m)</div>
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span id="m_hs" style="color:#facc15; font-weight:bold;">3.20m</span>
                         <span id="m_stat_hs" class="badge-veto-m">VETO</span>
                     </div>
                 </div>
                 <div class="item-box">
-                    <div style="color:#94a3b8; margin-bottom:2px;">Wind 陣風 (<=10.8m/s)</div>
+                    <div style="color:#94a3b8; margin-bottom:2px;">Wind 陣風 (&lt;=10.8m/s)</div>
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span id="m_w" style="color:#facc15; font-weight:bold;">14.88m/s</span>
                         <span id="m_stat_w" class="badge-veto-m">VETO</span>
                     </div>
                 </div>
                 <div class="item-box">
-                    <div style="color:#94a3b8; margin-bottom:2px;">UKC 裕深 (>=1.50m)</div>
+                    <div style="color:#94a3b8; margin-bottom:2px;">UKC 裕深 (&gt;=1.50m)</div>
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span id="m_ukc" style="color:#facc15; font-weight:bold;">-0.70m</span>
                         <span id="m_stat_ukc" class="badge-veto-m">VETO</span>
                     </div>
                 </div>
                 <div class="item-box">
-                    <div style="color:#94a3b8; margin-bottom:2px;">FB 乾舷 (>=0.50m)</div>
+                    <div style="color:#94a3b8; margin-bottom:2px;">FB 乾舷 (&gt;=0.50m)</div>
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span id="m_fb" style="color:#facc15; font-weight:bold;">0.35m</span>
                         <span id="m_stat_fb" class="badge-veto-m">VETO</span>
@@ -126,7 +126,7 @@
             </div>
         </div>
 
-        <!-- 4. 🌀 颱風專區 & 奇門宏觀預判 (重新補回) -->
+        <!-- 4. 🌀 颱風專區 & 奇門宏觀預判 -->
         <div class="card-mob" style="border: 1px solid #f59e0b;">
             <strong style="color:#f59e0b; font-size:12px; display:block; margin-bottom:6px;">🌀 颱風專區 & 奇門宏觀預判</strong>
             <div id="mob_cyclone_status" style="font-size:11px; color:#fca5a5; font-weight:bold; margin-bottom:6px; background:rgba(245,158,11,0.1); padding:6px; border-radius:4px;">
@@ -154,7 +154,7 @@
                     <tr>
                         <td style="color:#cbd5e1;">宏觀波浪</td>
                         <td style="color:#fca5a5;">長浪共振穿透</td>
-                        <td style="color:#ef4444; font-weight:bold;">Tp > 12.0s (港口封鎖)</td>
+                        <td style="color:#ef4444; font-weight:bold;">Tp &gt; 12.0s (港口封鎖)</td>
                     </tr>
                 </tbody>
             </table>
@@ -205,7 +205,7 @@
             </div>
         </div>
 
-        <!-- 8. 戰略三方案評估 (移除小結欄，精簡定性定量摘要) -->
+        <!-- 8. 戰略三方案評估 -->
         <div class="card-mob">
             <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">戰略三方案評估 (Ground Truth)</strong>
             <table class="table-full" style="margin-bottom:8px;">
@@ -237,7 +237,7 @@
             
             <div style="border-top: 1px dashed #334155; padding-top: 6px; font-size: 10px; line-height: 1.5; color: #cbd5e1;">
                 <div style="margin-bottom: 3px;">
-                    <span style="color:#facc15; font-weight:bold;">📌 定性比對：</span>A(官方)無港池消能易錯停；B(監測)無視401高地遮蔽；C(GEM)硬性約束<50ms即時阻斷。
+                    <span style="color:#facc15; font-weight:bold;">📌 定性比對：</span>A(官方)無港池消能易錯停；B(監測)無視401高地遮蔽；C(GEM)硬性約束&lt;50ms即時阻斷。
                 </div>
                 <div>
                     <span style="color:#facc15; font-weight:bold;">📊 定量反饋：</span>方案C精算 UKC=-0.70m 與 FB=0.35m 觸發剛性VETO，作自學習 Ground Truth 基準。
@@ -260,7 +260,7 @@
             const now = new Date();
             const tsEl = document.getElementById('mobileTimestamp');
             if (tsEl) tsEl.innerText = now.toLocaleString('zh-TW', {hour12: false}) + ' CST';
-            const fmt = (d) => `(${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')})`;
+            const fmt = (d) => `${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
             const d1 = new Date(now); d1.setDate(d1.getDate() + 1);
             const d2 = new Date(now); d2.setDate(d2.getDate() + 2);
             const d3 = new Date(now); d3.setDate(d3.getDate() + 3);
@@ -276,94 +276,110 @@
             const cntEl = document.getElementById('mobCommCount'); if(cntEl) cntEl.innerText = mobCommCounter;
             const staleEl = document.getElementById('staleAlertMob'); if(staleEl) staleEl.style.display = 'none';
 
-            let ts = data.timestamp || (new Date().toLocaleString('zh-TW', {hour12: false}) + ' CST');
+            let ts = (data.system && data.system.timestamp) || data.timestamp || (new Date().toLocaleString('zh-TW', {hour12: false}) + ' CST');
             const tsEl = document.getElementById('mobileTimestamp'); if(tsEl) tsEl.innerText = ts;
 
-            // 頂部戰術狀態 Banner
+            // 1. 頂部戰術狀態 Banner
             let bannerEl = document.getElementById('vetoBannerMob');
             if (bannerEl) {
-                if (data.decision_code === "Q4_DISASTER") {
+                let tac = data.tactical_decision || {};
+                let codeText = tac.q_mode || data.decision_code || "";
+                let vetoPass = tac.veto_pass !== undefined ? tac.veto_pass : !(data.physics_metrics && data.physics_metrics.has_veto);
+
+                if (codeText.includes("Q4_DISASTER") || data.decision_code === "Q4_DISASTER") {
                     bannerEl.style.background = "rgba(239, 68, 68, 0.9)";
                     bannerEl.style.color = "#ffffff";
-                    bannerEl.innerText = "⚠️ " + (data.tier0_reason || "觸發 Tier-0 災難級別，全線強制封島！");
+                    bannerEl.innerText = "⚠️ " + (data.tier0_reason || tac.reason || "觸發 Tier-0 災難級別，全線強制封島！");
                 } else {
-                    let isVeto = data.physics_metrics && data.physics_metrics.has_veto;
+                    let isVeto = !vetoPass || (data.physics_metrics && data.physics_metrics.has_veto);
                     bannerEl.style.background = isVeto ? "rgba(239, 68, 68, 0.2)" : "rgba(16, 185, 129, 0.2)";
                     bannerEl.style.color = isVeto ? "#fca5a5" : "#6ee7b7";
-                    let codeText = data.decision_code || (isVeto ? 'Q4' : 'Q1');
-                    bannerEl.innerText = (isVeto ? "🔴 " : "🟢 ") + codeText + " 模式 - " + (isVeto ? '觸發 VETO 剛性封鎖' : '許可巡航靠泊');
+                    bannerEl.innerText = (isVeto ? "🔴 " : "🟢 ") + (codeText || (isVeto ? 'Q4 嚴禁靠泊' : 'Q1 允許靠泊'));
                 }
             }
 
-            // 即時物理指標數值與剛性比對
-            if (data.physics_metrics) {
-                let p = data.physics_metrics;
-                const hsEl = document.getElementById('m_hs'); if(hsEl) hsEl.innerText = (p.hs_pier_m !== undefined ? p.hs_pier_m : '3.20') + 'm';
-                const shsEl = document.getElementById('m_stat_hs');
-                if(shsEl) {
-                    shsEl.innerText = p.hs_pier_m > 1.20 ? 'VETO' : 'PASS';
-                    shsEl.className = p.hs_pier_m > 1.20 ? 'badge-veto-m' : 'badge-pass-m';
-                }
+            // 2. 即時物理指標數值與剛性比對 (相容 veto_matrix 與 physics_metrics)
+            let vm = data.veto_matrix || {};
+            let pm = data.physics_metrics || {};
 
-                const wEl = document.getElementById('m_w'); if(wEl) wEl.innerText = (p.w_local_ms !== undefined ? p.w_local_ms : '14.88') + 'm/s';
-                const swEl = document.getElementById('m_stat_w');
-                if(swEl) {
-                    swEl.innerText = p.w_local_ms > 10.80 ? 'VETO' : 'PASS';
-                    swEl.className = p.w_local_ms > 10.80 ? 'badge-veto-m' : 'badge-pass-m';
-                }
-
-                const ukcEl = document.getElementById('m_ukc'); if(ukcEl) ukcEl.innerText = (p.ukc_m !== undefined ? p.ukc_m : '-0.70') + 'm';
-                const sukcEl = document.getElementById('m_stat_ukc');
-                if(sukcEl) {
-                    sukcEl.innerText = p.ukc_m < 1.50 ? 'VETO' : 'PASS';
-                    sukcEl.className = p.ukc_m < 1.50 ? 'badge-veto-m' : 'badge-pass-m';
-                }
-
-                const fbEl = document.getElementById('m_fb'); if(fbEl) fbEl.innerText = (p.fb_pier_m !== undefined ? p.fb_pier_m : '0.35') + 'm';
-                const sfbEl = document.getElementById('m_stat_fb');
-                if(sfbEl) {
-                    sfbEl.innerText = p.fb_pier_m < 0.50 ? 'VETO' : 'PASS';
-                    sfbEl.className = p.fb_pier_m < 0.50 ? 'badge-veto-m' : 'badge-pass-m';
-                }
+            let hsVal = vm.hs_pier ? vm.hs_pier.val : (pm.hs_pier_m !== undefined ? pm.hs_pier_m : 3.20);
+            let hsVeto = vm.hs_pier ? vm.hs_pier.status === "VETO_TRIGGERED" : hsVal > 1.20;
+            const hsEl = document.getElementById('m_hs'); if(hsEl) hsEl.innerText = hsVal + 'm';
+            const shsEl = document.getElementById('m_stat_hs');
+            if(shsEl) {
+                shsEl.innerText = hsVeto ? 'VETO' : 'PASS';
+                shsEl.className = hsVeto ? 'badge-veto-m' : 'badge-pass-m';
             }
 
-            // 動態更新颱風與奇門專區
-            if (data.left_panel_macro_prediction) {
-                let macro = data.left_panel_macro_prediction;
-                if (macro.cyclone_alert) {
-                    const cyStatus = document.getElementById('mob_cyclone_status');
-                    if (cyStatus && macro.cyclone_alert.status) cyStatus.innerText = macro.cyclone_alert.status;
-                    const cyStrat = document.getElementById('mob_cyclone_strategy');
-                    if (cyStrat && macro.cyclone_alert.strategy) cyStrat.innerText = '對策：' + macro.cyclone_alert.strategy;
-                }
+            let wVal = vm.w_local ? vm.w_local.val : (pm.w_local_ms !== undefined ? pm.w_local_ms : 14.88);
+            let wVeto = vm.w_local ? vm.w_local.status === "VETO_TRIGGERED" : wVal > 10.80;
+            const wEl = document.getElementById('m_w'); if(wEl) wEl.innerText = wVal + 'm/s';
+            const swEl = document.getElementById('m_stat_w');
+            if(swEl) {
+                swEl.innerText = wVeto ? 'VETO' : 'PASS';
+                swEl.className = wVeto ? 'badge-veto-m' : 'badge-pass-m';
             }
 
-            // 動態渲染當日船班官模比對表格
+            let ukcVal = vm.ukc ? vm.ukc.val : (pm.ukc_m !== undefined ? pm.ukc_m : -0.70);
+            let ukcVeto = vm.ukc ? vm.ukc.status === "VETO_TRIGGERED" : ukcVal < 1.50;
+            const ukcEl = document.getElementById('m_ukc'); if(ukcEl) ukcEl.innerText = ukcVal + 'm';
+            const sukcEl = document.getElementById('m_stat_ukc');
+            if(sukcEl) {
+                sukcEl.innerText = ukcVeto ? 'VETO' : 'PASS';
+                sukcEl.className = ukcVeto ? 'badge-veto-m' : 'badge-pass-m';
+            }
+
+            let fbVal = vm.fb_pier ? vm.fb_pier.val : (pm.fb_pier_m !== undefined ? pm.fb_pier_m : 0.35);
+            let fbVeto = vm.fb_pier ? vm.fb_pier.status === "VETO_TRIGGERED" : fbVal < 0.50;
+            const fbEl = document.getElementById('m_fb'); if(fbEl) fbEl.innerText = fbVal + 'm';
+            const sfbEl = document.getElementById('m_stat_fb');
+            if(sfbEl) {
+                sfbEl.innerText = fbVeto ? 'VETO' : 'PASS';
+                sfbEl.className = fbVeto ? 'badge-veto-m' : 'badge-pass-m';
+            }
+
+            // 3. 颱風與奇門專區 (相容 typhoon_qimen_prediction 與 left_panel_macro_prediction)
+            let tq = data.typhoon_qimen_prediction || {};
+            let macro = data.left_panel_macro_prediction || {};
+
+            const cyStatus = document.getElementById('mob_cyclone_status');
+            if (cyStatus) {
+                if (tq.cyclone_dynamic) cyStatus.innerText = "[氣旋動態] " + tq.cyclone_dynamic;
+                else if (macro.cyclone_alert && macro.cyclone_alert.status) cyStatus.innerText = macro.cyclone_alert.status;
+            }
+
+            const cyStrat = document.getElementById('mob_cyclone_strategy');
+            if (cyStrat) {
+                if (tq.qimen_anomaly_forecast) cyStrat.innerText = '對策：' + tq.qimen_anomaly_forecast;
+                else if (macro.cyclone_alert && macro.cyclone_alert.strategy) cyStrat.innerText = '對策：' + macro.cyclone_alert.strategy;
+            }
+
+            // 4. 當日船班官模比對表格
             if (data.tdx && Array.isArray(data.tdx)) {
                 const tbody = document.getElementById('mob_tdx_body');
                 if (tbody) {
                     tbody.innerHTML = data.tdx.map(item => `
                         <tr style="border-bottom:1px solid #0f172a;">
                             <td style="padding:4px 2px;">${item.time}</td>
-                            <td style="padding:4px 2px; color:${item.off === '准予靠泊' ? '#10b981' : '#f59e0b'};">${item.off}</td>
-                            <td style="padding:4px 2px; color:#ef4444; font-weight:bold;">${item.mod}</td>
+                            <td style="padding:4px 2px; color:${(item.off || item.official) === '准予靠泊' ? '#10b981' : '#f59e0b'};">${item.off || item.official || '准予靠泊'}</td>
+                            <td style="padding:4px 2px; color:#ef4444; font-weight:bold;">${item.mod || item.model || 'Q4 嚴禁靠泊'}</td>
                             <td style="padding:4px 2px; text-align:center;">${item.light === '#ef4444' || item.light === '🔴' ? '🔴' : '🟢'}</td>
                         </tr>
                     `).join('');
                 }
             }
 
-            // 動態更新最後判斷與處置
-            if (data.decision) {
-                const decEl = document.getElementById('mob_final_decision');
-                if (decEl) decEl.innerText = data.decision.status_text || 'Q4 嚴禁靠泊 (全線封島)';
-                const actEl = document.getElementById('mob_final_action');
-                if (actEl) actEl.innerText = '處置：' + (data.decision.route_action || '全線停航，營運船隻返回烏石港避風。');
-            }
+            // 5. 最終戰術裁決與處置
+            let tac = data.tactical_decision || {};
+            const decEl = document.getElementById('mob_final_decision');
+            if (decEl) decEl.innerText = tac.q_mode || (data.decision && data.decision.status_text) || 'Q4 嚴禁靠泊 (全線封島)';
+            const actEl = document.getElementById('mob_final_action');
+            if (actEl) actEl.innerText = '處置：' + (tac.reason || (data.decision && data.decision.route_action) || '全線停航，營運船隻返回烏石港避風。');
 
+            // 6. 雙生大腦與影子學習
             if (data.pattern_match) {
-                const mcEl = document.getElementById('mob_match_cases'); if(mcEl) mcEl.innerText = data.pattern_match.matched_cases + ' 筆';
-                const prEl = document.getElementById('mob_prior_rate'); if(prEl) prEl.innerText = ((data.pattern_match.historical_closure_rate || 0) * 100).toFixed(1) + '%';
+                const mcEl = document.getElementById('mob_match_cases'); if(mcEl) mcEl.innerText = (data.pattern_match.matched_cases || 0) + ' 筆';
+                const prEl = document.getElementById('mob_prior_rate'); if(prEl) prEl.innerText = (((data.pattern_match.historical_closure_rate || 0)) * 100).toFixed(1) + '%';
             }
 
             if (data.rl_feedback_status) {
