@@ -164,7 +164,6 @@
 <script>
   let chartHs, chartWind, chartUkc, chartTp;
   let lastUpdateDesk = Date.now();
-  let commCounter = 0; // 通訊次數統計
 
   // 初始化動態日期與時間戳記
   function initDynamicDates() {
@@ -257,8 +256,6 @@
   window.onSSOTDataReceived = function(data) {
     if (!data) return;
     lastUpdateDesk = Date.now();
-    commCounter++; // 累加通訊次數
-    document.getElementById('deskCommCount').innerText = commCounter;
     document.getElementById('staleAlertDesk').style.display = 'none';
 
     let ts = new Date().toLocaleString('zh-TW', {hour12: false}) + ' CST';
@@ -308,44 +305,7 @@
   setTimeout(initCharts, 100);
   window.addEventListener('resize', resizeAll);
 </script>
-<script>
-  let commCount = 0;
-  const GITHUB_RAW_URL = "https://raw.githubusercontent.com/marlinx-neyc/gem-engine/main/latest_decision.json";
 
-  function pullLatestTacticalDecision() {
-    const timestampUrl = GITHUB_RAW_URL + "?t=" + new Date().getTime();
-    fetch(timestampUrl)
-      .then(response => {
-        if (!response.ok) throw new Error("HTTP " + response.status);
-        return response.json();
-      })
-      .then(data => {
-        commCount++;
-        console.log("✅ 成功取得 GitHub 決策資料:", data);
-
-        // 自動捕捉並更新頁面上含有「通訊次數」文字的標籤數字
-        document.querySelectorAll("*").forEach(el => {
-          if (el.children.length === 0 && el.textContent && el.textContent.includes("通訊次數")) {
-            el.textContent = `通訊次數: ${commCount} 次`;
-          }
-        });
-
-        // 刷新相容圖表 UI
-        if (typeof renderSSOT === "function") renderSSOT(data);
-        if (typeof updateUI === "function") updateUI(data);
-        if (typeof renderDashboard === "function") renderDashboard(data);
-      })
-      .catch(err => {
-        console.warn("⚠️ 讀取 GitHub JSON 失敗:", err);
-      });
-  }
-
-  // 網頁載入後立即執行，並每 5 秒自動拉取刷新一次
-  document.addEventListener("DOMContentLoaded", () => {
-    pullLatestTacticalDecision();
-    setInterval(pullLatestTacticalDecision, 5000);
-  });
-</script>
 <script>
   let commCount = 0;
 
