@@ -126,7 +126,7 @@
             </div>
         </div>
 
-        <!-- 4. 🌀 颱風專區 & 奇門宏觀預判 (補回此區塊) -->
+        <!-- 4. 🌀 颱風專區 & 奇門宏觀預判 -->
         <div class="card-mob" style="border: 1px solid #f59e0b;">
             <strong style="color:#f59e0b; font-size:12px; display:block; margin-bottom:6px;">🌀 颱風專區 & 奇門宏觀預判</strong>
             <div id="mob_cyclone_status" style="font-size:11px; color:#fca5a5; font-weight:bold; margin-bottom:6px; background:rgba(245,158,11,0.1); padding:6px; border-radius:4px;">
@@ -205,48 +205,42 @@
             </div>
         </div>
 
-        <!-- 8. 戰略三方案評估與定量反饋 (Ground Truth) -->
+        <!-- 8. 戰略三方案評估 (Ground Truth) -->
         <div class="card-mob">
             <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">戰略三方案評估 (Ground Truth)</strong>
             <table class="table-full" style="margin-bottom:8px;">
                 <thead>
                     <tr style="border-bottom:1px solid #334155; color:#94a3b8; font-size:10px;">
-                        <th style="width:20%;">方案</th>
-                        <th style="width:32%;">數值 vs 標準值</th>
-                        <th>差異與缺陷小結</th>
-                        <th style="text-align:center; width:18%;">燈號</th>
+                        <th style="width:25%;">方案</th>
+                        <th>數值比對 (預測 vs 標準)</th>
+                        <th style="text-align:center; width:25%;">燈號 / 裁決</th>
                     </tr>
                 </thead>
                 <tbody id="mob_eval_body">
                     <tr style="border-bottom:1px solid #0f172a;">
                         <td style="color:#cbd5e1; font-weight:bold;">A (官方)</td>
-                        <td style="color:#fca5a5;">Hs 3.20m vs ≤1.20m</td>
-                        <td style="color:#94a3b8;">未考慮港池 Kd 屏障，易生過度停航(30%假警報)</td>
+                        <td style="color:#fca5a5;">Hs 3.20m [≤1.20m]</td>
                         <td style="text-align:center; color:#ef4444; font-weight:bold;">🔴 封島</td>
                     </tr>
                     <tr style="border-bottom:1px solid #0f172a;">
                         <td style="color:#cbd5e1; font-weight:bold;">B (監測)</td>
-                        <td style="color:#fca5a5;">W 14.88m/s vs ≤10.8m/s</td>
-                        <td style="color:#94a3b8;">未考量背風 Kw 陰影，弱網斷線機率高</td>
+                        <td style="color:#fca5a5;">W 14.88m/s [≤10.80m/s]</td>
                         <td style="text-align:center; color:#ef4444; font-weight:bold;">🔴 封島</td>
                     </tr>
                     <tr>
                         <td style="font-weight:bold; color:#facc15;">C (GEM)</td>
                         <td style="color:#10b981;">UKC -0.70m | FB 0.35m</td>
-                        <td style="color:#10b981;">PINN+UKF精算雙重VETO，0.8%極低誤判率</td>
                         <td style="text-align:center; color:#facc15; font-weight:bold;">🔴 採納</td>
                     </tr>
                 </tbody>
             </table>
             
             <div style="border-top: 1px dashed #334155; padding-top: 6px; font-size: 10px; line-height: 1.5; color: #cbd5e1;">
-                <div style="margin-bottom: 4px;">
-                    <span style="color:#facc15; font-weight:bold;">📌 定性比較分析：</span>
-                    官方預報 (A) 未考慮港池屏障 Kd = 0.883 易過度停航；現場監測 (B) 無視 401 高地 Kw 局域風場衰減；GEM 數位雙生 (C) 將智庫先驗權重預編譯為硬性約束，實現本地端 &lt; 50ms 零延遲硬阻斷。
+                <div style="margin-bottom: 3px;">
+                    <span style="color:#facc15; font-weight:bold;">📌 定性比對：</span>A(官方)無港池消能易錯停；B(監測)無視401高地遮蔽；C(GEM)硬性約束&lt;50ms即時阻斷。
                 </div>
                 <div>
-                    <span style="color:#facc15; font-weight:bold;">📊 定量反饋基準：</span>
-                    方案 C 透過 UKF 狀態同化精確扣合潮位與動態浪高，精算觸發 UKC = -0.70m 與 FB_pier = 0.35m 雙重 VETO。此定量結果直接作為自學習引擎微調 UKF 權重之 Ground Truth 基準。
+                    <span style="color:#facc15; font-weight:bold;">📊 定量反饋：</span>方案C精算 UKC=-0.70m 與 FB=0.35m 觸發剛性VETO，作自學習 Ground Truth 基準。
                 </div>
             </div>
         </div>
@@ -304,7 +298,7 @@
                 }
             }
 
-            // 2. 即時物理指標數值與剛性比對 (相容 veto_matrix 與 physics_metrics)
+            // 2. 即時物理指標數值與剛性比對
             let vm = data.veto_matrix || {};
             let pm = data.physics_metrics || {};
 
@@ -344,7 +338,7 @@
                 sfbEl.className = fbVeto ? 'badge-veto-m' : 'badge-pass-m';
             }
 
-            // 3. 颱風與奇門專區 (相容 typhoon_qimen_prediction 與 left_panel_macro_prediction)
+            // 3. 颱風與奇門專區動態對齊
             let tq = data.typhoon_qimen_prediction || {};
             let macro = data.left_panel_macro_prediction || {};
 
