@@ -1,6 +1,6 @@
 {
   "sender_id": "SYSTEM",
-  "decision_code": "Q2",
+  "decision_code": "Q4",
   "normalized_features_36d": [
     0.10999999195337296,
     0.1599999964237213,
@@ -40,12 +40,12 @@
     0.8740991950035095
   ],
   "physics_metrics": {
-    "hs_pier_m": 0.93,
-    "w_local_ms": 6.53,
-    "ukc_m": 6.49,
+    "hs_pier_m": 1.27,
+    "w_local_ms": 7.44,
+    "ukc_m": 6.32,
     "fb_pier_m": 2.4
   },
-  "veto_triggered": false,
+  "veto_triggered": true,
   "pattern_match": {
     "matched_cases": 0,
     "historical_closure_rate": 0.5,
