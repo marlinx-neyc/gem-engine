@@ -28,6 +28,7 @@
             text-align: center; font-weight: bold; border-radius: 6px; margin-bottom: 10px; font-size: 12px;
         }
 
+        /* 32% / 68% 剛性雙欄佈局 */
         .layout-main { display: flex; gap: 12px; align-items: stretch; }
         .left-col { width: 32%; flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; }
         .right-col { width: 68%; flex-grow: 1; display: flex; flex-direction: column; gap: 10px; }
@@ -51,6 +52,7 @@
         .attn-micro { background: #3b82f6; height: 100%; transition: width 0.5s ease; }
         .attn-macro { background: #a855f7; height: 100%; transition: width 0.5s ease; }
 
+        /* 圖表容器尺寸與邊距 */
         .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .chart-el {
             width: 100%; min-height: 220px; height: 220px;
@@ -84,9 +86,9 @@
     <div id="vetoBannerDesk" class="banner-desk">載入即時戰術裁決中...</div>
 
     <div class="layout-main">
-        <!-- 左側戰術控制欄 (32% 剛性精簡佈局) -->
+        <!-- 左側戰術控制欄 (32% 欄寬) -->
         <div class="left-col">
-            <!-- 1. AI 雙核戰術精確度與注意力閘 -->
+            <!-- 1. AI 雙核相對精確度與注意力閘 -->
             <div class="card-desk" style="border: 1px solid #38bdf8;">
                 <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">🧠 雙核相對精確度與注意力分配 (v36D.12.0)</strong>
                 <div class="grid-2">
@@ -151,7 +153,7 @@
                 </div>
             </div>
 
-            <!-- 3. 當日船班官模對比與最後判斷 -->
+            <!-- 3. 當日船班官模燈號比對與最後判斷 (補齊最後戰術裁決區塊) -->
             <div class="card-desk">
                 <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">當日船班官模燈號比對與最後判斷</strong>
                 <table class="table-full" style="margin-bottom:8px;">
@@ -178,6 +180,10 @@
                         </tr>
                     </tbody>
                 </table>
+                <div style="border-top: 1px dashed #334155; padding-top: 6px; font-size: 11px; line-height: 1.5; color: #cbd5e1;">
+                    <div><span style="color:#facc15; font-weight:bold;">最後戰術裁決：</span><span id="desk_final_decision" style="color:#ef4444; font-weight:bold;">🔴 封島/防颱 (NO_DISPATCH)</span></div>
+                    <div style="color:#94a3b8; margin-top:2px;" id="desk_final_action">處置：Hs_pier (3.71m > 1.20m) 觸發剛性 VETO 封鎖</div>
+                </div>
             </div>
         </div>
 
@@ -194,14 +200,14 @@
             <!-- 未來七天海氣象雙軸趨勢預判 -->
             <div id="chart_weekly" class="chart-weekly-el"></div>
 
-            <!-- 戰略三方案評估 (Ground Truth) -->
+            <!-- 戰略三方案評估 (Ground Truth) 補齊卡片 -->
             <div class="card-desk">
                 <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">戰略三方案評估 (Ground Truth)</strong>
                 <table class="table-full" style="margin-bottom:6px;">
                     <thead>
                         <tr style="border-bottom:1px solid #334155; color:#94a3b8; font-size:10px;">
                             <th style="width:16%;">方案</th>
-                            <th style="width:26%;">數值比對 (預測 vs 標準)</th>
+                            <th style="width:28%;">數值比對 (預測 vs 標準)</th>
                             <th>差異與缺陷小結</th>
                             <th style="text-align:center; width:16%;">燈號 / 裁決</th>
                         </tr>
@@ -280,99 +286,123 @@
         function initDesktopCharts() {
             const hours = ['06:00', '08:00', '10:00', '11:00', '13:00', '15:00', '16:00', '18:00'];
             
+            // 將 11:00/16:00 時間標籤置於圖表頂部 (insideStartTop)，避免與 X 軸時間標籤重疊
             const decisionTimeLines = [
-                { xAxis: '11:00', label: { show: true, position: 'start', formatter: '11:00 決策點', color: '#94a3b8', fontSize: 10 }, lineStyle: { color: '#94a3b8', type: 'dashed', width: 1.5 } },
-                { xAxis: '16:00', label: { show: true, position: 'start', formatter: '16:00 預警點', color: '#94a3b8', fontSize: 10 }, lineStyle: { color: '#94a3b8', type: 'dashed', width: 1.5 } }
+                {
+                    xAxis: '11:00',
+                    label: { show: true, position: 'insideStartTop', formatter: '11:00 決策點', color: '#94a3b8', fontSize: 10 },
+                    lineStyle: { color: '#94a3b8', type: 'dashed', width: 1.5 }
+                },
+                {
+                    xAxis: '16:00',
+                    label: { show: true, position: 'insideStartTop', formatter: '16:00 預警點', color: '#94a3b8', fontSize: 10 },
+                    lineStyle: { color: '#94a3b8', type: 'dashed', width: 1.5 }
+                }
             ];
 
+            // 1. Hs 港池有效波高
             chartHs = echarts.init(document.getElementById('chart_hs'));
             chartHs.setOption({
                 title: { text: 'Hs 港池有效波高 (m)', textStyle: { color: '#38bdf8', fontSize: 12 } },
                 tooltip: { trigger: 'axis', axisPointer: { type: 'cross' }, formatter: getCustomTooltip },
-                grid: { top: 30, bottom: 25, left: 35, right: 15 },
+                grid: { top: 35, bottom: 25, left: 35, right: 65 }, // 加大 right grid 防止 label 被裁切
                 xAxis: { type: 'category', data: hours, axisLine: { lineStyle: { color: '#64748b' } } },
                 yAxis: { type: 'value', min: 0, max: 5, splitLine: { lineStyle: { color: '#334155' } } },
                 series: [{
                     name: 'Hs 波高', type: 'line', data: [1.8, 2.2, 2.9, 3.71, 3.5, 3.2, 3.4, 3.6], smooth: true, itemStyle: { color: '#ef4444' },
                     markLine: {
                         symbol: ['none', 'none'],
-                        label: { show: true, position: 'end', formatter: 'Hs 限值: {c}m', color: '#ef4444', fontSize: 10, fontWeight: 'bold' },
                         lineStyle: { color: '#ef4444', type: 'dashed', width: 1.5 },
-                        data: [{ yAxis: 1.20, name: 'Hs 限值' }, ...decisionTimeLines]
+                        data: [
+                            { yAxis: 1.20, label: { show: true, position: 'insideEndTop', formatter: 'Hs 限值: 1.20m', color: '#ef4444', fontSize: 10, fontWeight: 'bold' } },
+                            ...decisionTimeLines
+                        ]
                     }
                 }]
             });
 
+            // 2. Wind 局域陣風
             chartW = echarts.init(document.getElementById('chart_w'));
             chartW.setOption({
                 title: { text: 'Wind 局域陣風 (m/s)', textStyle: { color: '#38bdf8', fontSize: 12 } },
                 tooltip: { trigger: 'axis', axisPointer: { type: 'cross' }, formatter: getCustomTooltip },
-                grid: { top: 30, bottom: 25, left: 35, right: 15 },
+                grid: { top: 35, bottom: 25, left: 35, right: 65 },
                 xAxis: { type: 'category', data: hours, axisLine: { lineStyle: { color: '#64748b' } } },
                 yAxis: { type: 'value', min: 0, max: 20, splitLine: { lineStyle: { color: '#334155' } } },
                 series: [{
                     name: 'Wind 陣風', type: 'line', data: [8.5, 10.2, 11.0, 8.50, 12.0, 12.8, 13.2, 14.0], smooth: true, itemStyle: { color: '#f59e0b' },
                     markLine: {
                         symbol: ['none', 'none'],
-                        label: { show: true, position: 'end', formatter: 'Wind 限值: {c}m/s', color: '#f59e0b', fontSize: 10, fontWeight: 'bold' },
                         lineStyle: { color: '#f59e0b', type: 'dashed', width: 1.5 },
-                        data: [{ yAxis: 10.80, name: 'Wind 限值' }, ...decisionTimeLines]
+                        data: [
+                            { yAxis: 10.80, label: { show: true, position: 'insideEndTop', formatter: 'Wind 限值: 10.80m/s', color: '#f59e0b', fontSize: 10, fontWeight: 'bold' } },
+                            ...decisionTimeLines
+                        ]
                     }
                 }]
             });
 
+            // 3. UKC 動態裕深
             chartUkc = echarts.init(document.getElementById('chart_ukc'));
             chartUkc.setOption({
                 title: { text: 'UKC 動態裕深 (m)', textStyle: { color: '#38bdf8', fontSize: 12 } },
                 tooltip: { trigger: 'axis', axisPointer: { type: 'cross' }, formatter: getCustomTooltip },
-                grid: { top: 30, bottom: 25, left: 35, right: 15 },
+                grid: { top: 35, bottom: 25, left: 35, right: 65 },
                 xAxis: { type: 'category', data: hours, axisLine: { lineStyle: { color: '#64748b' } } },
                 yAxis: { type: 'value', min: 0, max: 8, splitLine: { lineStyle: { color: '#334155' } } },
                 series: [{
                     name: 'UKC 裕深', type: 'line', data: [7.2, 6.8, 6.5, 5.84, 6.3, 6.5, 6.2, 6.1], smooth: true, itemStyle: { color: '#10b981' },
                     markLine: {
                         symbol: ['none', 'none'],
-                        label: { show: true, position: 'end', formatter: 'UKC 限值: {c}m', color: '#10b981', fontSize: 10, fontWeight: 'bold' },
                         lineStyle: { color: '#10b981', type: 'dashed', width: 1.5 },
-                        data: [{ yAxis: 1.50, name: 'UKC 限值' }, ...decisionTimeLines]
+                        data: [
+                            { yAxis: 1.50, label: { show: true, position: 'insideEndTop', formatter: 'UKC 限值: 1.50m', color: '#10b981', fontSize: 10, fontWeight: 'bold' } },
+                            ...decisionTimeLines
+                        ]
                     }
                 }]
             });
 
+            // 4. Tp 浪週期
             chartTp = echarts.init(document.getElementById('chart_tp'));
             chartTp.setOption({
                 title: { text: 'Tp 浪週期 (s)', textStyle: { color: '#38bdf8', fontSize: 12 } },
                 tooltip: { trigger: 'axis', axisPointer: { type: 'cross' }, formatter: getCustomTooltip },
-                grid: { top: 30, bottom: 25, left: 35, right: 15 },
+                grid: { top: 35, bottom: 25, left: 35, right: 65 },
                 xAxis: { type: 'category', data: hours, axisLine: { lineStyle: { color: '#64748b' } } },
                 yAxis: { type: 'value', min: 5, max: 20, splitLine: { lineStyle: { color: '#334155' } } },
                 series: [{
                     name: '浪週期 Tp', type: 'line', data: [11.0, 12.5, 14.0, 15.5, 15.0, 14.8, 15.2, 16.0], smooth: true, itemStyle: { color: '#c084fc' },
                     markLine: {
                         symbol: ['none', 'none'],
-                        label: { show: true, position: 'end', formatter: '長浪臨界: {c}s', color: '#c084fc', fontSize: 10, fontWeight: 'bold' },
                         lineStyle: { color: '#c084fc', type: 'dashed', width: 1.5 },
-                        data: [{ yAxis: 12.0, name: '長浪臨界' }, ...decisionTimeLines]
+                        data: [
+                            { yAxis: 12.0, label: { show: true, position: 'insideEndTop', formatter: '長浪臨界: 12.0s', color: '#c084fc', fontSize: 10, fontWeight: 'bold' } },
+                            ...decisionTimeLines
+                        ]
                     }
                 }]
             });
 
+            // 5. 未來七天海氣象雙軸趨勢預判
             chartWeekly = echarts.init(document.getElementById('chart_weekly'));
             chartWeekly.setOption({
                 title: { text: '🌀 未來七天海氣象雙軸趨勢預判 (v36D.12.0)', textStyle: { color: '#f59e0b', fontSize: 12 } },
                 tooltip: { trigger: 'axis', axisPointer: { type: 'cross', crossStyle: { color: '#94a3b8' } } },
                 legend: { data: ['Hs 波高 (m)', 'Wind 陣風 (m/s)'], textStyle: { color: '#cbd5e1' }, right: 10, top: 0 },
-                grid: { top: 35, bottom: 25, left: 40, right: 40 },
+                grid: { top: 35, bottom: 25, left: 45, right: 65 },
                 xAxis: { type: 'category', data: ['今日', '明日', 'D+2', 'D+3', 'D+4', 'D+5', 'D+6'], axisLine: { lineStyle: { color: '#64748b' } } },
                 yAxis: [
                     {
                         type: 'value', name: 'Hs (m)', min: 0, max: 5,
                         axisLine: { lineStyle: { color: '#ef4444' } },
+                        axisLabel: { color: '#ef4444' },
                         splitLine: { lineStyle: { color: '#334155' } }
                     },
                     {
                         type: 'value', name: 'Wind (m/s)', min: 0, max: 25,
                         axisLine: { lineStyle: { color: '#f59e0b' } },
+                        axisLabel: { color: '#f59e0b' },
                         splitLine: { show: false }
                     }
                 ],
@@ -382,9 +412,9 @@
                         smooth: true, itemStyle: { color: '#ef4444' },
                         markLine: {
                             symbol: ['none', 'none'],
-                            label: { show: true, position: 'end', formatter: 'Hs 限值: {c}m', color: '#ef4444', fontSize: 10, fontWeight: 'bold' },
+                            label: { show: true, position: 'insideEndBottom', formatter: 'Hs 限值: 1.20m', color: '#ef4444', fontSize: 10, fontWeight: 'bold' },
                             lineStyle: { color: '#ef4444', type: 'dashed', width: 1.5 },
-                            data: [{ yAxis: 1.20, name: 'Hs 限值' }]
+                            data: [{ yAxis: 1.20 }]
                         }
                     },
                     {
@@ -392,9 +422,9 @@
                         smooth: true, itemStyle: { color: '#f59e0b' },
                         markLine: {
                             symbol: ['none', 'none'],
-                            label: { show: true, position: 'start', formatter: 'Wind 限值: {c}m/s', color: '#f59e0b', fontSize: 10, fontWeight: 'bold' },
+                            label: { show: true, position: 'insideStartTop', formatter: 'Wind 限值: 10.80m/s', color: '#f59e0b', fontSize: 10, fontWeight: 'bold' },
                             lineStyle: { color: '#f59e0b', type: 'dashed', width: 1.5 },
-                            data: [{ yAxis: 10.80, name: 'Wind 限值' }]
+                            data: [{ yAxis: 10.80 }]
                         }
                     }
                 ]
