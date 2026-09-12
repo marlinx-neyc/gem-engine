@@ -72,6 +72,18 @@
             animation: pulse 2s infinite;
         }
 
+        .stale-banner {
+            grid-column: 1 / -1;
+            background: var(--accent-red);
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            display: none;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 0 12px rgba(239, 68, 68, 0.6);
+        }
+
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.6; }
@@ -99,6 +111,7 @@
             padding: 15px 0;
             border-radius: 8px;
             background: rgba(255, 255, 255, 0.05);
+            transition: color 0.3s ease;
         }
 
         .metric-group {
@@ -113,6 +126,7 @@
             padding: 12px;
             border-radius: 8px;
             text-align: center;
+            border: 1px solid var(--border-color);
         }
 
         .metric-value {
@@ -122,6 +136,9 @@
             margin-top: 4px;
         }
 
+        .badge-veto { background: var(--accent-red); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+        .badge-pass { background: var(--accent-green); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+
         .progress-bar-container {
             background: rgba(0, 0, 0, 0.3);
             border-radius: 10px;
@@ -129,19 +146,11 @@
             overflow: hidden;
             display: flex;
             margin-top: 10px;
+            border: 1px solid var(--border-color);
         }
 
-        .progress-micro {
-            background: #3b82f6;
-            height: 100%;
-            transition: width 0.5s ease;
-        }
-
-        .progress-macro {
-            background: #a855f7;
-            height: 100%;
-            transition: width 0.5s ease;
-        }
+        .progress-micro { background: #3b82f6; height: 100%; transition: width 0.5s ease; }
+        .progress-macro { background: #a855f7; height: 100%; transition: width 0.5s ease; }
 
         .legend {
             display: flex;
@@ -150,6 +159,20 @@
             color: var(--text-secondary);
             margin-top: 8px;
         }
+
+        .live-dot-blue {
+            display: inline-block; width: 10px; height: 10px; background-color: #3b82f6;
+            border-radius: 50%; margin-right: 8px; box-shadow: 0 0 10px #3b82f6; animation: pulseBlue 1.5s infinite;
+        }
+        @keyframes pulseBlue { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
+
+        .nav-switch {
+            grid-column: 1 / -1;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 20px; background: var(--card-bg); border-radius: 8px;
+            border: 1px solid var(--border-color); font-size: 0.85rem;
+        }
+        .nav-switch a { color: #38bdf8; text-decoration: none; font-weight: bold; margin-left: 10px; }
     </style>
 </head>
 <body>
@@ -158,12 +181,17 @@
     <!-- 頂部標題區 -->
     <div class="header">
         <div class="title-section">
-            <h1>🛡️ GEM-V36D 戰術指揮面板</h1>
+            <h1><span class="live-dot-blue"></span>🛡️ GEM-V36D 戰術指揮面板</h1>
             <div class="timestamp" id="last-updated">更新時間：載入中...</div>
         </div>
         <div>
             <span id="version-tag" style="background: #334155; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem;">v36D.11.0</span>
         </div>
+    </div>
+
+    <!-- 30 秒數據過期 Watchdog 警示 Banner -->
+    <div class="stale-banner" id="stale-banner">
+        🔴 數據過期 (READ_ONLY_BACKUP) — 遙測已逾 30 秒未更新，請勿依此進行靠泊決策！
     </div>
 
     <!-- PINN 物理 Hard-VETO 警告條 -->
@@ -187,7 +215,7 @@
         </div>
     </div>
 
-    <!-- 2. 不確定性與相對精確度卡片 (新增) -->
+    <!-- 2. 不確定性與相對精確度卡片 -->
     <div class="card">
         <div class="card-title">相對精確度與自信度評估 (Precision & Uncertainty)</div>
         <div class="metric-group">
@@ -220,33 +248,59 @@
     <!-- 4. PINN 物理水文邊界解算卡片 -->
     <div class="card" style="grid-column: 1 / -1;">
         <div class="card-title">PINN 物理水文邊界數值 (Hydrodynamic Physics Metrics)</div>
-        <div class="metric-group" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+        <div class="metric-group" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
             <div class="metric-item">
-                <div style="font-size: 0.8rem; color: var(--text-secondary);">碼頭計算浪高 (Hs Pier)</div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary); display:flex; justify-content:space-between; align-items:center;">
+                    <span>碼頭計算浪高 (Hs Pier)</span>
+                    <span id="badge-hs" class="badge-pass">PASS</span>
+                </div>
                 <div class="metric-value" id="hs-pier">0.00 m</div>
             </div>
             <div class="metric-item">
-                <div style="font-size: 0.8rem; color: var(--text-secondary);">局部風速 (W Local)</div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary); display:flex; justify-content:space-between; align-items:center;">
+                    <span>局部風速 (W Local)</span>
+                    <span id="badge-w" class="badge-pass">PASS</span>
+                </div>
                 <div class="metric-value" id="w-local">0.00 m/s</div>
             </div>
             <div class="metric-item">
-                <div style="font-size: 0.8rem; color: var(--text-secondary);">富餘水深 (UKC)</div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary); display:flex; justify-content:space-between; align-items:center;">
+                    <span>富餘水深 (UKC)</span>
+                    <span id="badge-ukc" class="badge-pass">PASS</span>
+                </div>
                 <div class="metric-value" id="ukc-m">0.00 m</div>
             </div>
             <div class="metric-item">
-                <div style="font-size: 0.8rem; color: var(--text-secondary);">預留乾舷高度 (Freeboard)</div>
+                <div style="font-size: 0.8rem; color: var(--text-secondary); display:flex; justify-content:space-between; align-items:center;">
+                    <span>預留乾舷高度 (Freeboard)</span>
+                    <span id="badge-fb" class="badge-pass">PASS</span>
+                </div>
                 <div class="metric-value" id="fb-pier">0.00 m</div>
             </div>
+        </div>
+    </div>
+
+    <!-- 5. 導覽視角切換器 -->
+    <div class="nav-switch">
+        <span style="color:#94a3b8;">當前視角：🛡️ 主指揮儀表板 (index.html)</span>
+        <div>
+            <a href="desktop.html">💻 切換至桌面完全版</a>
+            <a href="mobile.html">📱 切換至手持版</a>
         </div>
     </div>
 </div>
 
 <script>
+    let lastUpdateTS = Date.now();
+
     async function fetchDecisionData() {
         try {
             const response = await fetch('./latest_decision.json?t=' + new Date().getTime());
             if (!response.ok) throw new Error('Network response was not ok');
             const data = await response.json();
+
+            lastUpdateTS = Date.now();
+            document.getElementById('stale-banner').style.display = 'none';
 
             // 1. 基本資訊與時間
             document.getElementById('last-updated').innerText = '更新時間：' + (data.timestamp || 'N/A');
@@ -298,12 +352,25 @@
                 document.getElementById('weight-macro').innerText = macroW.toFixed(1) + '%';
             }
 
-            // 6. PINN 物理解算數據
+            // 6. PINN 物理解算數據與門檻標籤
             if (data.physics_metrics) {
-                document.getElementById('hs-pier').innerText = data.physics_metrics.hs_pier_m + ' m';
-                document.getElementById('w-local').innerText = data.physics_metrics.w_local_ms + ' m/s';
-                document.getElementById('ukc-m').innerText = data.physics_metrics.ukc_m + ' m';
-                document.getElementById('fb-pier').innerText = data.physics_metrics.fb_pier_m + ' m';
+                const p = data.physics_metrics;
+                document.getElementById('hs-pier').innerText = p.hs_pier_m + ' m';
+                document.getElementById('w-local').innerText = p.w_local_ms + ' m/s';
+                document.getElementById('ukc-m').innerText = p.ukc_m + ' m';
+                document.getElementById('fb-pier').innerText = p.fb_pier_m + ' m';
+
+                document.getElementById('badge-hs').className = (p.hs_pier_m > 1.20) ? 'badge-veto' : 'badge-pass';
+                document.getElementById('badge-hs').innerText = (p.hs_pier_m > 1.20) ? 'VETO' : 'PASS';
+
+                document.getElementById('badge-w').className = (p.w_local_ms > 10.80) ? 'badge-veto' : 'badge-pass';
+                document.getElementById('badge-w').innerText = (p.w_local_ms > 10.80) ? 'VETO' : 'PASS';
+
+                document.getElementById('badge-ukc').className = (p.ukc_m < 1.50) ? 'badge-veto' : 'badge-pass';
+                document.getElementById('badge-ukc').innerText = (p.ukc_m < 1.50) ? 'VETO' : 'PASS';
+
+                document.getElementById('badge-fb').className = (p.fb_pier_m < 0.50) ? 'badge-veto' : 'badge-pass';
+                document.getElementById('badge-fb').innerText = (p.fb_pier_m < 0.50) ? 'VETO' : 'PASS';
             }
 
         } catch (error) {
@@ -311,9 +378,17 @@
         }
     }
 
-    // 初次載入與每 30 秒自動刷新
+    // Watchdog 定時監控數據是否逾期 30 秒
+    setInterval(() => {
+        const sec = Math.floor((Date.now() - lastUpdateTS) / 1000);
+        if (sec > 30) {
+            document.getElementById('stale-banner').style.display = 'block';
+        }
+    }, 1000);
+
+    // 初次載入與每 3 秒自動Polling
     fetchDecisionData();
-    setInterval(fetchDecisionData, 30000);
+    setInterval(fetchDecisionData, 3000);
 </script>
 
 </body>
