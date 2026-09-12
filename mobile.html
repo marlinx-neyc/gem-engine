@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GEM Engine Mobile V36D.11.0 - 手持戰術智庫</title>
+    <title>GEM Engine Mobile V36D.12.0 - 手持戰術智庫</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html, body {
@@ -35,7 +35,6 @@
         .table-full { width: 100%; border-collapse: collapse; font-size: 11px; color: #cbd5e1; }
         .table-full td, .table-full th { padding: 5px 3px; text-align: left; vertical-align: middle; }
         
-        /* 注意力分配進度條 (手機端) */
         .attn-bar-bg {
             background: #0f172a; border-radius: 6px; height: 10px; overflow: hidden;
             display: flex; margin-top: 6px; border: 1px solid #334155;
@@ -48,9 +47,6 @@
             border-radius: 50%; margin-right: 6px; box-shadow: 0 0 8px #3b82f6; animation: pulseBlue 1.5s infinite;
         }
         @keyframes pulseBlue { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
-        
-        .flash-pulse-red { animation: flashRed 0.6s ease-out; }
-        @keyframes flashRed { 0% { background-color: rgba(239, 68, 68, 0.4); } 100% { background-color: transparent; } }
 
         .nav-switch { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 8px 12px; background: #0f172a; border-radius: 6px; border: 1px solid #334155; font-size: 11px; }
         .nav-switch a { color: #38bdf8; text-decoration: none; font-weight: bold; }
@@ -60,11 +56,10 @@
     <div class="mobile-container">
         <!-- 1. 頂部狀態卡片 -->
         <div class="card-mob" id="topStatusCard" style="display:flex; justify-content:space-between; align-items:center;">
-            <div><span class="live-dot-blue" id="liveDot"></span><strong style="color:#3b82f6; font-size:12px;">● LIVE SSOT 連線中 (v36D.11.0)</strong></div>
+            <div><span class="live-dot-blue"></span><strong style="color:#38bdf8; font-size:12px;">● LIVE SSOT 連線中 (v36D.12.0)</strong></div>
             <div style="font-size:11px; color:#94a3b8;">通訊: <span id="mobCommCount" style="color:#f8fafc; font-weight:bold;">0</span> 次 | <span id="mobSecAgo">更新: 0 秒前</span></div>
         </div>
 
-        <!-- 30 秒數據過期 Watchdog 警示 Banner -->
         <div id="staleAlertMob" class="stale-mob">
             🔴 數據過期 (OUT OF DATE / READ_ONLY_BACKUP)<br>
             <span style="font-size:10px; font-weight:normal;">警告：數據已逾 30 秒未更新，請勿依此進行靠泊決策！</span>
@@ -73,7 +68,7 @@
         <!-- 2. Q-Mode 戰術裁決 Banner -->
         <div id="vetoBannerMob" class="banner-mob">載入即時戰術裁決中...</div>
 
-        <!-- 3. AI 雙核戰術精確度與注意力閘 (v36D.11.0 核心) -->
+        <!-- 3. AI 雙核戰術精確度與注意力閘 -->
         <div class="card-mob" style="border: 1px solid #38bdf8;">
             <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">🧠 雙核相對精確度與注意力分配</strong>
             <div class="grid-2">
@@ -84,7 +79,7 @@
                 <div class="item-box">
                     <div style="color:#94a3b8;">不確定性 (σ) / 精確度升</div>
                     <div style="font-weight:bold; font-size:11px; color:#38bdf8; margin-top:2px;">
-                        σ: <span id="mob_sigma">0.3465</span> | <span id="mob_precision_gain" style="color:#10b981;">+47.4%</span>
+                        σ: <span id="mob_sigma">0.3551</span> | <span id="mob_precision_gain" style="color:#10b981;">+51.0%</span>
                     </div>
                 </div>
             </div>
@@ -110,28 +105,28 @@
                 <div class="item-box">
                     <div style="color:#94a3b8; margin-bottom:2px;">Hs Pier 波高 (<=1.20m)</div>
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span id="m_hs" style="color:#facc15; font-weight:bold;">3.72m</span>
+                        <span id="m_hs" style="color:#facc15; font-weight:bold;">3.71m</span>
                         <span id="m_stat_hs" class="badge-veto-m">VETO</span>
                     </div>
                 </div>
                 <div class="item-box">
                     <div style="color:#94a3b8; margin-bottom:2px;">Wind Local 風速 (<=10.8m/s)</div>
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span id="m_w" style="color:#facc15; font-weight:bold;">11.59m/s</span>
-                        <span id="m_stat_w" class="badge-veto-m">VETO</span>
+                        <span id="m_w" style="color:#facc15; font-weight:bold;">8.50m/s</span>
+                        <span id="m_stat_w" class="badge-pass-m">PASS</span>
                     </div>
                 </div>
                 <div class="item-box">
                     <div style="color:#94a3b8; margin-bottom:2px;">UKC 裕深 (>=1.50m)</div>
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span id="m_ukc" style="color:#10b981; font-weight:bold;">6.44m</span>
+                        <span id="m_ukc" style="color:#10b981; font-weight:bold;">5.84m</span>
                         <span id="m_stat_ukc" class="badge-pass-m">PASS</span>
                     </div>
                 </div>
                 <div class="item-box">
                     <div style="color:#94a3b8; margin-bottom:2px;">FB 乾舷 (>=0.50m)</div>
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span id="m_fb" style="color:#10b981; font-weight:bold;">1.40m</span>
+                        <span id="m_fb" style="color:#10b981; font-weight:bold;">2.00m</span>
                         <span id="m_stat_fb" class="badge-pass-m">PASS</span>
                     </div>
                 </div>
@@ -159,6 +154,9 @@
                     </tr>
                     <tr style="border-bottom:1px solid #0f172a;">
                         <td>14:00</td><td style="color:#10b981;">准予靠泊</td><td style="color:#ef4444; font-weight:bold;">🔴 封島/防颱</td><td style="text-align:center;">🔴</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid #0f172a;">
+                        <td>15:00</td><td style="color:#10b981;">准予靠泊</td><td style="color:#ef4444; font-weight:bold;">🔴 封島/防颱</td><td style="text-align:center;">🔴</td>
                     </tr>
                 </tbody>
             </table>
@@ -188,7 +186,7 @@
                     </tr>
                     <tr>
                         <td style="font-weight:bold; color:#facc15;">C (GEM)</td>
-                        <td style="color:#10b981;">UKC 6.44m | FB 1.40m</td>
+                        <td style="color:#10b981;">UKC 5.84m | FB 2.00m</td>
                         <td style="text-align:center; color:#facc15; font-weight:bold;">🔴 採納</td>
                     </tr>
                 </tbody>
@@ -216,7 +214,6 @@
             if (tsEl) tsEl.innerText = getFormattedCSTTime(new Date());
         }
 
-        // 接收來自 Master (index.html) 或獨立 Polling 的 SSOT 數據
         window.onSSOTDataReceived = function(data) {
             if (!data) return;
             lastUpdateMob = Date.now();
@@ -225,16 +222,8 @@
             document.getElementById('mobCommCount').innerText = mobCommCounter;
             document.getElementById('staleAlertMob').style.display = 'none';
 
-            const cardPinn = document.getElementById('pinnCard');
-            if (cardPinn) {
-                cardPinn.classList.remove('flash-pulse-red');
-                void cardPinn.offsetWidth;
-                cardPinn.classList.add('flash-pulse-red');
-            }
-
             if (data.timestamp) document.getElementById('mobileTimestamp').innerText = data.timestamp;
 
-            // 1. Banner 裁決與燈號
             let bannerEl = document.getElementById('vetoBannerMob');
             let decisionStr = data.decision || '🔴 封島/防颱';
             let isVeto = data.hard_veto_alert || false;
@@ -242,7 +231,6 @@
             bannerEl.style.color = isVeto ? "#fca5a5" : "#6ee7b7";
             bannerEl.innerText = `${decisionStr} ${isVeto ? '(觸發剛性 VETO 防線)' : '(正常放行)'}`;
 
-            // 2. 雙核戰術指標 (v36D.11.0)
             if (data.confidence_score !== undefined) {
                 document.getElementById('mob_confidence').innerText = data.confidence_score + '%';
             }
@@ -259,13 +247,12 @@
                 document.getElementById('bar_macro_m').style.width = macroW + '%';
             }
 
-            // 3. PINN 物理水文數據
             if (data.physics_metrics) {
                 let p = data.physics_metrics;
-                document.getElementById('m_hs').innerText = (p.hs_pier_m !== undefined ? p.hs_pier_m.toFixed(2) : '3.72') + 'm';
-                document.getElementById('m_w').innerText = (p.w_local_ms !== undefined ? p.w_local_ms.toFixed(2) : '11.59') + 'm';
-                document.getElementById('m_ukc').innerText = (p.ukc_m !== undefined ? p.ukc_m.toFixed(2) : '6.44') + 'm';
-                document.getElementById('m_fb').innerText = (p.fb_pier_m !== undefined ? p.fb_pier_m.toFixed(2) : '1.40') + 'm';
+                document.getElementById('m_hs').innerText = (p.hs_pier_m !== undefined ? p.hs_pier_m.toFixed(2) : '3.71') + 'm';
+                document.getElementById('m_w').innerText = (p.w_local_ms !== undefined ? p.w_local_ms.toFixed(2) : '8.50') + 'm';
+                document.getElementById('m_ukc').innerText = (p.ukc_m !== undefined ? p.ukc_m.toFixed(2) : '5.84') + 'm';
+                document.getElementById('m_fb').innerText = (p.fb_pier_m !== undefined ? p.fb_pier_m.toFixed(2) : '2.00') + 'm';
                 
                 document.getElementById('m_stat_hs').className = (p.hs_pier_m > 1.20) ? 'badge-veto-m' : 'badge-pass-m';
                 document.getElementById('m_stat_hs').innerText = (p.hs_pier_m > 1.20) ? 'VETO' : 'PASS';
@@ -279,23 +266,25 @@
                 document.getElementById('m_stat_fb').className = (p.fb_pier_m < 0.50) ? 'badge-veto-m' : 'badge-pass-m';
                 document.getElementById('m_stat_fb').innerText = (p.fb_pier_m < 0.50) ? 'VETO' : 'PASS';
             }
+
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'confirmReceiptACK', timestamp: Date.now() }, '*');
+            }
         };
 
-        // 監聽來自 Master (index.html) 之跨視窗 Message
         window.addEventListener('message', (event) => {
             if (event.data && event.data.type === 'SSOT_SYNC') {
                 window.onSSOTDataReceived(event.data.data);
             }
         });
 
-        // 獨立備用 Polling (直接讀取 ./latest_decision.json)
         async function fetchSSOTDataFallback() {
             try {
                 const response = await fetch('./latest_decision.json?t=' + Date.now());
                 if (!response.ok) throw new Error("HTTP " + response.status);
                 const data = await response.json();
                 window.onSSOTDataReceived(data);
-            } catch (err) { console.warn("[Mobile Fallback Polling Warning]:", err); }
+            } catch (err) { console.warn("[Mobile Fallback Warning]:", err); }
         }
 
         setInterval(function() {
