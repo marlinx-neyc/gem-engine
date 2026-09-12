@@ -2,72 +2,319 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GEM Engine V36D - Master SSOT Control Hub</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEM Engine v36D.11.0 戰術指揮儀表板</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body {
-            width: 100%; height: 100%;
-            background-color: #0b1120; color: #f8fafc;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            overflow: hidden;
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-green: #10b981;
+            --accent-yellow: #f59e0b;
+            --accent-red: #ef4444;
+            --border-color: #334155;
         }
-        #appFrame {
-            width: 100%; height: 100%; border: none; display: block;
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .header {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .title-section h1 {
+            margin: 0;
+            font-size: 1.6rem;
+            color: #38bdf8;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .timestamp {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .veto-banner {
+            grid-column: 1 / -1;
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid var(--accent-red);
+            color: #fca5a5;
+            padding: 15px 20px;
+            border-radius: 8px;
+            display: none;
+            font-weight: bold;
+            align-items: center;
+            gap: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+
+        .main-decision {
+            font-size: 2.2rem;
+            font-weight: bold;
+            text-align: center;
+            padding: 15px 0;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .metric-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .metric-item {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #38bdf8;
+            margin-top: 4px;
+        }
+
+        .progress-bar-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            height: 16px;
+            overflow: hidden;
+            display: flex;
+            margin-top: 10px;
+        }
+
+        .progress-micro {
+            background: #3b82f6;
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+
+        .progress-macro {
+            background: #a855f7;
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 8px;
         }
     </style>
 </head>
 <body>
-    <iframe id="appFrame" src="about:blank"></iframe>
 
-    <script>
-        let currentSSOTData = null;
-        let lastFetchTime = Date.now();
+<div class="container">
+    <!-- 頂部標題區 -->
+    <div class="header">
+        <div class="title-section">
+            <h1>🛡️ GEM-V36D 戰術指揮面板</h1>
+            <div class="timestamp" id="last-updated">更新時間：載入中...</div>
+        </div>
+        <div>
+            <span id="version-tag" style="background: #334155; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem;">v36D.11.0</span>
+        </div>
+    </div>
 
-        // 1. 裝置自動路由判斷 (< 768px 自動載入 mobile.html，否則載入 desktop.html)
-        function getTargetTargetUrl() {
-            return window.innerWidth < 768 ? 'mobile.html' : 'desktop.html';
-        }
+    <!-- PINN 物理 Hard-VETO 警告條 -->
+    <div class="veto-banner" id="veto-banner">
+        🚨 警告：觸發 PINN 物理剛性防線 (Hard-VETO)！安全指標已突破物理容許極限，請立即強制暫停靠泊或採取防颱處置。
+    </div>
 
-        function initFrameRouting() {
-            const frame = document.getElementById('appFrame');
-            const targetUrl = getTargetTargetUrl();
-            if (!frame.src || !frame.src.endsWith(targetUrl)) {
-                frame.src = targetUrl;
+    <!-- 1. 核心裁決卡片 -->
+    <div class="card">
+        <div class="card-title">即時戰術裁決 (Tactical Decision)</div>
+        <div class="main-decision" id="decision-text">載入中...</div>
+        <div class="metric-group">
+            <div class="metric-item">
+                <div style="font-size: 0.8rem; color: var(--text-secondary);">AI 信心指數</div>
+                <div class="metric-value" id="confidence-score">0%</div>
+            </div>
+            <div class="metric-item">
+                <div style="font-size: 0.8rem; color: var(--text-secondary);">剛性防線狀態</div>
+                <div class="metric-value" id="veto-status" style="font-size: 1.1rem; line-height: 2rem;">檢查中</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. 不確定性與相對精確度卡片 (新增) -->
+    <div class="card">
+        <div class="card-title">相對精確度與自信度評估 (Precision & Uncertainty)</div>
+        <div class="metric-group">
+            <div class="metric-item">
+                <div style="font-size: 0.8rem; color: var(--text-secondary);">不確定性方差 (σ)</div>
+                <div class="metric-value" id="sigma-val">0.000</div>
+                <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 4px;">數值越低代表自信度越高</div>
+            </div>
+            <div class="metric-item">
+                <div style="font-size: 0.8rem; color: var(--text-secondary);">雙核精確度提升</div>
+                <div class="metric-value" id="precision-gain" style="color: #10b981;">+0%</div>
+                <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 4px;">相較單核同化提升幅度</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. 雙核動態注意力閘卡片 -->
+    <div class="card">
+        <div class="card-title">雙核動態注意力分配 (Attention Gate)</div>
+        <div class="progress-bar-container">
+            <div class="progress-micro" id="bar-micro" style="width: 50%;"></div>
+            <div class="progress-macro" id="bar-macro" style="width: 50%;"></div>
+        </div>
+        <div class="legend">
+            <span>🟦 微觀物理腦: <strong id="weight-micro">50%</strong></span>
+            <span>🟪 宏觀奇門腦: <strong id="weight-macro">50%</strong></span>
+        </div>
+    </div>
+
+    <!-- 4. PINN 物理水文邊界解算卡片 -->
+    <div class="card" style="grid-column: 1 / -1;">
+        <div class="card-title">PINN 物理水文邊界數值 (Hydrodynamic Physics Metrics)</div>
+        <div class="metric-group" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+            <div class="metric-item">
+                <div style="font-size: 0.8rem; color: var(--text-secondary);">碼頭計算浪高 (Hs Pier)</div>
+                <div class="metric-value" id="hs-pier">0.00 m</div>
+            </div>
+            <div class="metric-item">
+                <div style="font-size: 0.8rem; color: var(--text-secondary);">局部風速 (W Local)</div>
+                <div class="metric-value" id="w-local">0.00 m/s</div>
+            </div>
+            <div class="metric-item">
+                <div style="font-size: 0.8rem; color: var(--text-secondary);">富餘水深 (UKC)</div>
+                <div class="metric-value" id="ukc-m">0.00 m</div>
+            </div>
+            <div class="metric-item">
+                <div style="font-size: 0.8rem; color: var(--text-secondary);">預留乾舷高度 (Freeboard)</div>
+                <div class="metric-value" id="fb-pier">0.00 m</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function fetchDecisionData() {
+        try {
+            const response = await fetch('./latest_decision.json?t=' + new Date().getTime());
+            if (!response.ok) throw new Error('Network response was not ok');
+            const data = await response.json();
+
+            // 1. 基本資訊與時間
+            document.getElementById('last-updated').innerText = '更新時間：' + (data.timestamp || 'N/A');
+            document.getElementById('version-tag').innerText = data.version || 'v36D.11.0';
+
+            // 2. 核心裁決與顏色
+            const decisionText = data.decision || '未知';
+            const decisionEl = document.getElementById('decision-text');
+            decisionEl.innerText = decisionText;
+            
+            if (decisionText.includes('放行')) {
+                decisionEl.style.color = 'var(--accent-green)';
+            } else if (decisionText.includes('限制')) {
+                decisionEl.style.color = 'var(--accent-yellow)';
+            } else {
+                decisionEl.style.color = 'var(--accent-red)';
             }
-        }
 
-        // 2. 視窗大小改變時自適應切換視角
-        window.addEventListener('resize', () => {
-            initFrameRouting();
-        });
+            document.getElementById('confidence-score').innerText = (data.confidence_score || 0) + '%';
 
-        // 3. 全局 3 秒 Polling 讀取 latest_decision.json 並向子視窗廣播
-        async function pollSSOTData() {
-            try {
-                const response = await fetch('./latest_decision.json?t=' + Date.now());
-                if (!response.ok) throw new Error("HTTP " + response.status);
-                currentSSOTData = await response.json();
-                lastFetchTime = Date.now();
+            // 3. 硬性防線 (Hard-VETO) 告警
+            const vetoAlert = data.hard_veto_alert || false;
+            const vetoBanner = document.getElementById('veto-banner');
+            const vetoStatus = document.getElementById('veto-status');
 
-                // 廣播給子視窗 (iframe)
-                const frame = document.getElementById('appFrame');
-                if (frame && frame.contentWindow) {
-                    if (typeof frame.contentWindow.onSSOTDataReceived === 'function') {
-                        frame.contentWindow.onSSOTDataReceived(currentSSOTData);
-                    }
-                    frame.contentWindow.postMessage({ type: 'SSOT_SYNC', data: currentSSOTData }, '*');
-                }
-            } catch (err) {
-                console.warn("[Master SSOT Polling Error]:", err);
+            if (vetoAlert) {
+                vetoBanner.style.display = 'flex';
+                vetoStatus.innerText = '⚠️ 觸發阻斷';
+                vetoStatus.style.color = 'var(--accent-red)';
+            } else {
+                vetoBanner.style.display = 'none';
+                vetoStatus.innerText = '🟢 正常放行';
+                vetoStatus.style.color = 'var(--accent-green)';
             }
-        }
 
-        document.addEventListener("DOMContentLoaded", () => {
-            initFrameRouting();
-            pollSSOTData();
-            setInterval(pollSSOTData, 3000);
-        });
-    </script>
+            // 4. 不確定性與相對精確度指標
+            if (data.precision_metrics) {
+                document.getElementById('sigma-val').innerText = data.precision_metrics.converged_sigma.toFixed(4);
+                document.getElementById('precision-gain').innerText = '+' + data.precision_metrics.precision_gain_pct.toFixed(1) + '%';
+            }
+
+            // 5. 注意力門控 (Attention Gate)
+            if (data.attention_gate) {
+                const microW = data.attention_gate.micro_physics_weight || 50;
+                const macroW = data.attention_gate.macro_qimen_weight || 50;
+                document.getElementById('bar-micro').style.width = microW + '%';
+                document.getElementById('bar-macro').style.width = macroW + '%';
+                document.getElementById('weight-micro').innerText = microW.toFixed(1) + '%';
+                document.getElementById('weight-macro').innerText = macroW.toFixed(1) + '%';
+            }
+
+            // 6. PINN 物理解算數據
+            if (data.physics_metrics) {
+                document.getElementById('hs-pier').innerText = data.physics_metrics.hs_pier_m + ' m';
+                document.getElementById('w-local').innerText = data.physics_metrics.w_local_ms + ' m/s';
+                document.getElementById('ukc-m').innerText = data.physics_metrics.ukc_m + ' m';
+                document.getElementById('fb-pier').innerText = data.physics_metrics.fb_pier_m + ' m';
+            }
+
+        } catch (error) {
+            console.error('Error loading decision JSON:', error);
+        }
+    }
+
+    // 初次載入與每 30 秒自動刷新
+    fetchDecisionData();
+    setInterval(fetchDecisionData, 30000);
+</script>
+
 </body>
 </html>
