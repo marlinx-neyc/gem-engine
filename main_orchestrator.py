@@ -8,11 +8,6 @@ GEM-V36D Dialectical Engine (v36D.11.0 雙核辯證學習引擎)
 """
 import os
 import math
-import random
-import argparse
-import time
-from datetime import datetime, timezone, timedelta
-from typing import Dict, Any, Tuple, List
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -102,7 +97,7 @@ class GEM36DNormalizedFeatureExtractor:
         return np.clip((raw_vec - min_b) / (max_b - min_b + 1e-6), 0.0, 1.0)
 
 # ==============================================================================
-# 2. 雙核神經網絡與相對精確度優化器
+# 2. 雙核神經網絡與 PINN 引擎
 # ==============================================================================
 class MicroPhysicsNet(nn.Module):
     def __init__(self, input_dim=24):
@@ -148,12 +143,6 @@ class DialecticalSynthesizer(nn.Module):
         final_pred = self.final_classifier(h_syn)
         return final_pred, h_micro, h_macro, p_micro, p_macro, w_macro
 
-def dialectical_loss(y_pred, y_true, h_micro, h_macro, p_micro, p_macro):
-    loss_task = F.cross_entropy(y_pred, y_true)
-    loss_orthogonal = torch.mean(torch.abs(F.cosine_similarity(h_micro, h_macro)))
-    divergence = F.mse_loss(F.softmax(p_micro, dim=1), F.softmax(p_macro, dim=1))
-    return loss_task + 0.3 * loss_orthogonal - 0.1 * divergence
-
 class PINNPhysicsEngine:
     def __init__(self):
         self.res_net = nn.Sequential(nn.Linear(36, 16), nn.Tanh(), nn.Linear(16, 2), nn.Hardtanh(-0.15, 0.15))
@@ -172,7 +161,7 @@ class PINNPhysicsEngine:
         return {"hs_pier_m": hs_pier, "w_local_ms": w_local, "ukc_m": ukc, "fb_pier_m": fb_pier, "has_veto": has_veto}
 
 # ==============================================================================
-# 3. 系統中樞與相對精確度優化器
+# 3. 系統中樞與相對精確度引擎
 # ==============================================================================
 class AutonomousDialecticalOrchestrator:
     def __init__(self, model_path="model_v36D.11.0.pt"):
@@ -186,12 +175,15 @@ class AutonomousDialecticalOrchestrator:
             print(f"✅ 載入辯證大腦權重: {self.model_path}")
 
 class PrecisionConvergenceEngine(nn.Module):
-    """將物理殘差與奇門先驗結合，實現相對精確性收斂的決策優化器"""
+    """相對精確度雙核收斂優化器 (v36D.11.0)"""
     def __init__(self, orchestrator: AutonomousDialecticalOrchestrator):
         super().__init__()
         self.orchestrator = orchestrator
         self.variance_estimator = nn.Sequential(
-            nn.Linear(36, 32), nn.ReLU(), nn.Linear(32, 2), nn.Softplus()
+            nn.Linear(36, 32),
+            nn.ReLU(),
+            nn.Linear(32, 2),
+            nn.Softplus()
         )
 
     def forward(self, telemetry: UnifiedMarineTelemetry):
@@ -217,5 +209,5 @@ class PrecisionConvergenceEngine(nn.Module):
             "precision_gain_pct": round(float((precision_micro / converged_precision).item()) * 100, 2),
             "physics_veto": pinn_metrics["has_veto"],
             "confidence_score": round(float(torch.max(F.softmax(final_pred, dim=1)).item()) * 100, 2),
-            "w_macro": w_macro.item()
+            "w_macro": float(w_macro.item())
         }
