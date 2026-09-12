@@ -9,7 +9,7 @@ from main_orchestrator import (
 )
 
 def build_veto_reason_string(metrics: dict) -> str:
-    """動態解析觸發 VETO 的精確物理原因（修復舊版數值判斷 Bug）"""
+    """動態解析真正觸發 VETO 的精確物理原因 (修復數值判斷 Bug)"""
     triggers = []
     if metrics["hs_pier_m"] > 1.20:
         triggers.append(f"碼頭浪高 Hs ({metrics['hs_pier_m']}m > 1.20m)")
@@ -25,28 +25,28 @@ def build_veto_reason_string(metrics: dict) -> str:
     return "物理指標正常 (PASS)"
 
 def fetch_cwa_and_run_pipeline():
-    # 1. 初始化大腦與精確度收斂引擎 (載入 v36D.11.0 權重)
+    # 1. 載入最新 v36D.11.0 權重與精確度收斂引擎
     model_path = os.getenv("MODEL_PATH", "model_v36D.11.0.pt")
     orchestrator = AutonomousDialecticalOrchestrator(model_path=model_path)
     orchestrator.policy.eval()
     precision_engine = PrecisionConvergenceEngine(orchestrator)
     
-    # 2. 帶入當前遙測數據
+    # 2. 帶入當前遙測數據 (以極端海象數據為例)
     telemetry = UnifiedMarineTelemetry(
         hs_cwa=3.23, w_cwa=13.50, tide_eta_m=1.20, 
         astro_tide_phase=0.95, future_3h_tide_surge_m=0.75, typhoon_dist_km=110.0
     )
     
-    # 3. 執行相對精確度雙核收斂評估
+    # 3. 執行相對精確度雙核收斂與 PINN 評估
     res = precision_engine(telemetry)
     norm_vec = orchestrator.extractor.build_normalized_vector(telemetry)
     pinn_metrics = orchestrator.pinn_engine.evaluate_physics(telemetry, norm_vec)
     
-    # 修復舊版 VETO 判讀文字
+    # 修正 VETO 原因文字
     veto_reason = build_veto_reason_string(pinn_metrics)
     pinn_metrics["reason"] = veto_reason
     
-    # 4. 封裝最新的 SSOT 規範結構
+    # 4. 封裝最新的 SSOT 規範結構 (v36D.11.0)
     payload = {
         "version": "v36D.11.0",
         "timestamp": datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S CST"),
@@ -71,7 +71,7 @@ def fetch_cwa_and_run_pipeline():
         }
     }
     
-    # 5. 導出為 SSOT 狀態檔
+    # 5. 寫入 SSOT 狀態檔
     with open("latest_decision.json", "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
         
