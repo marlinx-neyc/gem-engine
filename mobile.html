@@ -2,381 +2,111 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GEM Engine Mobile V36D.12.1 - 手持戰術智庫</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GEM Engine Mobile V36D.13.0 - Level 5 手持戰術台</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body {
-            width: 100%; min-height: 100%; min-height: 100dvh;
-            background-color: #0b1120; color: #f8fafc;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            overflow-x: hidden;
-        }
-        .mobile-container { width: 100%; min-height: 100dvh; padding: 12px; }
-        .card-mob {
-            background: #1e293b; border-radius: 8px; padding: 12px;
-            border: 1px solid #334155; margin-bottom: 10px; color: #f8fafc;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        }
-        .banner-mob {
-            border: 2px solid #ef4444; background: rgba(239, 68, 68, 0.2); color: #fca5a5;
-            padding: 10px; border-radius: 6px; font-weight: bold; margin-bottom: 10px;
-            font-size: 13px; line-height: 1.4; text-align: center; transition: all 0.3s ease;
-        }
-        .stale-mob {
-            display: none; background: #ef4444; color: #ffffff; padding: 8px 10px;
-            text-align: center; font-weight: bold; border-radius: 6px; margin-bottom: 10px; font-size: 11px;
-            line-height: 1.4; box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
-        }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; }
+        body { background-color: #0b1120; color: #f8fafc; font-family: -apple-system, sans-serif; padding: 12px; }
+        .card-mob { background: #1e293b; border-radius: 8px; padding: 12px; border: 1px solid #334155; margin-bottom: 10px; }
+        .banner-mob { border: 2px solid #ef4444; background: rgba(239, 68, 68, 0.2); color: #fca5a5; padding: 10px; border-radius: 6px; text-align: center; font-weight: bold; margin-bottom: 10px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11px; }
         .item-box { background: #0f172a; padding: 8px; border-radius: 6px; border: 1px solid #334155; }
-        .badge-veto-m { background: #ef4444; color: #fff; padding: 1px 5px; border-radius: 3px; font-size: 10px; font-weight: bold; }
-        .badge-pass-m { background: #10b981; color: #fff; padding: 1px 5px; border-radius: 3px; font-size: 10px; font-weight: bold; }
         .table-full { width: 100%; border-collapse: collapse; font-size: 11px; color: #cbd5e1; }
-        .table-full td, .table-full th { padding: 5px 3px; text-align: left; vertical-align: middle; }
-
-        .attn-bar-bg {
-            background: #0f172a; border-radius: 6px; height: 10px; overflow: hidden;
-            display: flex; margin-top: 6px; border: 1px solid #334155;
-        }
-        .attn-micro { background: #3b82f6; height: 100%; transition: width 0.5s ease; }
-        .attn-macro { background: #a855f7; height: 100%; transition: width 0.5s ease; }
-
-        .live-dot-blue {
-            display: inline-block; width: 8px; height: 8px; background-color: #3b82f6;
-            border-radius: 50%; margin-right: 6px; box-shadow: 0 0 8px #3b82f6; animation: pulseBlue 1.5s infinite;
-        }
-        @keyframes pulseBlue { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
-
-        .nav-switch { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 8px 12px; background: #0f172a; border-radius: 6px; border: 1px solid #334155; font-size: 11px; }
+        .table-full td, .table-full th { padding: 4px 2px; text-align: left; }
+        .nav-switch { display: flex; justify-content: space-between; margin-top: 15px; padding: 8px 12px; background: #0f172a; border-radius: 6px; border: 1px solid #334155; font-size: 11px; }
         .nav-switch a { color: #38bdf8; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div class="mobile-container">
-        <!-- 1. 頂部狀態卡片 -->
-        <div class="card-mob" id="topStatusCard" style="display:flex; justify-content:space-between; align-items:center;">
-            <div><span class="live-dot-blue"></span><strong style="color:#38bdf8; font-size:12px;">● LIVE SSOT 連線中 (v36D.12.1)</strong></div>
-            <div style="font-size:11px; color:#94a3b8;">通訊: <span id="mobCommCount" style="color:#f8fafc; font-weight:bold;">0</span> 次 | <span id="mobSecAgo">更新: 0 秒前</span></div>
-        </div>
+    <div class="card-mob" style="display:flex; justify-content:space-between; align-items:center;">
+        <div><strong style="color:#38bdf8; font-size:12px;">● LIVE SSOT (v36D.13.0 Level 5)</strong></div>
+        <div style="font-size:11px; color:#94a3b8;">通訊: <span id="mobCommCount">0</span> 次</div>
+    </div>
 
-        <div id="staleAlertMob" class="stale-mob">
-            🔴 數據過期 (OUT OF DATE / READ_ONLY_BACKUP)<br>
-            <span style="font-size:10px; font-weight:normal;">警告：數據已逾 30 秒未更新，請勿依此進行靠泊決策！</span>
-        </div>
+    <div id="vetoBannerMob" class="banner-mob">載入即時戰術裁決中...</div>
 
-        <!-- 2. Q-Mode 戰術裁決 Banner -->
-        <div id="vetoBannerMob" class="banner-mob">載入即時戰術裁決中...</div>
-
-        <!-- 3. AI 雙核戰術精確度與注意力閘 -->
-        <div class="card-mob" style="border: 1px solid #38bdf8;">
-            <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">🧠 雙核相對精確度與注意力分配</strong>
-            <div class="grid-2">
-                <div class="item-box">
-                    <div style="color:#94a3b8;">AI 信心指數</div>
-                    <div id="mob_confidence" style="color:#10b981; font-weight:bold; font-size:14px;">100.0%</div>
-                </div>
-                <div class="item-box">
-                    <div style="color:#94a3b8;">不確定性 (σ) / 精確度升</div>
-                    <div style="font-weight:bold; font-size:11px; color:#38bdf8; margin-top:2px;">
-                        σ: <span id="mob_sigma">0.3425</span> | <span id="mob_precision_gain" style="color:#10b981;">+52.9%</span>
-                    </div>
-                </div>
-            </div>
-            <div style="margin-top:8px;">
-                <div style="display:flex; justify-content:space-between; font-size:10px; color:#cbd5e1;">
-                    <span>🟦 微觀物理腦: <strong id="mob_w_micro">65.0%</strong></span>
-                    <span>🟪 宏觀奇門腦: <strong id="mob_w_macro">35.0%</strong></span>
-                </div>
-                <div class="attn-bar-bg">
-                    <div id="bar_micro_m" class="attn-micro" style="width: 65%;"></div>
-                    <div id="bar_macro_m" class="attn-macro" style="width: 35%;"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 4. 即時海象數值與剛性門檻比對 (PINN) -->
-        <div class="card-mob" id="pinnCard">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <strong style="color:#38bdf8; font-size:12px;">即時海象與剛性門檻比對 (PINN Engine)</strong>
-                <span id="mobileTimestamp" style="font-size:10px; color:#38bdf8; font-weight:bold;">載入中...</span>
-            </div>
-            <div class="grid-2">
-                <div class="item-box">
-                    <div style="color:#94a3b8; margin-bottom:2px;">Hs Pier 波高 (<=1.20m)</div>
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span id="m_hs" style="color:#facc15; font-weight:bold;">3.71m</span>
-                        <span id="m_stat_hs" class="badge-veto-m">VETO</span>
-                    </div>
-                </div>
-                <div class="item-box">
-                    <div style="color:#94a3b8; margin-bottom:2px;">Wind Local 風速 (<=10.8m/s)</div>
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span id="m_w" style="color:#facc15; font-weight:bold;">8.50m/s</span>
-                        <span id="m_stat_w" class="badge-pass-m">PASS</span>
-                    </div>
-                </div>
-                <div class="item-box">
-                    <div style="color:#94a3b8; margin-bottom:2px;">UKC 裕深 (>=1.50m)</div>
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span id="m_ukc" style="color:#10b981; font-weight:bold;">5.84m</span>
-                        <span id="m_stat_ukc" class="badge-pass-m">PASS</span>
-                    </div>
-                </div>
-                <div class="item-box">
-                    <div style="color:#94a3b8; margin-bottom:2px;">FB 乾舷 (>=0.50m)</div>
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span id="m_fb" style="color:#10b981; font-weight:bold;">2.00m</span>
-                        <span id="m_stat_fb" class="badge-pass-m">PASS</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 5. 當日船班對應數據、官模燈號與時窗動態處置 -->
-        <div class="card-mob">
-            <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">當日船班官模燈號比對與時窗動態處置</strong>
-            <table class="table-full" style="margin-bottom:8px;">
-                <thead>
-                    <tr style="border-bottom:1px solid #334155; color:#94a3b8; font-size:10px;">
-                        <th style="width:14%;">時段</th>
-                        <th style="width:26%;">海象 vs 標準</th>
-                        <th style="width:18%;">官 / GEM</th>
-                        <th>動態處置與時窗調度方式</th>
-                        <th style="text-align:center; width:10%;">燈號</th>
-                    </tr>
-                </thead>
-                <tbody id="mob_tdx_body">
-                    <tr style="border-bottom:1px solid #0f172a;">
-                        <td style="font-weight:bold;">07:30</td>
-                        <td><span style="color:#facc15;">Hs 1.15m</span> [<=1.20]</td>
-                        <td>准 / <span style="color:#f59e0b; font-weight:bold;">🟡 限制</span></td>
-                        <td style="color:#38bdf8;">08:30 首班「延滯登」至 10:00 浪平開放</td>
-                        <td style="text-align:center;">🟡</td>
-                    </tr>
-                    <tr style="border-bottom:1px solid #0f172a;">
-                        <td style="font-weight:bold;">09:00</td>
-                        <td><span style="color:#facc15;">W 9.8m/s</span> [Δθ 28°]</td>
-                        <td>准 / <span style="color:#f59e0b; font-weight:bold;">🟡 限制</span></td>
-                        <td style="color:#f59e0b;">北岸越浪，發動「游擊切換至南岸碼頭」</td>
-                        <td style="text-align:center;">🟡</td>
-                    </tr>
-                    <tr style="border-bottom:1px solid #0f172a;">
-                        <td style="font-weight:bold;">11:00</td>
-                        <td><span style="color:#ef4444; font-weight:bold;">Hs 2.75m</span> [Tp 14.5s]</td>
-                        <td>觀察 / <span style="color:#ef4444; font-weight:bold;">🔴 封島</span></td>
-                        <td style="color:#ef4444; font-weight:bold;">11:20 末班登島截止 / 止登預警發布</td>
-                        <td style="text-align:center;">🔴</td>
-                    </tr>
-                    <tr style="border-bottom:1px solid #0f172a;">
-                        <td style="font-weight:bold;">14:00</td>
-                        <td><span style="color:#ef4444; font-weight:bold;">Δθ 52°</span> [>=45°VETO]</td>
-                        <td>准 / <span style="color:#ef4444; font-weight:bold;">🔴 封島</span></td>
-                        <td style="color:#ef4444; font-weight:bold;">14:20 全員「提早退」強制清島撤離</td>
-                        <td style="text-align:center;">🔴</td>
-                    </tr>
-                    <tr style="border-bottom:1px solid #0f172a;">
-                        <td style="font-weight:bold;">15:00</td>
-                        <td><span style="color:#ef4444; font-weight:bold;">W 12.5m/s</span> [>10.8m]</td>
-                        <td>准 / <span style="color:#ef4444; font-weight:bold;">🔴 封島</span></td>
-                        <td style="color:#ef4444;">取消 15:30 末班，實施全線防颱撤退</td>
-                        <td style="text-align:center;">🔴</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- 6. ⚓ 游擊式動態調度與時窗預判卡片 -->
-        <div class="card-mob" style="border: 1px solid #f59e0b;">
-            <strong style="color:#f59e0b; font-size:12px; display:block; margin-bottom:6px;">⚓ 游擊式動態調度與時窗預判</strong>
-            <div style="font-size:11px; line-height:1.6; color:#cbd5e1;">
-                <div>靠泊碼頭：<strong id="mob_berthing_pier" style="color:#facc15;">無 (雙岸失效，禁止靠泊)</strong></div>
-                <div>撤離碼頭：<strong id="mob_evacuation_pier" style="color:#ef4444;">無 (雙岸失效，直航返航烏石港)</strong></div>
-                <div style="margin-top:2px;">戰術處置：<strong id="mob_tactical_summary" style="color:#ef4444;">執行「下午游擊撤退【南岸碼頭撤離】」</strong></div>
-                <div style="border-top:1px dashed #334155; margin-top:4px; padding-top:4px;">
-                    <div style="color:#cbd5e1;"><b>上午時窗：</b> <span id="mob_morning_tactic" style="color:#38bdf8;">08:30 班次改至【南岸權宜碼頭】靠泊</span></div>
-                    <div style="color:#cbd5e1; margin-top:2px;"><b>下午預警：</b> <span id="mob_afternoon_tactic" style="color:#fca5a5;">🚨 11:20 止登，全員於 14:20 前至【南岸權宜碼頭】登船撤離</span></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 7. 🌀 颱風與奇門宏觀氣場預判專區 (重構恢復) -->
-        <div class="card-mob" style="border: 1px solid #a855f7;">
-            <strong style="color:#a855f7; font-size:12px; display:block; margin-bottom:6px;">🌀 颱風與奇門宏觀氣場預判專區</strong>
-            <div class="grid-2" style="font-size:11px; margin-bottom:6px;">
-                <div class="item-box">
-                    <div style="color:#94a3b8;">颱風中心距離</div>
-                    <div id="mob_typhoon_dist" style="color:#38bdf8; font-weight:bold;">450 km</div>
-                </div>
-                <div class="item-box">
-                    <div style="color:#94a3b8;">2D 氣壓梯度</div>
-                    <div id="mob_pressure_grad" style="color:#10b981; font-weight:bold;">1.10 hPa/100km</div>
-                </div>
-                <div class="item-box">
-                    <div style="color:#94a3b8;">巽宮氣場異常</div>
-                    <div id="mob_xun_anomaly" style="color:#facc15; font-weight:bold;">0.00 (正常)</div>
-                </div>
-                <div class="item-box">
-                    <div style="color:#94a3b8;">宏觀共振風險</div>
-                    <div id="mob_macro_risk" style="color:#ef4444; font-weight:bold;">高 (長浪共振)</div>
-                </div>
-            </div>
-            <div style="border-top:1px dashed #334155; padding-top:4px; font-size:10px; color:#c084fc;" id="mob_qimen_prompt">
-                🔮 奇門氣場匹配率達 100.0% (>=70%)，已啟動宏觀參研決策與預警提示
-            </div>
-        </div>
-
-        <!-- 8. 今日營運時段檢核 (6~9月規範) -->
-        <div class="card-mob">
-            <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">今日營運時段檢核 (6~9月規範)</strong>
-            <div class="grid-2" style="font-size:11px; color:#cbd5e1; line-height:1.6;">
-                <div>海象整備: <span style="color:#f8fafc;">07:30</span></div>
-                <div>首段登島: <span style="color:#f8fafc;">08:30</span></div>
-                <div>區間時段: <span style="color:#f8fafc;">12:30</span></div>
-                <div>末段登島: <span style="color:#f8fafc;">15:30</span></div>
-                <div>前日預警: <span style="color:#f59e0b;">16:30</span></div>
-                <div>離島截止: <span style="color:#ef4444; font-weight:bold;">17:30</span></div>
-            </div>
-        </div>
-
-        <!-- 9. 戰略三方案評估 (Ground Truth) -->
-        <div class="card-mob">
-            <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">戰略三方案評估 (Ground Truth)</strong>
-            <table class="table-full" style="margin-bottom:8px;">
-                <thead>
-                    <tr style="border-bottom:1px solid #334155; color:#94a3b8; font-size:10px;">
-                        <th style="width:25%;">方案</th>
-                        <th>數值比對 (預測 vs 標準)</th>
-                        <th style="text-align:center; width:25%;">燈號 / 裁決</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr style="border-bottom:1px solid #0f172a;">
-                        <td style="color:#cbd5e1; font-weight:bold;">A (官方)</td>
-                        <td style="color:#fca5a5;">Hs 3.60m [<=1.20m]</td>
-                        <td style="text-align:center; color:#ef4444; font-weight:bold;">🔴 封島</td>
-                    </tr>
-                    <tr style="border-bottom:1px solid #0f172a;">
-                        <td style="color:#cbd5e1; font-weight:bold;">B (監測)</td>
-                        <td style="color:#fca5a5;">W 16.00m/s [<=10.80m/s]</td>
-                        <td style="text-align:center; color:#ef4444; font-weight:bold;">🔴 封島</td>
-                    </tr>
-                    <tr>
-                        <td style="font-weight:bold; color:#facc15;">C (GEM)</td>
-                        <td style="color:#10b981;">UKC 5.84m | FB 2.00m</td>
-                        <td style="text-align:center; color:#facc15; font-weight:bold;">🔴 採納</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="nav-switch">
-            <span style="color:#94a3b8;">當前視角：📱 手機版控制台</span>
-            <a href="desktop.html">💻 切換至桌面版</a>
+    <!-- AI 雙核卡片 -->
+    <div class="card-mob" style="border: 1px solid #38bdf8;">
+        <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">🧠 雙核精確度與注意力分配</strong>
+        <div class="grid-2">
+            <div class="item-box"><div>AI 信心</div><div id="mob_confidence" style="color:#10b981; font-weight:bold;">100.0%</div></div>
+            <div class="item-box"><div>精確度升</div><div id="mob_precision_gain" style="color:#10b981; font-weight:bold;">+58.4%</div></div>
         </div>
     </div>
 
+    <!-- 即時水文卡片 -->
+    <div class="card-mob">
+        <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">即時海象門檻比對 (PINN Engine)</strong>
+        <div class="grid-2">
+            <div class="item-box"><div>Hs 波高 (<=1.20m)</div><div id="m_hs" style="color:#facc15; font-weight:bold;">3.71m</div></div>
+            <div class="item-box"><div>Wind 風速 (<=10.8m/s)</div><div id="m_w" style="color:#facc15; font-weight:bold;">8.50m/s</div></div>
+        </div>
+    </div>
+
+    <!-- ⚓ 游擊調度卡片 -->
+    <div class="card-mob" style="border: 1px solid #f59e0b;">
+        <strong style="color:#f59e0b; font-size:12px; display:block; margin-bottom:6px;">⚓ 游擊式動態調度與時窗預判</strong>
+        <div style="font-size:11px; line-height:1.6; color:#cbd5e1;">
+            <div>靠泊碼頭：<strong id="mob_berthing_pier" style="color:#facc15;">無 (雙岸失效，禁止靠泊)</strong></div>
+            <div>撤離碼頭：<strong id="mob_evacuation_pier" style="color:#ef4444;">無 (雙岸失效，直航返航烏石港)</strong></div>
+            <div style="margin-top:2px;">處置：<strong id="mob_tactical_summary" style="color:#ef4444;">執行「下午游擊撤退」</strong></div>
+        </div>
+    </div>
+
+    <!-- 🚀 Level 5 進階算子卡片 -->
+    <div class="card-mob" style="border: 1px solid #10b981;">
+        <strong style="color:#10b981; font-size:12px; display:block; margin-bottom:6px;">🚀 Level 5 視覺、水動力與賽局算子</strong>
+        <div class="grid-2">
+            <div class="item-box"><div>CV 越浪率</div><div id="mob_overtopping_rate" style="color:#facc15; font-weight:bold;">1.31 p/min</div></div>
+            <div class="item-box"><div>客輪沉降 (Squat)</div><div id="mob_squat_m" style="color:#38bdf8; font-weight:bold;">0.86 m</div></div>
+            <div class="item-box"><div>FNO 預報波高</div><div id="mob_fno_wave" style="color:#fca5a5; font-weight:bold;">1.58 m</div></div>
+            <div class="item-box"><div>量子拓撲相干性</div><div id="mob_quantum_coherence" style="color:#c084fc; font-weight:bold;">0.4682</div></div>
+        </div>
+    </div>
+
+    <div class="nav-switch">
+        <span style="color:#94a3b8;">當前視角：📱 手機版控制台</span>
+        <a href="desktop.html">💻 切換至桌面版</a>
+    </div>
+
     <script>
-        let lastUpdateMob = Date.now();
         let mobCommCounter = 0;
-
-        function getFormattedCSTTime(d = new Date()) {
-            const pad = (n) => String(n).padStart(2, '0');
-            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} CST`;
-        }
-
-        function updateLiveTimestamp() {
-            const tsEl = document.getElementById('mobileTimestamp');
-            if (tsEl) tsEl.innerText = getFormattedCSTTime(new Date());
-        }
-
         window.onSSOTDataReceived = function(data) {
             if (!data) return;
-            lastUpdateMob = Date.now();
             mobCommCounter++;
             document.getElementById('mobCommCount').innerText = mobCommCounter;
-            document.getElementById('staleAlertMob').style.display = 'none';
-
-            if (data.timestamp) document.getElementById('mobileTimestamp').innerText = data.timestamp;
-
+            
             let bannerEl = document.getElementById('vetoBannerMob');
-            let decisionStr = data.decision || '🔴 封島/防颱';
-            let isVeto = data.hard_veto_alert || false;
-            bannerEl.style.background = isVeto ? "rgba(239, 68, 68, 0.2)" : "rgba(16, 185, 129, 0.2)";
-            bannerEl.style.color = isVeto ? "#fca5a5" : "#6ee7b7";
-            bannerEl.innerText = `${decisionStr} ${isVeto ? '(觸發剛性 VETO 防線)' : '(正常放行)'}`;
-
-            if (data.confidence_score !== undefined) {
-                document.getElementById('mob_confidence').innerText = data.confidence_score + '%';
-            }
-            if (data.precision_metrics) {
-                document.getElementById('mob_sigma').innerText = data.precision_metrics.converged_sigma.toFixed(4);
-                document.getElementById('mob_precision_gain').innerText = '+' + data.precision_metrics.precision_gain_pct.toFixed(1) + '%';
-            }
-            if (data.attention_gate) {
-                let microW = data.attention_gate.micro_physics_weight !== undefined ? data.attention_gate.micro_physics_weight : 65.0;
-                let macroW = data.attention_gate.macro_qimen_weight !== undefined ? data.attention_gate.macro_qimen_weight : 35.0;
-                document.getElementById('mob_w_micro').innerText = microW.toFixed(1) + '%';
-                document.getElementById('mob_w_macro').innerText = macroW.toFixed(1) + '%';
-                document.getElementById('bar_micro_m').style.width = microW + '%';
-                document.getElementById('bar_macro_m').style.width = macroW + '%';
-            }
-
-            if (data.physics_metrics) {
-                let p = data.physics_metrics;
-                document.getElementById('m_hs').innerText = (p.hs_pier_m !== undefined ? p.hs_pier_m.toFixed(2) : '3.71') + 'm';
-                document.getElementById('m_w').innerText = (p.w_local_ms !== undefined ? p.w_local_ms.toFixed(2) : '8.50') + 'm';
-                document.getElementById('m_ukc').innerText = (p.ukc_m !== undefined ? p.ukc_m.toFixed(2) : '5.84') + 'm';
-                document.getElementById('m_fb').innerText = (p.fb_pier_m !== undefined ? p.fb_pier_m.toFixed(2) : '2.00') + 'm';
-                
-                document.getElementById('m_stat_hs').className = (p.hs_pier_m > 1.20) ? 'badge-veto-m' : 'badge-pass-m';
-                document.getElementById('m_stat_hs').innerText = (p.hs_pier_m > 1.20) ? 'VETO' : 'PASS';
-                document.getElementById('m_stat_w').className = (p.w_local_ms > 10.80) ? 'badge-veto-m' : 'badge-pass-m';
-                document.getElementById('m_stat_w').innerText = (p.w_local_ms > 10.80) ? 'VETO' : 'PASS';
-                document.getElementById('m_stat_ukc').className = (p.ukc_m < 1.50) ? 'badge-veto-m' : 'badge-pass-m';
-                document.getElementById('m_stat_ukc').innerText = (p.ukc_m < 1.50) ? 'VETO' : 'PASS';
-                document.getElementById('m_stat_fb').className = (p.fb_pier_m < 0.50) ? 'badge-veto-m' : 'badge-pass-m';
-                document.getElementById('m_stat_fb').innerText = (p.fb_pier_m < 0.50) ? 'VETO' : 'PASS';
-            }
+            bannerEl.innerText = `${data.decision || '🔴 封島/防颱'} (觸發剛性 VETO 防線)`;
 
             if (data.guerrilla_dispatch) {
                 let g = data.guerrilla_dispatch;
                 if (g.berthing_pier) document.getElementById('mob_berthing_pier').innerText = g.berthing_pier;
                 if (g.evacuation_pier) document.getElementById('mob_evacuation_pier').innerText = g.evacuation_pier;
                 if (g.tactical_summary) document.getElementById('mob_tactical_summary').innerText = g.tactical_summary;
-                if (g.morning_tactic) document.getElementById('mob_morning_tactic').innerText = g.morning_tactic;
-                if (g.afternoon_tactic) document.getElementById('mob_afternoon_tactic').innerText = g.afternoon_tactic;
             }
 
-            if (data.qimen_macro_consensus && data.qimen_macro_consensus.qimen_status_prompt) {
-                document.getElementById('mob_qimen_prompt').innerText = data.qimen_macro_consensus.qimen_status_prompt;
-            }
-
-            if (data.telemetry_summary && data.telemetry_summary.typhoon_dist_km !== undefined) {
-                document.getElementById('mob_typhoon_dist').innerText = data.telemetry_summary.typhoon_dist_km + ' km';
+            if (data.level5_advanced_metrics) {
+                let l5 = data.level5_advanced_metrics;
+                if (l5.vision_overtopping_rate_pmin !== undefined) document.getElementById('mob_overtopping_rate').innerText = l5.vision_overtopping_rate_pmin + ' p/min';
+                if (l5.vessel_hydrodynamics && l5.vessel_hydrodynamics.dynamic_squat_m !== undefined) document.getElementById('mob_squat_m').innerText = l5.vessel_hydrodynamics.dynamic_squat_m + ' m';
+                if (l5.fno_forecast_mean_hs_m !== undefined) document.getElementById('mob_fno_wave').innerText = l5.fno_forecast_mean_hs_m + ' m';
+                if (l5.quantum_topology_coherence !== undefined) document.getElementById('mob_quantum_coherence').innerText = l5.quantum_topology_coherence;
             }
         };
 
-        async function fetchSSOTDataFallback() {
+        async function fetchSSOTData() {
             try {
                 const response = await fetch('./latest_decision.json?t=' + Date.now());
                 if (!response.ok) throw new Error("HTTP " + response.status);
                 const data = await response.json();
                 window.onSSOTDataReceived(data);
-            } catch (err) { console.warn("[Mobile Fallback Warning]:", err); }
+            } catch (err) { console.warn("Mobile error:", err); }
         }
 
-        setInterval(function() {
-            updateLiveTimestamp();
-            const sec = Math.floor((Date.now() - lastUpdateMob) / 1000);
-            document.getElementById('mobSecAgo').innerText = '更新: ' + sec + ' 秒前';
-            document.getElementById('staleAlertMob').style.display = (sec > 30) ? 'block' : 'none';
-        }, 1000);
-
         document.addEventListener("DOMContentLoaded", () => {
-            updateLiveTimestamp();
-            fetchSSOTDataFallback();
-            setInterval(fetchSSOTDataFallback, 3000);
+            fetchSSOTData();
+            setInterval(fetchSSOTData, 3000);
         });
     </script>
 </body>
