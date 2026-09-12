@@ -1,25 +1,25 @@
 {
   "version": "v36D.11.0",
-  "timestamp": "2026-09-12 14:08:38 CST",
+  "timestamp": "2026-09-12 14:31:50 CST",
   "decision": "🔴 封島/防颱",
-  "confidence_score": 100.0,
+  "confidence_score": 99.95,
   "hard_veto_alert": true,
-  "veto_reason": "觸發剛性 VETO：碼頭浪高 Hs (3.17m > 1.20m) 及 局部風速 W (12.55m/s > 10.80m/s)",
+  "veto_reason": "觸發剛性 VETO：碼頭浪高 Hs (3.71m > 1.20m) 及 局部風速 W (11.77m/s > 10.80m/s)",
   "precision_metrics": {
-    "converged_sigma": 0.3064,
-    "precision_gain_pct": 45.96
+    "converged_sigma": 0.377,
+    "precision_gain_pct": 48.28
   },
   "attention_gate": {
     "micro_physics_weight": 100.0,
     "macro_qimen_weight": 0.0
   },
   "physics_metrics": {
-    "hs_pier_m": 3.17,
-    "w_local_ms": 12.55,
-    "ukc_m": 6.11,
+    "hs_pier_m": 3.71,
+    "w_local_ms": 11.77,
+    "ukc_m": 5.84,
     "fb_pier_m": 2.0,
     "has_veto": true,
-    "reason": "觸發剛性 VETO：碼頭浪高 Hs (3.17m > 1.20m) 及 局部風速 W (12.55m/s > 10.80m/s)"
+    "reason": "觸發剛性 VETO：碼頭浪高 Hs (3.71m > 1.20m) 及 局部風速 W (11.77m/s > 10.80m/s)"
   },
   "telemetry_summary": {
     "hs_cwa": 3.23,
