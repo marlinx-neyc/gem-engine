@@ -1,25 +1,25 @@
 {
   "version": "v36D.11.0",
-  "timestamp": "2026-09-12 23:16:10 CST",
+  "timestamp": "2026-09-13 02:13:59 CST",
   "decision": "🔴 封島/防颱",
   "confidence_score": 100.0,
   "hard_veto_alert": true,
-  "veto_reason": "觸發剛性 VETO：碼頭浪高 Hs (3.37m > 1.20m)",
+  "veto_reason": "觸發剛性 VETO：碼頭浪高 Hs (3.64m > 1.20m)",
   "precision_metrics": {
-    "converged_sigma": 0.3209,
-    "precision_gain_pct": 53.88
+    "converged_sigma": 0.2952,
+    "precision_gain_pct": 48.83
   },
   "attention_gate": {
     "micro_physics_weight": 100.0,
     "macro_qimen_weight": 0.0
   },
   "physics_metrics": {
-    "hs_pier_m": 3.37,
-    "w_local_ms": 9.02,
-    "ukc_m": 6.01,
+    "hs_pier_m": 3.64,
+    "w_local_ms": 8.5,
+    "ukc_m": 5.88,
     "fb_pier_m": 2.0,
     "has_veto": true,
-    "reason": "觸發剛性 VETO：碼頭浪高 Hs (3.37m > 1.20m)"
+    "reason": "觸發剛性 VETO：碼頭浪高 Hs (3.64m > 1.20m)"
   },
   "telemetry_summary": {
     "hs_cwa": 3.23,
