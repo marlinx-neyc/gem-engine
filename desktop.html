@@ -1,512 +1,477 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GEM Engine Desktop V36D.12.0 - 數位雙生海事戰術智庫</title>
-    <!-- 引入 ECharts 繪圖庫 -->
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            background-color: #0b1120; color: #f8fafc;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            padding: 12px; font-size: 12px;
-        }
-        .header-bar {
-            display: flex; justify-content: space-between; align-items: center;
-            background: #1e293b; padding: 10px 16px; border-radius: 8px;
-            border: 1px solid #334155; margin-bottom: 10px;
-        }
-        .banner-desk {
-            border: 2px solid #ef4444; background: rgba(239, 68, 68, 0.2); color: #fca5a5;
-            padding: 10px; border-radius: 8px; font-weight: bold; font-size: 15px;
-            text-align: center; margin-bottom: 10px; transition: all 0.3s ease;
-        }
-        .stale-desk {
-            display: none; background: #ef4444; color: #ffffff; padding: 8px;
-            text-align: center; font-weight: bold; border-radius: 6px; margin-bottom: 10px; font-size: 12px;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GEM Engine Desktop V36D.12.0 - 數位雙生海事戰術智庫 (含颱風與奇門預判完整版)</title>
+<!-- 引入 ECharts 繪圖庫 -->
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background-color: #0b1120; color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 12px; font-size: 12px; }
+.header-bar { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 10px 16px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 10px; }
+.banner-desk { border: 2px solid #ef4444; background: rgba(239, 68, 68, 0.2); color: #fca5a5; padding: 10px; border-radius: 8px; font-weight: bold; font-size: 15px; text-align: center; margin-bottom: 10px; transition: all 0.3s ease; }
+.stale-desk { display: none; background: #ef4444; color: #ffffff; padding: 8px; text-align: center; font-weight: bold; border-radius: 6px; margin-bottom: 10px; font-size: 12px; }
 
-        /* 32% / 68% 剛性雙欄佈局 */
-        .layout-main { display: flex; gap: 12px; align-items: stretch; }
-        .left-col { width: 32%; flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; }
-        .right-col { width: 68%; flex-grow: 1; display: flex; flex-direction: column; gap: 10px; }
+/* 32% / 68% 剛性雙欄佈局 */
+.layout-main { display: flex; gap: 12px; align-items: stretch; }
+.left-col { width: 32%; flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; }
+.right-col { width: 68%; flex-grow: 1; display: flex; flex-direction: column; gap: 10px; }
 
-        .card-desk {
-            background: #1e293b; border-radius: 8px; padding: 12px;
-            border: 1px solid #334155;
-        }
+.card-desk { background: #1e293b; border-radius: 8px; padding: 12px; border: 1px solid #334155; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.item-box { background: #0f172a; padding: 8px; border-radius: 6px; border: 1px solid #334155; }
+.badge-veto { background: #ef4444; color: #fff; padding: 2px 5px; border-radius: 3px; font-size: 10px; font-weight: bold; }
+.badge-pass { background: #10b981; color: #fff; padding: 2px 5px; border-radius: 3px; font-size: 10px; font-weight: bold; }
 
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .item-box { background: #0f172a; padding: 8px; border-radius: 6px; border: 1px solid #334155; }
-        .badge-veto { background: #ef4444; color: #fff; padding: 2px 5px; border-radius: 3px; font-size: 10px; font-weight: bold; }
-        .badge-pass { background: #10b981; color: #fff; padding: 2px 5px; border-radius: 3px; font-size: 10px; font-weight: bold; }
-        .table-full { width: 100%; border-collapse: collapse; font-size: 11px; color: #cbd5e1; }
-        .table-full td, .table-full th { padding: 5px 3px; text-align: left; vertical-align: middle; }
-        
-        .attn-bar-bg {
-            background: #0f172a; border-radius: 6px; height: 12px; overflow: hidden;
-            display: flex; margin-top: 6px; border: 1px solid #334155;
-        }
-        .attn-micro { background: #3b82f6; height: 100%; transition: width 0.5s ease; }
-        .attn-macro { background: #a855f7; height: 100%; transition: width 0.5s ease; }
+.table-full { width: 100%; border-collapse: collapse; font-size: 11px; color: #cbd5e1; }
+.table-full td, .table-full th { padding: 5px 3px; text-align: left; vertical-align: middle; }
 
-        /* 圖表容器尺寸與邊距 */
-        .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .chart-el {
-            width: 100%; min-height: 220px; height: 220px;
-            background: #1e293b; border-radius: 8px; border: 1px solid #334155; padding: 6px;
-        }
-        .chart-weekly-el {
-            width: 100%; min-height: 220px; height: 220px;
-            background: #1e293b; border-radius: 8px; border: 1px solid #334155; padding: 6px;
-        }
+.attn-bar-bg { background: #0f172a; border-radius: 6px; height: 12px; overflow: hidden; display: flex; margin-top: 6px; border: 1px solid #334155; }
+.attn-micro { background: #3b82f6; height: 100%; transition: width 0.5s ease; }
+.attn-macro { background: #a855f7; height: 100%; transition: width 0.5s ease; }
 
-        .live-dot-blue {
-            display: inline-block; width: 8px; height: 8px; background-color: #3b82f6;
-            border-radius: 50%; margin-right: 6px; box-shadow: 0 0 8px #3b82f6; animation: pulseBlue 1.5s infinite;
-        }
-        @keyframes pulseBlue { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
-        .nav-switch { display: flex; justify-content: space-between; align-items: center; padding: 8px 14px; background: #0f172a; border-radius: 8px; border: 1px solid #334155; font-size: 11px; margin-top: 10px; }
-        .nav-switch a { color: #38bdf8; text-decoration: none; font-weight: bold; }
-    </style>
+/* 圖表容器尺寸與邊距 */
+.charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.chart-el { width: 100%; min-height: 220px; height: 220px; background: #1e293b; border-radius: 8px; border: 1px solid #334155; padding: 6px; }
+.chart-weekly-el { width: 100%; min-height: 220px; height: 220px; background: #1e293b; border-radius: 8px; border: 1px solid #334155; padding: 6px; }
+
+.live-dot-blue { display: inline-block; width: 8px; height: 8px; background-color: #3b82f6; border-radius: 50%; margin-right: 6px; box-shadow: 0 0 8px #3b82f6; animation: pulseBlue 1.5s infinite; }
+@keyframes pulseBlue {
+  0% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.2); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.nav-switch { display: flex; justify-content: space-between; align-items: center; padding: 8px 14px; background: #0f172a; border-radius: 8px; border: 1px solid #334155; font-size: 11px; margin-top: 10px; }
+.nav-switch a { color: #38bdf8; text-decoration: none; font-weight: bold; }
+</style>
 </head>
 <body>
-    <!-- 頂部狀態列 -->
-    <div class="header-bar">
-        <div><span class="live-dot-blue"></span><strong style="color:#38bdf8; font-size:13px;">SSOT 雙生連線中 (v36D.12.0 桌面戰術台)</strong></div>
-        <div style="font-size:11px; color:#94a3b8;">通訊: <span id="deskCommCount" style="color:#f8fafc; font-weight:bold;">0</span> 次 | <span id="deskSecAgo">更新: 0 秒前</span></div>
-    </div>
 
-    <!-- 備援退避警示 Banner -->
-    <div id="staleAlertDesk" class="stale-desk">🔴 數據過期 (READ_ONLY_BACKUP) - 請勿依此進行靠泊決策</div>
+<!-- 頂部狀態列 -->
+<div class="header-bar">
+  <div><span class="live-dot-blue"></span><strong style="color:#38bdf8; font-size:13px;">SSOT 雙生連線中 (v36D.12.0 桌面戰術台 - 雙核完整版)</strong></div>
+  <div style="font-size:11px; color:#94a3b8;">通訊: <span id="deskCommCount" style="color:#f8fafc; font-weight:bold;">0</span> 次 | <span id="deskSecAgo">更新: 0 秒前</span></div>
+</div>
 
-    <!-- 頂部 Q-Mode 戰術裁決 Banner -->
-    <div id="vetoBannerDesk" class="banner-desk">載入即時戰術裁決中...</div>
+<!-- 備援退避警示 Banner -->
+<div id="staleAlertDesk" class="stale-desk">🔴 數據過期 (READ_ONLY_BACKUP) - 請勿依此進行靠泊決策</div>
 
-    <div class="layout-main">
-        <!-- 左側戰術控制欄 (32% 欄寬) -->
-        <div class="left-col">
-            <!-- 1. AI 雙核相對精確度與注意力閘 -->
-            <div class="card-desk" style="border: 1px solid #38bdf8;">
-                <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">🧠 雙核相對精確度與注意力分配 (v36D.12.0)</strong>
-                <div class="grid-2">
-                    <div class="item-box">
-                        <div style="color:#94a3b8;">AI 信心指數</div>
-                        <div id="desk_confidence" style="color:#10b981; font-weight:bold; font-size:15px;">100.0%</div>
-                    </div>
-                    <div class="item-box">
-                        <div style="color:#94a3b8;">不確定性 (σ) / 精確度升</div>
-                        <div style="font-weight:bold; font-size:12px; color:#38bdf8; margin-top:2px;">
-                            σ: <span id="desk_sigma">0.3551</span> | <span id="desk_precision_gain" style="color:#10b981;">+51.0%</span>
-                        </div>
-                    </div>
-                </div>
-                <div style="margin-top:8px;">
-                    <div style="display:flex; justify-content:space-between; font-size:10px; color:#cbd5e1;">
-                        <span>🟦 微觀物理腦: <strong id="desk_w_micro">100%</strong></span>
-                        <span>🟪 宏觀奇門腦: <strong id="desk_w_macro">0%</strong></span>
-                    </div>
-                    <div class="attn-bar-bg">
-                        <div id="bar_micro" class="attn-micro" style="width: 100%;"></div>
-                        <div id="bar_macro" class="attn-macro" style="width: 0%;"></div>
-                    </div>
-                </div>
-            </div>
+<!-- 頂部 Q-Mode 戰術裁決 Banner -->
+<div id="vetoBannerDesk" class="banner-desk">載入即時戰術裁決中...</div>
 
-            <!-- 2. PINN 海象比對 -->
-            <div class="card-desk">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <strong style="color:#38bdf8; font-size:12px;">即時水文與剛性門檻比對 (PINN Engine)</strong>
-                    <span id="deskTimestamp" style="font-size:10px; color:#38bdf8; font-weight:bold;">載入中...</span>
-                </div>
-                <div class="grid-2">
-                    <div class="item-box">
-                        <div style="color:#94a3b8; margin-bottom:2px;">Hs Pier 波高 (<=1.20m)</div>
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <span id="d_hs" style="color:#facc15; font-weight:bold; font-size:14px;">3.71m</span>
-                            <span id="d_stat_hs" class="badge-veto">VETO</span>
-                        </div>
-                    </div>
-                    <div class="item-box">
-                        <div style="color:#94a3b8; margin-bottom:2px;">Wind Local 風速 (<=10.8m/s)</div>
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <span id="d_w" style="color:#facc15; font-weight:bold; font-size:14px;">8.50m/s</span>
-                            <span id="d_stat_w" class="badge-pass">PASS</span>
-                        </div>
-                    </div>
-                    <div class="item-box">
-                        <div style="color:#94a3b8; margin-bottom:2px;">UKC 裕深 (>=1.50m)</div>
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <span id="d_ukc" style="color:#10b981; font-weight:bold; font-size:14px;">5.84m</span>
-                            <span id="d_stat_ukc" class="badge-pass">PASS</span>
-                        </div>
-                    </div>
-                    <div class="item-box">
-                        <div style="color:#94a3b8; margin-bottom:2px;">FB 乾舷 (>=0.50m)</div>
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <span id="d_fb" style="color:#10b981; font-weight:bold; font-size:14px;">2.00m</span>
-                            <span id="d_stat_fb" class="badge-pass">PASS</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 3. 當日船班官模燈號比對與最後判斷 (補齊最後戰術裁決區塊) -->
-            <div class="card-desk">
-                <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">當日船班官模燈號比對與最後判斷</strong>
-                <table class="table-full" style="margin-bottom:8px;">
-                    <thead>
-                        <tr style="border-bottom:1px solid #334155; color:#94a3b8; font-size:10px;">
-                            <th>時段</th><th>官方預報</th><th>GEM 模型判斷</th><th style="text-align:center;">燈號</th>
-                        </tr>
-                    </thead>
-                    <tbody id="desk_tdx_body">
-                        <tr style="border-bottom:1px solid #0f172a;">
-                            <td>07:30</td><td style="color:#10b981;">准予靠泊</td><td style="color:#ef4444; font-weight:bold;">🔴 封島/防颱</td><td style="text-align:center;">🔴</td>
-                        </tr>
-                        <tr style="border-bottom:1px solid #0f172a;">
-                            <td>09:00</td><td style="color:#10b981;">准予靠泊</td><td style="color:#ef4444; font-weight:bold;">🔴 封島/防颱</td><td style="text-align:center;">🔴</td>
-                        </tr>
-                        <tr style="border-bottom:1px solid #0f172a;">
-                            <td>11:00</td><td style="color:#f59e0b;">觀察靠泊</td><td style="color:#ef4444; font-weight:bold;">🔴 封島/防颱</td><td style="text-align:center;">🔴</td>
-                        </tr>
-                        <tr style="border-bottom:1px solid #0f172a;">
-                            <td>14:00</td><td style="color:#10b981;">准予靠泊</td><td style="color:#ef4444; font-weight:bold;">🔴 封島/防颱</td><td style="text-align:center;">🔴</td>
-                        </tr>
-                        <tr style="border-bottom:1px solid #0f172a;">
-                            <td>15:00</td><td style="color:#10b981;">准予靠泊</td><td style="color:#ef4444; font-weight:bold;">🔴 封島/防颱</td><td style="text-align:center;">🔴</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div style="border-top: 1px dashed #334155; padding-top: 6px; font-size: 11px; line-height: 1.5; color: #cbd5e1;">
-                    <div><span style="color:#facc15; font-weight:bold;">最後戰術裁決：</span><span id="desk_final_decision" style="color:#ef4444; font-weight:bold;">🔴 封島/防颱 (NO_DISPATCH)</span></div>
-                    <div style="color:#94a3b8; margin-top:2px;" id="desk_final_action">處置：Hs_pier (3.71m > 1.20m) 觸發剛性 VETO 封鎖</div>
-                </div>
-            </div>
+<div class="layout-main">
+  <!-- 左側戰術控制欄 (32% 欄寬) -->
+  <div class="left-col">
+    <!-- 1. 🌀 颱風專區與奇門宏觀氣旋預判卡片 (復原模組) -->
+    <div class="card-desk" style="border: 1px solid #a855f7;">
+      <strong style="color:#c084fc; font-size:12px; display:block; margin-bottom:6px;">🌀 颱風專區與奇門宏觀氣旋預判</strong>
+      <div class="grid-2">
+        <div class="item-box">
+          <div style="color:#94a3b8;">氣旋動態</div>
+          <div id="typhoon_name" style="color:#f59e0b; font-weight:bold; font-size:13px;">強颱「米米」(320km)</div>
         </div>
-
-        <!-- 右側動態圖表陣列 (68% 主畫廊) -->
-        <div class="right-col">
-            <!-- 今日 24 小時 2x2 圖表矩陣 -->
-            <div class="charts-grid">
-                <div id="chart_hs" class="chart-el"></div>
-                <div id="chart_w" class="chart-el"></div>
-                <div id="chart_ukc" class="chart-el"></div>
-                <div id="chart_tp" class="chart-el"></div>
-            </div>
-
-            <!-- 未來七天海氣象雙軸趨勢預判 -->
-            <div id="chart_weekly" class="chart-weekly-el"></div>
-
-            <!-- 戰略三方案評估 (Ground Truth) 補齊卡片 -->
-            <div class="card-desk">
-                <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">戰略三方案評估 (Ground Truth)</strong>
-                <table class="table-full" style="margin-bottom:6px;">
-                    <thead>
-                        <tr style="border-bottom:1px solid #334155; color:#94a3b8; font-size:10px;">
-                            <th style="width:16%;">方案</th>
-                            <th style="width:28%;">數值比對 (預測 vs 標準)</th>
-                            <th>差異與缺陷小結</th>
-                            <th style="text-align:center; width:16%;">燈號 / 裁決</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr style="border-bottom:1px solid #0f172a;">
-                            <td style="color:#cbd5e1; font-weight:bold;">A (官方)</td>
-                            <td style="color:#fca5a5;">Hs 3.60m [<=1.20m]</td>
-                            <td style="color:#94a3b8;">未考慮港池 Kd 屏障，易生過度停航(30%假警報)</td>
-                            <td style="text-align:center; color:#ef4444; font-weight:bold;">🔴 封島</td>
-                        </tr>
-                        <tr style="border-bottom:1px solid #0f172a;">
-                            <td style="color:#cbd5e1; font-weight:bold;">B (監測)</td>
-                            <td style="color:#fca5a5;">W 16.00m/s [<=10.80m/s]</td>
-                            <td style="color:#94a3b8;">未考量背風 Kw 陰影，弱網斷線機率高</td>
-                            <td style="text-align:center; color:#ef4444; font-weight:bold;">🔴 封島</td>
-                        </tr>
-                        <tr>
-                            <td style="font-weight:bold; color:#facc15;">C (GEM)</td>
-                            <td style="color:#10b981;">UKC 5.84m | FB 2.00m</td>
-                            <td style="color:#facc15; font-weight:bold;">PINN 雙重剛性 VETO 阻斷，0.8% 極低誤判率 (Ground Truth 採納)</td>
-                            <td style="text-align:center; color:#facc15; font-weight:bold;">🔴 採納</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+        <div class="item-box">
+          <div style="color:#94a3b8;">奇門局勢預判</div>
+          <div id="qimen_status" style="color:#c084fc; font-weight:bold; font-size:13px;">景門迫宮 / 暴風圈臨近</div>
         </div>
+      </div>
+      <div style="margin-top:6px; font-size:11px; color:#cbd5e1; line-height:1.4;">
+        <span>宏觀趨勢：風切變強烈，氣旋偏北侵襲防線，建議提早 4 小時實施剛性防護。</span>
+      </div>
     </div>
 
-    <!-- 裝置切換器 -->
-    <div class="nav-switch">
-        <span style="color:#94a3b8;">當前視角：💻 桌面版控制台</span>
-        <a href="mobile.html">📱 切換至手機版</a>
+    <!-- 2. AI 雙核相對精確度與注意力閘 -->
+    <div class="card-desk" style="border: 1px solid #38bdf8;">
+      <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">🧠 雙核相對精確度與注意力分配 (v36D.12.0)</strong>
+      <div class="grid-2">
+        <div class="item-box">
+          <div style="color:#94a3b8;">AI 信心指數</div>
+          <div id="desk_confidence" style="color:#10b981; font-weight:bold; font-size:15px;">100.0%</div>
+        </div>
+        <div class="item-box">
+          <div style="color:#94a3b8;">不確定性 (σ) / 精確度升</div>
+          <div style="font-weight:bold; font-size:12px; color:#38bdf8; margin-top:2px;">
+            σ: <span id="desk_sigma">0.3551</span> | <span id="desk_precision_gain" style="color:#10b981;">+51.0%</span>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:8px;">
+        <div style="display:flex; justify-content:space-between; font-size:10px; color:#cbd5e1;">
+          <span>🟦 微觀物理腦: <strong id="desk_w_micro">65.0%</strong></span>
+          <span>🟪 宏觀奇門腦: <strong id="desk_w_macro">35.0%</strong></span>
+        </div>
+        <div class="attn-bar-bg">
+          <div id="bar_micro" class="attn-micro" style="width: 65%;"></div>
+          <div id="bar_macro" class="attn-macro" style="width: 35%;"></div>
+        </div>
+      </div>
     </div>
 
-    <script>
-        let lastUpdateDesk = Date.now();
-        let deskCommCounter = 0;
-        let chartHs, chartW, chartUkc, chartTp, chartWeekly;
+    <!-- 3. PINN 海象比對 -->
+    <div class="card-desk">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <strong style="color:#38bdf8; font-size:12px;">即時水文與剛性門檻比對 (PINN Engine)</strong>
+        <span id="deskTimestamp" style="font-size:10px; color:#38bdf8; font-weight:bold;">載入中...</span>
+      </div>
+      <div class="grid-2">
+        <div class="item-box">
+          <div style="color:#94a3b8; margin-bottom:2px;">Hs Pier 波高 (<=1.20m)</div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span id="d_hs" style="color:#facc15; font-weight:bold; font-size:14px;">3.71m</span>
+            <span id="d_stat_hs" class="badge-veto">VETO</span>
+          </div>
+        </div>
+        <div class="item-box">
+          <div style="color:#94a3b8; margin-bottom:2px;">Wind Local 風速 (<=10.8m/s)</div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span id="d_w" style="color:#facc15; font-weight:bold; font-size:14px;">8.50m/s</span>
+            <span id="d_stat_w" class="badge-pass">PASS</span>
+          </div>
+        </div>
+        <div class="item-box">
+          <div style="color:#94a3b8; margin-bottom:2px;">UKC 裕深 (>=1.50m)</div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span id="d_ukc" style="color:#10b981; font-weight:bold; font-size:14px;">5.84m</span>
+            <span id="d_stat_ukc" class="badge-pass">PASS</span>
+          </div>
+        </div>
+        <div class="item-box">
+          <div style="color:#94a3b8; margin-bottom:2px;">FB 乾舷 (>=0.50m)</div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span id="d_fb" style="color:#10b981; font-weight:bold; font-size:14px;">2.00m</span>
+            <span id="d_stat_fb" class="badge-pass">PASS</span>
+          </div>
+        </div>
+      </div>
+    </div>
 
-        const timelineData = {
-            '06:00': { wind: '8.50 m/s', wave: '1.80 m', light: '🟢 放行' },
-            '08:00': { wind: '10.20 m/s', wave: '2.20 m', light: '🔴 封島' },
-            '10:00': { wind: '12.10 m/s', wave: '2.90 m', light: '🔴 封島' },
-            '11:00': { wind: '8.50 m/s', wave: '3.71 m', light: '🔴 封島 (11:00 關鍵決策點)' },
-            '13:00': { wind: '13.00 m/s', wave: '3.50 m', light: '🔴 封島' },
-            '15:00': { wind: '12.80 m/s', wave: '3.20 m', light: '🔴 封島' },
-            '16:00': { wind: '13.20 m/s', wave: '3.40 m', light: '🔴 封島 (16:00 預警點)' },
-            '18:00': { wind: '14.00 m/s', wave: '3.60 m', light: '🔴 封島' }
-        };
+    <!-- 4. 當日船班官模燈號比對與最後判斷 -->
+    <div class="card-desk">
+      <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">當日船班官模燈號比對與最後判斷</strong>
+      <table class="table-full" style="margin-bottom:8px;">
+        <thead>
+          <tr style="border-bottom:1px solid #334155; color:#94a3b8; font-size:10px;">
+            <th>時段</th><th>官方預報</th><th>GEM 模型判斷</th><th style="text-align:center;">燈號</th>
+          </tr>
+        </thead>
+        <tbody id="desk_tdx_body">
+          <tr style="border-bottom:1px solid #0f172a;">
+            <td>07:30</td><td style="color:#10b981;">准予靠泊</td><td style="color:#ef4444; font-weight:bold;">🔴 封島/防颱</td><td style="text-align:center;">🔴</td>
+          </tr>
+          <tr style="border-bottom:1px solid #0f172a;">
+            <td>09:00</td><td style="color:#10b981;">准予靠泊</td><td style="color:#ef4444; font-weight:bold;">🔴 封島/防颱</td><td style="text-align:center;">🔴</td>
+          </tr>
+          <tr style="border-bottom:1px solid #0f172a;">
+            <td>11:00</td><td style="color:#f59e0b;">觀察靠泊</td><td style="color:#ef4444; font-weight:bold;">🔴 封島/防颱</td><td style="text-align:center;">🔴</td>
+          </tr>
+          <tr style="border-bottom:1px solid #0f172a;">
+            <td>14:00</td><td style="color:#10b981;">准予靠泊</td><td style="color:#ef4444; font-weight:bold;">🔴 封島/防颱</td><td style="text-align:center;">🔴</td>
+          </tr>
+          <tr style="border-bottom:1px solid #0f172a;">
+            <td>15:00</td><td style="color:#10b981;">准予靠泊</td><td style="color:#ef4444; font-weight:bold;">🔴 封島/防颱</td><td style="text-align:center;">🔴</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="border-top: 1px dashed #334155; padding-top: 6px; font-size: 11px; line-height: 1.5; color: #cbd5e1;">
+        <div><span style="color:#facc15; font-weight:bold;">最後戰術裁決：</span><span id="desk_final_decision" style="color:#ef4444; font-weight:bold;">🔴 封島/防颱 (NO_DISPATCH)</span></div>
+        <div style="color:#94a3b8; margin-top:2px;" id="desk_final_action">處置：Hs_pier (3.71m > 1.20m) 觸發剛性 VETO 封鎖</div>
+      </div>
+    </div>
+  </div>
 
-        function getCustomTooltip(params) {
-            if (!params || !params.length) return '';
-            const itemKey = params[0].name;
-            const d = timelineData[itemKey] || { wind: '8.50 m/s', wave: '3.71 m', light: '🔴 封島/防颱' };
-            return `
-                <div style="font-weight:bold; color:#38bdf8; border-bottom:1px solid #334155; padding-bottom:3px; margin-bottom:4px;">⏱️ 決策時段：${itemKey}</div>
-                <div style="font-size:11px; line-height:1.6; color:#cbd5e1;">
-                    💨 <b>局域風速:</b> <span style="color:#facc15;">${d.wind}</span><br>
-                    🌊 <b>港池波高:</b> <span style="color:#facc15;">${d.wave}</span><br>
-                    🚦 <b>戰術裁決:</b> <span style="font-weight:bold;">${d.light}</span>
-                </div>
-            `;
-        }
+  <!-- 右側動態圖表陣列 (68% 主畫廊) -->
+  <div class="right-col">
+    <!-- 今日 24 小時 2x2 圖表矩陣 -->
+    <div class="charts-grid">
+      <div id="chart_hs" class="chart-el"></div>
+      <div id="chart_w" class="chart-el"></div>
+      <div id="chart_ukc" class="chart-el"></div>
+      <div id="chart_tp" class="chart-el"></div>
+    </div>
 
-        function getFormattedCSTTime(d = new Date()) {
-            const pad = (n) => String(n).padStart(2, '0');
-            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} CST`;
-        }
+    <!-- 未來七天海氣象雙軸趨勢預判 -->
+    <div id="chart_weekly" class="chart-weekly-el"></div>
 
-        function updateLiveTimestamp() {
-            const tsEl = document.getElementById('deskTimestamp');
-            if (tsEl) tsEl.innerText = getFormattedCSTTime(new Date());
-        }
+    <!-- 戰略三方案評估 (Ground Truth) 補齊卡片 -->
+    <div class="card-desk">
+      <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">戰略三方案評估 (Ground Truth)</strong>
+      <table class="table-full" style="margin-bottom:6px;">
+        <thead>
+          <tr style="border-bottom:1px solid #334155; color:#94a3b8; font-size:10px;">
+            <th style="width:16%;">方案</th>
+            <th style="width:28%;">數值比對 (預測 vs 標準)</th>
+            <th>差異與缺陷小結</th>
+            <th style="text-align:center; width:16%;">燈號 / 裁決</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid #0f172a;">
+            <td style="color:#cbd5e1; font-weight:bold;">A (官方)</td>
+            <td style="color:#fca5a5;">Hs 3.60m [<=1.20m]</td>
+            <td style="color:#94a3b8;">未考慮港池 Kd 屏障，易生過度停航(30%假警報)</td>
+            <td style="text-align:center; color:#ef4444; font-weight:bold;">🔴 封島</td>
+          </tr>
+          <tr style="border-bottom:1px solid #0f172a;">
+            <td style="color:#cbd5e1; font-weight:bold;">B (監測)</td>
+            <td style="color:#fca5a5;">W 16.00m/s [<=10.80m/s]</td>
+            <td style="color:#94a3b8;">未考量背風 Kw 陰影，弱網斷線機率高</td>
+            <td style="text-align:center; color:#ef4444; font-weight:bold;">🔴 封島</td>
+          </tr>
+          <tr>
+            <td style="font-weight:bold; color:#facc15;">C (GEM)</td>
+            <td style="color:#10b981;">UKC 5.84m | FB 2.00m</td>
+            <td style="color:#facc15; font-weight:bold;">PINN 雙重剛性 VETO 阻斷，0.8% 極低誤判率 (Ground Truth 採納)</td>
+            <td style="text-align:center; color:#facc15; font-weight:bold;">🔴 採納</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
-        function initDesktopCharts() {
-            const hours = ['06:00', '08:00', '10:00', '11:00', '13:00', '15:00', '16:00', '18:00'];
-            
-            // 將 11:00/16:00 時間標籤置於圖表頂部 (insideStartTop)，避免與 X 軸時間標籤重疊
-            const decisionTimeLines = [
-                {
-                    xAxis: '11:00',
-                    label: { show: true, position: 'insideStartTop', formatter: '11:00 決策點', color: '#94a3b8', fontSize: 10 },
-                    lineStyle: { color: '#94a3b8', type: 'dashed', width: 1.5 }
-                },
-                {
-                    xAxis: '16:00',
-                    label: { show: true, position: 'insideStartTop', formatter: '16:00 預警點', color: '#94a3b8', fontSize: 10 },
-                    lineStyle: { color: '#94a3b8', type: 'dashed', width: 1.5 }
-                }
-            ];
+<!-- 裝置切換器 -->
+<div class="nav-switch">
+  <span style="color:#94a3b8;">當前視角：💻 桌面版控制台</span>
+  <a href="mobile.html">📱 切換至手機版</a>
+</div>
 
-            // 1. Hs 港池有效波高
-            chartHs = echarts.init(document.getElementById('chart_hs'));
-            chartHs.setOption({
-                title: { text: 'Hs 港池有效波高 (m)', textStyle: { color: '#38bdf8', fontSize: 12 } },
-                tooltip: { trigger: 'axis', axisPointer: { type: 'cross' }, formatter: getCustomTooltip },
-                grid: { top: 35, bottom: 25, left: 35, right: 65 }, // 加大 right grid 防止 label 被裁切
-                xAxis: { type: 'category', data: hours, axisLine: { lineStyle: { color: '#64748b' } } },
-                yAxis: { type: 'value', min: 0, max: 5, splitLine: { lineStyle: { color: '#334155' } } },
-                series: [{
-                    name: 'Hs 波高', type: 'line', data: [1.8, 2.2, 2.9, 3.71, 3.5, 3.2, 3.4, 3.6], smooth: true, itemStyle: { color: '#ef4444' },
-                    markLine: {
-                        symbol: ['none', 'none'],
-                        lineStyle: { color: '#ef4444', type: 'dashed', width: 1.5 },
-                        data: [
-                            { yAxis: 1.20, label: { show: true, position: 'insideEndTop', formatter: 'Hs 限值: 1.20m', color: '#ef4444', fontSize: 10, fontWeight: 'bold' } },
-                            ...decisionTimeLines
-                        ]
-                    }
-                }]
-            });
+<script>
+let lastUpdateDesk = Date.now();
+let deskCommCounter = 0;
+let chartHs, chartW, chartUkc, chartTp, chartWeekly;
 
-            // 2. Wind 局域陣風
-            chartW = echarts.init(document.getElementById('chart_w'));
-            chartW.setOption({
-                title: { text: 'Wind 局域陣風 (m/s)', textStyle: { color: '#38bdf8', fontSize: 12 } },
-                tooltip: { trigger: 'axis', axisPointer: { type: 'cross' }, formatter: getCustomTooltip },
-                grid: { top: 35, bottom: 25, left: 35, right: 65 },
-                xAxis: { type: 'category', data: hours, axisLine: { lineStyle: { color: '#64748b' } } },
-                yAxis: { type: 'value', min: 0, max: 20, splitLine: { lineStyle: { color: '#334155' } } },
-                series: [{
-                    name: 'Wind 陣風', type: 'line', data: [8.5, 10.2, 11.0, 8.50, 12.0, 12.8, 13.2, 14.0], smooth: true, itemStyle: { color: '#f59e0b' },
-                    markLine: {
-                        symbol: ['none', 'none'],
-                        lineStyle: { color: '#f59e0b', type: 'dashed', width: 1.5 },
-                        data: [
-                            { yAxis: 10.80, label: { show: true, position: 'insideEndTop', formatter: 'Wind 限值: 10.80m/s', color: '#f59e0b', fontSize: 10, fontWeight: 'bold' } },
-                            ...decisionTimeLines
-                        ]
-                    }
-                }]
-            });
+const timelineData = {
+  '06:00': { wind: '8.50 m/s', wave: '1.80 m', light: '🟢 放行' },
+  '08:00': { wind: '10.20 m/s', wave: '2.20 m', light: '🔴 封島' },
+  '10:00': { wind: '12.10 m/s', wave: '2.90 m', light: '🔴 封島' },
+  '11:00': { wind: '8.50 m/s', wave: '3.71 m', light: '🔴 封島 (11:00 關鍵決策點)' },
+  '13:00': { wind: '13.00 m/s', wave: '3.50 m', light: '🔴 封島' },
+  '15:00': { wind: '12.80 m/s', wave: '3.20 m', light: '🔴 封島' },
+  '16:00': { wind: '13.20 m/s', wave: '3.40 m', light: '🔴 封島 (16:00 預警點)' },
+  '18:00': { wind: '14.00 m/s', wave: '3.60 m', light: '🔴 封島' }
+};
 
-            // 3. UKC 動態裕深
-            chartUkc = echarts.init(document.getElementById('chart_ukc'));
-            chartUkc.setOption({
-                title: { text: 'UKC 動態裕深 (m)', textStyle: { color: '#38bdf8', fontSize: 12 } },
-                tooltip: { trigger: 'axis', axisPointer: { type: 'cross' }, formatter: getCustomTooltip },
-                grid: { top: 35, bottom: 25, left: 35, right: 65 },
-                xAxis: { type: 'category', data: hours, axisLine: { lineStyle: { color: '#64748b' } } },
-                yAxis: { type: 'value', min: 0, max: 8, splitLine: { lineStyle: { color: '#334155' } } },
-                series: [{
-                    name: 'UKC 裕深', type: 'line', data: [7.2, 6.8, 6.5, 5.84, 6.3, 6.5, 6.2, 6.1], smooth: true, itemStyle: { color: '#10b981' },
-                    markLine: {
-                        symbol: ['none', 'none'],
-                        lineStyle: { color: '#10b981', type: 'dashed', width: 1.5 },
-                        data: [
-                            { yAxis: 1.50, label: { show: true, position: 'insideEndTop', formatter: 'UKC 限值: 1.50m', color: '#10b981', fontSize: 10, fontWeight: 'bold' } },
-                            ...decisionTimeLines
-                        ]
-                    }
-                }]
-            });
+function getCustomTooltip(params) {
+  if (!params || !params.length) return '';
+  const itemKey = params[0].name;
+  const d = timelineData[itemKey] || { wind: '8.50 m/s', wave: '3.71 m', light: '🔴 封島/防颱' };
+  return `
+    <div style="font-weight:bold; color:#38bdf8; border-bottom:1px solid #334155; padding-bottom:3px; margin-bottom:4px;">⏱️ 決策時段：${itemKey}</div>
+    <div style="font-size:11px; line-height:1.6; color:#cbd5e1;">
+      💨 <b>局域風速:</b> <span style="color:#facc15;">${d.wind}</span><br>
+      🌊 <b>港池波高:</b> <span style="color:#facc15;">${d.wave}</span><br>
+      🚦 <b>戰術裁決:</b> <span style="font-weight:bold;">${d.light}</span>
+    </div>
+  `;
+}
 
-            // 4. Tp 浪週期
-            chartTp = echarts.init(document.getElementById('chart_tp'));
-            chartTp.setOption({
-                title: { text: 'Tp 浪週期 (s)', textStyle: { color: '#38bdf8', fontSize: 12 } },
-                tooltip: { trigger: 'axis', axisPointer: { type: 'cross' }, formatter: getCustomTooltip },
-                grid: { top: 35, bottom: 25, left: 35, right: 65 },
-                xAxis: { type: 'category', data: hours, axisLine: { lineStyle: { color: '#64748b' } } },
-                yAxis: { type: 'value', min: 5, max: 20, splitLine: { lineStyle: { color: '#334155' } } },
-                series: [{
-                    name: '浪週期 Tp', type: 'line', data: [11.0, 12.5, 14.0, 15.5, 15.0, 14.8, 15.2, 16.0], smooth: true, itemStyle: { color: '#c084fc' },
-                    markLine: {
-                        symbol: ['none', 'none'],
-                        lineStyle: { color: '#c084fc', type: 'dashed', width: 1.5 },
-                        data: [
-                            { yAxis: 12.0, label: { show: true, position: 'insideEndTop', formatter: '長浪臨界: 12.0s', color: '#c084fc', fontSize: 10, fontWeight: 'bold' } },
-                            ...decisionTimeLines
-                        ]
-                    }
-                }]
-            });
+function getFormattedCSTTime(d = new Date()) {
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())} CST`;
+}
 
-            // 5. 未來七天海氣象雙軸趨勢預判
-            chartWeekly = echarts.init(document.getElementById('chart_weekly'));
-            chartWeekly.setOption({
-                title: { text: '🌀 未來七天海氣象雙軸趨勢預判 (v36D.12.0)', textStyle: { color: '#f59e0b', fontSize: 12 } },
-                tooltip: { trigger: 'axis', axisPointer: { type: 'cross', crossStyle: { color: '#94a3b8' } } },
-                legend: { data: ['Hs 波高 (m)', 'Wind 陣風 (m/s)'], textStyle: { color: '#cbd5e1' }, right: 10, top: 0 },
-                grid: { top: 35, bottom: 25, left: 45, right: 65 },
-                xAxis: { type: 'category', data: ['今日', '明日', 'D+2', 'D+3', 'D+4', 'D+5', 'D+6'], axisLine: { lineStyle: { color: '#64748b' } } },
-                yAxis: [
-                    {
-                        type: 'value', name: 'Hs (m)', min: 0, max: 5,
-                        axisLine: { lineStyle: { color: '#ef4444' } },
-                        axisLabel: { color: '#ef4444' },
-                        splitLine: { lineStyle: { color: '#334155' } }
-                    },
-                    {
-                        type: 'value', name: 'Wind (m/s)', min: 0, max: 25,
-                        axisLine: { lineStyle: { color: '#f59e0b' } },
-                        axisLabel: { color: '#f59e0b' },
-                        splitLine: { show: false }
-                    }
-                ],
-                series: [
-                    {
-                        name: 'Hs 波高 (m)', type: 'line', data: [3.71, 2.8, 1.6, 0.9, 0.8, 1.1, 1.3],
-                        smooth: true, itemStyle: { color: '#ef4444' },
-                        markLine: {
-                            symbol: ['none', 'none'],
-                            label: { show: true, position: 'insideEndBottom', formatter: 'Hs 限值: 1.20m', color: '#ef4444', fontSize: 10, fontWeight: 'bold' },
-                            lineStyle: { color: '#ef4444', type: 'dashed', width: 1.5 },
-                            data: [{ yAxis: 1.20 }]
-                        }
-                    },
-                    {
-                        name: 'Wind 陣風 (m/s)', type: 'line', yAxisIndex: 1, data: [8.50, 12.0, 9.8, 6.5, 5.8, 7.5, 8.2],
-                        smooth: true, itemStyle: { color: '#f59e0b' },
-                        markLine: {
-                            symbol: ['none', 'none'],
-                            label: { show: true, position: 'insideStartTop', formatter: 'Wind 限值: 10.80m/s', color: '#f59e0b', fontSize: 10, fontWeight: 'bold' },
-                            lineStyle: { color: '#f59e0b', type: 'dashed', width: 1.5 },
-                            data: [{ yAxis: 10.80 }]
-                        }
-                    }
-                ]
-            });
+function updateLiveTimestamp() {
+  const tsEl = document.getElementById('deskTimestamp');
+  if (tsEl) tsEl.innerText = getFormattedCSTTime(new Date());
+}
 
-            window.addEventListener('resize', () => {
-                setTimeout(() => { chartHs.resize(); chartW.resize(); chartUkc.resize(); chartTp.resize(); chartWeekly.resize(); }, 150);
-            });
-        }
+function initDesktopCharts() {
+  const hours = ['06:00', '08:00', '10:00', '11:00', '13:00', '15:00', '16:00', '18:00'];
+  const decisionTimeLines = [
+    { xAxis: '11:00', label: { show: true, position: 'insideStartTop', formatter: '11:00 決策點', color: '#94a3b8', fontSize: 10 }, lineStyle: { color: '#94a3b8', type: 'dashed', width: 1.5 } },
+    { xAxis: '16:00', label: { show: true, position: 'insideStartTop', formatter: '16:00 預警點', color: '#94a3b8', fontSize: 10 }, lineStyle: { color: '#94a3b8', type: 'dashed', width: 1.5 } }
+  ];
 
-        window.onSSOTDataReceived = function(data) {
-            if (!data) return;
-            lastUpdateDesk = Date.now();
-            deskCommCounter++;
-            document.getElementById('deskCommCount').innerText = deskCommCounter;
-            document.getElementById('staleAlertDesk').style.display = 'none';
+  // 1. Hs 港池有效波高
+  chartHs = echarts.init(document.getElementById('chart_hs'));
+  chartHs.setOption({
+    title: { text: 'Hs 港池有效波高 (m)', textStyle: { color: '#38bdf8', fontSize: 12 } },
+    tooltip: { trigger: 'axis', axisPointer: { type: 'cross' }, formatter: getCustomTooltip },
+    grid: { top: 35, bottom: 25, left: 35, right: 65 },
+    xAxis: { type: 'category', data: hours, axisLine: { lineStyle: { color: '#64748b' } } },
+    yAxis: { type: 'value', min: 0, max: 5, splitLine: { lineStyle: { color: '#334155' } } },
+    series: [{
+      name: 'Hs 波高', type: 'line', data: [1.8, 2.2, 2.9, 3.71, 3.5, 3.2, 3.4, 3.6],
+      smooth: true, itemStyle: { color: '#ef4444' },
+      markLine: {
+        symbol: ['none', 'none'],
+        lineStyle: { color: '#ef4444', type: 'dashed', width: 1.5 },
+        data: [{ yAxis: 1.20, label: { show: true, position: 'insideEndTop', formatter: 'Hs 限值: 1.20m', color: '#ef4444', fontSize: 10, fontWeight: 'bold' } }, ...decisionTimeLines]
+      }
+    }]
+  });
 
-            if (data.timestamp) document.getElementById('deskTimestamp').innerText = data.timestamp;
+  // 2. Wind 局域陣風
+  chartW = echarts.init(document.getElementById('chart_w'));
+  chartW.setOption({
+    title: { text: 'Wind 局域陣風 (m/s)', textStyle: { color: '#38bdf8', fontSize: 12 } },
+    tooltip: { trigger: 'axis', axisPointer: { type: 'cross' }, formatter: getCustomTooltip },
+    grid: { top: 35, bottom: 25, left: 35, right: 65 },
+    xAxis: { type: 'category', data: hours, axisLine: { lineStyle: { color: '#64748b' } } },
+    yAxis: { type: 'value', min: 0, max: 20, splitLine: { lineStyle: { color: '#334155' } } },
+    series: [{
+      name: 'Wind 陣風', type: 'line', data: [8.5, 10.2, 11.0, 8.50, 12.0, 12.8, 13.2, 14.0],
+      smooth: true, itemStyle: { color: '#f59e0b' },
+      markLine: {
+        symbol: ['none', 'none'],
+        lineStyle: { color: '#f59e0b', type: 'dashed', width: 1.5 },
+        data: [{ yAxis: 10.80, label: { show: true, position: 'insideEndTop', formatter: 'Wind 限值: 10.80m/s', color: '#f59e0b', fontSize: 10, fontWeight: 'bold' } }, ...decisionTimeLines]
+      }
+    }]
+  });
 
-            let bannerEl = document.getElementById('vetoBannerDesk');
-            let decisionStr = data.decision || '🔴 封島/防颱';
-            let isVeto = data.hard_veto_alert || false;
-            bannerEl.style.background = isVeto ? "rgba(239, 68, 68, 0.2)" : "rgba(16, 185, 129, 0.2)";
-            bannerEl.style.color = isVeto ? "#fca5a5" : "#6ee7b7";
-            bannerEl.innerText = `${decisionStr} ${isVeto ? '(觸發剛性 VETO 防線)' : '(正常放行)'}`;
+  // 3. UKC 動態裕深
+  chartUkc = echarts.init(document.getElementById('chart_ukc'));
+  chartUkc.setOption({
+    title: { text: 'UKC 動態裕深 (m)', textStyle: { color: '#38bdf8', fontSize: 12 } },
+    tooltip: { trigger: 'axis', axisPointer: { type: 'cross' }, formatter: getCustomTooltip },
+    grid: { top: 35, bottom: 25, left: 35, right: 65 },
+    xAxis: { type: 'category', data: hours, axisLine: { lineStyle: { color: '#64748b' } } },
+    yAxis: { type: 'value', min: 0, max: 8, splitLine: { lineStyle: { color: '#334155' } } },
+    series: [{
+      name: 'UKC 裕深', type: 'line', data: [7.2, 6.8, 6.5, 5.84, 6.3, 6.5, 6.2, 6.1],
+      smooth: true, itemStyle: { color: '#10b981' },
+      markLine: {
+        symbol: ['none', 'none'],
+        lineStyle: { color: '#10b981', type: 'dashed', width: 1.5 },
+        data: [{ yAxis: 1.50, label: { show: true, position: 'insideEndTop', formatter: 'UKC 限值: 1.50m', color: '#10b981', fontSize: 10, fontWeight: 'bold' } }, ...decisionTimeLines]
+      }
+    }]
+  });
 
-            if (data.confidence_score !== undefined) {
-                document.getElementById('desk_confidence').innerText = data.confidence_score + '%';
-            }
-            if (data.precision_metrics) {
-                document.getElementById('desk_sigma').innerText = data.precision_metrics.converged_sigma.toFixed(4);
-                document.getElementById('desk_precision_gain').innerText = '+' + data.precision_metrics.precision_gain_pct.toFixed(1) + '%';
-            }
-            if (data.attention_gate) {
-                let microW = data.attention_gate.micro_physics_weight || 100;
-                let macroW = data.attention_gate.macro_qimen_weight || 0;
-                document.getElementById('desk_w_micro').innerText = microW.toFixed(1) + '%';
-                document.getElementById('desk_w_macro').innerText = macroW.toFixed(1) + '%';
-                document.getElementById('bar_micro').style.width = microW + '%';
-                document.getElementById('bar_macro').style.width = macroW + '%';
-            }
+  // 4. Tp 浪週期
+  chartTp = echarts.init(document.getElementById('chart_tp'));
+  chartTp.setOption({
+    title: { text: 'Tp 浪週期 (s)', textStyle: { color: '#38bdf8', fontSize: 12 } },
+    tooltip: { trigger: 'axis', axisPointer: { type: 'cross' }, formatter: getCustomTooltip },
+    grid: { top: 35, bottom: 25, left: 35, right: 65 },
+    xAxis: { type: 'category', data: hours, axisLine: { lineStyle: { color: '#64748b' } } },
+    yAxis: { type: 'value', min: 5, max: 20, splitLine: { lineStyle: { color: '#334155' } } },
+    series: [{
+      name: '浪週期 Tp', type: 'line', data: [11.0, 12.5, 14.0, 15.5, 15.0, 14.8, 15.2, 16.0],
+      smooth: true, itemStyle: { color: '#c084fc' },
+      markLine: {
+        symbol: ['none', 'none'],
+        lineStyle: { color: '#c084fc', type: 'dashed', width: 1.5 },
+        data: [{ yAxis: 12.0, label: { show: true, position: 'insideEndTop', formatter: '長浪臨界: 12.0s', color: '#c084fc', fontSize: 10, fontWeight: 'bold' } }, ...decisionTimeLines]
+      }
+    }]
+  });
 
-            if (data.physics_metrics) {
-                let p = data.physics_metrics;
-                document.getElementById('d_hs').innerText = (p.hs_pier_m !== undefined ? p.hs_pier_m.toFixed(2) : '3.71') + 'm';
-                document.getElementById('d_w').innerText = (p.w_local_ms !== undefined ? p.w_local_ms.toFixed(2) : '8.50') + 'm';
-                document.getElementById('d_ukc').innerText = (p.ukc_m !== undefined ? p.ukc_m.toFixed(2) : '5.84') + 'm';
-                document.getElementById('d_fb').innerText = (p.fb_pier_m !== undefined ? p.fb_pier_m.toFixed(2) : '2.00') + 'm';
-                
-                document.getElementById('d_stat_hs').className = (p.hs_pier_m > 1.20) ? 'badge-veto' : 'badge-pass';
-                document.getElementById('d_stat_w').className = (p.w_local_ms > 10.80) ? 'badge-veto' : 'badge-pass';
-                document.getElementById('d_stat_ukc').className = (p.ukc_m < 1.50) ? 'badge-veto' : 'badge-pass';
-                document.getElementById('d_stat_fb').className = (p.fb_pier_m < 0.50) ? 'badge-veto' : 'badge-pass';
-            }
+  // 5. 未來七天海氣象雙軸趨勢預判
+  chartWeekly = echarts.init(document.getElementById('chart_weekly'));
+  chartWeekly.setOption({
+    title: { text: '🌀 未來七天海氣象雙軸趨勢預判 (v36D.12.0 雙核)', textStyle: { color: '#f59e0b', fontSize: 12 } },
+    tooltip: { trigger: 'axis', axisPointer: { type: 'cross', crossStyle: { color: '#94a3b8' } } },
+    legend: { data: ['Hs 波高 (m)', 'Wind 陣風 (m/s)'], textStyle: { color: '#cbd5e1' }, right: 10, top: 0 },
+    grid: { top: 35, bottom: 25, left: 45, right: 65 },
+    xAxis: { type: 'category', data: ['今日', '明日', 'D+2', 'D+3', 'D+4', 'D+5', 'D+6'], axisLine: { lineStyle: { color: '#64748b' } } },
+    yAxis: [
+      { type: 'value', name: 'Hs (m)', min: 0, max: 5, axisLine: { lineStyle: { color: '#ef4444' } }, axisLabel: { color: '#ef4444' }, splitLine: { lineStyle: { color: '#334155' } } },
+      { type: 'value', name: 'Wind (m/s)', min: 0, max: 25, axisLine: { lineStyle: { color: '#f59e0b' } }, axisLabel: { color: '#f59e0b' }, splitLine: { show: false } }
+    ],
+    series: [
+      {
+        name: 'Hs 波高 (m)', type: 'line', data: [3.71, 2.8, 1.6, 0.9, 0.8, 1.1, 1.3], smooth: true, itemStyle: { color: '#ef4444' },
+        markLine: { symbol: ['none', 'none'], label: { show: true, position: 'insideEndBottom', formatter: 'Hs 限值: 1.20m', color: '#ef4444', fontSize: 10, fontWeight: 'bold' }, lineStyle: { color: '#ef4444', type: 'dashed', width: 1.5 }, data: [{ yAxis: 1.20 }] }
+      },
+      {
+        name: 'Wind 陣風 (m/s)', type: 'line', yAxisIndex: 1, data: [8.50, 12.0, 9.8, 6.5, 5.8, 7.5, 8.2], smooth: true, itemStyle: { color: '#f59e0b' },
+        markLine: { symbol: ['none', 'none'], label: { show: true, position: 'insideStartTop', formatter: 'Wind 限值: 10.80m/s', color: '#f59e0b', fontSize: 10, fontWeight: 'bold' }, lineStyle: { color: '#f59e0b', type: 'dashed', width: 1.5 }, data: [{ yAxis: 10.80 }] }
+      }
+    ]
+  });
 
-            if (window.parent && window.parent !== window) {
-                window.parent.postMessage({ type: 'confirmReceiptACK', timestamp: Date.now() }, '*');
-            }
-        };
+  window.addEventListener('resize', () => {
+    setTimeout(() => {
+      chartHs.resize(); chartW.resize(); chartUkc.resize(); chartTp.resize(); chartWeekly.resize();
+    }, 150);
+  });
+}
 
-        setInterval(function() {
-            updateLiveTimestamp();
-            const sec = Math.floor((Date.now() - lastUpdateDesk) / 1000);
-            document.getElementById('deskSecAgo').innerText = '更新: ' + sec + ' 秒前';
-            document.getElementById('staleAlertDesk').style.display = (sec > 30) ? 'block' : 'none';
-        }, 1000);
+window.onSSOTDataReceived = function(data) {
+  if (!data) return;
+  lastUpdateDesk = Date.now();
+  deskCommCounter++;
+  document.getElementById('deskCommCount').innerText = deskCommCounter;
+  document.getElementById('staleAlertDesk').style.display = 'none';
 
-        async function fetchSSOTData() {
-            try {
-                const response = await fetch('./latest_decision.json?t=' + new Date().getTime());
-                if (!response.ok) throw new Error("HTTP " + response.status);
-                const data = await response.json();
-                window.onSSOTDataReceived(data);
-            } catch (err) { console.warn("遙測讀取失敗:", err); }
-        }
+  if (data.timestamp) document.getElementById('deskTimestamp').innerText = data.timestamp;
 
-        document.addEventListener("DOMContentLoaded", () => {
-            updateLiveTimestamp();
-            initDesktopCharts();
-            fetchSSOTData();
-            setInterval(fetchSSOTData, 3000);
-        });
-    </script>
+  let bannerEl = document.getElementById('vetoBannerDesk');
+  let decisionStr = data.decision || '🔴 封島/防颱';
+  let isVeto = data.hard_veto_alert || false;
+  bannerEl.style.background = isVeto ? "rgba(239, 68, 68, 0.2)" : "rgba(16, 185, 129, 0.2)";
+  bannerEl.style.color = isVeto ? "#fca5a5" : "#6ee7b7";
+  bannerEl.innerText = `${decisionStr} ${isVeto ? '(觸發剛性 VETO 防線)' : '(正常放行)'}`;
+
+  if (data.confidence_score !== undefined) {
+    document.getElementById('desk_confidence').innerText = data.confidence_score + '%';
+  }
+  if (data.precision_metrics) {
+    document.getElementById('desk_sigma').innerText = data.precision_metrics.converged_sigma.toFixed(4);
+    document.getElementById('desk_precision_gain').innerText = '+' + data.precision_metrics.precision_gain_pct.toFixed(1) + '%';
+  }
+
+  // 更新颱風與奇門預判數據
+  if (data.typhoon_telemetry) {
+    if (data.typhoon_telemetry.name) document.getElementById('typhoon_name').innerText = data.typhoon_telemetry.name;
+    if (data.typhoon_telemetry.qimen_status) document.getElementById('qimen_status').innerText = data.typhoon_telemetry.qimen_status;
+  }
+
+  // 動態分配微觀物理與宏觀奇門權重進度條
+  if (data.attention_gate) {
+    let microW = data.attention_gate.micro_physics_weight !== undefined ? data.attention_gate.micro_physics_weight : 65.0;
+    let macroW = data.attention_gate.macro_qimen_weight !== undefined ? data.attention_gate.macro_qimen_weight : 35.0;
+    document.getElementById('desk_w_micro').innerText = microW.toFixed(1) + '%';
+    document.getElementById('desk_w_macro').innerText = macroW.toFixed(1) + '%';
+    document.getElementById('bar_micro').style.width = microW + '%';
+    document.getElementById('bar_macro').style.width = macroW + '%';
+  }
+
+  if (data.physics_metrics) {
+    let p = data.physics_metrics;
+    document.getElementById('d_hs').innerText = (p.hs_pier_m !== undefined ? p.hs_pier_m.toFixed(2) : '3.71') + 'm';
+    document.getElementById('d_w').innerText = (p.w_local_ms !== undefined ? p.w_local_ms.toFixed(2) : '8.50') + 'm';
+    document.getElementById('d_ukc').innerText = (p.ukc_m !== undefined ? p.ukc_m.toFixed(2) : '5.84') + 'm';
+    document.getElementById('d_fb').innerText = (p.fb_pier_m !== undefined ? p.fb_pier_m.toFixed(2) : '2.00') + 'm';
+    document.getElementById('d_stat_hs').className = (p.hs_pier_m > 1.20) ? 'badge-veto' : 'badge-pass';
+    document.getElementById('d_stat_w').className = (p.w_local_ms > 10.80) ? 'badge-veto' : 'badge-pass';
+    document.getElementById('d_stat_ukc').className = (p.ukc_m < 1.50) ? 'badge-veto' : 'badge-pass';
+    document.getElementById('d_stat_fb').className = (p.fb_pier_m < 0.50) ? 'badge-veto' : 'badge-pass';
+  }
+
+  if (window.parent && window.parent !== window) {
+    window.parent.postMessage({ type: 'confirmReceiptACK', timestamp: Date.now() }, '*');
+  }
+};
+
+setInterval(function() {
+  updateLiveTimestamp();
+  const sec = Math.floor((Date.now() - lastUpdateDesk) / 1000);
+  document.getElementById('deskSecAgo').innerText = '更新: ' + sec + ' 秒前';
+  document.getElementById('staleAlertDesk').style.display = (sec > 30) ? 'block' : 'none';
+}, 1000);
+
+async function fetchSSOTData() {
+  try {
+    const response = await fetch('./latest_decision.json?t=' + new Date().getTime());
+    if (!response.ok) throw new Error("HTTP " + response.status);
+    const data = await response.json();
+    window.onSSOTDataReceived(data);
+  } catch (err) {
+    console.warn("遙測讀取失敗:", err);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  updateLiveTimestamp();
+  initDesktopCharts();
+  fetchSSOTData();
+  setInterval(fetchSSOTData, 3000);
+});
+</script>
 </body>
 </html>
