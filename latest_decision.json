@@ -1,75 +1,30 @@
 {
-  "system": {
-    "system_version": "GEM-V36D-DIALECTICAL-ULTIMATE",
-    "knowledge_base_code": "KB_20260908_TACTICAL_TWIN",
-    "checksum_fingerprint": "0x9F8B26",
-    "api_connection_status": "ONLINE_LOCAL_SSOT",
-    "ukf_convergence_ratio": 99.8,
-    "ground_truth_accuracy": 99.2,
-    "network_latency_ms": 0,
-    "learning_iteration": 11,
-    "timestamp": "2026-09-12 11:49:23 CST"
+  "version": "v36D.11.0",
+  "timestamp": "2026-09-12 14:08:38 CST",
+  "decision": "🔴 封島/防颱",
+  "confidence_score": 100.0,
+  "hard_veto_alert": true,
+  "veto_reason": "觸發剛性 VETO：碼頭浪高 Hs (3.17m > 1.20m) 及 局部風速 W (12.55m/s > 10.80m/s)",
+  "precision_metrics": {
+    "converged_sigma": 0.3064,
+    "precision_gain_pct": 45.96
   },
-  "tactical_decision": {
-    "q_mode": "🔴 Q4 嚴禁靠泊 (全線封島 48H)",
-    "dispatch_status": "NO_DISPATCH",
-    "reward_score": 100.0,
-    "veto_pass": false,
-    "reason": "Hs_pier (2.75m > 1.20m) 及 W_local (9.81m/s > 10.80m/s) 觸發剛性 VETO"
-  },
-  "dialectical_attention": {
-    "micro_physics_weight": 0.5459,
-    "macro_qimen_weight": 0.4541,
-    "micro_prediction": "Q3",
-    "macro_prediction": "Q2"
+  "attention_gate": {
+    "micro_physics_weight": 100.0,
+    "macro_qimen_weight": 0.0
   },
   "physics_metrics": {
-    "hs_pier_m": 2.75,
-    "w_local_ms": 9.81,
-    "ukc_m": 6.17,
-    "fb_pier_m": 0.7,
+    "hs_pier_m": 3.17,
+    "w_local_ms": 12.55,
+    "ukc_m": 6.11,
+    "fb_pier_m": 2.0,
     "has_veto": true,
-    "reason": "物理門檻超標",
-    "is_tier0": false
+    "reason": "觸發剛性 VETO：碼頭浪高 Hs (3.17m > 1.20m) 及 局部風速 W (12.55m/s > 10.80m/s)"
   },
-  "veto_matrix": {
-    "hs_pier": {
-      "val": 2.75,
-      "limit": 1.2,
-      "status": "VETO_TRIGGERED",
-      "unit": "m"
-    },
-    "w_local": {
-      "val": 9.81,
-      "limit": 10.8,
-      "status": "PASS",
-      "unit": "m/s"
-    },
-    "ukc": {
-      "val": 6.17,
-      "limit": 1.5,
-      "status": "PASS",
-      "unit": "m"
-    },
-    "fb_pier": {
-      "val": 0.7,
-      "limit": 0.5,
-      "status": "PASS",
-      "unit": "m"
-    }
-  },
-  "decision_code": "Q4",
-  "typhoon_qimen_prediction": {
-    "cyclone_dynamic": "[氣旋警戒] 東南東 450 km，中颱 (45m/s)，暴風半徑 200km。",
-    "qimen_anomaly_forecast": "巽宮氣場異常，帶狀低壓活躍，長浪 (Tp > 12.0s) 共振頻繁，請撤離離岸設施。"
-  },
-  "pattern_match": {
-    "matched_cases": 12,
-    "historical_closure_rate": 0.35,
-    "max_similarity_score": 0.9123
-  },
-  "rl_feedback_status": {
-    "has_contradiction": true,
-    "raw_rl_prediction": "Q1"
+  "telemetry_summary": {
+    "hs_cwa": 3.23,
+    "w_cwa": 13.5,
+    "tide_eta_m": 1.2,
+    "future_3h_tide_surge_m": 0.75
   }
 }
