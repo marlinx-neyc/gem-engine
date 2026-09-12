@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GEM Engine Desktop V36D.12.0 - 數位雙生海事戰術智庫 (含颱風與奇門預判完整版)</title>
+<title>GEM Engine Desktop V36D.12.0 - 數位雙生海事戰術智庫 (含颱風奇門模組與雙軸判準 Tooltip 完整版)</title>
 <!-- 引入 ECharts 繪圖庫 -->
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 <style>
@@ -51,7 +51,7 @@ body { background-color: #0b1120; color: #f8fafc; font-family: -apple-system, Bl
 
 <!-- 頂部狀態列 -->
 <div class="header-bar">
-  <div><span class="live-dot-blue"></span><strong style="color:#38bdf8; font-size:13px;">SSOT 雙生連線中 (v36D.12.0 桌面戰術台 - 雙核完整版)</strong></div>
+  <div><span class="live-dot-blue"></span><strong style="color:#38bdf8; font-size:13px;">SSOT 雙生連線中 (v36D.12.0 桌面戰術台 - 完整修正版)</strong></div>
   <div style="font-size:11px; color:#94a3b8;">通訊: <span id="deskCommCount" style="color:#f8fafc; font-weight:bold;">0</span> 次 | <span id="deskSecAgo">更新: 0 秒前</span></div>
 </div>
 
@@ -64,7 +64,7 @@ body { background-color: #0b1120; color: #f8fafc; font-family: -apple-system, Bl
 <div class="layout-main">
   <!-- 左側戰術控制欄 (32% 欄寬) -->
   <div class="left-col">
-    <!-- 1. 🌀 颱風專區與奇門宏觀氣旋預判卡片 (復原模組) -->
+    <!-- 1. 🌀 颱風專區與奇門宏觀氣旋預判卡片 -->
     <div class="card-desk" style="border: 1px solid #a855f7;">
       <strong style="color:#c084fc; font-size:12px; display:block; margin-bottom:6px;">🌀 颱風專區與奇門宏觀氣旋預判</strong>
       <div class="grid-2">
@@ -194,7 +194,7 @@ body { background-color: #0b1120; color: #f8fafc; font-family: -apple-system, Bl
     <!-- 未來七天海氣象雙軸趨勢預判 -->
     <div id="chart_weekly" class="chart-weekly-el"></div>
 
-    <!-- 戰略三方案評估 (Ground Truth) 補齊卡片 -->
+    <!-- 戰略三方案評估 (Ground Truth) -->
     <div class="card-desk">
       <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">戰略三方案評估 (Ground Truth)</strong>
       <table class="table-full" style="margin-bottom:6px;">
@@ -253,6 +253,7 @@ const timelineData = {
   '18:00': { wind: '14.00 m/s', wave: '3.60 m', light: '🔴 封島' }
 };
 
+// 當日 24 小時圖表 Hover 視窗格式化
 function getCustomTooltip(params) {
   if (!params || !params.length) return '';
   const itemKey = params[0].name;
@@ -263,6 +264,39 @@ function getCustomTooltip(params) {
       💨 <b>局域風速:</b> <span style="color:#facc15;">${d.wind}</span><br>
       🌊 <b>港池波高:</b> <span style="color:#facc15;">${d.wave}</span><br>
       🚦 <b>戰術裁決:</b> <span style="font-weight:bold;">${d.light}</span>
+    </div>
+  `;
+}
+
+// 未來七天雙軸趨勢圖表帶有判準的 Hover 視窗格式化
+function getWeeklyTooltip(params) {
+  if (!params || !params.length) return '';
+  const dayName = params[0].name;
+  let hsVal = null;
+  let windVal = null;
+
+  params.forEach(p => {
+    if (p.seriesName.includes('Hs')) hsVal = p.value;
+    if (p.seriesName.includes('Wind')) windVal = p.value;
+  });
+
+  const hsOver = hsVal !== null && hsVal > 1.20;
+  const windOver = windVal !== null && windVal > 10.80;
+  const isVeto = hsOver || windOver;
+
+  const decisionBadge = isVeto 
+    ? '<span style="color:#ef4444; font-weight:bold;">🔴 封島/防颱 (VETO)</span>'
+    : '<span style="color:#10b981; font-weight:bold;">🟢 准予靠泊 (PASS)</span>';
+
+  const hsStatus = hsOver ? '<span style="color:#ef4444;">(⚠️ 超標)</span>' : '<span style="color:#10b981;">(合格)</span>';
+  const windStatus = windOver ? '<span style="color:#ef4444;">(⚠️ 超標)</span>' : '<span style="color:#10b981;">(合格)</span>';
+
+  return `
+    <div style="font-weight:bold; color:#38bdf8; border-bottom:1px solid #334155; padding-bottom:3px; margin-bottom:4px;">📅 預判日期：${dayName}</div>
+    <div style="font-size:11px; line-height:1.6; color:#cbd5e1;">
+      🌊 <b>Hs 波高:</b> <span style="color:#facc15;">${hsVal !== null ? hsVal.toFixed(2) + ' m' : '--'}</span> ${hsStatus}<br>
+      💨 <b>Wind 陣風:</b> <span style="color:#facc15;">${windVal !== null ? windVal.toFixed(2) + ' m/s' : '--'}</span> ${windStatus}<br>
+      🚦 <b>戰術判準:</b> ${decisionBadge}
     </div>
   `;
 }
@@ -360,11 +394,15 @@ function initDesktopCharts() {
     }]
   });
 
-  // 5. 未來七天海氣象雙軸趨勢預判
+  // 5. 未來七天海氣象雙軸趨勢預判 (含戰術判準 Tooltip 修正)
   chartWeekly = echarts.init(document.getElementById('chart_weekly'));
   chartWeekly.setOption({
     title: { text: '🌀 未來七天海氣象雙軸趨勢預判 (v36D.12.0 雙核)', textStyle: { color: '#f59e0b', fontSize: 12 } },
-    tooltip: { trigger: 'axis', axisPointer: { type: 'cross', crossStyle: { color: '#94a3b8' } } },
+    tooltip: { 
+      trigger: 'axis', 
+      axisPointer: { type: 'cross', crossStyle: { color: '#94a3b8' } },
+      formatter: getWeeklyTooltip
+    },
     legend: { data: ['Hs 波高 (m)', 'Wind 陣風 (m/s)'], textStyle: { color: '#cbd5e1' }, right: 10, top: 0 },
     grid: { top: 35, bottom: 25, left: 45, right: 65 },
     xAxis: { type: 'category', data: ['今日', '明日', 'D+2', 'D+3', 'D+4', 'D+5', 'D+6'], axisLine: { lineStyle: { color: '#64748b' } } },
