@@ -1,30 +1,40 @@
 {
-  "version": "v36D.11.0",
-  "timestamp": "2026-09-12 16:30:51 CST",
+  "version": "v36D.12.0",
+  "timestamp": "2026-09-12 18:11:08 CST",
   "decision": "🔴 封島/防颱",
-  "confidence_score": 100.0,
+  "confidence_score": 99.91,
   "hard_veto_alert": true,
-  "veto_reason": "觸發剛性 VETO：碼頭浪高 Hs (3.71m > 1.20m)",
   "precision_metrics": {
-    "converged_sigma": 0.303,
-    "precision_gain_pct": 45.39
+    "converged_sigma": 0.3416,
+    "precision_gain_pct": 46.41
   },
   "attention_gate": {
     "micro_physics_weight": 100.0,
     "macro_qimen_weight": 0.0
   },
   "physics_metrics": {
-    "hs_pier_m": 3.71,
-    "w_local_ms": 8.5,
-    "ukc_m": 5.84,
+    "hs_pier_m": 2.93,
+    "w_local_ms": 13.18,
+    "ukc_m": 6.23,
     "fb_pier_m": 2.0,
-    "has_veto": true,
-    "reason": "觸發剛性 VETO：碼頭浪高 Hs (3.71m > 1.20m)"
+    "has_veto": true
   },
   "telemetry_summary": {
-    "hs_cwa": 3.23,
-    "w_cwa": 13.5,
+    "hs_cwa": 2.75,
+    "w_cwa": 12.56,
     "tide_eta_m": 1.2,
-    "future_3h_tide_surge_m": 0.75
+    "future_3h_tide_surge_m": 0.2
+  },
+  "guerrilla_dispatch": {
+    "berthing_pier": "無 (南北岸雙岸屏障失效 / 長浪共振)",
+    "guerrilla_mode": "BOTH_PIERS_DISABLED",
+    "morning_tactic": "無",
+    "afternoon_tactic": "🚨 下午游擊撤退：預測午後 ESE 巽宮風陣/長浪，取消 15:30 末班，全員於 14:20 提早撤離",
+    "tactical_summary": "執行「下午游擊撤退 / 提早退」"
+  },
+  "qimen_macro_consensus": {
+    "consensus_rate_pct": 100.0,
+    "macro_advisory_enabled": true,
+    "qimen_status_prompt": "🔮 奇門氣場匹配率達 100.0% (>=70%)，已啟動宏觀參研決策與預警提示"
   }
 }
