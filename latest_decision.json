@@ -1,30 +1,35 @@
 {
-  "version": "v36D.11.0",
-  "timestamp": "2026-09-12 18:44:44 CST",
+  "version": "v36D.12.1",
+  "timestamp": "2026-09-12 19:26:07 CST",
   "decision": "🔴 封島/防颱",
-  "confidence_score": 100.0,
+  "confidence_score": 99.92,
   "hard_veto_alert": true,
-  "veto_reason": "觸發剛性 VETO：碼頭浪高 Hs (3.13m > 1.20m)",
   "precision_metrics": {
-    "converged_sigma": 0.3738,
-    "precision_gain_pct": 57.04
+    "converged_sigma": 0.3579,
+    "precision_gain_pct": 42.78
   },
   "attention_gate": {
-    "micro_physics_weight": 100.0,
-    "macro_qimen_weight": 0.0
+    "micro_physics_weight": 99.8,
+    "macro_qimen_weight": 0.2
   },
   "physics_metrics": {
-    "hs_pier_m": 3.13,
-    "w_local_ms": 8.93,
-    "ukc_m": 6.13,
+    "hs_pier_m": 2.77,
+    "w_local_ms": 12.9,
+    "ukc_m": 6.31,
     "fb_pier_m": 2.0,
-    "has_veto": true,
-    "reason": "觸發剛性 VETO：碼頭浪高 Hs (3.13m > 1.20m)"
+    "has_veto": true
   },
-  "telemetry_summary": {
-    "hs_cwa": 3.23,
-    "w_cwa": 13.5,
-    "tide_eta_m": 1.2,
-    "future_3h_tide_surge_m": 0.75
+  "guerrilla_dispatch": {
+    "berthing_pier": "無 (雙岸失效，禁止靠泊)",
+    "evacuation_pier": "無 (雙岸失效，直航返航烏石港)",
+    "guerrilla_mode": "BOTH_PIERS_DISABLED",
+    "morning_tactic": "無 (按常規於【北岸碼頭】靠撤)",
+    "afternoon_tactic": "🚨 下午游擊撤退：預測午後 ESE 巽宮風陣，11:20 止登，全員於 14:20 前至【南岸權宜碼頭】登船撤離",
+    "tactical_summary": "執行「下午游擊撤退【南岸碼頭撤離】」"
+  },
+  "qimen_macro_consensus": {
+    "consensus_rate_pct": 100.0,
+    "macro_advisory_enabled": true,
+    "qimen_status_prompt": "🔮 奇門氣場匹配率達 100.0% (>=70%)，已啟動宏觀參研決策與預警提示"
   }
 }
