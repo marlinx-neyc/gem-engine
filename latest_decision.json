@@ -1,30 +1,68 @@
 {
-  "version": "v36D.11.0",
-  "timestamp": "2026-09-12 19:31:40 CST",
+  "version": "v36D.13.0 Level 5 Complete",
+  "timestamp": "2026-09-12 20:05:29 CST",
   "decision": "🔴 封島/防颱",
   "confidence_score": 100.0,
   "hard_veto_alert": true,
-  "veto_reason": "觸發剛性 VETO：碼頭浪高 Hs (2.75m > 1.20m)",
   "precision_metrics": {
-    "converged_sigma": 0.36,
-    "precision_gain_pct": 48.63
+    "converged_sigma": 0.3125,
+    "precision_gain_pct": 58.4
   },
   "attention_gate": {
-    "micro_physics_weight": 100.0,
-    "macro_qimen_weight": 0.0
+    "micro_physics_weight": 65.0,
+    "macro_qimen_weight": 35.0
   },
   "physics_metrics": {
-    "hs_pier_m": 2.75,
-    "w_local_ms": 8.5,
-    "ukc_m": 6.32,
+    "hs_pier_m": 2.76,
+    "w_local_ms": 12.56,
+    "ukc_m": 5.46,
     "fb_pier_m": 2.0,
-    "has_veto": true,
-    "reason": "觸發剛性 VETO：碼頭浪高 Hs (2.75m > 1.20m)"
+    "has_veto": true
   },
-  "telemetry_summary": {
-    "hs_cwa": 3.23,
-    "w_cwa": 13.5,
-    "tide_eta_m": 1.2,
-    "future_3h_tide_surge_m": 0.75
+  "guerrilla_dispatch": {
+    "berthing_pier": "無 (雙岸失效，禁止靠泊)",
+    "evacuation_pier": "無 (雙岸失效，直航返航烏石港)",
+    "guerrilla_mode": "BOTH_PIERS_DISABLED",
+    "morning_tactic": "⚠️ 上午游擊調撥：北岸越浪，08:30 班次改至【南岸權宜碼頭】靠泊",
+    "afternoon_tactic": "🚨 下午游擊撤退：預測午後 ESE 巽宮風陣，11:20 止登，14:20 全員撤離",
+    "tactical_summary": "執行「下午游擊撤退【南岸碼頭撤離】」"
+  },
+  "level5_advanced_metrics": {
+    "vision_overtopping_rate_pmin": 2.49,
+    "vision_kd_bias": 0.0022,
+    "vessel_hydrodynamics": {
+      "vessel_name": "凱鯨號 (穿浪雙體船)",
+      "vessel_type": "CATAMARAN",
+      "dynamic_squat_m": 0.86,
+      "roll_deg": 3.31,
+      "pitch_deg": 4.42
+    },
+    "fno_forecast_mean_hs_m": -0.11,
+    "quantum_topology_coherence": 0.5063,
+    "swarm_dispatch_plan": [
+      {
+        "agent_id": 1,
+        "vessel_label": "凱鯨號 (Agent 1)",
+        "assigned_pier": "無 (雙岸失效)",
+        "tactical_action": "直航返航烏石港"
+      },
+      {
+        "agent_id": 2,
+        "vessel_label": "龜山島一號 (Agent 2)",
+        "assigned_pier": "無 (雙岸失效)",
+        "tactical_action": "直航返航烏石港"
+      },
+      {
+        "agent_id": 3,
+        "vessel_label": "宏棋號 (Agent 3)",
+        "assigned_pier": "無 (雙岸失效)",
+        "tactical_action": "直航返航烏石港"
+      }
+    ]
+  },
+  "qimen_macro_consensus": {
+    "consensus_rate_pct": 100.0,
+    "macro_advisory_enabled": true,
+    "qimen_status_prompt": "🔮 奇門氣場匹配率達 100.0% (>=70%)，已啟動宏觀參研決策與預警提示"
   }
 }
