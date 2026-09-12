@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GEM Engine Mobile V36D.12.0 - 手持戰術智庫</title>
+    <title>GEM Engine Mobile V36D.12.1 - 手持戰術智庫</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html, body {
@@ -56,7 +56,7 @@
     <div class="mobile-container">
         <!-- 1. 頂部狀態卡片 -->
         <div class="card-mob" id="topStatusCard" style="display:flex; justify-content:space-between; align-items:center;">
-            <div><span class="live-dot-blue"></span><strong style="color:#38bdf8; font-size:12px;">● LIVE SSOT 連線中 (v36D.12.0)</strong></div>
+            <div><span class="live-dot-blue"></span><strong style="color:#38bdf8; font-size:12px;">● LIVE SSOT 連線中 (v36D.12.1)</strong></div>
             <div style="font-size:11px; color:#94a3b8;">通訊: <span id="mobCommCount" style="color:#f8fafc; font-weight:bold;">0</span> 次 | <span id="mobSecAgo">更新: 0 秒前</span></div>
         </div>
 
@@ -79,18 +79,18 @@
                 <div class="item-box">
                     <div style="color:#94a3b8;">不確定性 (σ) / 精確度升</div>
                     <div style="font-weight:bold; font-size:11px; color:#38bdf8; margin-top:2px;">
-                        σ: <span id="mob_sigma">0.3551</span> | <span id="mob_precision_gain" style="color:#10b981;">+51.0%</span>
+                        σ: <span id="mob_sigma">0.3425</span> | <span id="mob_precision_gain" style="color:#10b981;">+52.9%</span>
                     </div>
                 </div>
             </div>
             <div style="margin-top:8px;">
                 <div style="display:flex; justify-content:space-between; font-size:10px; color:#cbd5e1;">
-                    <span>🟦 微觀物理腦: <strong id="mob_w_micro">100%</strong></span>
-                    <span>🟪 宏觀奇門腦: <strong id="mob_w_macro">0%</strong></span>
+                    <span>🟦 微觀物理腦: <strong id="mob_w_micro">65.0%</strong></span>
+                    <span>🟪 宏觀奇門腦: <strong id="mob_w_macro">35.0%</strong></span>
                 </div>
                 <div class="attn-bar-bg">
-                    <div id="bar_micro_m" class="attn-micro" style="width: 100%;"></div>
-                    <div id="bar_macro_m" class="attn-macro" style="width: 0%;"></div>
+                    <div id="bar_micro_m" class="attn-micro" style="width: 65%;"></div>
+                    <div id="bar_macro_m" class="attn-macro" style="width: 35%;"></div>
                 </div>
             </div>
         </div>
@@ -190,19 +190,43 @@
         <div class="card-mob" style="border: 1px solid #f59e0b;">
             <strong style="color:#f59e0b; font-size:12px; display:block; margin-bottom:6px;">⚓ 游擊式動態調度與時窗預判</strong>
             <div style="font-size:11px; line-height:1.6; color:#cbd5e1;">
-                <div>建議靠泊碼頭：<strong id="mob_berthing_pier" style="color:#facc15;">無 (南北岸雙岸屏障失效 / 長浪共振)</strong></div>
-                <div>戰術調度總結：<strong id="mob_tactical_summary" style="color:#ef4444;">執行「下午游擊撤退 / 提早退」</strong></div>
+                <div>靠泊碼頭：<strong id="mob_berthing_pier" style="color:#facc15;">無 (雙岸失效，禁止靠泊)</strong></div>
+                <div>撤離碼頭：<strong id="mob_evacuation_pier" style="color:#ef4444;">無 (雙岸失效，直航返航烏石港)</strong></div>
+                <div style="margin-top:2px;">戰術處置：<strong id="mob_tactical_summary" style="color:#ef4444;">執行「下午游擊撤退【南岸碼頭撤離】」</strong></div>
                 <div style="border-top:1px dashed #334155; margin-top:4px; padding-top:4px;">
-                    <div style="color:#cbd5e1;"><b>上午時窗：</b> <span id="mob_morning_tactic" style="color:#38bdf8;">08:30 班次預防性「延滯登」至 10:00 浪平</span></div>
-                    <div style="color:#cbd5e1; margin-top:2px;"><b>下午預警：</b> <span id="mob_afternoon_tactic" style="color:#fca5a5;">🚨 13:30 長浪共振，取消 15:30 末班，人員於 14:20 前清島撤離</span></div>
-                </div>
-                <div style="border-top:1px dashed #334155; margin-top:4px; padding-top:4px; font-size:10px; color:#c084fc;" id="mob_qimen_prompt">
-                    🔮 奇門氣場匹配率達 100.0% (>=70%)，已啟動宏觀參研決策與預警提示
+                    <div style="color:#cbd5e1;"><b>上午時窗：</b> <span id="mob_morning_tactic" style="color:#38bdf8;">08:30 班次改至【南岸權宜碼頭】靠泊</span></div>
+                    <div style="color:#cbd5e1; margin-top:2px;"><b>下午預警：</b> <span id="mob_afternoon_tactic" style="color:#fca5a5;">🚨 11:20 止登，全員於 14:20 前至【南岸權宜碼頭】登船撤離</span></div>
                 </div>
             </div>
         </div>
 
-        <!-- 7. 今日營運時段檢核 (6~9月規範) -->
+        <!-- 7. 🌀 颱風與奇門宏觀氣場預判專區 (重構恢復) -->
+        <div class="card-mob" style="border: 1px solid #a855f7;">
+            <strong style="color:#a855f7; font-size:12px; display:block; margin-bottom:6px;">🌀 颱風與奇門宏觀氣場預判專區</strong>
+            <div class="grid-2" style="font-size:11px; margin-bottom:6px;">
+                <div class="item-box">
+                    <div style="color:#94a3b8;">颱風中心距離</div>
+                    <div id="mob_typhoon_dist" style="color:#38bdf8; font-weight:bold;">450 km</div>
+                </div>
+                <div class="item-box">
+                    <div style="color:#94a3b8;">2D 氣壓梯度</div>
+                    <div id="mob_pressure_grad" style="color:#10b981; font-weight:bold;">1.10 hPa/100km</div>
+                </div>
+                <div class="item-box">
+                    <div style="color:#94a3b8;">巽宮氣場異常</div>
+                    <div id="mob_xun_anomaly" style="color:#facc15; font-weight:bold;">0.00 (正常)</div>
+                </div>
+                <div class="item-box">
+                    <div style="color:#94a3b8;">宏觀共振風險</div>
+                    <div id="mob_macro_risk" style="color:#ef4444; font-weight:bold;">高 (長浪共振)</div>
+                </div>
+            </div>
+            <div style="border-top:1px dashed #334155; padding-top:4px; font-size:10px; color:#c084fc;" id="mob_qimen_prompt">
+                🔮 奇門氣場匹配率達 100.0% (>=70%)，已啟動宏觀參研決策與預警提示
+            </div>
+        </div>
+
+        <!-- 8. 今日營運時段檢核 (6~9月規範) -->
         <div class="card-mob">
             <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">今日營運時段檢核 (6~9月規範)</strong>
             <div class="grid-2" style="font-size:11px; color:#cbd5e1; line-height:1.6;">
@@ -215,7 +239,7 @@
             </div>
         </div>
 
-        <!-- 8. 戰略三方案評估 (Ground Truth) -->
+        <!-- 9. 戰略三方案評估 (Ground Truth) -->
         <div class="card-mob">
             <strong style="color:#38bdf8; font-size:12px; display:block; margin-bottom:6px;">戰略三方案評估 (Ground Truth)</strong>
             <table class="table-full" style="margin-bottom:8px;">
@@ -246,7 +270,6 @@
             </table>
         </div>
 
-        <!-- 9. 裝置視角切換器 -->
         <div class="nav-switch">
             <span style="color:#94a3b8;">當前視角：📱 手機版控制台</span>
             <a href="desktop.html">💻 切換至桌面版</a>
@@ -271,7 +294,6 @@
             if (!data) return;
             lastUpdateMob = Date.now();
             mobCommCounter++;
-            
             document.getElementById('mobCommCount').innerText = mobCommCounter;
             document.getElementById('staleAlertMob').style.display = 'none';
 
@@ -292,8 +314,8 @@
                 document.getElementById('mob_precision_gain').innerText = '+' + data.precision_metrics.precision_gain_pct.toFixed(1) + '%';
             }
             if (data.attention_gate) {
-                let microW = data.attention_gate.micro_physics_weight || 100;
-                let macroW = data.attention_gate.macro_qimen_weight || 0;
+                let microW = data.attention_gate.micro_physics_weight !== undefined ? data.attention_gate.micro_physics_weight : 65.0;
+                let macroW = data.attention_gate.macro_qimen_weight !== undefined ? data.attention_gate.macro_qimen_weight : 35.0;
                 document.getElementById('mob_w_micro').innerText = microW.toFixed(1) + '%';
                 document.getElementById('mob_w_macro').innerText = macroW.toFixed(1) + '%';
                 document.getElementById('bar_micro_m').style.width = microW + '%';
@@ -309,13 +331,10 @@
                 
                 document.getElementById('m_stat_hs').className = (p.hs_pier_m > 1.20) ? 'badge-veto-m' : 'badge-pass-m';
                 document.getElementById('m_stat_hs').innerText = (p.hs_pier_m > 1.20) ? 'VETO' : 'PASS';
-                
                 document.getElementById('m_stat_w').className = (p.w_local_ms > 10.80) ? 'badge-veto-m' : 'badge-pass-m';
                 document.getElementById('m_stat_w').innerText = (p.w_local_ms > 10.80) ? 'VETO' : 'PASS';
-
                 document.getElementById('m_stat_ukc').className = (p.ukc_m < 1.50) ? 'badge-veto-m' : 'badge-pass-m';
                 document.getElementById('m_stat_ukc').innerText = (p.ukc_m < 1.50) ? 'VETO' : 'PASS';
-
                 document.getElementById('m_stat_fb').className = (p.fb_pier_m < 0.50) ? 'badge-veto-m' : 'badge-pass-m';
                 document.getElementById('m_stat_fb').innerText = (p.fb_pier_m < 0.50) ? 'VETO' : 'PASS';
             }
@@ -323,6 +342,7 @@
             if (data.guerrilla_dispatch) {
                 let g = data.guerrilla_dispatch;
                 if (g.berthing_pier) document.getElementById('mob_berthing_pier').innerText = g.berthing_pier;
+                if (g.evacuation_pier) document.getElementById('mob_evacuation_pier').innerText = g.evacuation_pier;
                 if (g.tactical_summary) document.getElementById('mob_tactical_summary').innerText = g.tactical_summary;
                 if (g.morning_tactic) document.getElementById('mob_morning_tactic').innerText = g.morning_tactic;
                 if (g.afternoon_tactic) document.getElementById('mob_afternoon_tactic').innerText = g.afternoon_tactic;
@@ -332,16 +352,10 @@
                 document.getElementById('mob_qimen_prompt').innerText = data.qimen_macro_consensus.qimen_status_prompt;
             }
 
-            if (window.parent && window.parent !== window) {
-                window.parent.postMessage({ type: 'confirmReceiptACK', timestamp: Date.now() }, '*');
+            if (data.telemetry_summary && data.telemetry_summary.typhoon_dist_km !== undefined) {
+                document.getElementById('mob_typhoon_dist').innerText = data.telemetry_summary.typhoon_dist_km + ' km';
             }
         };
-
-        window.addEventListener('message', (event) => {
-            if (event.data && event.data.type === 'SSOT_SYNC') {
-                window.onSSOTDataReceived(event.data.data);
-            }
-        });
 
         async function fetchSSOTDataFallback() {
             try {
