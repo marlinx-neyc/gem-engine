@@ -3,130 +3,334 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GEM-V36D Level 5/7 龜山島戰術智庫 (Mobile Edition)</title>
+    <title>GEM-V36D (v36D.13.0 Level 5) 戰術智庫 - 手持端</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background: #0f172a; color: #e2e8f0; margin: 0; padding: 12px; }
-        .mobile-container { display: flex; flex-direction: column; gap: 14px; }
-        
-        .header { background: #1e293b; padding: 14px; border-radius: 10px; display: flex; flex-direction: column; gap: 8px; contain: strict; height: auto; border: 1px solid #334155; border-left: 5px solid #334155; }
-        .decision-badge { font-size: 18px; font-weight: bold; padding: 6px 14px; border-radius: 16px; background: #94a3b8; color: white; text-align: center; width: 100%; box-sizing: border-box; }
+        :root {
+            --bg-color: #0b1120;
+            --card-bg: #1e293b;
+            --border-color: #334155;
+            --blue: #38bdf8;
+            --red: #ef4444;
+            --green: #10b981;
+            --yellow: #facc15;
+            --orange: #f59e0b;
+            --purple: #c084fc;
+        }
 
-        /* 補齊：手持版 Level 5 邊緣視覺、水動力與賽局算子 最上層整合表格 */
-        .master-operator-card { background: #151d30; border: 1.5px solid #10b981; border-radius: 10px; padding: 14px; contain: content; }
-        .operator-title { font-size: 1.05rem; font-weight: bold; color: #34d399; display: flex; align-items: center; gap: 6px; margin-bottom: 12px; }
-        .operator-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .op-subcard { background: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 10px 12px; }
-        .op-label { font-size: 0.8rem; color: #94a3b8; margin-bottom: 4px; }
-        .op-val-yellow { font-size: 1.25rem; font-weight: bold; color: #facc15; }
-        .op-val-cyan   { font-size: 1.25rem; font-weight: bold; color: #38bdf8; }
-        .op-val-rose   { font-size: 1.25rem; font-weight: bold; color: #f43f5e; }
-        .op-val-purple { font-size: 1.25rem; font-weight: bold; color: #c084fc; }
-        .op-divider { border: 0; border-top: 1px dashed #334155; margin: 12px 0 10px 0; }
-        .swarm-footer { font-size: 0.85rem; display: flex; flex-direction: column; gap: 4px; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: #f8fafc;
+            margin: 0;
+            padding: 12px;
+        }
 
-        /* 手機單欄堆疊結構 */
-        .card { background: #1e293b; padding: 14px; border-radius: 8px; border: 1px solid #334155; contain: content; }
-        .metric { font-size: 20px; font-weight: bold; color: #38bdf8; margin-top: 4px; }
+        .mobile-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
 
-        .nav-switch { display: flex; flex-direction: column; gap: 8px; padding: 12px; background: #1e293b; border-radius: 8px; border: 1px solid #334155; font-size: 0.85rem; text-align: center; }
-        .nav-switch a { color: #38bdf8; text-decoration: none; font-weight: bold; padding: 6px; background: rgba(56, 189, 248, 0.1); border-radius: 4px; }
+        /* 1. 頂部連線狀態卡片 */
+        .card-conn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--blue);
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .live-dot-blue {
+            display: inline-block; width: 10px; height: 10px; background-color: var(--blue);
+            border-radius: 50%; margin-right: 6px; box-shadow: 0 0 8px var(--blue); animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        /* 2. Watchdog 數據過期 Banner */
+        .stale-banner {
+            background: var(--red);
+            color: #fff;
+            padding: 10px;
+            border-radius: 6px;
+            display: none;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        /* 3. Q-Mode 戰術裁決 Banner */
+        .veto-banner {
+            background: rgba(239, 68, 68, 0.25);
+            border: 1px solid var(--red);
+            color: #fca5a5;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px;
+            contain: content;
+        }
+
+        .card-title {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #94a3b8;
+            margin-bottom: 10px;
+        }
+
+        /* 4. AI 雙核閘卡片 */
+        .card-ai { border: 1px solid var(--blue); }
+
+        /* 7. 游擊調度卡片 */
+        .card-guerrilla { border: 1px solid var(--orange); }
+
+        /* 8. 奇門氣場卡片 */
+        .card-qimen { border: 1px solid var(--purple); }
+
+        /* 9. Level 5 算子卡片 */
+        .card-level5 { border: 1px solid var(--green); background: #151d30; }
+
+        .badge-pass { background: var(--green); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; }
+        .badge-veto { background: var(--red); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; }
+
+        .grid-2x2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .box {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .val { font-size: 1.1rem; font-weight: bold; color: var(--blue); margin-top: 2px; }
+
+        .gt-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+        .gt-table th, .gt-table td { padding: 6px; border-bottom: 1px solid var(--border-color); }
+
+        .nav-switch {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px;
+            background: var(--card-bg);
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            font-size: 0.8rem;
+            text-align: center;
+        }
+        .nav-switch a { color: var(--blue); text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="mobile-container">
-    <div class="header" id="header-bar">
-        <div>
-            <h3 style="margin:0; color:#38bdf8; font-size:1.15rem;">📱 GEM-V36D 龜山島戰術智庫 (Mobile)</h3>
-            <p style="color: #94a3b8; margin: 4px 0 0 0; font-size: 0.75rem;">時間：<span id="txt-time">--</span> | <span id="txt-version">v36D.13.0</span></p>
+    <!-- 1. 頂部連線狀態卡片 -->
+    <div class="card-conn">
+        <div style="font-size:0.85rem; font-weight:bold;">
+            <span class="live-dot-blue"></span>● LIVE SSOT 連線
         </div>
-        <div id="badge-decision" class="decision-badge">載入中...</div>
-    </div>
-
-    <!-- 手機版補齊：Level 5 邊緣視覺、水動力與賽局算子 表格 -->
-    <div class="master-operator-card">
-        <div class="operator-title">🚀 Level 5 邊緣視覺、水動力與賽局算子</div>
-        <div class="operator-grid">
-            <div class="op-subcard">
-                <div class="op-label">CV 視覺越浪率</div>
-                <div id="txt-overtopping" class="op-val-yellow">1.31 p/min</div>
-            </div>
-            <div class="op-subcard">
-                <div class="op-label">MMSI 沉降 (Squat)</div>
-                <div id="txt-squat" class="op-val-cyan">0.86 m</div>
-            </div>
-            <div class="op-subcard">
-                <div class="op-label">FNO 預報波高</div>
-                <div id="txt-hs" class="op-val-rose">1.58 m</div>
-            </div>
-            <div class="op-subcard">
-                <div class="op-label">64D 量子拓撲相干性</div>
-                <div id="txt-coherence" class="op-val-purple">0.4682</div>
-            </div>
-        </div>
-        <hr class="op-divider">
-        <div class="swarm-footer">
-            <span style="font-weight:bold; color:#f8fafc;">Swarm 賽局排隊：</span>
-            <span style="color:#34d399;" id="txt-swarm-status">已成功為 3 艘 Agent 客輪規劃分流靠撤航線</span>
+        <div style="font-size:0.75rem; color:#94a3b8;">
+            連線: <span id="txt-count-mob">1</span> 次 | <span id="txt-time-mob">--</span>
         </div>
     </div>
 
-    <!-- 手機次要狀態卡片 -->
-    <div class="card">
-        <div style="font-size: 0.8rem; color:#94a3b8;">剛性熔斷狀態 (Hard-VETO)</div>
-        <div id="txt-veto" class="metric" style="font-size: 16px;">False (放行)</div>
-    </div>
-    <div class="card">
-        <div style="font-size: 0.8rem; color:#94a3b8;">Kd 偏置修正值</div>
-        <div id="txt-kd" class="metric" style="font-size: 18px;">0.0</div>
-    </div>
-    <div class="card">
-        <div style="font-size: 0.8rem; color:#94a3b8;">游擊調度處置</div>
-        <div id="txt-tactical" class="metric" style="font-size: 15px; color:#e2e8f0;">--</div>
+    <!-- 2. Watchdog 數據過期 Banner -->
+    <div class="stale-banner" id="staleAlertMob">
+        🔴 數據過期 — 遙測停滯 &gt; 30 秒，請勿依此進行靠泊決策！
     </div>
 
+    <!-- 3. Q-Mode 戰術裁決 Banner -->
+    <div class="veto-banner" id="vetoBannerMob">
+        即時裁決：<span id="txt-decision-mob">🔴 封島/防颱</span>
+    </div>
+
+    <!-- 4. AI 雙核相對精確度與注意力閘卡片 (#38bdf8 邊框) -->
+    <div class="card card-ai">
+        <div class="card-title" style="color:var(--blue);">4. AI 雙核相對精確度與注意力閘</div>
+        <div style="display:flex; justify-shadow:space-between; font-size:0.8rem; margin-bottom:8px;">
+            <span>信心度: <strong style="color:var(--green);" id="txt-conf-mob">100.0%</strong></span>
+            <span>σ 方差: <strong id="txt-sigma-mob">0.3125</strong></span>
+            <span>提升: <strong style="color:var(--blue);" id="txt-gain-mob">+58.4%</strong></span>
+        </div>
+        <div style="height:8px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden; display:flex;">
+            <div id="bar-micro-mob" style="width:65%; background:#3b82f6;"></div>
+            <div id="bar-macro-mob" style="width:35%; background:#a855f7;"></div>
+        </div>
+    </div>
+
+    <!-- 5. 即時海象數值與剛性門檻比對卡片 (PINN Engine) -->
+    <div class="card">
+        <div class="card-title">5. PINN 物理水文邊界數值</div>
+        <div class="grid-2x2">
+            <div class="box">
+                <div style="font-size:0.7rem; color:#94a3b8;">Hs Pier</div>
+                <div class="val" id="txt-hs-mob">3.71 m</div>
+                <span id="badge-hs-mob" class="badge-veto">VETO</span>
+            </div>
+            <div class="box">
+                <div style="font-size:0.7rem; color:#94a3b8;">W Local</div>
+                <div class="val" id="txt-w-mob">8.50 m/s</div>
+                <span id="badge-w-mob" class="badge-pass">PASS</span>
+            </div>
+            <div class="box">
+                <div style="font-size:0.7rem; color:#94a3b8;">UKC 裕深</div>
+                <div class="val" id="txt-ukc-mob">5.84 m</div>
+                <span id="badge-ukc-mob" class="badge-pass">PASS</span>
+            </div>
+            <div class="box">
+                <div style="font-size:0.7rem; color:#94a3b8;">FB Pier</div>
+                <div class="val" id="txt-fb-mob">2.00 m</div>
+                <span id="badge-fb-mob" class="badge-pass">PASS</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. 當日船班官模燈號比對卡片 -->
+    <div class="card">
+        <div class="card-title">6. 官方 vs GEM 燈號比對</div>
+        <div style="font-size:0.8rem; line-height:1.5;">
+            <div>官方判斷：<span style="color:var(--green);">🟢 常規開航</span></div>
+            <div>GEM 剛性：<span style="color:var(--red);" id="txt-veto-status-mob">🚨 觸發阻斷</span></div>
+        </div>
+    </div>
+
+    <!-- 7. ⚓ 游擊式動態調度卡片 (#f59e0b 邊框) -->
+    <div class="card card-guerrilla">
+        <div class="card-title" style="color:var(--orange);">7. ⚓ 游擊式動態調度處置</div>
+        <div style="font-size:0.8rem; line-height:1.5;">
+            <div>靠泊碼頭：<span id="txt-berth-mob" style="color:var(--yellow);">無 (雙岸失效)</span></div>
+            <div>撤離碼頭：<span id="txt-evac-mob" style="color:var(--yellow);">無 (直航烏石港)</span></div>
+            <div style="margin-top:4px; color:#94a3b8;" id="txt-tactical-mob">--</div>
+        </div>
+    </div>
+
+    <!-- 8. 🌀 颱風與奇門氣場預判專區 (#a855f7 邊框) -->
+    <div class="card card-qimen">
+        <div class="card-title" style="color:var(--purple);">8. 🌀 颱風與奇門氣場預判</div>
+        <div style="font-size:0.8rem; line-height:1.5;">
+            <div>颱風距離：450.0 km | 梯度：1.10 hPa/km</div>
+            <div style="color:var(--purple); margin-top:4px;" id="txt-qimen-mob">🔮 奇門匹配率達 100.0% (>=70%)</div>
+        </div>
+    </div>
+
+    <!-- 9. 🚀 Level 5 邊緣視覺、水動力與賽局算子卡片 (#10b981 邊框) -->
+    <div class="card card-level5">
+        <div class="card-title" style="color:var(--green);">9. 🚀 Level 5 邊緣高維算子</div>
+        <div class="grid-2x2">
+            <div class="box"><div style="font-size:0.65rem; color:#94a3b8;">CV 越浪率</div><div class="val" style="color:var(--yellow);" id="txt-overtop-mob">1.31 p/m</div></div>
+            <div class="box"><div style="font-size:0.65rem; color:#94a3b8;">Squat 沉降</div><div class="val" style="color:var(--blue);" id="txt-squat-mob">0.86 m</div></div>
+            <div class="box"><div style="font-size:0.65rem; color:#94a3b8;">FNO 預報</div><div class="val" style="color:var(--red);" id="txt-fno-mob">1.58 m</div></div>
+            <div class="box"><div style="font-size:0.65rem; color:#94a3b8;">64D 相干性</div><div class="val" style="color:var(--purple);" id="txt-coh-mob">0.4682</div></div>
+        </div>
+        <div style="font-size:0.75rem; color:#34d399; margin-top:8px;" id="txt-swarm-mob">
+            Swarm 賽局：已成功為 3 艘 Agent 客輪規劃分流
+        </div>
+    </div>
+
+    <!-- 10. 戰略三方案評估卡片 (Ground Truth) -->
+    <div class="card">
+        <div class="card-title">10. 戰略三方案評估 (Ground Truth)</div>
+        <table class="gt-table">
+            <thead><tr><th>方案</th><th>浪高</th><th>戰術處置</th></tr></thead>
+            <tbody>
+                <tr><td>A 官方</td><td>1.10m</td><td>開放靠泊</td></tr>
+                <tr><td>B 監測</td><td>1.45m</td><td>限制班次</td></tr>
+                <tr style="color:var(--yellow); font-weight:bold;"><td>C GEM</td><td>3.71m</td><td>🔴 強制封島</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 11. 裝置視角切換導覽列 -->
     <div class="nav-switch">
         <span style="color:#94a3b8;">當前視角：📱 手持移動版 (mobile.html)</span>
         <a href="index.html">🛡️ 切換至主指揮儀表板</a>
+        <a href="desktop.html">💻 切換至桌面完全版</a>
     </div>
 </div>
 
 <script>
-    async function fetchLatestSSOTData() {
+    let mobCommCount = 1;
+    let lastTS = Date.now();
+
+    async function fetchSSOTDataMob() {
         try {
-            const response = await fetch('./latest_decision.json?t=' + Date.now());
-            if (!response.ok) return;
-            const data = await response.json();
+            const res = await fetch('./latest_decision.json?t=' + Date.now());
+            if (!res.ok) return;
+            const data = await res.json();
 
-            document.getElementById('txt-time').textContent = data.timestamp || '--';
-            document.getElementById('txt-version').textContent = data.version || 'v36D.13.0 Mobile';
+            lastTS = Date.now();
+            document.getElementById('staleAlertMob').style.display = 'none';
 
-            const decision = data.decision || 'UNK';
-            const badge = document.getElementById('badge-decision');
-            badge.textContent = decision;
-            const isRed = decision.includes('🔴');
-            const isYellow = decision.includes('🟡');
-            const color = isRed ? '#e74c3c' : (isYellow ? '#f39c12' : '#2ecc71');
-            badge.style.background = color;
-            document.getElementById('header-bar').style.borderLeftColor = color;
+            document.getElementById('txt-time-mob').textContent = data.timestamp || '--';
+            document.getElementById('txt-count-mob').textContent = mobCommCount++;
 
-            const vetoAlert = !!data.hard_veto_alert;
-            document.getElementById('txt-veto').textContent = vetoAlert ? 'True (剛性熔斷)' : 'False (放行)';
+            document.getElementById('txt-decision-mob').textContent = data.decision || '未知';
 
-            const m = data.level6_metrics || {};
-            document.getElementById('txt-overtopping').textContent = (m.vision_overtopping !== undefined ? m.vision_overtopping : '1.31') + ' p/min';
-            document.getElementById('txt-squat').textContent = (m.squat_m !== undefined ? m.squat_m : '0.86') + ' m';
-            document.getElementById('txt-hs').textContent = (m.fno_forecast_hs !== undefined ? m.fno_forecast_hs : '1.58') + ' m';
-            document.getElementById('txt-coherence').textContent = m.quantum_coherence !== undefined ? m.quantum_coherence : '0.4682';
-            document.getElementById('txt-kd').textContent = m.kd_bias !== undefined ? m.kd_bias : '0.0';
+            if (data.confidence_score !== undefined) document.getElementById('txt-conf-mob').textContent = data.confidence_score.toFixed(1) + '%';
+            if (data.precision_metrics) {
+                document.getElementById('txt-sigma-mob').textContent = data.precision_metrics.converged_sigma;
+                document.getElementById('txt-gain-mob').textContent = '+' + data.precision_metrics.precision_gain_pct + '%';
+            }
+            if (data.attention_gate) {
+                document.getElementById('bar-micro-mob').style.width = data.attention_gate.micro_physics_weight + '%';
+                document.getElementById('bar-macro-mob').style.width = data.attention_gate.macro_qimen_weight + '%';
+            }
 
-            const g = data.guerrilla_dispatch || {};
-            document.getElementById('txt-swarm-status').textContent = g.swarm_queue || '已成功為 3 艘 Agent 客輪規劃分流靠撤航線';
-            document.getElementById('txt-tactical').textContent = g.tactical_summary || '兩岸正常常規靠泊';
-        } catch (err) { console.warn(err); }
+            if (data.physics_metrics) {
+                const p = data.physics_metrics;
+                document.getElementById('txt-hs-mob').textContent = p.hs_pier_m + ' m';
+                document.getElementById('txt-w-mob').textContent = p.w_local_ms + ' m/s';
+                document.getElementById('txt-ukc-mob').textContent = p.ukc_m + ' m';
+                document.getElementById('txt-fb-mob').textContent = p.fb_pier_m + ' m';
+            }
+
+            if (data.guerrilla_dispatch) {
+                const g = data.guerrilla_dispatch;
+                document.getElementById('txt-berth-mob').textContent = g.berthing_pier || '--';
+                document.getElementById('txt-evac-mob').textContent = g.evacuation_pier || '--';
+                document.getElementById('txt-tactical-mob').textContent = g.tactical_summary || '--';
+            }
+
+            if (data.qimen_macro_consensus) {
+                document.getElementById('txt-qimen-mob').textContent = data.qimen_macro_consensus.qimen_status_prompt || '--';
+            }
+
+            if (data.level5_advanced_metrics) {
+                const l5 = data.level5_advanced_metrics;
+                document.getElementById('txt-overtop-mob').textContent = l5.vision_overtopping_rate_pmin + ' p/m';
+                document.getElementById('txt-squat-mob').textContent = (l5.vessel_hydrodynamics ? l5.vessel_hydrodynamics.dynamic_squat_m : 0.86) + ' m';
+                document.getElementById('txt-fno-mob').textContent = l5.fno_forecast_mean_hs_m + ' m';
+                document.getElementById('txt-coh-mob').textContent = l5.quantum_topology_coherence;
+            }
+        } catch (err) {
+            console.warn(err);
+        }
     }
-    fetchLatestSSOTData();
-    setInterval(fetchLatestSSOTData, 5000);
+
+    setInterval(() => {
+        if ((Date.now() - lastTS) / 1000 > 30) {
+            document.getElementById('staleAlertMob').style.display = 'block';
+        }
+    }, 1000);
+
+    fetchSSOTDataMob();
+    setInterval(fetchSSOTDataMob, 5000);
 </script>
+
 </body>
 </html>
