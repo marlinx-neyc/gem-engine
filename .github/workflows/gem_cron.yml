@@ -5,6 +5,10 @@ on:
     - cron: '*/15 * * * *'
   workflow_dispatch:
 
+# 授權 github-actions[bot] 具備寫入與 Push 權限
+permissions:
+  contents: write
+
 jobs:
   run-engine:
     runs-on: ubuntu-latest
