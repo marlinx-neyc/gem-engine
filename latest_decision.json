@@ -1,6 +1,6 @@
 {
   "version": "v36D.13.0 Level 5 Complete",
-  "timestamp": "2026-09-13 21:45:47 CST",
+  "timestamp": "2026-09-13 15:02:45 CST",
   "decision": "🔴 封島/防颱",
   "confidence_score": 100.0,
   "hard_veto_alert": true,
@@ -23,34 +23,18 @@
     "berthing_pier": "【南岸權宜碼頭】",
     "evacuation_pier": "【南岸權宜碼頭】 &rarr; 返航【烏石港】",
     "guerrilla_mode": "BOTH_PIERS_DISABLED",
-    "morning_tactic": "⚠️ 上午游擊調撥：北岸越浪，08:30 班次改至【南岸權宜碼頭】靠泊",
-    "afternoon_tactic": "🚨 下午游擊撤退：10:50/13:50 雙預警，11:20 止登，14:20 全員撤離至【烏石港】",
-    "tactical_summary": "執行「10:50/13:50 雙預警，11:20 止登【南岸碼頭】，14:20 全員撤離至【烏石港】」"
+    "morning_tactic": "🚨 浪高/風速超標觸發 VETO，取消常規登島班次",
+    "afternoon_tactic": "🚨 10:50/13:50 雙預警，11:20 止登【南岸碼頭】，14:20 全員強制撤離至【烏石港】",
+    "tactical_summary": "採納「方案 C (GEM-V36D)」，啟動剛性熔斷，10:50 預警/11:20 止登【南岸碼頭】，13:50 預警/14:20 全員撤離至【烏石港】。"
   },
   "level5_advanced_metrics": {
     "vision_overtopping_rate_pmin": 1.31,
-    "vision_kd_bias": 0.0341,
     "vessel_hydrodynamics": {
       "vessel_name": "凱鯨號 (穿浪雙體船)",
-      "vessel_type": "CATAMARAN",
-      "dynamic_squat_m": 0.82,
-      "roll_deg": 3.3,
-      "pitch_deg": 4.4
+      "dynamic_squat_m": 0.82
     },
     "fno_forecast_mean_hs_m": 1.58,
-    "quantum_topology_coherence": 0.4682,
-    "swarm_dispatch_plan": [
-      {
-        "agent_id": 1,
-        "vessel_label": "凱鯨號 (Agent 1)",
-        "assigned_pier": "【南岸權宜碼頭】",
-        "tactical_action": "直航返航烏石港"
-      }
-    ]
+    "quantum_topology_coherence": 0.4682
   },
-  "qimen_macro_consensus": {
-    "consensus_rate_pct": 100.0,
-    "macro_advisory_enabled": true,
-    "qimen_status_prompt": "🔮 奇門氣場匹配率達 100.0% (>=70%)，已啟動宏觀參研決策與預警提示"
-  }
+  "qimen_macro_consensus": {}
 }
