@@ -44,8 +44,8 @@
     .timeline-list li { margin-bottom: 2px; }
     .alert-box { background: #450a0a; border: 1px solid #dc2626; color: #fecaca; padding: 8px; border-radius: 4px; font-size: 11px; margin-top: 8px; line-height: 1.4; }
     .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .chart-box { background: #0f172a; border: 1px solid #1e293b; border-radius: 6px; height: 200px; padding: 8px; min-width: 0; }
-    .chart-box-wide { grid-column: span 2; height: 170px; min-width: 0; }
+    .chart-box { background: #0f172a; border: 1px solid #1e293b; border-radius: 6px; height: 200px; padding: 8px; width: 100%; }
+    .chart-box-wide { grid-column: span 2; height: 170px; width: 100%; }
   </style>
 </head>
 <body>
@@ -104,6 +104,7 @@
       </div>
     </div>
 
+    <!-- 5 大圖表容器 -->
     <div class="charts-grid">
       <div class="chart-box" id="hsChart"></div>
       <div class="chart-box" id="windChart"></div>
@@ -117,23 +118,36 @@
     const commonXAxis = ['08:00', '10:00', '11:00', '12:00', '14:00', '16:00', '18:00'];
     const HS_LIMIT = 1.20;
 
-    // 全域圖表實體變數
-    let hsChart, windChart, ukcChart, tpChart, futureChart;
+    const charts = {};
+
+    // 獨立安全初始化單一圖表，避免錯誤互相干擾
+    function safeInitChart(id, option) {
+      try {
+        const el = document.getElementById(id);
+        if (!el) return null;
+        const chart = echarts.init(el);
+        chart.setOption(option);
+        return chart;
+      } catch (err) {
+        console.error('初始化圖表失敗: ' + id, err);
+        return null;
+      }
+    }
 
     function initAllCharts() {
-      // 1. Hs 浪高演化
-      hsChart = echarts.init(document.getElementById('hsChart'));
-      hsChart.setOption({
+      // 1. Hs 浪高圖表
+      charts.hs = safeInitChart('hsChart', {
         backgroundColor: 'transparent',
         title: { text: 'Hs 浪高演化 (m)', textStyle: { color: '#38bdf8', fontSize: 12 } },
-        grid: { top: 30, left: 35, right: 60, bottom: 25 },
+        grid: { top: 35, left: 35, right: 65, bottom: 25 },
         tooltip: { trigger: 'axis' },
         xAxis: { type: 'category', data: commonXAxis, axisLabel: { color: '#64748b', fontSize: 10 } },
         yAxis: { type: 'value', min: 0, max: 4, axisLabel: { color: '#64748b', fontSize: 10 }, splitLine: { lineStyle: { color: '#1e293b' } } },
-        visualMap: { show: false, dimension: 1, pieces: [{ lte: HS_LIMIT, color: '#38bdf8' }, { gt: HS_LIMIT, color: '#ef4444' }] },
         series: [{
           name: 'Hs 波高', type: 'line', smooth: true, symbolSize: 6,
           data: [1.1, 1.3, 2.7, 3.71, 3.9, 3.1, 2.0],
+          itemStyle: { color: '#ef4444' },
+          lineStyle: { color: '#ef4444', width: 2 },
           markLine: {
             symbol: 'none', silent: true,
             data: [{ yAxis: HS_LIMIT, lineStyle: { color: '#eab308', type: 'dashed' }, label: { formatter: `H (${HS_LIMIT}m)`, color: '#eab308', position: 'end', fontSize: 10 } }]
@@ -141,48 +155,44 @@
         }]
       });
 
-      // 2. 風速演化
-      windChart = echarts.init(document.getElementById('windChart'));
-      windChart.setOption({
+      // 2. 風速圖表
+      charts.wind = safeInitChart('windChart', {
         backgroundColor: 'transparent',
         title: { text: 'Wind 風速演化 (m/s)', textStyle: { color: '#38bdf8', fontSize: 12 } },
-        grid: { top: 30, left: 35, right: 35, bottom: 25 },
+        grid: { top: 35, left: 35, right: 35, bottom: 25 },
         tooltip: { trigger: 'axis' },
         xAxis: { type: 'category', data: commonXAxis, axisLabel: { color: '#64748b', fontSize: 10 } },
         yAxis: { type: 'value', min: 0, max: 12, axisLabel: { color: '#64748b', fontSize: 10 }, splitLine: { lineStyle: { color: '#1e293b' } } },
         series: [{ name: '風速', type: 'line', smooth: true, symbolSize: 6, data: [6.2, 7.5, 8.5, 9.8, 10.5, 9.2, 8.0], itemStyle: { color: '#f59e0b' } }]
       });
 
-      // 3. UKC 水深演化
-      ukcChart = echarts.init(document.getElementById('ukcChart'));
-      ukcChart.setOption({
+      // 3. UKC 水深圖表
+      charts.ukc = safeInitChart('ukcChart', {
         backgroundColor: 'transparent',
         title: { text: 'UKC 水深演化 (m)', textStyle: { color: '#38bdf8', fontSize: 12 } },
-        grid: { top: 30, left: 35, right: 35, bottom: 25 },
+        grid: { top: 35, left: 35, right: 35, bottom: 25 },
         tooltip: { trigger: 'axis' },
         xAxis: { type: 'category', data: commonXAxis, axisLabel: { color: '#64748b', fontSize: 10 } },
         yAxis: { type: 'value', min: 0, max: 7, axisLabel: { color: '#64748b', fontSize: 10 }, splitLine: { lineStyle: { color: '#1e293b' } } },
         series: [{ name: 'UKC', type: 'line', smooth: true, symbolSize: 6, data: [6.8, 6.4, 6.0, 5.84, 5.6, 6.1, 6.5], itemStyle: { color: '#10b981' } }]
       });
 
-      // 4. Tp 浪週期
-      tpChart = echarts.init(document.getElementById('tpChart'));
-      tpChart.setOption({
+      // 4. Tp 週期圖表
+      charts.tp = safeInitChart('tpChart', {
         backgroundColor: 'transparent',
         title: { text: 'Tp 浪週期 (s)', textStyle: { color: '#38bdf8', fontSize: 12 } },
-        grid: { top: 30, left: 35, right: 35, bottom: 25 },
+        grid: { top: 35, left: 35, right: 35, bottom: 25 },
         tooltip: { trigger: 'axis' },
         xAxis: { type: 'category', data: commonXAxis, axisLabel: { color: '#64748b', fontSize: 10 } },
         yAxis: { type: 'value', min: 0, max: 15, axisLabel: { color: '#64748b', fontSize: 10 }, splitLine: { lineStyle: { color: '#1e293b' } } },
         series: [{ name: 'Tp 週期', type: 'line', smooth: true, symbolSize: 6, data: [6.5, 8.2, 10.8, 14.5, 13.1, 11.0, 9.5], itemStyle: { color: '#a855f7' } }]
       });
 
-      // 5. 未來 1 小時趨勢
-      futureChart = echarts.init(document.getElementById('futureChart'));
-      futureChart.setOption({
+      // 5. 未來 1 小時趨勢預判
+      charts.future = safeInitChart('futureChart', {
         backgroundColor: 'transparent',
         title: { text: '未來1小時趨勢預判 (Hs 波高 & Wind 風速)', textStyle: { color: '#38bdf8', fontSize: 12 } },
-        grid: { top: 30, left: 35, right: 35, bottom: 25 },
+        grid: { top: 35, left: 35, right: 35, bottom: 25 },
         tooltip: { trigger: 'axis' },
         xAxis: { type: 'category', data: ['19:00', '20:00', '21:00', '22:00', '23:00'], axisLabel: { color: '#64748b', fontSize: 10 } },
         yAxis: { type: 'value', axisLabel: { color: '#64748b', fontSize: 10 }, splitLine: { lineStyle: { color: '#1e293b' } } },
@@ -196,11 +206,7 @@
     }
 
     function resizeAllCharts() {
-      if (hsChart) hsChart.resize();
-      if (windChart) windChart.resize();
-      if (ukcChart) ukcChart.resize();
-      if (tpChart) tpChart.resize();
-      if (futureChart) futureChart.resize();
+      Object.values(charts).forEach(chart => { if (chart) chart.resize(); });
     }
 
     async function syncSSOTData() {
@@ -231,30 +237,19 @@
             b.innerText = phys.hs_pier_m > 1.20 ? 'VETO' : 'PASS';
             b.className = phys.hs_pier_m > 1.20 ? 'badge-veto' : 'badge-pass';
           }
-          if (phys.w_local_ms !== undefined) document.getElementById('val-wind').innerText = `${phys.w_local_ms} m/s`;
-          if (phys.ukc_m !== undefined) document.getElementById('val-ukc').innerText = `${phys.ukc_m} m`;
-          if (phys.fb_pier_m !== undefined) document.getElementById('val-fb').innerText = `${phys.fb_pier_m} m`;
 
-          // 更新圖表數據（若 JSON 陣列元素大於 1 則更新，否則保留展演數據）
-          if (Array.isArray(phys.hs_series) && phys.hs_series.length > 1) {
-            hsChart.setOption({ series: [{ name: 'Hs 波高', type: 'line', data: phys.hs_series }] });
+          // 帶入數據更新（保護：長度小於 2 時不覆蓋預設展演陣列）
+          if (charts.hs && Array.isArray(phys.hs_series) && phys.hs_series.length > 1) {
+            charts.hs.setOption({ series: [{ name: 'Hs 波高', data: phys.hs_series }] });
           }
-          if (Array.isArray(phys.wind_series) && phys.wind_series.length > 1) {
-            windChart.setOption({ series: [{ name: '風速', type: 'line', data: phys.wind_series }] });
+          if (charts.wind && Array.isArray(phys.wind_series) && phys.wind_series.length > 1) {
+            charts.wind.setOption({ series: [{ name: '風速', data: phys.wind_series }] });
           }
-          if (Array.isArray(phys.ukc_series) && phys.ukc_series.length > 1) {
-            ukcChart.setOption({ series: [{ name: 'UKC', type: 'line', data: phys.ukc_series }] });
+          if (charts.ukc && Array.isArray(phys.ukc_series) && phys.ukc_series.length > 1) {
+            charts.ukc.setOption({ series: [{ name: 'UKC', data: phys.ukc_series }] });
           }
-          if (Array.isArray(phys.tp_series) && phys.tp_series.length > 1) {
-            tpChart.setOption({ series: [{ name: 'Tp 週期', type: 'line', data: phys.tp_series }] });
-          }
-          if (Array.isArray(phys.future_hs_series) && phys.future_hs_series.length > 1) {
-            futureChart.setOption({
-              series: [
-                { name: 'Hs 波高', type: 'line', data: phys.future_hs_series },
-                { name: 'Wind 風速', type: 'line', data: phys.future_wind_series || [] }
-              ]
-            });
+          if (charts.tp && Array.isArray(phys.tp_series) && phys.tp_series.length > 1) {
+            charts.tp.setOption({ series: [{ name: 'Tp 週期', data: phys.tp_series }] });
           }
         }
 
@@ -264,20 +259,12 @@
           gemEl.style.color = data.hard_veto_alert ? '#ef4444' : '#22c55e';
         }
 
-        if (data.guerrilla_dispatch) {
-          const g = data.guerrilla_dispatch;
-          if (g.tactical_summary) document.getElementById('tactical-summary').innerText = g.tactical_summary;
-          if (g.berthing_pier) document.getElementById('berthing-pier').innerHTML = g.berthing_pier;
-          if (g.evacuation_pier) document.getElementById('evacuation-pier').innerHTML = g.evacuation_pier;
-        }
-
         resizeAllCharts();
       } catch (e) {
-        console.warn('SSOT 輪詢暫停或未取得 JSON', e);
+        console.warn('SSOT 數據讀取備援中', e);
       }
     }
 
-    // 確保 DOM 與排版計算完成後再初始化圖表
     document.addEventListener('DOMContentLoaded', () => {
       initAllCharts();
       syncSSOTData();
