@@ -34,7 +34,6 @@
             gap: 20px;
         }
 
-        /* 頂部一體化整合主卡片 */
         .header-master-card {
             background: #151d30;
             border: 1.5px solid #10b981;
@@ -219,6 +218,7 @@
         </div>
     </div>
 
+    <!-- 32% / 68% 雙欄 -->
     <div class="main-columns">
         <div class="left-col">
             <!-- 1. PINN Engine 水文門檻比對 -->
@@ -439,7 +439,7 @@
         }]
     });
 
-    // 七天趨勢預判
+    // 未來七天雙軸趨勢預判圖表 (Tooltip 帶有動態燈號與判斷)
     const c7d = echarts.init(document.getElementById('chart-7days'));
     c7d.setOption({
         backgroundColor: 'transparent',
