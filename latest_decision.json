@@ -1,6 +1,6 @@
 {
   "version": "v36D.13.0 Level 5 Complete",
-  "timestamp": "2026-09-13 12:17:54 CST",
+  "timestamp": "2026-09-13 12:56:55 CST",
   "decision": "🔴 封島/防颱",
   "confidence_score": 100.0,
   "hard_veto_alert": true,
@@ -29,7 +29,7 @@
   },
   "level5_advanced_metrics": {
     "vision_overtopping_rate_pmin": 1.31,
-    "vision_kd_bias": 0.0334,
+    "vision_kd_bias": 0.0343,
     "vessel_hydrodynamics": {
       "vessel_name": "凱鯨號 (穿浪雙體船)",
       "vessel_type": "CATAMARAN",
