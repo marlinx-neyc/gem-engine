@@ -39,36 +39,47 @@
             background: #151d30;
             border: 1.5px solid #10b981;
             border-radius: 12px;
-            padding: 20px 24px;
+            padding: 18px 24px;
             contain: content;
             box-shadow: 0 4px 25px rgba(16, 185, 129, 0.12);
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 14px;
         }
 
-        .top-row {
-            display: flex;
-            justify-content: space-between;
+        /* 需求 2：同一列大整合 (主標題 + Level 5 算子名稱 + AI 信心度雙核指標) */
+        .top-integrated-row {
+            display: grid;
+            grid-template-columns: 1.2fr 1.5fr 1.3fr;
+            gap: 16px;
             align-items: center;
         }
 
-        .title-group { display: flex; align-items: center; gap: 12px; }
+        .title-group { display: flex; align-items: center; gap: 10px; }
         .live-dot {
             width: 12px; height: 12px; background-color: var(--blue);
             border-radius: 50%; box-shadow: 0 0 10px var(--blue); animation: pulse 1.5s infinite;
         }
         @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.2); } }
 
+        .l5-header-center {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            border-left: 1px dashed var(--border-color);
+            border-right: 1px dashed var(--border-color);
+            padding: 0 16px;
+        }
+
         .dual-core-badge {
-            display: flex; align-items: center; gap: 24px;
-            background: rgba(0, 0, 0, 0.3); padding: 10px 20px;
+            display: flex; align-items: center; justify-content: space-around;
+            background: rgba(0, 0, 0, 0.3); padding: 8px 14px;
             border-radius: 10px; border: 1px solid var(--border-color);
         }
 
         .progress-bar-wrap {
-            width: 140px; height: 12px; background: rgba(255, 255, 255, 0.1);
-            border-radius: 6px; overflow: hidden; display: flex;
+            width: 110px; height: 10px; background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px; overflow: hidden; display: flex;
         }
         .progress-micro { background: #3b82f6; height: 100%; transition: width 0.5s; }
         .progress-macro { background: #a855f7; height: 100%; transition: width 0.5s; }
@@ -77,12 +88,6 @@
             border: 0;
             border-top: 1px dashed var(--border-color);
             margin: 0;
-        }
-
-        .sub-header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
         .l5-grid-4col {
@@ -95,13 +100,13 @@
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            padding: 14px 16px;
+            padding: 10px 14px;
             text-align: center;
         }
-        .l5-val-yellow { font-size: 1.6rem; font-weight: bold; color: var(--yellow); margin-top: 4px; }
-        .l5-val-cyan   { font-size: 1.6rem; font-weight: bold; color: var(--blue); margin-top: 4px; }
-        .l5-val-rose   { font-size: 1.6rem; font-weight: bold; color: var(--red); margin-top: 4px; }
-        .l5-val-purple { font-size: 1.6rem; font-weight: bold; color: var(--purple); margin-top: 4px; }
+        .l5-val-yellow { font-size: 1.5rem; font-weight: bold; color: var(--yellow); margin-top: 2px; }
+        .l5-val-cyan   { font-size: 1.5rem; font-weight: bold; color: var(--blue); margin-top: 2px; }
+        .l5-val-rose   { font-size: 1.5rem; font-weight: bold; color: var(--red); margin-top: 2px; }
+        .l5-val-purple { font-size: 1.5rem; font-weight: bold; color: var(--purple); margin-top: 2px; }
 
         /* 32% / 68% 剛性雙欄 */
         .main-columns { display: flex; gap: 20px; align-items: flex-start; }
@@ -145,17 +150,6 @@
         .gt-table th, .gt-table td { padding: 10px 12px; border-bottom: 1px solid var(--border-color); }
         .gt-plan-c { background: rgba(250, 204, 21, 0.15); color: var(--yellow); font-weight: bold; }
 
-        .gt-summary-bar {
-            background: rgba(250, 204, 21, 0.2);
-            border: 1px solid var(--yellow);
-            color: var(--yellow);
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 0.9rem;
-            margin-top: 12px;
-        }
-
         .nav-switch {
             display: flex; justify-content: space-between; align-items: center;
             padding: 12px 20px; background: var(--card-bg);
@@ -167,29 +161,40 @@
 <body>
 
 <div class="desktop-layout">
-    <!-- 【置頂一體化整合主卡片】標題 + AI 雙核狀態 + Level 5 四大高維算子 -->
+    <!-- 需求 2：置頂一體化整合主卡片 (主標題 + Level 5 算子 + AI 信心度雙核指標 整合在同一列) -->
     <div class="header-master-card">
-        <!-- 上排：主標題與 AI 雙核狀態 -->
-        <div class="top-row">
+        <div class="top-integrated-row">
+            <!-- 左：主標題與連線時間 -->
             <div class="title-group">
                 <span class="live-dot"></span>
                 <div>
-                    <h2 style="margin:0; font-size:1.35rem; color: var(--blue);">GEM-V36D (v36D.13.0 Level 5) 戰術智庫</h2>
-                    <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px;">成功通訊：<span id="txt-count">13</span> 次 | 即時更新：<span id="txt-time">--</span></div>
+                    <h2 style="margin:0; font-size:1.25rem; color: var(--blue);">GEM-V36D (v36D.13.0 Level 5) 戰術智庫</h2>
+                    <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 3px;">通訊：<span id="txt-count">13</span> 次 | 即時：<span id="txt-time">--</span></div>
                 </div>
             </div>
 
+            <!-- 中：Level 5 算子名稱與 Swarm / 相干性宣告 -->
+            <div class="l5-header-center">
+                <div style="font-size: 1.05rem; font-weight: bold; color: var(--green); display: flex; align-items: center; gap: 6px;">
+                    🚀 Level 5 邊緣視覺、水動力與賽局高維整合算子
+                </div>
+                <div style="font-size: 0.78rem; color: #94a3b8;">
+                    Swarm: <strong style="color:var(--green);" id="txt-swarm">已成功為 3 艘 Agent 客輪規劃分流</strong> | 相干性: <strong style="color:var(--purple);" id="txt-coh-status">高維相干 (σ=0.3125)</strong>
+                </div>
+            </div>
+
+            <!-- 右：AI 雙核指標 -->
             <div class="dual-core-badge">
                 <div style="text-align:center;">
-                    <div style="font-size:0.75rem; color:#94a3b8;">AI 信心度</div>
-                    <div style="font-size:1.1rem; font-weight:bold; color:var(--green);" id="txt-confidence">100.0%</div>
+                    <div style="font-size:0.7rem; color:#94a3b8;">AI 信心度</div>
+                    <div style="font-size:1.05rem; font-weight:bold; color:var(--green);" id="txt-confidence">100.0%</div>
                 </div>
                 <div style="text-align:center;">
-                    <div style="font-size:0.75rem; color:#94a3b8;">σ 方差 / 精確度</div>
-                    <div style="font-size:1.1rem; font-weight:bold; color:var(--blue);"><span id="txt-sigma">0.3125</span> (<span id="txt-gain">+58.4%</span>)</div>
+                    <div style="font-size:0.7rem; color:#94a3b8;">σ 方差 / 精確度</div>
+                    <div style="font-size:1.05rem; font-weight:bold; color:var(--blue);"><span id="txt-sigma">0.3125</span> (<span id="txt-gain">+58.4%</span>)</div>
                 </div>
                 <div>
-                    <div style="font-size:0.75rem; color:#94a3b8; margin-bottom:4px;">微觀 / 宏觀 權重</div>
+                    <div style="font-size:0.7rem; color:#94a3b8; margin-bottom:2px;">微觀 / 宏觀 權重</div>
                     <div class="progress-bar-wrap">
                         <div class="progress-micro" id="bar-micro" style="width: 65%;"></div>
                         <div class="progress-macro" id="bar-macro" style="width: 35%;"></div>
@@ -200,33 +205,22 @@
 
         <hr class="header-divider">
 
-        <!-- 中排：Level 5 標題與 Swarm/相干性宣告 -->
-        <div class="sub-header-row">
-            <div style="font-size: 1.1rem; font-weight: bold; color: var(--green); display: flex; align-items: center; gap: 8px;">
-                🚀 Level 5 邊緣視覺、水動力與賽局高維整合算子
-            </div>
-            <div style="font-size: 0.85rem; color: #94a3b8; display: flex; gap: 20px;">
-                <span>Swarm 賽局狀態：<strong style="color:var(--green);" id="txt-swarm">已成功為 3 艘 Agent 客輪規劃分流靠撤航線</strong></span>
-                <span>相干性狀態：<strong style="color:var(--purple);" id="txt-coh-status">高維相干收斂 (σ=0.3125)</strong></span>
-            </div>
-        </div>
-
-        <!-- 下排：Level 5 四大算子卡片 -->
+        <!-- 下排：Level 5 四大數值區塊 -->
         <div class="l5-grid-4col">
             <div class="l5-box">
-                <div style="font-size:0.85rem; color:#94a3b8;">CV 視覺越浪率</div>
+                <div style="font-size:0.8rem; color:#94a3b8;">CV 視覺越浪率</div>
                 <div class="l5-val-yellow" id="txt-overtopping">1.31 p/min</div>
             </div>
             <div class="l5-box">
-                <div style="font-size:0.85rem; color:#94a3b8;">MMSI 客輪沉降 (Squat)</div>
+                <div style="font-size:0.8rem; color:#94a3b8;">MMSI 客輪沉降 (Squat)</div>
                 <div class="l5-val-cyan" id="txt-squat">0.82 m</div>
             </div>
             <div class="l5-box">
-                <div style="font-size:0.85rem; color:#94a3b8;">FNO 100ms 預報波高</div>
+                <div style="font-size:0.8rem; color:#94a3b8;">FNO 100ms 預報波高</div>
                 <div class="l5-val-rose" id="txt-fno">1.58 m</div>
             </div>
             <div class="l5-box">
-                <div style="font-size:0.85rem; color:#94a3b8;">64D 量子拓撲相干性</div>
+                <div style="font-size:0.8rem; color:#94a3b8;">64D 量子拓撲相干性</div>
                 <div class="l5-val-purple" id="txt-coherence">0.4682</div>
             </div>
         </div>
@@ -262,9 +256,9 @@
                 </div>
             </div>
 
-            <!-- 2. 當日船班官模燈號與時窗比對 -->
+            <!-- 需求 3：戰略方案總結與當日船班官模燈號與時窗比對 整合大卡片 -->
             <div class="card">
-                <div class="card-title">2. 當日船班官模燈號與時窗比對</div>
+                <div class="card-title">2. 當日船班官模燈號、時窗與戰略方案總結</div>
                 <div style="font-size:0.85rem; color:#94a3b8; line-height:1.6;">
                     <div>海象標準：Hs &le; 1.20m | W &le; 10.80m/s | &Delta;&theta; &lt; 45&deg;</div>
                     <div style="margin-top:4px;">官方燈號：<strong style="color:var(--green);">🟢 常規開放 (預測未達標)</strong></div>
@@ -275,6 +269,10 @@
                     • 08:30 首班：<span style="color:var(--yellow);">改至【南岸權宜碼頭】靠泊</span><br>
                     • 11:20 時窗：<span style="color:var(--red);">止登封閉時窗啟動</span><br>
                     • 14:20 撤離：<span style="color:var(--red);">強制清島，全船返航烏石港</span>
+                </div>
+                <!-- 戰略方案總結整合置入 -->
+                <div style="background:rgba(250, 204, 21, 0.18); border:1px solid var(--yellow); color:var(--yellow); padding:10px; border-radius:6px; margin-top:8px; font-size:0.82rem; font-weight:bold; line-height:1.4;">
+                    📌 戰略方案總結：採納「方案 C (GEM-V36D)」，啟動剛性熔斷，強制實施 11:20 止登與 14:20 全員清島撤離。
                 </div>
             </div>
 
@@ -307,7 +305,7 @@
         </div>
 
         <div class="right-col">
-            <!-- 2x2 時間線圖表 -->
+            <!-- 需求 1：圖表警戒線改為虛線 (type: 'dashed') + 明確數值標籤 (Hs 1.20m / Wind 10.80m/s) + 判點虛線無箭頭 (symbol: 'none') -->
             <div class="charts-2x2">
                 <div id="chart-hs" class="chart-box"></div>
                 <div id="chart-wind" class="chart-box"></div>
@@ -315,10 +313,10 @@
                 <div id="chart-tp" class="chart-box"></div>
             </div>
 
-            <!-- 七天趨勢預判圖表 -->
+            <!-- 七天趨勢預判圖表 (含虛線警戒線) -->
             <div id="chart-7days" style="height: 210px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px; cursor: crosshair;"></div>
 
-            <!-- 戰略三方案評估 (Ground Truth Comparison) -->
+            <!-- 戰略三方案評估表格 (Ground Truth Comparison) -->
             <div class="card">
                 <div class="card-title">戰略三方案評估結論 (Ground Truth Comparison)</div>
                 <table class="gt-table">
@@ -331,10 +329,6 @@
                         <tr class="gt-plan-c"><td>方案 C (GEM-V36D)</td><td>雙核 PINN + Level 5</td><td>Hs = 3.71m (VETO)</td><td>W = 8.5m/s (PASS)</td><td>🔴 強制封島 / 下午游擊撤離</td></tr>
                     </tbody>
                 </table>
-
-                <div class="gt-summary-bar">
-                    📌 戰略方案總結：採納「方案 C (GEM-V36D)」，啟動剛性熔斷，強制實施 11:20 止登與 14:20 全員清島撤離。
-                </div>
             </div>
         </div>
     </div>
@@ -351,6 +345,7 @@
 <script>
     let commCount = 13;
 
+    // 通用圖表設定：含 Legend 圖例與 Crosshair hover
     const commonChartOption = {
         backgroundColor: 'transparent',
         legend: { show: true, textStyle: { color: '#94a3b8' }, top: 0, right: 10 },
@@ -369,6 +364,7 @@
         yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(51, 65, 85, 0.5)' } }, axisLine: { lineStyle: { color: '#94a3b8' } } }
     };
 
+    // Hs 波高演化 (黃色虛線警戒線 1.20m, 無箭頭判點虛線)
     const cHs = echarts.init(document.getElementById('chart-hs'));
     cHs.setOption({
         ...commonChartOption,
@@ -381,7 +377,7 @@
             markLine: {
                 symbol: 'none',
                 data: [
-                    { yAxis: 1.20, name: 'Hs 警戒極限 (1.20m)', lineStyle: { color: '#facc15', type: 'solid', width: 1.5 }, label: { formatter: 'Hs 門檻 1.20m', color: '#facc15' } },
+                    { yAxis: 1.20, name: 'Hs 警戒極限 (1.20m)', lineStyle: { color: '#facc15', type: 'dashed', width: 1.5 }, label: { formatter: 'Hs 警戒 1.20m', color: '#facc15' } },
                     { xAxis: '11:00', lineStyle: { color: '#ef4444', type: 'dashed' }, label: { formatter: '11:00 止登' } },
                     { xAxis: '14:00', lineStyle: { color: '#ef4444', type: 'dashed' }, label: { formatter: '14:00 撤離' } }
                 ]
@@ -389,6 +385,7 @@
         }]
     });
 
+    // Wind 風速演化 (橘色虛線警戒線 10.80m/s)
     const cWind = echarts.init(document.getElementById('chart-wind'));
     cWind.setOption({
         ...commonChartOption,
@@ -401,7 +398,7 @@
             markLine: {
                 symbol: 'none',
                 data: [
-                    { yAxis: 10.80, name: 'Wind 門檻 (10.80m/s)', lineStyle: { color: '#f59e0b', type: 'solid', width: 1.5 }, label: { formatter: '風速門檻 10.8m/s', color: '#f59e0b' } },
+                    { yAxis: 10.80, name: 'Wind 門檻 (10.80m/s)', lineStyle: { color: '#f59e0b', type: 'dashed', width: 1.5 }, label: { formatter: '風速警戒 10.80m/s', color: '#f59e0b' } },
                     { xAxis: '11:00', lineStyle: { color: '#ef4444', type: 'dashed' } },
                     { xAxis: '14:00', lineStyle: { color: '#ef4444', type: 'dashed' } }
                 ]
@@ -448,8 +445,14 @@
             { type: 'value', name: 'Wind (m/s)', splitLine: { show: false } }
         ],
         series: [
-            { name: 'Hs 波高', type: 'line', data: [3.71, 1.8, 0.9, 1.1, 1.0, 0.8, 0.9], itemStyle: { color: '#ef4444' } },
-            { name: 'Wind 風速', type: 'line', yAxisIndex: 1, data: [12.5, 9.5, 7.0, 6.5, 7.2, 6.0, 5.8], itemStyle: { color: '#f59e0b' } }
+            {
+                name: 'Hs 波高', type: 'line', data: [3.71, 1.8, 0.9, 1.1, 1.0, 0.8, 0.9], itemStyle: { color: '#ef4444' },
+                markLine: { symbol: 'none', data: [{ yAxis: 1.20, lineStyle: { color: '#facc15', type: 'dashed' }, label: { formatter: 'Hs 1.20m', color: '#facc15' } }] }
+            },
+            {
+                name: 'Wind 風速', type: 'line', yAxisIndex: 1, data: [12.5, 9.5, 7.0, 6.5, 7.2, 6.0, 5.8], itemStyle: { color: '#f59e0b' },
+                markLine: { symbol: 'none', data: [{ yAxis: 10.80, lineStyle: { color: '#f59e0b', type: 'dashed' }, label: { formatter: 'Wind 10.8m/s', color: '#f59e0b' } }] }
+            }
         ]
     });
 
