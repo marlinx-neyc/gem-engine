@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 GEM-V36D Level 7 Master Orchestrator (全自主海氣象雙層決策主控腳本)
+解耦說明：僅產出 latest_decision.json SSOT 純數據，停止寫入 dashboard.html 靜態 UI。
 """
 
 import os
@@ -98,7 +99,7 @@ class GEM36DNormalizedFeatureExtractor:
         return np.clip((raw_vec - self.BOUNDS[:, 0]) / (self.BOUNDS[:, 1] - self.BOUNDS[:, 0] + 1e-6), 0.0, 1.0)
 
 # ==============================================================================
-# 3. 神經網路神經算子模組
+# 3. 神經網路算子模組
 # ==============================================================================
 class VisionPINNEdgeNet(nn.Module):
     def __init__(self):
@@ -227,48 +228,6 @@ class SecureCWADataIngestionEngine:
             "namr_multibeam_depth_m": 8.50
         }
 
-# ==============================================================================
-# 5. HTML 戰情室儀表板渲染器與 Webhook
-# ==============================================================================
-class InteractiveDashboardHTMLExporter:
-    @staticmethod
-    def export_html_dashboard(ssot_data: Dict[str, Any], filename: str = "dashboard.html"):
-        decision = ssot_data.get("decision", "UNK")
-        color = "#e74c3c" if "🔴" in decision else ("#f39c12" if "🟡" in decision else "#2ecc71")
-        html_content = f"""<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <title>GEM-V36D Level 7 龜山島海氣象雙層整合戰情中心</title>
-    <style>
-        body {{ font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #e2e8f0; margin: 0; padding: 20px; }}
-        .header {{ background: #1e293b; padding: 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 6px solid {color}; }}
-        .card-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 20px; }}
-        .card {{ background: #1e293b; padding: 20px; border-radius: 10px; border: 1px solid #334155; }}
-        .metric {{ font-size: 28px; font-weight: bold; color: #38bdf8; margin-top: 5px; }}
-        .decision-badge {{ font-size: 22px; font-weight: bold; background: {color}; color: white; padding: 6px 16px; border-radius: 20px; }}
-    </style>
-</head>
-<body>
-    <div class="header">
-        <div>
-            <h2>龜山島海氣象雙層整合戰情中心 (GEM-V36D Master)</h2>
-            <p style="color: #94a3b8; margin: 0;">更新時間：{ssot_data.get('timestamp')} | 版本：{ssot_data.get('version')}</p>
-        </div>
-        <div class="decision-badge">{decision}</div>
-    </div>
-    <div class="card-grid">
-        <div class="card"><h3>微觀物理浪高</h3><div class="metric">{ssot_data.get('level6_metrics', {}).get('fno_forecast_hs', '2.75')} m</div><p>否決狀態：{ssot_data.get('hard_veto_alert')}</p></div>
-        <div class="card"><h3>越浪率估算</h3><div class="metric">{ssot_data.get('level6_metrics', {}).get('vision_overtopping', '0.0')} p/min</div><p>Kd 修正：{ssot_data.get('level6_metrics', {}).get('kd_bias', '0.0')}</p></div>
-        <div class="card"><h3>64D 量子拓撲共振</h3><div class="metric">{ssot_data.get('level6_metrics', {}).get('quantum_coherence', '0.0')}</div><p>歷史共振：100%</p></div>
-        <div class="card"><h3>游擊調度戰術</h3><div class="metric">Swarm 自動化</div><p>{ssot_data.get('guerrilla_dispatch', {}).get('tactical_summary', '正常營運')}</p></div>
-    </div>
-</body>
-</html>"""
-        with open(filename, "w", encoding="utf-8") as f:
-            f.write(html_content)
-        print(f"✅ 成功渲染戰情室 HTML 儀表板：{filename}")
-
 class WebhookAlertEngine:
     def __init__(self, webhook_url: str = ""):
         self.webhook_url = webhook_url or os.environ.get("WEBHOOK_URL", "")
@@ -281,7 +240,7 @@ class WebhookAlertEngine:
                 print(f"⚠️ Webhook 連線失敗: {e}")
 
 # ==============================================================================
-# 6. 端到端主解算與推理管線
+# 5. 端到端主解算與推演管線
 # ==============================================================================
 def execute_master_pipeline():
     print("=" * 75)
@@ -357,13 +316,12 @@ def execute_master_pipeline():
         }
     }
 
+    # 僅產出 SSOT JSON 純數據檔，絕不重寫 HTML
     with open("latest_decision.json", "w", encoding="utf-8") as f:
         json.dump(ssot_payload, f, ensure_ascii=False, indent=2)
 
-    InteractiveDashboardHTMLExporter.export_html_dashboard(ssot_payload, "dashboard.html")
     WebhookAlertEngine().send_alert(ssot_payload)
-
-    print("🎉 戰情中心 SSOT 狀態更新與儀表板渲染完畢！")
+    print("🎉 戰情中心 SSOT 純數據 latest_decision.json 更新完畢！")
 
 if __name__ == "__main__":
     execute_master_pipeline()
