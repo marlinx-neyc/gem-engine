@@ -88,16 +88,9 @@
             margin-bottom: 10px;
         }
 
-        /* 4. AI 雙核閘卡片 */
         .card-ai { border: 1px solid var(--blue); }
-
-        /* 7. 游擊調度卡片 */
         .card-guerrilla { border: 1px solid var(--orange); }
-
-        /* 8. 奇門氣場卡片 */
         .card-qimen { border: 1px solid var(--purple); }
-
-        /* 9. Level 5 算子卡片 */
         .card-level5 { border: 1px solid var(--green); background: #151d30; }
 
         .badge-pass { background: var(--green); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; }
@@ -159,10 +152,10 @@
         即時裁決：<span id="txt-decision-mob">🔴 封島/防颱</span>
     </div>
 
-    <!-- 4. AI 雙核相對精確度與注意力閘卡片 (#38bdf8 邊框) -->
+    <!-- 4. AI 雙核相對精確度與注意力閘卡片 -->
     <div class="card card-ai">
         <div class="card-title" style="color:var(--blue);">4. AI 雙核相對精確度與注意力閘</div>
-        <div style="display:flex; justify-shadow:space-between; font-size:0.8rem; margin-bottom:8px;">
+        <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:8px;">
             <span>信心度: <strong style="color:var(--green);" id="txt-conf-mob">100.0%</strong></span>
             <span>σ 方差: <strong id="txt-sigma-mob">0.3125</strong></span>
             <span>提升: <strong style="color:var(--blue);" id="txt-gain-mob">+58.4%</strong></span>
@@ -173,7 +166,7 @@
         </div>
     </div>
 
-    <!-- 5. 即時海象數值與剛性門檻比對卡片 (PINN Engine) -->
+    <!-- 5. PINN 物理水文邊界卡片 -->
     <div class="card">
         <div class="card-title">5. PINN 物理水文邊界數值</div>
         <div class="grid-2x2">
@@ -200,16 +193,21 @@
         </div>
     </div>
 
-    <!-- 6. 當日船班官模燈號比對卡片 -->
+    <!-- 6. 當日船班官模燈號比對與時窗卡片 (包含明確船班細節) -->
     <div class="card">
-        <div class="card-title">6. 官方 vs GEM 燈號比對</div>
+        <div class="card-title">6. 當日船班官模燈號與時窗比對</div>
         <div style="font-size:0.8rem; line-height:1.5;">
-            <div>官方判斷：<span style="color:var(--green);">🟢 常規開航</span></div>
-            <div>GEM 剛性：<span style="color:var(--red);" id="txt-veto-status-mob">🚨 觸發阻斷</span></div>
+            <div>官方燈號：<span style="color:var(--green);">🟢 常規開放</span></div>
+            <div>GEM 剛性：<span style="color:var(--red);" id="txt-veto-status-mob">🚨 強制封島 (剛性熔斷)</span></div>
+        </div>
+        <div style="background:rgba(0,0,0,0.2); padding:8px; border-radius:6px; margin-top:8px; font-size:0.75rem; border:1px solid var(--border-color);">
+            <div style="color:var(--blue); font-weight:bold; margin-bottom:2px;">🚢 船班動態時窗：</div>
+            • 08:30 首班：<span style="color:var(--yellow);">改至【南岸碼頭】靠泊</span><br>
+            • 11:20 時窗：<span style="color:var(--red);">止登封閉</span> | 14:20 全員撤離
         </div>
     </div>
 
-    <!-- 7. ⚓ 游擊式動態調度卡片 (#f59e0b 邊框) -->
+    <!-- 7. 游擊式動態調度卡片 -->
     <div class="card card-guerrilla">
         <div class="card-title" style="color:var(--orange);">7. ⚓ 游擊式動態調度處置</div>
         <div style="font-size:0.8rem; line-height:1.5;">
@@ -219,7 +217,7 @@
         </div>
     </div>
 
-    <!-- 8. 🌀 颱風與奇門氣場預判專區 (#a855f7 邊框) -->
+    <!-- 8. 颱風與奇門氣場預判專區 -->
     <div class="card card-qimen">
         <div class="card-title" style="color:var(--purple);">8. 🌀 颱風與奇門氣場預判</div>
         <div style="font-size:0.8rem; line-height:1.5;">
@@ -228,7 +226,7 @@
         </div>
     </div>
 
-    <!-- 9. 🚀 Level 5 邊緣視覺、水動力與賽局算子卡片 (#10b981 邊框) -->
+    <!-- 9. Level 5 邊緣高維算子卡片 -->
     <div class="card card-level5">
         <div class="card-title" style="color:var(--green);">9. 🚀 Level 5 邊緣高維算子</div>
         <div class="grid-2x2">
@@ -242,7 +240,7 @@
         </div>
     </div>
 
-    <!-- 10. 戰略三方案評估卡片 (Ground Truth) -->
+    <!-- 10. 戰略三方案評估卡片 -->
     <div class="card">
         <div class="card-title">10. 戰略三方案評估 (Ground Truth)</div>
         <table class="gt-table">
