@@ -138,17 +138,20 @@
         </div>
     </div>
 
-    <!-- 6. 船班官模燈號與未來三天開/封島預測 -->
+    <!-- 6. 船班官模燈號與預警時窗卡片 -->
     <div class="card">
-        <div class="card-title">6. 船班官模燈號與未來 3 天開/封島預測</div>
+        <div class="card-title">6. 船班官模燈號、預警時窗與未來 3 天預測</div>
         <div style="font-size:0.8rem; line-height:1.5;">
             <div>官方燈號：<span style="color:var(--green);">🟢 常規開放 (Hs &le; 1.10m)</span></div>
             <div>GEM 剛性：<span style="color:var(--red);" id="txt-veto-status-mob">🚨 強制封島 (Hs=3.71m VETO)</span></div>
         </div>
-        <div style="background:rgba(0,0,0,0.25); padding:8px; border-radius:6px; margin-top:6px; font-size:0.75rem;">
-            <div style="color:var(--blue); font-weight:bold; margin-bottom:2px;">🚢 當日船班細節：</div>
-            • 08:30 首班：<span style="color:var(--yellow);">改至南岸碼頭靠泊</span><br>
-            • 11:20 止登 | 14:20 全員清島撤離
+        <div style="background:rgba(0,0,0,0.25); padding:8px; border-radius:6px; margin-top:6px; font-size:0.75rem; line-height:1.5;">
+            <div style="color:var(--blue); font-weight:bold; margin-bottom:2px;">🚢 船班動態與半小時預警：</div>
+            • 08:30 首班登島：<span style="color:var(--yellow);">靠泊【南岸碼頭】</span><br>
+            • 10:50 預警 (提早0.5h)：<span style="color:var(--orange);">預發止登廣播</span><br>
+            • 11:20 止登時窗：<span style="color:var(--red);">啟動封閉【南岸碼頭】</span><br>
+            • 13:50 預警 (提早0.5h)：<span style="color:var(--orange);">預發全船撤離</span><br>
+            • 14:20 強制撤離：<span style="color:var(--red);">從【南岸碼頭】返航【烏石港】</span>
         </div>
 
         <div style="font-size:0.75rem; font-weight:bold; color:#94a3b8; margin-top:8px;">📅 未來三天開、封島動態預測：</div>
@@ -175,18 +178,18 @@
     <div class="card card-guerrilla">
         <div class="card-title" style="color:var(--orange);">7. ⚓ 游擊式動態調度處置</div>
         <div style="font-size:0.8rem; line-height:1.5;">
-            <div>靠泊碼頭：<span id="txt-berth-mob" style="color:var(--yellow);">無 (雙岸失效)</span></div>
-            <div>撤離碼頭：<span id="txt-evac-mob" style="color:var(--yellow);">無 (直航烏石港)</span></div>
+            <div>登島靠泊碼頭：<span id="txt-berth-mob" style="color:var(--yellow);">【南岸權宜碼頭】</span></div>
+            <div>撤退離島碼頭：<span id="txt-evac-mob" style="color:var(--yellow);">【南岸碼頭】 &rarr; 【烏石港】</span></div>
             <div style="margin-top:4px; color:#94a3b8;" id="txt-tactical-mob">--</div>
         </div>
     </div>
 
     <!-- 8. 颱風與奇門氣場 -->
     <div class="card card-qimen">
-        <div class="card-title" style="color:var(--purple);">8. 🌀 颱風與奇門氣場預判</div>
+        <div class="card-title" style="color:var(--purple);">8. 🌀 颱風、雙週長浪與潮汐預判</div>
         <div style="font-size:0.8rem; line-height:1.5;">
             <div>中颱 (955 hPa) | 暴風半徑: 250km</div>
-            <div>颱風距離: 450km | 梯度: 1.10 hPa/km</div>
+            <div>潮汐動態: 朔望大潮 (高潮 +1.20m)</div>
             <div style="color:var(--purple); margin-top:4px;" id="txt-qimen-mob">🔮 奇門氣場匹配率 100.0% (>=70%)</div>
         </div>
     </div>
@@ -196,7 +199,7 @@
         <div class="card-title" style="color:var(--green);">9. 🚀 Level 5 邊緣高維算子</div>
         <div class="grid-2x2">
             <div class="box"><div style="font-size:0.65rem; color:#94a3b8;">CV 越浪率</div><div class="val" style="color:var(--yellow);" id="txt-overtop-mob">1.31 p/m</div></div>
-            <div class="box"><div style="font-size:0.65rem; color:#94a3b8;">Squat 沉降</div><div class="val" style="color:var(--blue);" id="txt-squat-mob">0.86 m</div></div>
+            <div class="box"><div style="font-size:0.65rem; color:#94a3b8;">Squat 沉降</div><div class="val" style="color:var(--blue);" id="txt-squat-mob">0.82 m</div></div>
             <div class="box"><div style="font-size:0.65rem; color:#94a3b8;">FNO 預報</div><div class="val" style="color:var(--red);" id="txt-fno-mob">1.58 m</div></div>
             <div class="box"><div style="font-size:0.65rem; color:#94a3b8;">64D 相干性</div><div class="val" style="color:var(--purple);" id="txt-coh-mob">0.4682</div></div>
         </div>
@@ -205,7 +208,7 @@
         </div>
     </div>
 
-    <!-- 10. 戰略三方案評估 (含據值、標準檢核與正確處置) -->
+    <!-- 10. 戰略三方案評估 -->
     <div class="card">
         <div class="card-title">10. 戰略三方案評估與標準檢核 (Ground Truth)</div>
         <table class="gt-table">
@@ -234,7 +237,7 @@
             </tbody>
         </table>
         <div style="margin-top:8px; font-size:0.75rem; color:var(--yellow); font-weight:bold; background:rgba(250,204,21,0.15); padding:6px; border-radius:4px;">
-            📌 總結：採納 GEM 方案 C 剛性熔斷，11:20 止登，14:20 強制撤離。
+            📌 總結：採納 GEM 方案 C 剛性熔斷，10:50/13:50 預警，11:20 止登【南岸碼頭】，14:20 強制撤離至【烏石港】。
         </div>
     </div>
 
@@ -296,7 +299,7 @@
             if (data.level5_advanced_metrics) {
                 const l5 = data.level5_advanced_metrics;
                 document.getElementById('txt-overtop-mob').textContent = l5.vision_overtopping_rate_pmin + ' p/m';
-                document.getElementById('txt-squat-mob').textContent = (l5.vessel_hydrodynamics ? l5.vessel_hydrodynamics.dynamic_squat_m : 0.86) + ' m';
+                document.getElementById('txt-squat-mob').textContent = (l5.vessel_hydrodynamics ? l5.vessel_hydrodynamics.dynamic_squat_m : 0.82) + ' m';
                 document.getElementById('txt-fno-mob').textContent = l5.fno_forecast_mean_hs_m + ' m';
                 document.getElementById('txt-coh-mob').textContent = l5.quantum_topology_coherence;
             }
