@@ -25,8 +25,13 @@
             padding: 12px;
         }
 
-        .mobile-container { display: flex; flex-direction: column; gap: 12px; }
+        .mobile-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
 
+        /* 1. 頂部連線狀態卡片 */
         .card-conn {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -44,52 +49,89 @@
         }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
+        /* 2. Watchdog 數據過期 Banner */
         .stale-banner {
-            background: var(--red); color: #fff; padding: 10px; border-radius: 6px; display: none; font-size: 0.8rem; font-weight: bold; text-align: center;
+            background: var(--red);
+            color: #fff;
+            padding: 10px;
+            border-radius: 6px;
+            display: none;
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-align: center;
         }
 
+        /* 3. Q-Mode 戰術裁決 Banner */
         .veto-banner {
-            background: rgba(239, 68, 68, 0.25); border: 1px solid var(--red); color: #fca5a5; padding: 12px; border-radius: 6px; font-weight: bold; font-size: 1.1rem; text-align: center;
+            background: rgba(239, 68, 68, 0.25);
+            border: 1px solid var(--red);
+            color: #fca5a5;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-align: center;
         }
 
         .card {
-            background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; contain: content;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px;
+            contain: content;
         }
 
-        .card-title { font-size: 0.85rem; font-weight: bold; color: #94a3b8; margin-bottom: 10px; }
+        .card-title {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #94a3b8;
+            margin-bottom: 10px;
+        }
 
+        /* 4. AI 雙核閘卡片 */
         .card-ai { border: 1px solid var(--blue); }
+
+        /* 7. 游擊調度卡片 */
         .card-guerrilla { border: 1px solid var(--orange); }
+
+        /* 8. 奇門氣場卡片 */
         .card-qimen { border: 1px solid var(--purple); }
+
+        /* 9. Level 5 算子卡片 */
         .card-level5 { border: 1px solid var(--green); background: #151d30; }
 
         .badge-pass { background: var(--green); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; }
         .badge-veto { background: var(--red); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; }
-        .badge-warn { background: var(--orange); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; }
 
-        .grid-2x2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .box { background: rgba(0, 0, 0, 0.2); padding: 8px; border-radius: 6px; text-align: center; border: 1px solid var(--border-color); }
+        .grid-2x2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .box {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
         .val { font-size: 1.1rem; font-weight: bold; color: var(--blue); margin-top: 2px; }
 
-        .forecast-3days-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
-            margin-top: 8px;
-        }
-        .forecast-item {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 8px 4px;
-            text-align: center;
-        }
-
-        .gt-table { width: 100%; border-collapse: collapse; font-size: 0.72rem; }
-        .gt-table th, .gt-table td { padding: 6px 4px; border-bottom: 1px solid var(--border-color); }
+        .gt-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+        .gt-table th, .gt-table td { padding: 6px; border-bottom: 1px solid var(--border-color); }
 
         .nav-switch {
-            display: flex; flex-direction: column; gap: 6px; padding: 10px; background: var(--card-bg); border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.8rem; text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px;
+            background: var(--card-bg);
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            font-size: 0.8rem;
+            text-align: center;
         }
         .nav-switch a { color: var(--blue); text-decoration: none; font-weight: bold; }
     </style>
@@ -97,7 +139,7 @@
 <body>
 
 <div class="mobile-container">
-    <!-- 1. 連線卡片 -->
+    <!-- 1. 頂部連線狀態卡片 -->
     <div class="card-conn">
         <div style="font-size:0.85rem; font-weight:bold;">
             <span class="live-dot-blue"></span>● LIVE SSOT 連線
@@ -107,16 +149,20 @@
         </div>
     </div>
 
-    <!-- 2. Watchdog Banner -->
-    <div class="stale-banner" id="staleAlertMob">🔴 數據過期 — 遙測停滯 &gt; 30 秒，請勿進行靠泊決策！</div>
+    <!-- 2. Watchdog 數據過期 Banner -->
+    <div class="stale-banner" id="staleAlertMob">
+        🔴 數據過期 — 遙測停滯 &gt; 30 秒，請勿依此進行靠泊決策！
+    </div>
 
-    <!-- 3. Q-Mode 裁決 Banner -->
-    <div class="veto-banner" id="vetoBannerMob">即時裁決：<span id="txt-decision-mob">🔴 封島/防颱</span></div>
+    <!-- 3. Q-Mode 戰術裁決 Banner -->
+    <div class="veto-banner" id="vetoBannerMob">
+        即時裁決：<span id="txt-decision-mob">🔴 封島/防颱</span>
+    </div>
 
-    <!-- 4. AI 雙核閘卡片 -->
+    <!-- 4. AI 雙核相對精確度與注意力閘卡片 (#38bdf8 邊框) -->
     <div class="card card-ai">
         <div class="card-title" style="color:var(--blue);">4. AI 雙核相對精確度與注意力閘</div>
-        <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:8px;">
+        <div style="display:flex; justify-shadow:space-between; font-size:0.8rem; margin-bottom:8px;">
             <span>信心度: <strong style="color:var(--green);" id="txt-conf-mob">100.0%</strong></span>
             <span>σ 方差: <strong id="txt-sigma-mob">0.3125</strong></span>
             <span>提升: <strong style="color:var(--blue);" id="txt-gain-mob">+58.4%</strong></span>
@@ -127,51 +173,43 @@
         </div>
     </div>
 
-    <!-- 5. PINN 物理水文邊界 -->
+    <!-- 5. 即時海象數值與剛性門檻比對卡片 (PINN Engine) -->
     <div class="card">
         <div class="card-title">5. PINN 物理水文邊界數值</div>
         <div class="grid-2x2">
-            <div class="box"><div style="font-size:0.7rem; color:#94a3b8;">Hs Pier</div><div class="val" id="txt-hs-mob">3.71 m</div><span id="badge-hs-mob" class="badge-veto">VETO</span></div>
-            <div class="box"><div style="font-size:0.7rem; color:#94a3b8;">W Local</div><div class="val" id="txt-w-mob">8.50 m/s</div><span id="badge-w-mob" class="badge-pass">PASS</span></div>
-            <div class="box"><div style="font-size:0.7rem; color:#94a3b8;">UKC 裕深</div><div class="val" id="txt-ukc-mob">5.84 m</div><span id="badge-ukc-mob" class="badge-pass">PASS</span></div>
-            <div class="box"><div style="font-size:0.7rem; color:#94a3b8;">FB Pier</div><div class="val" id="txt-fb-mob">2.00 m</div><span id="badge-fb-mob" class="badge-pass">PASS</span></div>
+            <div class="box">
+                <div style="font-size:0.7rem; color:#94a3b8;">Hs Pier</div>
+                <div class="val" id="txt-hs-mob">3.71 m</div>
+                <span id="badge-hs-mob" class="badge-veto">VETO</span>
+            </div>
+            <div class="box">
+                <div style="font-size:0.7rem; color:#94a3b8;">W Local</div>
+                <div class="val" id="txt-w-mob">8.50 m/s</div>
+                <span id="badge-w-mob" class="badge-pass">PASS</span>
+            </div>
+            <div class="box">
+                <div style="font-size:0.7rem; color:#94a3b8;">UKC 裕深</div>
+                <div class="val" id="txt-ukc-mob">5.84 m</div>
+                <span id="badge-ukc-mob" class="badge-pass">PASS</span>
+            </div>
+            <div class="box">
+                <div style="font-size:0.7rem; color:#94a3b8;">FB Pier</div>
+                <div class="val" id="txt-fb-mob">2.00 m</div>
+                <span id="badge-fb-mob" class="badge-pass">PASS</span>
+            </div>
         </div>
     </div>
 
-    <!-- 6. 船班官模燈號與未來三天開/封島預測 -->
+    <!-- 6. 當日船班官模燈號比對卡片 -->
     <div class="card">
-        <div class="card-title">6. 船班官模燈號與未來 3 天開/封島預測</div>
+        <div class="card-title">6. 官方 vs GEM 燈號比對</div>
         <div style="font-size:0.8rem; line-height:1.5;">
-            <div>官方燈號：<span style="color:var(--green);">🟢 常規開放 (Hs &le; 1.10m)</span></div>
-            <div>GEM 剛性：<span style="color:var(--red);" id="txt-veto-status-mob">🚨 強制封島 (Hs=3.71m VETO)</span></div>
-        </div>
-        <div style="background:rgba(0,0,0,0.25); padding:8px; border-radius:6px; margin-top:6px; font-size:0.75rem;">
-            <div style="color:var(--blue); font-weight:bold; margin-bottom:2px;">🚢 當日船班細節：</div>
-            • 08:30 首班：<span style="color:var(--yellow);">改至南岸碼頭靠泊</span><br>
-            • 11:20 止登 | 14:20 全員清島撤離
-        </div>
-
-        <div style="font-size:0.75rem; font-weight:bold; color:#94a3b8; margin-top:8px;">📅 未來三天開、封島動態預測：</div>
-        <div class="forecast-3days-grid">
-            <div class="forecast-item">
-                <div style="font-size:0.65rem; color:#94a3b8;">明日 (D+1)</div>
-                <div style="font-size:0.8rem; font-weight:bold; color:var(--red); margin:2px 0;">🔴 封島</div>
-                <div style="font-size:0.65rem; color:#94a3b8;">Hs 3.71m</div>
-            </div>
-            <div class="forecast-item">
-                <div style="font-size:0.65rem; color:#94a3b8;">後日 (D+2)</div>
-                <div style="font-size:0.8rem; font-weight:bold; color:var(--yellow); margin:2px 0;">🟡 限制靠泊</div>
-                <div style="font-size:0.65rem; color:#94a3b8;">Hs 1.80m</div>
-            </div>
-            <div class="forecast-item">
-                <div style="font-size:0.65rem; color:#94a3b8;">大後日 (D+3)</div>
-                <div style="font-size:0.8rem; font-weight:bold; color:var(--green); margin:2px 0;">🟢 全線開放</div>
-                <div style="font-size:0.65rem; color:#94a3b8;">Hs 0.90m</div>
-            </div>
+            <div>官方判斷：<span style="color:var(--green);">🟢 常規開航</span></div>
+            <div>GEM 剛性：<span style="color:var(--red);" id="txt-veto-status-mob">🚨 觸發阻斷</span></div>
         </div>
     </div>
 
-    <!-- 7. 游擊調度卡片 -->
+    <!-- 7. ⚓ 游擊式動態調度卡片 (#f59e0b 邊框) -->
     <div class="card card-guerrilla">
         <div class="card-title" style="color:var(--orange);">7. ⚓ 游擊式動態調度處置</div>
         <div style="font-size:0.8rem; line-height:1.5;">
@@ -181,17 +219,16 @@
         </div>
     </div>
 
-    <!-- 8. 颱風與奇門氣場 -->
+    <!-- 8. 🌀 颱風與奇門氣場預判專區 (#a855f7 邊框) -->
     <div class="card card-qimen">
         <div class="card-title" style="color:var(--purple);">8. 🌀 颱風與奇門氣場預判</div>
         <div style="font-size:0.8rem; line-height:1.5;">
-            <div>中颱 (955 hPa) | 暴風半徑: 250km</div>
-            <div>颱風距離: 450km | 梯度: 1.10 hPa/km</div>
-            <div style="color:var(--purple); margin-top:4px;" id="txt-qimen-mob">🔮 奇門氣場匹配率 100.0% (>=70%)</div>
+            <div>颱風距離：450.0 km | 梯度：1.10 hPa/km</div>
+            <div style="color:var(--purple); margin-top:4px;" id="txt-qimen-mob">🔮 奇門匹配率達 100.0% (>=70%)</div>
         </div>
     </div>
 
-    <!-- 9. Level 5 邊緣算子 -->
+    <!-- 9. 🚀 Level 5 邊緣視覺、水動力與賽局算子卡片 (#10b981 邊框) -->
     <div class="card card-level5">
         <div class="card-title" style="color:var(--green);">9. 🚀 Level 5 邊緣高維算子</div>
         <div class="grid-2x2">
@@ -205,40 +242,20 @@
         </div>
     </div>
 
-    <!-- 10. 戰略三方案評估 (含據值、標準檢核與正確處置) -->
+    <!-- 10. 戰略三方案評估卡片 (Ground Truth) -->
     <div class="card">
-        <div class="card-title">10. 戰略三方案評估與標準檢核 (Ground Truth)</div>
+        <div class="card-title">10. 戰略三方案評估 (Ground Truth)</div>
         <table class="gt-table">
-            <thead>
-                <tr><th>方案</th><th>浪高/風速數值</th><th>檢核</th><th>戰略處置</th></tr>
-            </thead>
+            <thead><tr><th>方案</th><th>浪高</th><th>戰術處置</th></tr></thead>
             <tbody>
-                <tr>
-                    <td>A 官方</td>
-                    <td>Hs 1.10m / W 9.2m/s</td>
-                    <td><span class="badge-pass">PASS</span></td>
-                    <td>開放靠泊</td>
-                </tr>
-                <tr>
-                    <td>B 監測</td>
-                    <td>Hs 1.45m / W 10.5m/s</td>
-                    <td><span class="badge-warn">RESTR</span></td>
-                    <td>限制班次</td>
-                </tr>
-                <tr style="color:var(--yellow); font-weight:bold;">
-                    <td>C GEM</td>
-                    <td>Hs 3.71m / W 8.5m/s</td>
-                    <td><span class="badge-veto">VETO</span></td>
-                    <td>🔴 強制封島</td>
-                </tr>
+                <tr><td>A 官方</td><td>1.10m</td><td>開放靠泊</td></tr>
+                <tr><td>B 監測</td><td>1.45m</td><td>限制班次</td></tr>
+                <tr style="color:var(--yellow); font-weight:bold;"><td>C GEM</td><td>3.71m</td><td>🔴 強制封島</td></tr>
             </tbody>
         </table>
-        <div style="margin-top:8px; font-size:0.75rem; color:var(--yellow); font-weight:bold; background:rgba(250,204,21,0.15); padding:6px; border-radius:4px;">
-            📌 總結：採納 GEM 方案 C 剛性熔斷，11:20 止登，14:20 強制撤離。
-        </div>
     </div>
 
-    <!-- 11. 導覽列 -->
+    <!-- 11. 裝置視角切換導覽列 -->
     <div class="nav-switch">
         <span style="color:#94a3b8;">當前視角：📱 手持移動版 (mobile.html)</span>
         <a href="index.html">🛡️ 切換至主指揮儀表板</a>
