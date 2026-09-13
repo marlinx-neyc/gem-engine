@@ -3,72 +3,342 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GEM-V36D Level 5/7 龜山島戰術智庫 (Desktop Master)</title>
+    <title>GEM-V36D (v36D.13.0 Level 5) 戰術智庫 - 桌面端</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background: #0f172a; color: #e2e8f0; margin: 0; padding: 24px; }
-        .desktop-container { max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
-        .header { background: #1e293b; padding: 24px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; contain: strict; height: 90px; border: 1px solid #334155; border-left: 6px solid #334155; }
-        .decision-badge { font-size: 26px; font-weight: bold; padding: 8px 24px; border-radius: 30px; background: #94a3b8; color: white; }
+        :root {
+            --bg-color: #0b1120;
+            --card-bg: #1e293b;
+            --border-color: #334155;
+            --blue: #38bdf8;
+            --red: #ef4444;
+            --green: #10b981;
+            --yellow: #facc15;
+            --orange: #f59e0b;
+            --purple: #c084fc;
+        }
 
-        .master-operator-card { background: #151d30; border: 1.5px solid #10b981; border-radius: 12px; padding: 24px; contain: content; box-shadow: 0 4px 25px rgba(16, 185, 129, 0.1); }
-        .operator-title { font-size: 1.3rem; font-weight: bold; color: #34d399; display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
-        .operator-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-        .op-subcard { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 18px 22px; }
-        .op-label { font-size: 1rem; color: #94a3b8; margin-bottom: 8px; }
-        .op-val-yellow { font-size: 1.8rem; font-weight: bold; color: #facc15; }
-        .op-val-cyan   { font-size: 1.8rem; font-weight: bold; color: #38bdf8; }
-        .op-val-rose   { font-size: 1.8rem; font-weight: bold; color: #f43f5e; }
-        .op-val-purple { font-size: 1.8rem; font-weight: bold; color: #c084fc; }
-        .op-divider { border: 0; border-top: 1px dashed #334155; margin: 20px 0 16px 0; }
-        .swarm-footer { font-size: 1.05rem; display: flex; align-items: center; gap: 8px; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: #f8fafc;
+            margin: 0;
+            padding: 20px;
+        }
 
-        .desk-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-        .card { background: #1e293b; padding: 24px; border-radius: 12px; border: 1px solid #334155; contain: content; }
-        .metric { font-size: 28px; font-weight: bold; color: #38bdf8; margin-top: 8px; }
+        .desktop-layout {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
 
-        .nav-switch { display: flex; justify-content: space-between; align-items: center; padding: 14px 24px; background: #1e293b; border-radius: 10px; border: 1px solid #334155; font-size: 0.9rem; }
-        .nav-switch a { color: #38bdf8; text-decoration: none; font-weight: bold; margin-left: 12px; }
+        /* 頂部整合標題列 (header-bar) */
+        .header-bar {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-left: 6px solid var(--blue);
+            border-radius: 12px;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            contain: strict;
+            height: 90px;
+            box-sizing: border-box;
+        }
+
+        .title-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .live-dot {
+            width: 12px;
+            height: 12px;
+            background-color: var(--blue);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--blue);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.2); }
+        }
+
+        .dual-core-badge {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .progress-bar-wrap {
+            width: 140px;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .progress-micro { background: #3b82f6; height: 100%; transition: width 0.5s; }
+        .progress-macro { background: #a855f7; height: 100%; transition: width 0.5s; }
+
+        /* 32% / 68% 剛性雙欄佈局 */
+        .main-columns {
+            display: flex;
+            gap: 20px;
+        }
+
+        .left-col {
+            width: 32%;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .right-col {
+            width: 68%;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 18px;
+            contain: content;
+        }
+
+        .card-title {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #94a3b8;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-guerrilla { border: 1.5px solid var(--orange); }
+        .card-qimen { border: 1.5px solid var(--purple); }
+        .card-level5 { border: 1.5px solid var(--green); background: #151d30; }
+
+        .badge-pass { background: var(--green); color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+        .badge-veto { background: var(--red); color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+
+        .metric-grid-2x2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .metric-box {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .metric-val {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--blue);
+            margin-top: 4px;
+        }
+
+        /* 右側 ECharts 圖表網格 */
+        .charts-2x2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .chart-box {
+            height: 240px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .gt-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            text-align: left;
+        }
+
+        .gt-table th, .gt-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .gt-plan-c {
+            background: rgba(250, 204, 21, 0.15);
+            color: var(--yellow);
+            font-weight: bold;
+        }
+
+        .nav-switch {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+        .nav-switch a { color: var(--blue); text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="desktop-container">
-    <div class="header" id="header-bar">
-        <div>
-            <h1 style="margin:0; color:#38bdf8; font-size:1.6rem;">💻 GEM-V36D 龜山島雙層戰術指揮中心 (Desktop)</h1>
-            <p style="color: #94a3b8; margin: 6px 0 0 0; font-size: 0.9rem;">更新時間：<span id="txt-time">--</span> | 版本：<span id="txt-version">v36D.13.0 Level 5</span></p>
+<div class="desktop-layout">
+    <!-- 頂部整合標題列 -->
+    <div class="header-bar">
+        <div class="title-group">
+            <span class="live-dot"></span>
+            <div>
+                <h2 style="margin:0; font-size:1.3rem; color: var(--blue);">GEM-V36D (v36D.13.0 Level 5) 戰術智庫</h2>
+                <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px;">成功通訊：<span id="txt-count">1</span> 次 | 即時更新：<span id="txt-time">--</span></div>
+            </div>
         </div>
-        <div id="badge-decision" class="decision-badge">載入中...</div>
+
+        <div class="dual-core-badge">
+            <div style="text-align:center;">
+                <div style="font-size:0.75rem; color:#94a3b8;">AI 信心度</div>
+                <div style="font-size:1.1rem; font-weight:bold; color:var(--green);" id="txt-confidence">100.0%</div>
+            </div>
+            <div style="text-align:center;">
+                <div style="font-size:0.75rem; color:#94a3b8;">σ 方差 / 精確度</div>
+                <div style="font-size:1.1rem; font-weight:bold; color:var(--blue);"><span id="txt-sigma">0.3125</span> (<span id="txt-gain">+58.4%</span>)</div>
+            </div>
+            <div>
+                <div style="font-size:0.75rem; color:#94a3b8; margin-bottom:4px;">微觀 / 宏觀 權重</div>
+                <div class="progress-bar-wrap">
+                    <div class="progress-micro" id="bar-micro" style="width: 65%;"></div>
+                    <div class="progress-macro" id="bar-macro" style="width: 35%;"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- 桌面最上層 Level 5 算子卡片 -->
-    <div class="master-operator-card">
-        <div class="operator-title">🚀 Level 5 邊緣視覺、水動力與賽局算子</div>
-        <div class="operator-grid">
-            <div class="op-subcard"><div class="op-label">CV 視覺越浪率</div><div id="txt-overtopping" class="op-val-yellow">1.31 p/min</div></div>
-            <div class="op-subcard"><div class="op-label">MMSI 客輪沉降 (Squat)</div><div id="txt-squat" class="op-val-cyan">0.86 m</div></div>
-            <div class="op-subcard"><div class="op-label">FNO 100ms 預報波高</div><div id="txt-hs" class="op-val-rose">1.58 m</div></div>
-            <div class="op-subcard"><div class="op-label">64D 量子拓撲相干性</div><div id="txt-coherence" class="op-val-purple">0.4682</div></div>
-        </div>
-        <hr class="op-divider">
-        <div class="swarm-footer">
-            <span style="font-weight:bold; color:#f8fafc;">Swarm 賽局排隊：</span>
-            <span style="color:#34d399;" id="txt-swarm-status">已成功為 3 艘 Agent 客輪規劃分流靠撤航線</span>
-        </div>
-    </div>
+    <!-- 32% / 68% 主雙欄結構 -->
+    <div class="main-columns">
+        <!-- 左側戰術控制欄 (32%) - 剛性 5 張卡片順序 -->
+        <div class="left-col">
+            <!-- 1. PINN Engine 水文與剛性門檻 -->
+            <div class="card">
+                <div class="card-title">1. PINN Engine 即時水文門檻比對</div>
+                <div class="metric-grid-2x2">
+                    <div class="metric-box">
+                        <div style="font-size:0.75rem; color:#94a3b8;">碼頭浪高 (Hs Pier)</div>
+                        <div class="metric-val" id="txt-hs-pier">3.71 m</div>
+                        <span id="badge-hs" class="badge-veto">VETO</span>
+                    </div>
+                    <div class="metric-box">
+                        <div style="font-size:0.75rem; color:#94a3b8;">局部風速 (W Local)</div>
+                        <div class="metric-val" id="txt-w-local">8.50 m/s</div>
+                        <span id="badge-w" class="badge-pass">PASS</span>
+                    </div>
+                    <div class="metric-box">
+                        <div style="font-size:0.75rem; color:#94a3b8;">富餘水深 (UKC)</div>
+                        <div class="metric-val" id="txt-ukc">5.84 m</div>
+                        <span id="badge-ukc" class="badge-pass">PASS</span>
+                    </div>
+                    <div class="metric-box">
+                        <div style="font-size:0.75rem; color:#94a3b8;">預留乾舷 (FB Pier)</div>
+                        <div class="metric-val" id="txt-fb">2.00 m</div>
+                        <span id="badge-fb" class="badge-pass">PASS</span>
+                    </div>
+                </div>
+            </div>
 
-    <div class="desk-grid">
-        <div class="card">
-            <div style="font-size: 0.95rem; color:#94a3b8;">剛性熔斷防線 (Hard-VETO)</div>
-            <div id="txt-veto" class="metric" style="font-size: 24px;">False (放行)</div>
+            <!-- 2. 官模燈號比對與最後判斷 -->
+            <div class="card">
+                <div class="card-title">2. 官方 vs GEM 戰術判斷對比</div>
+                <div style="font-size:0.85rem; color:#94a3b8; line-height:1.6;">
+                    <div>標準門檻：Hs &le; 1.20m | W &le; 10.80m/s | &Delta;&theta; &lt; 45&deg;</div>
+                    <div style="margin-top:6px;">官方判斷：<strong style="color:var(--green);">🟢 放行 (預測極值未達標)</strong></div>
+                    <div>GEM 判斷：<strong style="color:var(--red);" id="txt-decision">🔴 封島/防颱 (剛性防線阻斷)</strong></div>
+                </div>
+            </div>
+
+            <!-- 3. 游擊式動態調度 (#f59e0b 邊框) -->
+            <div class="card card-guerrilla">
+                <div class="card-title" style="color:var(--orange);">3. ⚓ 游擊式動態調度與時窗預判</div>
+                <div style="font-size:0.85rem; line-height:1.6;">
+                    <div>靠泊碼頭：<span id="txt-berth" style="color:var(--yellow);">無 (雙岸失效，禁止靠泊)</span></div>
+                    <div>撤離碼頭：<span id="txt-evac" style="color:var(--yellow);">無 (雙岸失效，直航返航烏石港)</span></div>
+                    <hr style="border:0; border-top:1px dashed #334155; margin:8px 0;">
+                    <div id="txt-morning" style="color:#94a3b8;">--</div>
+                    <div id="txt-afternoon" style="color:#94a3b8; margin-top:4px;">--</div>
+                </div>
+            </div>
+
+            <!-- 4. 颱風與奇門氣場預判 (#a855f7 邊框) -->
+            <div class="card card-qimen">
+                <div class="card-title" style="color:var(--purple);">4. 🌀 颱風與奇門宏觀氣場預判</div>
+                <div style="font-size:0.85rem; line-height:1.6;">
+                    <div>颱風距離：<strong>450.0 km</strong> | 2D 氣壓梯度：<strong>1.10 hPa/km</strong></div>
+                    <div style="margin-top:6px; color:var(--purple);" id="txt-qimen-prompt">🔮 奇門氣場匹配率達 100.0% (>=70%)，已啟動宏觀參研決策</div>
+                </div>
+            </div>
+
+            <!-- 5. Level 5 邊緣算子卡片 (#10b981 邊框) -->
+            <div class="card card-level5">
+                <div class="card-title" style="color:var(--green);">5. 🚀 Level 5 邊緣視覺、水動力與賽局算子</div>
+                <div class="metric-grid-2x2" style="margin-bottom:10px;">
+                    <div class="metric-box"><div style="font-size:0.75rem; color:#94a3b8;">CV 視覺越浪率</div><div class="metric-val" style="color:var(--yellow);" id="txt-overtopping">1.31 p/min</div></div>
+                    <div class="metric-box"><div style="font-size:0.75rem; color:#94a3b8;">MMSI 客輪沉降 (Squat)</div><div class="metric-val" style="color:var(--blue);" id="txt-squat">0.86 m</div></div>
+                    <div class="metric-box"><div style="font-size:0.75rem; color:#94a3b8;">FNO 100ms 預報波高</div><div class="metric-val" style="color:var(--red);" id="txt-fno">1.58 m</div></div>
+                    <div class="metric-box"><div style="font-size:0.75rem; color:#94a3b8;">64D 量子拓撲相干性</div><div class="metric-val" style="color:var(--purple);" id="txt-coherence">0.4682</div></div>
+                </div>
+                <div style="font-size:0.8rem; color:#34d399; border-top:1px dashed #334155; padding-top:8px;" id="txt-swarm">
+                    Swarm 賽局排隊：已成功為 3 艘 Agent 客輪規劃分流靠撤航線
+                </div>
+            </div>
         </div>
-        <div class="card">
-            <div style="font-size: 0.95rem; color:#94a3b8;">Kd 偏置修正值 (Kd Bias)</div>
-            <div id="txt-kd" class="metric">0.0</div>
-        </div>
-        <div class="card">
-            <div style="font-size: 0.95rem; color:#94a3b8;">游擊調度戰術處置</div>
-            <div id="txt-tactical" class="metric" style="font-size: 20px; color:#e2e8f0;">--</div>
+
+        <!-- 右側動態圖表陣列 (68%) -->
+        <div class="right-col">
+            <!-- 2x2 時間線圖表 -->
+            <div class="charts-2x2">
+                <div id="chart-hs" class="chart-box"></div>
+                <div id="chart-wind" class="chart-box"></div>
+                <div id="chart-ukc" class="chart-box"></div>
+                <div id="chart-tp" class="chart-box"></div>
+            </div>
+
+            <!-- 七天趨勢預判圖表 -->
+            <div id="chart-7days" style="height: 220px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px;"></div>
+
+            <!-- 戰略三方案評估 (Ground Truth) -->
+            <div class="card">
+                <div class="card-title">戰略三方案評估結論 (Ground Truth Comparison)</div>
+                <table class="gt-table">
+                    <thead>
+                        <tr><th>方案名稱</th><th>決策模式</th><th>評估浪高極限</th><th>風速警戒</th><th>最終戰術處置</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>方案 A (官方預報)</td><td>傳統氣象模組</td><td>Hs &le; 1.10m</td><td>W &le; 9.2m/s</td><td>常規開放登島靠泊</td></tr>
+                        <tr><td>方案 B (即時監測)</td><td>單點遙測閥值</td><td>Hs = 1.45m</td><td>W = 10.5m/s</td><td>限制班次動態調整</td></tr>
+                        <tr class="gt-plan-c"><td>方案 C (GEM-V36D)</td><td>雙核 PINN + Level 5</td><td>Hs = 3.71m (VETO)</td><td>W = 8.5m/s</td><td>🔴 強制封島 / 下午游擊撤離</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -76,47 +346,112 @@
         <span style="color:#94a3b8;">當前視角：💻 桌面完全版 (desktop.html)</span>
         <div>
             <a href="index.html">🛡️ 主指揮儀表板</a>
-            <a href="mobile.html">📱 手持版</a>
+            <a href="mobile.html">📱 切換至手持版</a>
         </div>
     </div>
 </div>
 
 <script>
-    async function fetchLatestSSOTData() {
+    let commCount = 1;
+
+    // 初始化 ECharts 圖表 (符合 splitLine 50% 透明度與 cross axisPointer)
+    const commonChartOption = {
+        backgroundColor: 'transparent',
+        tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
+        grid: { top: 30, bottom: 25, left: 40, right: 15 },
+        xAxis: { type: 'category', data: ['08:00', '10:00', '11:00', '12:00', '14:00', '16:00', '18:00'], axisLine: { lineStyle: { color: '#94a3b8' } } },
+        yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(51, 65, 85, 0.5)' } }, axisLine: { lineStyle: { color: '#94a3b8' } } }
+    };
+
+    const cHs = echarts.init(document.getElementById('chart-hs'));
+    cHs.setOption({ ...commonChartOption, title: { text: 'Hs 波高演化 (m)', textStyle: { color: '#38bdf8', fontSize: 12 } }, series: [{ type: 'line', data: [1.2, 1.5, 2.8, 3.2, 3.71, 3.1, 2.0], itemStyle: { color: '#ef4444' }, markLine: { data: [{ xAxis: '11:00' }, { xAxis: '16:00' }] } }] });
+
+    const cWind = echarts.init(document.getElementById('chart-wind'));
+    cWind.setOption({ ...commonChartOption, title: { text: 'Wind 風速演化 (m/s)', textStyle: { color: '#38bdf8', fontSize: 12 } }, series: [{ type: 'line', data: [6.5, 7.2, 8.5, 9.8, 10.5, 9.0, 7.8], itemStyle: { color: '#f59e0b' }, markLine: { data: [{ xAxis: '11:00' }, { xAxis: '16:00' }] } }] });
+
+    const cUkc = echarts.init(document.getElementById('chart-ukc'));
+    cUkc.setOption({ ...commonChartOption, title: { text: 'UKC 裕深演化 (m)', textStyle: { color: '#38bdf8', fontSize: 12 } }, series: [{ type: 'line', data: [6.8, 6.5, 6.0, 5.84, 5.9, 6.2, 6.5], itemStyle: { color: '#10b981' }, markLine: { data: [{ xAxis: '11:00' }, { xAxis: '16:00' }] } }] });
+
+    const cTp = echarts.init(document.getElementById('chart-tp'));
+    cTp.setOption({ ...commonChartOption, title: { text: 'Tp 長浪週期 (s)', textStyle: { color: '#38bdf8', fontSize: 12 } }, series: [{ type: 'line', data: [8.0, 9.5, 12.5, 14.5, 14.0, 11.0, 9.0], itemStyle: { color: '#c084fc' }, markLine: { data: [{ xAxis: '11:00' }, { xAxis: '16:00' }] } }] });
+
+    const c7d = echarts.init(document.getElementById('chart-7days'));
+    c7d.setOption({
+        backgroundColor: 'transparent',
+        title: { text: '未來七天雙軸趨勢預判 (Hs 波高 & Wind 風速)', textStyle: { color: '#38bdf8', fontSize: 13 } },
+        tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
+        grid: { top: 40, bottom: 25, left: 40, right: 40 },
+        xAxis: { type: 'category', data: ['D+1', 'D+2', 'D+3', 'D+4', 'D+5', 'D+6', 'D+7'] },
+        yAxis: [
+            { type: 'value', name: 'Hs (m)', splitLine: { lineStyle: { color: 'rgba(51, 65, 85, 0.5)' } } },
+            { type: 'value', name: 'Wind (m/s)', splitLine: { show: false } }
+        ],
+        series: [
+            { name: 'Hs 波高', type: 'line', data: [1.2, 2.5, 3.7, 1.8, 1.1, 0.9, 1.0], itemStyle: { color: '#ef4444' } },
+            { name: 'Wind 風速', type: 'line', yAxisIndex: 1, data: [8.0, 12.5, 15.0, 9.5, 7.0, 6.5, 7.2], itemStyle: { color: '#f59e0b' } }
+        ]
+    });
+
+    async function fetchSSOTData() {
         try {
-            const response = await fetch('./latest_decision.json?t=' + Date.now());
-            if (!response.ok) return;
-            const data = await response.json();
+            const res = await fetch('./latest_decision.json?t=' + Date.now());
+            if (!res.ok) return;
+            const data = await res.json();
 
             document.getElementById('txt-time').textContent = data.timestamp || '--';
-            document.getElementById('txt-version').textContent = data.version || 'v36D.13.0 Level 5 Desktop';
+            document.getElementById('txt-count').textContent = commCount++;
 
-            const decision = data.decision || 'UNK';
-            const badge = document.getElementById('badge-decision');
-            badge.textContent = decision;
-            const isRed = decision.includes('🔴');
-            const isYellow = decision.includes('🟡');
-            const color = isRed ? '#e74c3c' : (isYellow ? '#f39c12' : '#2ecc71');
-            badge.style.background = color;
-            document.getElementById('header-bar').style.borderLeftColor = color;
+            if (data.confidence_score !== undefined) document.getElementById('txt-confidence').textContent = data.confidence_score.toFixed(1) + '%';
+            if (data.precision_metrics) {
+                document.getElementById('txt-sigma').textContent = data.precision_metrics.converged_sigma;
+                document.getElementById('txt-gain').textContent = '+' + data.precision_metrics.precision_gain_pct + '%';
+            }
+            if (data.attention_gate) {
+                document.getElementById('bar-micro').style.width = data.attention_gate.micro_physics_weight + '%';
+                document.getElementById('bar-macro').style.width = data.attention_gate.macro_qimen_weight + '%';
+            }
 
-            const vetoAlert = !!data.hard_veto_alert;
-            document.getElementById('txt-veto').textContent = vetoAlert ? 'True (剛性熔斷)' : 'False (放行)';
+            if (data.physics_metrics) {
+                const p = data.physics_metrics;
+                document.getElementById('txt-hs-pier').textContent = p.hs_pier_m + ' m';
+                document.getElementById('txt-w-local').textContent = p.w_local_ms + ' m/s';
+                document.getElementById('txt-ukc').textContent = p.ukc_m + ' m';
+                document.getElementById('txt-fb').textContent = p.fb_pier_m + ' m';
 
-            const m = data.level6_metrics || {};
-            document.getElementById('txt-overtopping').textContent = (m.vision_overtopping !== undefined ? m.vision_overtopping : '1.31') + ' p/min';
-            document.getElementById('txt-squat').textContent = (m.squat_m !== undefined ? m.squat_m : '0.86') + ' m';
-            document.getElementById('txt-hs').textContent = (m.fno_forecast_hs !== undefined ? m.fno_forecast_hs : '1.58') + ' m';
-            document.getElementById('txt-coherence').textContent = m.quantum_coherence !== undefined ? m.quantum_coherence : '0.4682';
-            document.getElementById('txt-kd').textContent = m.kd_bias !== undefined ? m.kd_bias : '0.0';
+                document.getElementById('badge-hs').className = p.hs_pier_m > 1.20 ? 'badge-veto' : 'badge-pass';
+                document.getElementById('badge-hs').textContent = p.hs_pier_m > 1.20 ? 'VETO' : 'PASS';
+            }
 
-            const g = data.guerrilla_dispatch || {};
-            document.getElementById('txt-swarm-status').textContent = g.swarm_queue || '已成功為 3 艘 Agent 客輪規劃分流靠撤航線';
-            document.getElementById('txt-tactical').textContent = g.tactical_summary || '兩岸正常常規靠泊';
-        } catch (err) { console.warn(err); }
+            document.getElementById('txt-decision').textContent = data.decision || '未知';
+
+            if (data.guerrilla_dispatch) {
+                const g = data.guerrilla_dispatch;
+                document.getElementById('txt-berth').textContent = g.berthing_pier || '--';
+                document.getElementById('txt-evac').textContent = g.evacuation_pier || '--';
+                document.getElementById('txt-morning').textContent = g.morning_tactic || '--';
+                document.getElementById('txt-afternoon').textContent = g.afternoon_tactic || '--';
+            }
+
+            if (data.qimen_macro_consensus) {
+                document.getElementById('txt-qimen-prompt').textContent = data.qimen_macro_consensus.qimen_status_prompt || '--';
+            }
+
+            if (data.level5_advanced_metrics) {
+                const l5 = data.level5_advanced_metrics;
+                document.getElementById('txt-overtopping').textContent = l5.vision_overtopping_rate_pmin + ' p/min';
+                document.getElementById('txt-squat').textContent = (l5.vessel_hydrodynamics ? l5.vessel_hydrodynamics.dynamic_squat_m : 0.86) + ' m';
+                document.getElementById('txt-fno').textContent = l5.fno_forecast_mean_hs_m + ' m';
+                document.getElementById('txt-coherence').textContent = l5.quantum_topology_coherence;
+            }
+        } catch (err) {
+            console.warn('SSOT 數據更新暫緩:', err);
+        }
     }
-    fetchLatestSSOTData();
-    setInterval(fetchLatestSSOTData, 5000);
+
+    fetchSSOTData();
+    setInterval(fetchSSOTData, 5000);
+    window.addEventListener('resize', () => { cHs.resize(); cWind.resize(); cUkc.resize(); cTp.resize(); c7d.resize(); });
 </script>
+
 </body>
 </html>
