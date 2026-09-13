@@ -1,13 +1,13 @@
 {
-  "version": "v36D.14.0 Level 7 Master Unified",
-  "timestamp": "2026-09-13 10:47:56 CST",
+  "version": "v36D.14.0 Level 7 Operational Master",
+  "timestamp": "2026-09-13 11:07:47 CST",
   "decision": "🔴 封島/防颱",
   "hard_veto_alert": true,
   "level6_metrics": {
-    "vision_overtopping": 0.35,
-    "kd_bias": 0.012,
-    "fno_forecast_hs": 2.75,
-    "quantum_coherence": 0.8842
+    "vision_overtopping": 1.43,
+    "kd_bias": 0.0337,
+    "fno_forecast_hs": 1.99,
+    "quantum_coherence": 0.5141
   },
   "qimen_macro_consensus": {
     "consensus_rate_pct": 100.0,
