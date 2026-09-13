@@ -1,6 +1,6 @@
 {
   "version": "v36D.13.0 Level 5 Complete",
-  "timestamp": "2026-09-13 13:34:28 CST",
+  "timestamp": "2026-09-13 13:52:56 CST",
   "decision": "🔴 封島/防颱",
   "confidence_score": 100.0,
   "hard_veto_alert": true,
@@ -20,16 +20,16 @@
     "has_veto": true
   },
   "guerrilla_dispatch": {
-    "berthing_pier": "無 (雙岸失效，禁止靠泊)",
-    "evacuation_pier": "無 (雙岸失效，直航返航烏石港)",
+    "berthing_pier": "【南岸權宜碼頭】",
+    "evacuation_pier": "【南岸權宜碼頭】 &rarr; 返航【烏石港】",
     "guerrilla_mode": "BOTH_PIERS_DISABLED",
     "morning_tactic": "⚠️ 上午游擊調撥：北岸越浪，08:30 班次改至【南岸權宜碼頭】靠泊",
-    "afternoon_tactic": "🚨 下午游擊撤退：預測午後 ESE 巽宮風陣，11:20 止登，14:20 全員撤離",
-    "tactical_summary": "執行「下午游擊撤退【南岸碼頭撤離】」"
+    "afternoon_tactic": "🚨 下午游擊撤退：10:50/13:50 雙預警，11:20 止登，14:20 全員撤離至【烏石港】",
+    "tactical_summary": "執行「10:50/13:50 雙預警，11:20 止登【南岸碼頭】，14:20 全員撤離至【烏石港】」"
   },
   "level5_advanced_metrics": {
     "vision_overtopping_rate_pmin": 1.31,
-    "vision_kd_bias": 0.033,
+    "vision_kd_bias": 0.0341,
     "vessel_hydrodynamics": {
       "vessel_name": "凱鯨號 (穿浪雙體船)",
       "vessel_type": "CATAMARAN",
@@ -43,7 +43,7 @@
       {
         "agent_id": 1,
         "vessel_label": "凱鯨號 (Agent 1)",
-        "assigned_pier": "無 (雙岸失效)",
+        "assigned_pier": "【南岸權宜碼頭】",
         "tactical_action": "直航返航烏石港"
       }
     ]
