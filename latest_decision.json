@@ -1,21 +1,56 @@
 {
-  "version": "v36D.13.0 Level 5 Master Unified",
-  "timestamp": "2026-09-13 12:02:37 CST",
+  "version": "v36D.13.0 Level 5 Complete",
+  "timestamp": "2026-09-13 12:17:54 CST",
   "decision": "🔴 封島/防颱",
+  "confidence_score": 100.0,
   "hard_veto_alert": true,
-  "level6_metrics": {
-    "vision_overtopping": 1.4,
-    "squat_m": 0.91,
-    "fno_forecast_hs": 2.02,
-    "quantum_coherence": 0.5299,
-    "kd_bias": 0.0342
+  "precision_metrics": {
+    "converged_sigma": 0.3125,
+    "precision_gain_pct": 58.4
+  },
+  "attention_gate": {
+    "micro_physics_weight": 65.0,
+    "macro_qimen_weight": 35.0
+  },
+  "physics_metrics": {
+    "hs_pier_m": 3.71,
+    "w_local_ms": 8.5,
+    "ukc_m": 5.84,
+    "fb_pier_m": 2.0,
+    "has_veto": true
+  },
+  "guerrilla_dispatch": {
+    "berthing_pier": "無 (雙岸失效，禁止靠泊)",
+    "evacuation_pier": "無 (雙岸失效，直航返航烏石港)",
+    "guerrilla_mode": "BOTH_PIERS_DISABLED",
+    "morning_tactic": "⚠️ 上午游擊調撥：北岸越浪，08:30 班次改至【南岸權宜碼頭】靠泊",
+    "afternoon_tactic": "🚨 下午游擊撤退：預測午後 ESE 巽宮風陣，11:20 止登，14:20 全員撤離",
+    "tactical_summary": "執行「下午游擊撤退【南岸碼頭撤離】」"
+  },
+  "level5_advanced_metrics": {
+    "vision_overtopping_rate_pmin": 1.31,
+    "vision_kd_bias": 0.0334,
+    "vessel_hydrodynamics": {
+      "vessel_name": "凱鯨號 (穿浪雙體船)",
+      "vessel_type": "CATAMARAN",
+      "dynamic_squat_m": 0.82,
+      "roll_deg": 3.3,
+      "pitch_deg": 4.4
+    },
+    "fno_forecast_mean_hs_m": 1.58,
+    "quantum_topology_coherence": 0.4682,
+    "swarm_dispatch_plan": [
+      {
+        "agent_id": 1,
+        "vessel_label": "凱鯨號 (Agent 1)",
+        "assigned_pier": "無 (雙岸失效)",
+        "tactical_action": "直航返航烏石港"
+      }
+    ]
   },
   "qimen_macro_consensus": {
     "consensus_rate_pct": 100.0,
-    "macro_advisory_enabled": true
-  },
-  "guerrilla_dispatch": {
-    "tactical_summary": "執行「下午游擊撤退【南岸碼頭撤離】」",
-    "swarm_queue": "已成功為 3 艘 Agent 客輪規劃分流靠撤航線"
+    "macro_advisory_enabled": true,
+    "qimen_status_prompt": "🔮 奇門氣場匹配率達 100.0% (>=70%)，已啟動宏觀參研決策與預警提示"
   }
 }
