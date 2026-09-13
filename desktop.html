@@ -160,7 +160,7 @@
 <body>
 
 <div class="desktop-layout">
-    <!-- 置頂一體化整合主卡片 -->
+    <!-- 置頂一體化整合主卡片 (標題 + Level 5 算子 + AI 信心度) -->
     <div class="header-master-card">
         <div class="top-integrated-row">
             <div class="title-group">
@@ -299,7 +299,7 @@
         </div>
 
         <div class="right-col">
-            <!-- 四圖警戒虛線 + 明確數值標籤 (Hs 1.20m, Wind 10.80m/s, UKC 1.50m, Tp 12.0s) -->
+            <!-- 四圖警戒虛線 + 數值標籤 -->
             <div class="charts-2x2">
                 <div id="chart-hs" class="chart-box"></div>
                 <div id="chart-wind" class="chart-box"></div>
@@ -307,7 +307,7 @@
                 <div id="chart-tp" class="chart-box"></div>
             </div>
 
-            <!-- 七天趨勢預判圖表 -->
+            <!-- 七天趨勢預判圖表 (含動態燈號與判斷 Tooltip 懸浮提示) -->
             <div id="chart-7days" style="height: 210px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px; cursor: crosshair;"></div>
 
             <!-- 戰略三方案評估表格 (Ground Truth Comparison) -->
@@ -357,7 +357,7 @@
         yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(51, 65, 85, 0.5)' } }, axisLine: { lineStyle: { color: '#94a3b8' } } }
     };
 
-    // Hs 波高演化 (黃色虛線警戒線 1.20m + 無箭頭判點虛線)
+    // Hs 波高演化 (黃色虛線 1.20m)
     const cHs = echarts.init(document.getElementById('chart-hs'));
     cHs.setOption({
         ...commonChartOption,
@@ -378,7 +378,7 @@
         }]
     });
 
-    // Wind 風速演化 (橘色虛線警戒線 10.80m/s)
+    // Wind 風速演化 (橘色虛線 10.80m/s)
     const cWind = echarts.init(document.getElementById('chart-wind'));
     cWind.setOption({
         ...commonChartOption,
@@ -399,7 +399,7 @@
         }]
     });
 
-    // UKC 裕深演化 (紅色虛線警戒線 1.50m)
+    // UKC 裕深演化 (紅色虛線 1.50m)
     const cUkc = echarts.init(document.getElementById('chart-ukc'));
     cUkc.setOption({
         ...commonChartOption,
@@ -420,7 +420,7 @@
         }]
     });
 
-    // Tp 長浪週期演化 (紫色虛線警戒線 12.0s)
+    // Tp 長浪週期演化 (紫色虛線 12.0s)
     const cTp = echarts.init(document.getElementById('chart-tp'));
     cTp.setOption({
         ...commonChartOption,
@@ -441,12 +441,35 @@
         }]
     });
 
+    // 未來七天雙軸趨勢預判圖表 (Tooltip 帶有動態燈號與判斷)
     const c7d = echarts.init(document.getElementById('chart-7days'));
     c7d.setOption({
         backgroundColor: 'transparent',
         legend: { show: true, textStyle: { color: '#94a3b8' }, top: 0, right: 10 },
         title: { text: '未來七天雙軸趨勢預判 (Hs 波高 & Wind 風速)', textStyle: { color: '#38bdf8', fontSize: 13 } },
-        tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'cross', label: { backgroundColor: '#334155' } },
+            formatter: function(params) {
+                let day = params[0].name;
+                let hs = params[0] ? params[0].value : 0;
+                let wind = params[1] ? params[1].value : 0;
+                let decisionTag = '';
+                
+                if (hs > 1.20 || wind > 10.80) {
+                    decisionTag = '<span style="color:#ef4444; font-weight:bold;">🔴 封島/防颱 (剛性熔斷)</span>';
+                } else if (hs > 0.90 || wind > 8.0) {
+                    decisionTag = '<span style="color:#facc15; font-weight:bold;">🟡 限制靠泊 (預警時窗)</span>';
+                } else {
+                    decisionTag = '<span style="color:#10b981; font-weight:bold;">🟢 常規開放 (全線放行)</span>';
+                }
+                
+                return `<b>${day} 戰術趨勢預判</b><br/>` +
+                       `裁決燈號：${decisionTag}<br/>` +
+                       `Hs 波高：<b>${hs} m</b><br/>` +
+                       `Wind 風速：<b>${wind} m/s</b>`;
+            }
+        },
         grid: { top: 40, bottom: 25, left: 40, right: 40 },
         xAxis: { type: 'category', data: ['D+1', 'D+2', 'D+3', 'D+4', 'D+5', 'D+6', 'D+7'] },
         yAxis: [
