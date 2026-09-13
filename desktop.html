@@ -34,7 +34,7 @@
             gap: 20px;
         }
 
-        /* 頂部標題列 */
+        /* 頂部整合標題列 */
         .header-bar {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -80,7 +80,10 @@
             border-radius: 12px;
             padding: 18px;
             contain: content;
+            cursor: pointer;
+            transition: border-color 0.2s;
         }
+        .card:hover { border-color: var(--blue); }
 
         .card-title {
             font-size: 0.95rem; font-weight: bold; color: #94a3b8;
@@ -101,9 +104,17 @@
         }
         .metric-val { font-size: 1.4rem; font-weight: bold; color: var(--blue); margin-top: 4px; }
 
+        .ferry-timeline {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 8px;
+            border: 1px solid var(--border-color);
+        }
+
         /* 右側 ECharts 圖表網格 */
         .charts-2x2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        .chart-box { height: 240px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px; }
+        .chart-box { height: 240px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px; cursor: crosshair; }
 
         .gt-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left; }
         .gt-table th, .gt-table td { padding: 10px 12px; border-bottom: 1px solid var(--border-color); }
@@ -114,13 +125,12 @@
             padding: 12px 20px; background: var(--card-bg);
             border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.85rem;
         }
-        .nav-switch a { color: var(--blue); text-decoration: none; font-weight: bold; }
+        .nav-switch a { color: var(--blue); text-decoration: none; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="desktop-layout">
-    <!-- 頂部整合標題列 -->
     <div class="header-bar">
         <div class="title-group">
             <span class="live-dot"></span>
@@ -149,9 +159,7 @@
         </div>
     </div>
 
-    <!-- 32% / 68% 雙欄 -->
     <div class="main-columns">
-        <!-- 左側戰術控制欄 (32%) 完整 5 張卡片 -->
         <div class="left-col">
             <!-- 1. PINN Engine 水文與剛性門檻 -->
             <div class="card">
@@ -180,13 +188,21 @@
                 </div>
             </div>
 
-            <!-- 2. 官方 vs GEM 判斷對比 -->
+            <!-- 2. 當日船班官模燈號比對與最後判斷 (含船班時間細節) -->
             <div class="card">
-                <div class="card-title">2. 官方 vs GEM 戰術判斷對比</div>
+                <div class="card-title">2. 當日船班官模燈號與時窗比對</div>
                 <div style="font-size:0.85rem; color:#94a3b8; line-height:1.6;">
-                    <div>標準門檻：Hs &le; 1.20m | W &le; 10.80m/s | &Delta;&theta; &lt; 45&deg;</div>
-                    <div style="margin-top:6px;">官方判斷：<strong style="color:var(--green);">🟢 放行 (預測極值未達標)</strong></div>
-                    <div>GEM 判斷：<strong style="color:var(--red);" id="txt-decision">🔴 封島/防颱 (剛性防線阻斷)</strong></div>
+                    <div>海象標準：Hs &le; 1.20m | W &le; 10.80m/s | &Delta;&theta; &lt; 45&deg;</div>
+                    <div style="margin-top:4px;">官方燈號：<strong style="color:var(--green);">🟢 常規開放 (預測未達標)</strong></div>
+                    <div>GEM 剛性：<strong style="color:var(--red);" id="txt-decision">🔴 強制封島 (剛性熔斷)</strong></div>
+                </div>
+                <div class="ferry-timeline">
+                    <div style="font-size:0.8rem; font-weight:bold; color:var(--blue); margin-bottom:4px;">🚢 當日船班時窗動態：</div>
+                    <div style="font-size:0.75rem; color:#e2e8f0; line-height:1.5;">
+                        • 08:30 首班：<span style="color:var(--yellow);">改至【南岸權宜碼頭】靠泊</span><br>
+                        • 11:20 時窗：<span style="color:var(--red);">止登封閉時窗啟動</span><br>
+                        • 14:20 撤離：<span style="color:var(--red);">強制清島，全船返航烏石港</span>
+                    </div>
                 </div>
             </div>
 
@@ -202,7 +218,7 @@
                 </div>
             </div>
 
-            <!-- 4. 🌀 颱風與奇門氣場預判 (#a855f7 邊框 - 已補齊) -->
+            <!-- 4. 🌀 颱風與奇門氣場預判 (#a855f7 邊框) -->
             <div class="card card-qimen">
                 <div class="card-title" style="color:var(--purple);">4. 🌀 颱風與奇門宏觀氣場預判</div>
                 <div style="font-size:0.85rem; line-height:1.6;">
@@ -211,7 +227,7 @@
                 </div>
             </div>
 
-            <!-- 5. Level 5 邊緣算子卡片 (#10b981 邊框 - 已補齊) -->
+            <!-- 5. Level 5 邊緣算子卡片 (#10b981 邊框) -->
             <div class="card card-level5">
                 <div class="card-title" style="color:var(--green);">5. 🚀 Level 5 邊緣視覺、水動力與賽局算子</div>
                 <div class="metric-grid-2x2" style="margin-bottom:10px;">
@@ -226,9 +242,7 @@
             </div>
         </div>
 
-        <!-- 右側動態圖表陣列 (68%) -->
         <div class="right-col">
-            <!-- 2x2 時間線圖表 -->
             <div class="charts-2x2">
                 <div id="chart-hs" class="chart-box"></div>
                 <div id="chart-wind" class="chart-box"></div>
@@ -236,10 +250,8 @@
                 <div id="chart-tp" class="chart-box"></div>
             </div>
 
-            <!-- 七天趨勢預判圖表 -->
-            <div id="chart-7days" style="height: 220px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px;"></div>
+            <div id="chart-7days" style="height: 220px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px; cursor: crosshair;"></div>
 
-            <!-- 戰略三方案評估 (Ground Truth Comparison - 已補齊) -->
             <div class="card">
                 <div class="card-title">戰略三方案評估結論 (Ground Truth Comparison)</div>
                 <table class="gt-table">
@@ -256,7 +268,6 @@
         </div>
     </div>
 
-    <!-- 頁尾視角切換器 -->
     <div class="nav-switch">
         <span style="color:#94a3b8;">當前視角：💻 桌面完全版 (desktop.html)</span>
         <div>
@@ -269,25 +280,35 @@
 <script>
     let commCount = 9;
 
+    // 依據規範 II 導入游標懸浮動態提示 (cross axisPointer + 精確戰術判準 Formatter)
     const commonChartOption = {
         backgroundColor: 'transparent',
-        tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'cross', label: { backgroundColor: '#334155' } },
+            formatter: function(params) {
+                let time = params[0].name;
+                let val = params[0].value;
+                let status = (time === '11:00' || time === '14:00') ? '<span style="color:#ef4444;">[時窗警戒/撤離]</span>' : '<span style="color:#10b981;">[正常]</span>';
+                return `<b>時間：${time}</b> ${status}<br/>${params[0].seriesName}：<b>${val}</b>`;
+            }
+        },
         grid: { top: 30, bottom: 25, left: 40, right: 15 },
         xAxis: { type: 'category', data: ['08:00', '10:00', '11:00', '12:00', '14:00', '16:00', '18:00'], axisLine: { lineStyle: { color: '#94a3b8' } } },
         yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(51, 65, 85, 0.5)' } }, axisLine: { lineStyle: { color: '#94a3b8' } } }
     };
 
     const cHs = echarts.init(document.getElementById('chart-hs'));
-    cHs.setOption({ ...commonChartOption, title: { text: 'Hs 波高演化 (m)', textStyle: { color: '#38bdf8', fontSize: 12 } }, series: [{ type: 'line', data: [1.2, 1.5, 2.8, 3.2, 3.71, 3.1, 2.0], itemStyle: { color: '#ef4444' }, markLine: { data: [{ xAxis: '11:00' }, { xAxis: '16:00' }] } }] });
+    cHs.setOption({ ...commonChartOption, title: { text: 'Hs 波高演化 (m)', textStyle: { color: '#38bdf8', fontSize: 12 } }, series: [{ name: 'Hs 波高', type: 'line', data: [1.2, 1.5, 2.8, 3.2, 3.71, 3.1, 2.0], itemStyle: { color: '#ef4444' }, markLine: { data: [{ xAxis: '11:00' }, { xAxis: '16:00' }] } }] });
 
     const cWind = echarts.init(document.getElementById('chart-wind'));
-    cWind.setOption({ ...commonChartOption, title: { text: 'Wind 風速演化 (m/s)', textStyle: { color: '#38bdf8', fontSize: 12 } }, series: [{ type: 'line', data: [6.5, 7.2, 8.5, 9.8, 10.5, 9.0, 7.8], itemStyle: { color: '#f59e0b' }, markLine: { data: [{ xAxis: '11:00' }, { xAxis: '16:00' }] } }] });
+    cWind.setOption({ ...commonChartOption, title: { text: 'Wind 風速演化 (m/s)', textStyle: { color: '#38bdf8', fontSize: 12 } }, series: [{ name: 'Wind 風速', type: 'line', data: [6.5, 7.2, 8.5, 9.8, 10.5, 9.0, 7.8], itemStyle: { color: '#f59e0b' }, markLine: { data: [{ xAxis: '11:00' }, { xAxis: '16:00' }] } }] });
 
     const cUkc = echarts.init(document.getElementById('chart-ukc'));
-    cUkc.setOption({ ...commonChartOption, title: { text: 'UKC 裕深演化 (m)', textStyle: { color: '#38bdf8', fontSize: 12 } }, series: [{ type: 'line', data: [6.8, 6.5, 6.0, 5.84, 5.9, 6.2, 6.5], itemStyle: { color: '#10b981' }, markLine: { data: [{ xAxis: '11:00' }, { xAxis: '16:00' }] } }] });
+    cUkc.setOption({ ...commonChartOption, title: { text: 'UKC 裕深演化 (m)', textStyle: { color: '#38bdf8', fontSize: 12 } }, series: [{ name: 'UKC 裕深', type: 'line', data: [6.8, 6.5, 6.0, 5.84, 5.9, 6.2, 6.5], itemStyle: { color: '#10b981' }, markLine: { data: [{ xAxis: '11:00' }, { xAxis: '16:00' }] } }] });
 
     const cTp = echarts.init(document.getElementById('chart-tp'));
-    cTp.setOption({ ...commonChartOption, title: { text: 'Tp 長浪週期 (s)', textStyle: { color: '#38bdf8', fontSize: 12 } }, series: [{ type: 'line', data: [8.0, 9.5, 12.5, 14.5, 14.0, 11.0, 9.0], itemStyle: { color: '#c084fc' }, markLine: { data: [{ xAxis: '11:00' }, { xAxis: '16:00' }] } }] });
+    cTp.setOption({ ...commonChartOption, title: { text: 'Tp 長浪週期 (s)', textStyle: { color: '#38bdf8', fontSize: 12 } }, series: [{ name: 'Tp 週期', type: 'line', data: [8.0, 9.5, 12.5, 14.5, 14.0, 11.0, 9.0], itemStyle: { color: '#c084fc' }, markLine: { data: [{ xAxis: '11:00' }, { xAxis: '16:00' }] } }] });
 
     const c7d = echarts.init(document.getElementById('chart-7days'));
     c7d.setOption({
