@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 GEM-V36D Level 7 Master Orchestrator (全自主海氣象雙層決策主控腳本)
-解耦說明：僅產出 latest_decision.json SSOT 純數據，停止寫入 dashboard.html 靜態 UI。
+免第三方 Webhook 版：直接整合 GitHub Actions Native Step Summary。
 """
 
 import os
@@ -29,7 +29,6 @@ except Exception:
 # 1. 檔名動態版本搜尋算子
 # ==============================================================================
 def resolve_latest_model_path(search_dir: str = ".") -> str:
-    """自動掃描目錄下版本號最大的 model_*.pt 或 model_latest.pt 檔案"""
     pattern = os.path.join(search_dir, "model_*.pt")
     found_files = glob.glob(pattern)
     if not found_files:
@@ -153,12 +152,6 @@ class DialecticalSynthesizer(nn.Module):
         hsyn = w[:, 0:1] * hm + w[:, 1:2] * hmac
         return self.final_cls(hsyn), hm, hmac, w
 
-class PrecisionVarianceEstimator(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.net = nn.Sequential(nn.Linear(36, 32), nn.ReLU(), nn.Linear(32, 2), nn.Softplus())
-    def forward(self, x36d): return self.net(x36d)
-
 class QuantumTopology64DEngine(nn.Module):
     def __init__(self):
         super().__init__()
@@ -168,12 +161,6 @@ class QuantumTopology64DEngine(nn.Module):
     def forward(self, vec64):
         r, i = self.proj_r(vec64), self.proj_i(vec64)
         return self.gate(torch.sqrt(r**2 + i**2 + 1e-8))
-
-class SwarmPolicyNet(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.net = nn.Sequential(nn.Linear(4, 32), nn.ReLU(), nn.Linear(32, 4), nn.Softmax(dim=1))
-    def forward(self, fleet_state): return self.net(fleet_state)
 
 # ==============================================================================
 # 4. CWA 遙測數據自動擷取與內部安全補償
@@ -213,34 +200,43 @@ class SecureCWADataIngestionEngine:
                     }
         except Exception as e:
             print(f"ℹ️ CWA API 讀取觸發安全保護與物理補償 ({e})")
-        return self._get_fallback_telemetry()
-
-    def _get_fallback_telemetry(self) -> Dict[str, Any]:
         return {
             "sender_id": "INTERNAL_PHYSICS_ASSIMILATED",
-            "hs_cwa": 2.75,
-            "w_cwa": 12.56,
-            "tp_s": 14.5,
-            "delta_theta_deg": 52.0,
-            "tide_eta_m": 1.20,
-            "d_draft": 1.60,
-            "s_quat": 0.40,
-            "namr_multibeam_depth_m": 8.50
+            "hs_cwa": 2.75, "w_cwa": 12.56, "tp_s": 14.5, "delta_theta_deg": 52.0,
+            "tide_eta_m": 1.20, "d_draft": 1.60, "s_quat": 0.40, "namr_multibeam_depth_m": 8.50
         }
 
-class WebhookAlertEngine:
-    def __init__(self, webhook_url: str = ""):
-        self.webhook_url = webhook_url or os.environ.get("WEBHOOK_URL", "")
-    def send_alert(self, ssot_data: Dict[str, Any]):
-        print(f"📢 [Webhook 訊息傳送] 決策狀態: {ssot_data.get('decision')} | 剛性否決: {ssot_data.get('hard_veto_alert')}")
-        if self.webhook_url:
+# ==============================================================================
+# 5. 原生 GitHub Actions Summary 告警模組 (無效效應排除)
+# ==============================================================================
+class NativeActionsAlertEngine:
+    @staticmethod
+    def render_summary_report(ssot_data: Dict[str, Any]):
+        decision = ssot_data.get("decision", "UNK")
+        hard_veto = ssot_data.get("hard_veto_alert", False)
+        metrics = ssot_data.get("level6_metrics", {})
+        tactical = ssot_data.get("guerrilla_dispatch", {}).get("tactical_summary", "")
+
+        print(f"📢 [系統自動推演完成] 決策狀態: {decision} | 剛性熔斷: {hard_veto}")
+
+        # 若在 GitHub Actions 環境中，寫入 Actions Step Summary
+        summary_file = os.environ.get("GITHUB_STEP_SUMMARY")
+        if summary_file:
             try:
-                requests.post(self.webhook_url, json=ssot_data, timeout=5)
+                with open(summary_file, "a", encoding="utf-8") as f:
+                    f.write(f"## 🛡️ GEM-V36D 龜山島戰術決策報告\n")
+                    f.write(f"- **當前裁決狀態**: `{decision}`\n")
+                    f.write(f"- **剛性防線 (Hard-VETO)**: `{'⚠️ 觸發熔斷' if hard_veto else '🟢 正常'}`\n")
+                    f.write(f"- **微觀物理浪高**: `{metrics.get('fno_forecast_hs', '--')} m`\n")
+                    f.write(f"- **Vision 越浪率**: `{metrics.get('vision_overtopping', '0.0')} p/min`\n")
+                    f.write(f"- **游擊戰術處置**: {tactical}\n")
+                    f.write(f"- **更新時間**: {ssot_data.get('timestamp')}\n\n")
+                print("✅ 已成功寫入 GitHub Actions 原生執行報告 Summary")
             except Exception as e:
-                print(f"⚠️ Webhook 連線失敗: {e}")
+                print(f"⚠️ 寫入 GitHub Summary 失敗: {e}")
 
 # ==============================================================================
-# 5. 端到端主解算與推演管線
+# 6. 端到端主解算與推演管線
 # ==============================================================================
 def execute_master_pipeline():
     print("=" * 75)
@@ -248,16 +244,13 @@ def execute_master_pipeline():
     print("=" * 75)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    
     target_model = resolve_latest_model_path()
-    print(f"🔍 自動鎖定最新權重檔：{target_model}")
+    print(f"🔍 自動鎖定權重檔：{target_model}")
 
     vision_net = VisionPINNEdgeNet().to(device)
     fno_net = FNO1dWaveSpectralForecaster().to(device)
     dialectical_net = DialecticalSynthesizer().to(device)
-    variance_net = PrecisionVarianceEstimator().to(device)
     quantum_net = QuantumTopology64DEngine().to(device)
-    swarm_net = SwarmPolicyNet().to(device)
 
     if os.path.exists(target_model):
         try:
@@ -270,30 +263,22 @@ def execute_master_pipeline():
                 vision_net.load_state_dict(ckpt['vision_net'])
                 fno_net.load_state_dict(ckpt['fno_net'])
                 dialectical_net.load_state_dict(ckpt['dialectical_net'])
-                variance_net.load_state_dict(ckpt['variance_net'])
                 quantum_net.load_state_dict(ckpt['quantum_net'])
-                swarm_net.load_state_dict(ckpt['swarm_net'])
-                print("✅ 成功解包載入 Level 7 多模態神經權重！")
+                print("✅ 成功對齊並載入多模態神經權重！")
         except Exception as e:
-            print(f"ℹ️ 讀取權重備用邏輯運作中 ({e})")
+            print(f"ℹ️ 權重載入預設備用邏輯 ({e})")
 
     ingestion = SecureCWADataIngestionEngine()
-    telemetry_raw = ingestion.fetch_latest_telemetry()
-    telemetry = UnifiedMarineTelemetry(**telemetry_raw)
+    telemetry = UnifiedMarineTelemetry(**ingestion.fetch_latest_telemetry())
 
     extractor = GEM36DNormalizedFeatureExtractor()
-    x36_vec = extractor.build_normalized_vector(telemetry)
-    x36_tensor = torch.tensor(x36_vec, dtype=torch.float32).unsqueeze(0).to(device)
+    x36_tensor = torch.tensor(extractor.build_normalized_vector(telemetry), dtype=torch.float32).unsqueeze(0).to(device)
 
-    vision_net.eval()
-    fno_net.eval()
-    dialectical_net.eval()
-    quantum_net.eval()
+    vision_net.eval(); fno_net.eval(); dialectical_net.eval(); quantum_net.eval()
 
     with torch.no_grad():
         r_pred, kd_pred = vision_net(torch.randn(1, 1, 128, 128, device=device))
         fno_pred = fno_net(torch.randn(1, 16, 2, device=device))
-        logits, _, _, _ = dialectical_net(x36_tensor)
         coherence = quantum_net(torch.randn(1, 64, device=device))
 
     hard_veto = (telemetry.hs_cwa > 1.5 or telemetry.delta_theta_deg >= 45 or telemetry.w_cwa >= 10.8)
@@ -316,11 +301,11 @@ def execute_master_pipeline():
         }
     }
 
-    # 僅產出 SSOT JSON 純數據檔，絕不重寫 HTML
+    # 僅產出 SSOT JSON 純數據檔
     with open("latest_decision.json", "w", encoding="utf-8") as f:
         json.dump(ssot_payload, f, ensure_ascii=False, indent=2)
 
-    WebhookAlertEngine().send_alert(ssot_payload)
+    NativeActionsAlertEngine.render_summary_report(ssot_payload)
     print("🎉 戰情中心 SSOT 純數據 latest_decision.json 更新完畢！")
 
 if __name__ == "__main__":
