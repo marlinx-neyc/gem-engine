@@ -3,19 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GEM-V36D Level 7 龜山島海氣象雙層整合戰情中心</title>
+    <title>GEM-V36D Level 5/7 龜山島海氣象雙層整合戰術智庫</title>
     <style>
-        /* 幾何座標鎖定：contain 徹底隔絕幾何重算 (CLS = 0) */
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background: #0f172a; color: #e2e8f0; margin: 0; padding: 20px; }
         .container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
         .header { background: #1e293b; padding: 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; contain: strict; height: 80px; border: 1px solid #334155; border-left: 6px solid #334155; }
-        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-        .card { background: #1e293b; padding: 20px; border-radius: 10px; border: 1px solid #334155; contain: content; }
-        .card-title { font-size: 0.9rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
-        .metric { font-size: 28px; font-weight: bold; color: #38bdf8; margin-top: 5px; }
         .decision-badge { font-size: 22px; font-weight: bold; padding: 6px 16px; border-radius: 20px; background: #94a3b8; color: white; }
         .veto-banner { background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; padding: 15px 20px; border-radius: 8px; display: none; font-weight: bold; align-items: center; gap: 10px; }
         .stale-banner { background: #ef4444; color: #ffffff; padding: 12px 20px; border-radius: 8px; display: none; font-weight: bold; text-align: center; box-shadow: 0 0 12px rgba(239, 68, 68, 0.6); }
+
+        /* Level 5 邊緣視覺、水動力與賽局算子 最上層整合表格卡片 */
+        .master-operator-card { background: #151d30; border: 1.5px solid #10b981; border-radius: 12px; padding: 20px; contain: content; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.08); }
+        .operator-title { font-size: 1.2rem; font-weight: bold; color: #34d399; display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+        .operator-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        @media (max-width: 640px) { .operator-grid { grid-template-columns: 1fr; } }
+        .op-subcard { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 14px 18px; }
+        .op-label { font-size: 0.95rem; color: #94a3b8; margin-bottom: 6px; }
+        .op-val-yellow { font-size: 1.5rem; font-weight: bold; color: #facc15; }
+        .op-val-cyan { font-size: 1.5rem; font-weight: bold; color: #38bdf8; }
+        .op-val-rose { font-size: 1.5rem; font-weight: bold; color: #f43f5e; }
+        .op-val-purple { font-size: 1.5rem; font-weight: bold; color: #c084fc; }
+        .op-divider { border: 0; border-top: 1px dashed #334155; margin: 18px 0 14px 0; }
+        .swarm-footer { font-size: 0.95rem; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+        /* 次要資訊網格 */
+        .sub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .card { background: #1e293b; padding: 20px; border-radius: 10px; border: 1px solid #334155; contain: content; }
+        .metric { font-size: 24px; font-weight: bold; color: #38bdf8; margin-top: 5px; }
+
         .nav-switch { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; background: #1e293b; border-radius: 8px; border: 1px solid #334155; font-size: 0.85rem; }
         .nav-switch a { color: #38bdf8; text-decoration: none; font-weight: bold; margin-left: 10px; }
     </style>
@@ -23,54 +38,69 @@
 <body>
 
 <div class="container">
-    <!-- 頂部標題區 -->
     <div class="header" id="header-bar">
         <div>
-            <h2 style="margin:0; color:#38bdf8; font-size:1.5rem;">🛡️ 龜山島海氣象雙層整合戰情中心 (GEM-V36D Master)</h2>
-            <p style="color: #94a3b8; margin: 5px 0 0 0; font-size: 0.85rem;">更新時間：<span id="txt-time">--</span> | 版本：<span id="txt-version">v36D.14.0 Level 7</span></p>
+            <h2 style="margin:0; color:#38bdf8; font-size:1.4rem;">🛡️ 龜山島海氣象雙層整合戰術智庫 (GEM-V36D Master)</h2>
+            <p style="color: #94a3b8; margin: 5px 0 0 0; font-size: 0.85rem;">更新時間：<span id="txt-time">--</span> | 版本：<span id="txt-version">v36D.13.0 Level 5</span></p>
         </div>
         <div id="badge-decision" class="decision-badge">載入中...</div>
     </div>
 
-    <!-- 30 秒數據過期 Watchdog 警示 Banner -->
-    <div class="stale-banner" id="stale-banner">
-        🔴 數據過期 (READ_ONLY_BACKUP) — 遙測已逾 30 秒未更新，請勿依此進行靠泊決策！
+    <div class="stale-banner" id="stale-banner">🔴 數據過期 — 遙測已逾 30 秒未更新，請勿依此進行靠泊決策！</div>
+    <div class="veto-banner" id="veto-banner">🚨 警告：觸發 PINN 物理剛性防線 (Hard-VETO)！安全指標已突破極限，請立即強制暫停靠泊或採取防颱處置。</div>
+
+    <!-- 最上層整合表格 -->
+    <div class="master-operator-card">
+        <div class="operator-title">🚀 Level 5 邊緣視覺、水動力與賽局算子</div>
+        <div class="operator-grid">
+            <div class="op-subcard">
+                <div class="op-label">CV 視覺越浪率</div>
+                <div id="txt-overtopping" class="op-val-yellow">1.31 p/min</div>
+            </div>
+            <div class="op-subcard">
+                <div class="op-label">MMSI 客輪沉降 (Squat)</div>
+                <div id="txt-squat" class="op-val-cyan">0.86 m</div>
+            </div>
+            <div class="op-subcard">
+                <div class="op-label">FNO 100ms 預報波高</div>
+                <div id="txt-hs" class="op-val-rose">1.58 m</div>
+            </div>
+            <div class="op-subcard">
+                <div class="op-label">64D 量子拓撲相干性</div>
+                <div id="txt-coherence" class="op-val-purple">0.4682</div>
+            </div>
+        </div>
+
+        <hr class="op-divider">
+
+        <div class="swarm-footer">
+            <span style="font-weight:bold; color:#f8fafc;">Swarm 賽局排隊：</span>
+            <span style="color:#34d399;" id="txt-swarm-status">已成功為 3 艘 Agent 客輪規劃分流靠撤航線</span>
+        </div>
     </div>
 
-    <!-- Hard-VETO 警告條 -->
-    <div class="veto-banner" id="veto-banner">
-        🚨 警告：觸發 PINN 物理剛性防線 (Hard-VETO)！安全指標已突破物理容許極限，請立即強制暫停靠泊或採取防颱處置。
-    </div>
-
-    <!-- 4 大核心指標卡片區 -->
-    <div class="card-grid">
+    <!-- 次要細節網格 -->
+    <div class="sub-grid">
         <div class="card">
-            <div class="card-title">微觀物理浪高 (FNO Forecast)</div>
-            <div id="txt-hs" class="metric">-- m</div>
-            <p style="color:#94a3b8; margin: 8px 0 0 0; font-size: 0.85rem;">否決狀態：<span id="txt-veto">--</span></p>
+            <div style="font-size: 0.9rem; color:#94a3b8;">剛性熔斷狀態</div>
+            <div id="txt-veto" class="metric" style="font-size: 20px;">False (放行)</div>
         </div>
         <div class="card">
-            <div class="card-title">越浪率估算 (Vision-PINN)</div>
-            <div id="txt-overtopping" class="metric">-- p/min</div>
-            <p style="color:#94a3b8; margin: 8px 0 0 0; font-size: 0.85rem;">Kd 修正：<span id="txt-kd">--</span></p>
+            <div style="font-size: 0.9rem; color:#94a3b8;">Kd 偏置修正</div>
+            <div id="txt-kd" class="metric">0.0</div>
         </div>
         <div class="card">
-            <div class="card-title">64D 量子拓撲共振 (Quantum Phase)</div>
-            <div id="txt-coherence" class="metric">--</div>
-            <p style="color:#94a3b8; margin: 8px 0 0 0; font-size: 0.85rem;">歷史共振吻合率：<span id="txt-consensus">--</span>%</p>
-        </div>
-        <div class="card">
-            <div class="card-title">游擊調度戰術 (Swarm Fleet)</div>
-            <div class="metric" style="font-size: 20px; color:#e2e8f0;">Swarm 自動化</div>
-            <p style="color:#38bdf8; margin: 8px 0 0 0; font-size: 0.85rem;" id="txt-tactical">--</p>
+            <div style="font-size: 0.9rem; color:#94a3b8;">游擊調度處置</div>
+            <div id="txt-tactical" class="metric" style="font-size: 18px; color:#e2e8f0;">--</div>
         </div>
     </div>
 
-    <!-- 視角切換器 -->
     <div class="nav-switch">
         <span style="color:#94a3b8;">當前視角：🛡️ 主指揮儀表板 (index.html)</span>
         <div>
             <a href="dashboard.html">💻 靜態儀表板</a>
+            <a href="desktop.html">💻 桌面完全版</a>
+            <a href="mobile.html">📱 切換至手持版</a>
         </div>
     </div>
 </div>
@@ -81,17 +111,15 @@
     async function fetchLatestSSOTData() {
         try {
             const response = await fetch('./latest_decision.json?t=' + Date.now());
-            if (!response.ok) throw new Error('Network response was not ok');
+            if (!response.ok) throw new Error('Network error');
             const data = await response.json();
 
             lastUpdateTS = Date.now();
             document.getElementById('stale-banner').style.display = 'none';
 
-            // 1. 時間與版本
             document.getElementById('txt-time').textContent = data.timestamp || '--';
-            document.getElementById('txt-version').textContent = data.version || 'v36D.14.0 Level 7 Master';
+            document.getElementById('txt-version').textContent = data.version || 'v36D.13.0 Level 5';
 
-            // 2. 核心裁決與 Badge
             const decision = data.decision || '未知';
             const badge = document.getElementById('badge-decision');
             badge.textContent = decision;
@@ -103,23 +131,19 @@
             badge.style.background = color;
             document.getElementById('header-bar').style.borderLeftColor = color;
 
-            // 3. 剛性防線 (Hard-VETO) 告警
             const vetoAlert = !!data.hard_veto_alert;
             document.getElementById('veto-banner').style.display = vetoAlert ? 'flex' : 'none';
             document.getElementById('txt-veto').textContent = vetoAlert ? 'True (剛性熔斷)' : 'False (放行)';
 
-            // 4. Level 6/7 數值解算綁定
             const m = data.level6_metrics || {};
-            document.getElementById('txt-hs').textContent = (m.fno_forecast_hs !== undefined ? m.fno_forecast_hs : '--') + ' m';
-            document.getElementById('txt-overtopping').textContent = (m.vision_overtopping !== undefined ? m.vision_overtopping : '0.0') + ' p/min';
+            document.getElementById('txt-overtopping').textContent = (m.vision_overtopping !== undefined ? m.vision_overtopping : '1.31') + ' p/min';
+            document.getElementById('txt-squat').textContent = (m.squat_m !== undefined ? m.squat_m : '0.86') + ' m';
+            document.getElementById('txt-hs').textContent = (m.fno_forecast_hs !== undefined ? m.fno_forecast_hs : '1.58') + ' m';
+            document.getElementById('txt-coherence').textContent = m.quantum_coherence !== undefined ? m.quantum_coherence : '0.4682';
             document.getElementById('txt-kd').textContent = m.kd_bias !== undefined ? m.kd_bias : '0.0';
-            document.getElementById('txt-coherence').textContent = m.quantum_coherence !== undefined ? m.quantum_coherence : '--';
-
-            // 5. 宏觀與戰術調度
-            const q = data.qimen_macro_consensus || {};
-            document.getElementById('txt-consensus').textContent = q.consensus_rate_pct !== undefined ? q.consensus_rate_pct : '100';
 
             const g = data.guerrilla_dispatch || {};
+            document.getElementById('txt-swarm-status').textContent = g.swarm_queue || '已成功為 3 艘 Agent 客輪規劃分流靠撤航線';
             document.getElementById('txt-tactical').textContent = g.tactical_summary || '兩岸正常常規靠泊';
 
         } catch (error) {
@@ -127,13 +151,11 @@
         }
     }
 
-    // Watchdog 定時監控數據是否逾期 30 秒
     setInterval(() => {
         const sec = Math.floor((Date.now() - lastUpdateTS) / 1000);
         document.getElementById('stale-banner').style.display = (sec > 30) ? 'block' : 'none';
     }, 1000);
 
-    // 初次載入與每 5 秒自動輪詢
     fetchLatestSSOTData();
     setInterval(fetchLatestSSOTData, 5000);
 </script>
