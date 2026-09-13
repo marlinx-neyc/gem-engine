@@ -47,7 +47,6 @@
             gap: 14px;
         }
 
-        /* 需求 2：同一列大整合 (主標題 + Level 5 算子名稱 + AI 信心度雙核指標) */
         .top-integrated-row {
             display: grid;
             grid-template-columns: 1.2fr 1.5fr 1.3fr;
@@ -161,10 +160,9 @@
 <body>
 
 <div class="desktop-layout">
-    <!-- 需求 2：置頂一體化整合主卡片 (主標題 + Level 5 算子 + AI 信心度雙核指標 整合在同一列) -->
+    <!-- 置頂一體化整合主卡片 -->
     <div class="header-master-card">
         <div class="top-integrated-row">
-            <!-- 左：主標題與連線時間 -->
             <div class="title-group">
                 <span class="live-dot"></span>
                 <div>
@@ -173,7 +171,6 @@
                 </div>
             </div>
 
-            <!-- 中：Level 5 算子名稱與 Swarm / 相干性宣告 -->
             <div class="l5-header-center">
                 <div style="font-size: 1.05rem; font-weight: bold; color: var(--green); display: flex; align-items: center; gap: 6px;">
                     🚀 Level 5 邊緣視覺、水動力與賽局高維整合算子
@@ -183,7 +180,6 @@
                 </div>
             </div>
 
-            <!-- 右：AI 雙核指標 -->
             <div class="dual-core-badge">
                 <div style="text-align:center;">
                     <div style="font-size:0.7rem; color:#94a3b8;">AI 信心度</div>
@@ -205,7 +201,6 @@
 
         <hr class="header-divider">
 
-        <!-- 下排：Level 5 四大數值區塊 -->
         <div class="l5-grid-4col">
             <div class="l5-box">
                 <div style="font-size:0.8rem; color:#94a3b8;">CV 視覺越浪率</div>
@@ -256,7 +251,7 @@
                 </div>
             </div>
 
-            <!-- 需求 3：戰略方案總結與當日船班官模燈號與時窗比對 整合大卡片 -->
+            <!-- 2. 船班官模燈號與時窗比對 + 戰略方案總結整合卡片 -->
             <div class="card">
                 <div class="card-title">2. 當日船班官模燈號、時窗與戰略方案總結</div>
                 <div style="font-size:0.85rem; color:#94a3b8; line-height:1.6;">
@@ -270,7 +265,6 @@
                     • 11:20 時窗：<span style="color:var(--red);">止登封閉時窗啟動</span><br>
                     • 14:20 撤離：<span style="color:var(--red);">強制清島，全船返航烏石港</span>
                 </div>
-                <!-- 戰略方案總結整合置入 -->
                 <div style="background:rgba(250, 204, 21, 0.18); border:1px solid var(--yellow); color:var(--yellow); padding:10px; border-radius:6px; margin-top:8px; font-size:0.82rem; font-weight:bold; line-height:1.4;">
                     📌 戰略方案總結：採納「方案 C (GEM-V36D)」，啟動剛性熔斷，強制實施 11:20 止登與 14:20 全員清島撤離。
                 </div>
@@ -305,7 +299,7 @@
         </div>
 
         <div class="right-col">
-            <!-- 需求 1：圖表警戒線改為虛線 (type: 'dashed') + 明確數值標籤 (Hs 1.20m / Wind 10.80m/s) + 判點虛線無箭頭 (symbol: 'none') -->
+            <!-- 四圖警戒虛線 + 明確數值標籤 (Hs 1.20m, Wind 10.80m/s, UKC 1.50m, Tp 12.0s) -->
             <div class="charts-2x2">
                 <div id="chart-hs" class="chart-box"></div>
                 <div id="chart-wind" class="chart-box"></div>
@@ -313,7 +307,7 @@
                 <div id="chart-tp" class="chart-box"></div>
             </div>
 
-            <!-- 七天趨勢預判圖表 (含虛線警戒線) -->
+            <!-- 七天趨勢預判圖表 -->
             <div id="chart-7days" style="height: 210px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px; cursor: crosshair;"></div>
 
             <!-- 戰略三方案評估表格 (Ground Truth Comparison) -->
@@ -345,7 +339,6 @@
 <script>
     let commCount = 13;
 
-    // 通用圖表設定：含 Legend 圖例與 Crosshair hover
     const commonChartOption = {
         backgroundColor: 'transparent',
         legend: { show: true, textStyle: { color: '#94a3b8' }, top: 0, right: 10 },
@@ -364,7 +357,7 @@
         yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(51, 65, 85, 0.5)' } }, axisLine: { lineStyle: { color: '#94a3b8' } } }
     };
 
-    // Hs 波高演化 (黃色虛線警戒線 1.20m, 無箭頭判點虛線)
+    // Hs 波高演化 (黃色虛線警戒線 1.20m + 無箭頭判點虛線)
     const cHs = echarts.init(document.getElementById('chart-hs'));
     cHs.setOption({
         ...commonChartOption,
@@ -406,6 +399,7 @@
         }]
     });
 
+    // UKC 裕深演化 (紅色虛線警戒線 1.50m)
     const cUkc = echarts.init(document.getElementById('chart-ukc'));
     cUkc.setOption({
         ...commonChartOption,
@@ -415,10 +409,18 @@
             type: 'line',
             data: [6.8, 6.5, 6.0, 5.84, 5.9, 6.2, 6.5],
             itemStyle: { color: '#10b981' },
-            markLine: { symbol: 'none', data: [{ xAxis: '11:00', lineStyle: { type: 'dashed' } }, { xAxis: '14:00', lineStyle: { type: 'dashed' } }] }
+            markLine: {
+                symbol: 'none',
+                data: [
+                    { yAxis: 1.50, name: 'UKC 安全極限 (1.50m)', lineStyle: { color: '#ef4444', type: 'dashed', width: 1.5 }, label: { formatter: 'UKC 下限 1.50m', color: '#ef4444' } },
+                    { xAxis: '11:00', lineStyle: { color: '#ef4444', type: 'dashed' } },
+                    { xAxis: '14:00', lineStyle: { color: '#ef4444', type: 'dashed' } }
+                ]
+            }
         }]
     });
 
+    // Tp 長浪週期演化 (紫色虛線警戒線 12.0s)
     const cTp = echarts.init(document.getElementById('chart-tp'));
     cTp.setOption({
         ...commonChartOption,
@@ -428,7 +430,14 @@
             type: 'line',
             data: [8.0, 9.5, 12.5, 14.5, 14.0, 11.0, 9.0],
             itemStyle: { color: '#c084fc' },
-            markLine: { symbol: 'none', data: [{ xAxis: '11:00', lineStyle: { type: 'dashed' } }, { xAxis: '14:00', lineStyle: { type: 'dashed' } }] }
+            markLine: {
+                symbol: 'none',
+                data: [
+                    { yAxis: 12.0, name: 'Tp 長浪警戒 (12.0s)', lineStyle: { color: '#c084fc', type: 'dashed', width: 1.5 }, label: { formatter: 'Tp 長浪 12.0s', color: '#c084fc' } },
+                    { xAxis: '11:00', lineStyle: { color: '#ef4444', type: 'dashed' } },
+                    { xAxis: '14:00', lineStyle: { color: '#ef4444', type: 'dashed' } }
+                ]
+            }
         }]
     });
 
