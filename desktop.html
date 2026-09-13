@@ -34,7 +34,7 @@
             gap: 20px;
         }
 
-        /* 頂部整合標題列 (header-bar) */
+        /* 頂部標題列 */
         .header-bar {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -49,67 +49,30 @@
             box-sizing: border-box;
         }
 
-        .title-group {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
+        .title-group { display: flex; align-items: center; gap: 12px; }
         .live-dot {
-            width: 12px;
-            height: 12px;
-            background-color: var(--blue);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--blue);
-            animation: pulse 1.5s infinite;
+            width: 12px; height: 12px; background-color: var(--blue);
+            border-radius: 50%; box-shadow: 0 0 10px var(--blue); animation: pulse 1.5s infinite;
         }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(1.2); }
-        }
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.2); } }
 
         .dual-core-badge {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            background: rgba(0, 0, 0, 0.25);
-            padding: 10px 20px;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
+            display: flex; align-items: center; gap: 20px;
+            background: rgba(0, 0, 0, 0.25); padding: 10px 20px;
+            border-radius: 10px; border: 1px solid var(--border-color);
         }
 
         .progress-bar-wrap {
-            width: 140px;
-            height: 12px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 6px;
-            overflow: hidden;
-            display: flex;
+            width: 140px; height: 12px; background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px; overflow: hidden; display: flex;
         }
-
         .progress-micro { background: #3b82f6; height: 100%; transition: width 0.5s; }
         .progress-macro { background: #a855f7; height: 100%; transition: width 0.5s; }
 
-        /* 32% / 68% 剛性雙欄佈局 */
-        .main-columns {
-            display: flex;
-            gap: 20px;
-        }
-
-        .left-col {
-            width: 32%;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .right-col {
-            width: 68%;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
+        /* 32% / 68% 剛性雙欄 */
+        .main-columns { display: flex; gap: 20px; align-items: flex-start; }
+        .left-col { width: 32%; display: flex; flex-direction: column; gap: 16px; }
+        .right-col { width: 68%; display: flex; flex-direction: column; gap: 16px; }
 
         .card {
             background: var(--card-bg);
@@ -120,13 +83,8 @@
         }
 
         .card-title {
-            font-size: 0.95rem;
-            font-weight: bold;
-            color: #94a3b8;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            font-size: 0.95rem; font-weight: bold; color: #94a3b8;
+            margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;
         }
 
         .card-guerrilla { border: 1.5px solid var(--orange); }
@@ -136,69 +94,25 @@
         .badge-pass { background: var(--green); color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
         .badge-veto { background: var(--red); color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
 
-        .metric-grid-2x2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
+        .metric-grid-2x2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .metric-box {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            text-align: center;
+            background: rgba(0, 0, 0, 0.2); padding: 12px;
+            border-radius: 8px; border: 1px solid var(--border-color); text-align: center;
         }
-
-        .metric-val {
-            font-size: 1.4rem;
-            font-weight: bold;
-            color: var(--blue);
-            margin-top: 4px;
-        }
+        .metric-val { font-size: 1.4rem; font-weight: bold; color: var(--blue); margin-top: 4px; }
 
         /* 右側 ECharts 圖表網格 */
-        .charts-2x2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
+        .charts-2x2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .chart-box { height: 240px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px; }
 
-        .chart-box {
-            height: 240px;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 10px;
-        }
-
-        .gt-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-            text-align: left;
-        }
-
-        .gt-table th, .gt-table td {
-            padding: 10px 12px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .gt-plan-c {
-            background: rgba(250, 204, 21, 0.15);
-            color: var(--yellow);
-            font-weight: bold;
-        }
+        .gt-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; text-align: left; }
+        .gt-table th, .gt-table td { padding: 10px 12px; border-bottom: 1px solid var(--border-color); }
+        .gt-plan-c { background: rgba(250, 204, 21, 0.15); color: var(--yellow); font-weight: bold; }
 
         .nav-switch {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 20px;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 0.85rem;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 20px; background: var(--card-bg);
+            border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.85rem;
         }
         .nav-switch a { color: var(--blue); text-decoration: none; font-weight: bold; }
     </style>
@@ -212,7 +126,7 @@
             <span class="live-dot"></span>
             <div>
                 <h2 style="margin:0; font-size:1.3rem; color: var(--blue);">GEM-V36D (v36D.13.0 Level 5) 戰術智庫</h2>
-                <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px;">成功通訊：<span id="txt-count">1</span> 次 | 即時更新：<span id="txt-time">--</span></div>
+                <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px;">成功通訊：<span id="txt-count">9</span> 次 | 即時更新：<span id="txt-time">--</span></div>
             </div>
         </div>
 
@@ -235,9 +149,9 @@
         </div>
     </div>
 
-    <!-- 32% / 68% 主雙欄結構 -->
+    <!-- 32% / 68% 雙欄 -->
     <div class="main-columns">
-        <!-- 左側戰術控制欄 (32%) - 剛性 5 張卡片順序 -->
+        <!-- 左側戰術控制欄 (32%) 完整 5 張卡片 -->
         <div class="left-col">
             <!-- 1. PINN Engine 水文與剛性門檻 -->
             <div class="card">
@@ -250,7 +164,7 @@
                     </div>
                     <div class="metric-box">
                         <div style="font-size:0.75rem; color:#94a3b8;">局部風速 (W Local)</div>
-                        <div class="metric-val" id="txt-w-local">8.50 m/s</div>
+                        <div class="metric-val" id="txt-w-local">8.5 m/s</div>
                         <span id="badge-w" class="badge-pass">PASS</span>
                     </div>
                     <div class="metric-box">
@@ -260,13 +174,13 @@
                     </div>
                     <div class="metric-box">
                         <div style="font-size:0.75rem; color:#94a3b8;">預留乾舷 (FB Pier)</div>
-                        <div class="metric-val" id="txt-fb">2.00 m</div>
+                        <div class="metric-val" id="txt-fb">2 m</div>
                         <span id="badge-fb" class="badge-pass">PASS</span>
                     </div>
                 </div>
             </div>
 
-            <!-- 2. 官模燈號比對與最後判斷 -->
+            <!-- 2. 官方 vs GEM 判斷對比 -->
             <div class="card">
                 <div class="card-title">2. 官方 vs GEM 戰術判斷對比</div>
                 <div style="font-size:0.85rem; color:#94a3b8; line-height:1.6;">
@@ -283,21 +197,21 @@
                     <div>靠泊碼頭：<span id="txt-berth" style="color:var(--yellow);">無 (雙岸失效，禁止靠泊)</span></div>
                     <div>撤離碼頭：<span id="txt-evac" style="color:var(--yellow);">無 (雙岸失效，直航返航烏石港)</span></div>
                     <hr style="border:0; border-top:1px dashed #334155; margin:8px 0;">
-                    <div id="txt-morning" style="color:#94a3b8;">--</div>
-                    <div id="txt-afternoon" style="color:#94a3b8; margin-top:4px;">--</div>
+                    <div id="txt-morning" style="color:#94a3b8;">⚠️ 上午游擊調撥：北岸越浪，08:30 班次改至【南岸權宜碼頭】靠泊</div>
+                    <div id="txt-afternoon" style="color:#94a3b8; margin-top:4px;">🚨 下午游擊撤退：預測午後 ESE 巽宮風陣，11:20 止登，14:20 全員撤離</div>
                 </div>
             </div>
 
-            <!-- 4. 颱風與奇門氣場預判 (#a855f7 邊框) -->
+            <!-- 4. 🌀 颱風與奇門氣場預判 (#a855f7 邊框 - 已補齊) -->
             <div class="card card-qimen">
                 <div class="card-title" style="color:var(--purple);">4. 🌀 颱風與奇門宏觀氣場預判</div>
                 <div style="font-size:0.85rem; line-height:1.6;">
                     <div>颱風距離：<strong>450.0 km</strong> | 2D 氣壓梯度：<strong>1.10 hPa/km</strong></div>
-                    <div style="margin-top:6px; color:var(--purple);" id="txt-qimen-prompt">🔮 奇門氣場匹配率達 100.0% (>=70%)，已啟動宏觀參研決策</div>
+                    <div style="margin-top:6px; color:var(--purple);" id="txt-qimen-prompt">🔮 奇門氣場匹配率達 100.0% (>=70%)，已啟動宏觀參研決策與預警提示</div>
                 </div>
             </div>
 
-            <!-- 5. Level 5 邊緣算子卡片 (#10b981 邊框) -->
+            <!-- 5. Level 5 邊緣算子卡片 (#10b981 邊框 - 已補齊) -->
             <div class="card card-level5">
                 <div class="card-title" style="color:var(--green);">5. 🚀 Level 5 邊緣視覺、水動力與賽局算子</div>
                 <div class="metric-grid-2x2" style="margin-bottom:10px;">
@@ -325,7 +239,7 @@
             <!-- 七天趨勢預判圖表 -->
             <div id="chart-7days" style="height: 220px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 10px;"></div>
 
-            <!-- 戰略三方案評估 (Ground Truth) -->
+            <!-- 戰略三方案評估 (Ground Truth Comparison - 已補齊) -->
             <div class="card">
                 <div class="card-title">戰略三方案評估結論 (Ground Truth Comparison)</div>
                 <table class="gt-table">
@@ -342,6 +256,7 @@
         </div>
     </div>
 
+    <!-- 頁尾視角切換器 -->
     <div class="nav-switch">
         <span style="color:#94a3b8;">當前視角：💻 桌面完全版 (desktop.html)</span>
         <div>
@@ -352,9 +267,8 @@
 </div>
 
 <script>
-    let commCount = 1;
+    let commCount = 9;
 
-    // 初始化 ECharts 圖表 (符合 splitLine 50% 透明度與 cross axisPointer)
     const commonChartOption = {
         backgroundColor: 'transparent',
         tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
@@ -387,7 +301,7 @@
             { type: 'value', name: 'Wind (m/s)', splitLine: { show: false } }
         ],
         series: [
-            { name: 'Hs 波高', type: 'line', data: [1.2, 2.5, 3.7, 1.8, 1.1, 0.9, 1.0], itemStyle: { color: '#ef4444' } },
+            { name: 'Hs 波高', type: 'line', data: [1.2, 2.5, 3.71, 1.8, 1.1, 0.9, 1.0], itemStyle: { color: '#ef4444' } },
             { name: 'Wind 風速', type: 'line', yAxisIndex: 1, data: [8.0, 12.5, 15.0, 9.5, 7.0, 6.5, 7.2], itemStyle: { color: '#f59e0b' } }
         ]
     });
