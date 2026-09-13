@@ -18,7 +18,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from pydantic import BaseModel, Field
 
-# SSL 驗證
+# Native Truststore SSL 驗證
 try:
     import truststore
     truststore.inject_into_ssl()
@@ -261,7 +261,7 @@ def execute_master_pipeline():
     extractor = GEM36DNormalizedFeatureExtractor()
     x36_tensor = torch.tensor(extractor.build_normalized_vector(telemetry), dtype=torch.float32).unsqueeze(0).to(device)
 
-    # 紅藍對抗演化對抗推算
+    # 紅藍對抗演化推算
     z_noise = torch.randn(1, 16, device=device)
     adversarial_perturbation = red_gan(z_noise)
     perturbed_x36 = torch.clamp(x36_tensor + adversarial_perturbation, 0.0, 1.0)
