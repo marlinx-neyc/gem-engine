@@ -1,12 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 GEM-V36D Level 7 Master Orchestrator (全自主海氣象雙層決策主控腳本)
-整合功能：
- 1. 36D/64D 遙測特徵解算與 Pydantic 契約 Schema。
- 2. 動態版本搜尋算子 (自動對接 model_v36D.14.0.pt / model_latest.pt)。
- 3. 雙核辯證 Attention Gate + FNO 1D 波浪譜 + Vision-PINN 越浪估算。
- 4. SecureCWADataIngestionEngine 具備 Native SSL 與內部物理補償機制。
- 5. SSOT 狀態檔 (latest_decision.json) 生成與 dashboard.html 戰情室渲染。
 """
 
 import os
@@ -188,6 +182,12 @@ class SecureCWADataIngestionEngine:
         self.api_key = api_key or os.environ.get("CWA_API_KEY", "CWA-YOUR-ACTUAL-API-KEY")
         self.buoy_url = "https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-A0003-001"
 
+    def _safe_float(self, val, default_val: float) -> float:
+        try:
+            return float(val)
+        except (ValueError, TypeError):
+            return default_val
+
     def fetch_latest_telemetry(self) -> Dict[str, Any]:
         params = {"Authorization": self.api_key, "StationID": "46708A"}
         try:
@@ -201,10 +201,10 @@ class SecureCWADataIngestionEngine:
                                    for elem in station.get('weatherElement', [])}
                     return {
                         "sender_id": "CWA_API_LIVE_46708A",
-                        "hs_cwa": float(weather_obs.get('WaveHeight', 1.45)),
-                        "w_cwa": float(weather_obs.get('WindSpeed', 9.5)),
-                        "tp_s": float(weather_obs.get('WavePeriod', 8.2)),
-                        "delta_theta_deg": abs(float(weather_obs.get('WindDirection', 65.0)) - 45.0),
+                        "hs_cwa": self._safe_float(weather_obs.get('WaveHeight'), 1.45),
+                        "w_cwa": self._safe_float(weather_obs.get('WindSpeed'), 9.5),
+                        "tp_s": self._safe_float(weather_obs.get('WavePeriod'), 8.2),
+                        "delta_theta_deg": abs(self._safe_float(weather_obs.get('WindDirection'), 65.0) - 45.0),
                         "tide_eta_m": 1.20,
                         "d_draft": 1.60,
                         "s_quat": 0.40,
@@ -290,11 +290,9 @@ def execute_master_pipeline():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
-    # 1. 自動定位並鎖定最新權重檔
     target_model = resolve_latest_model_path()
     print(f"🔍 自動鎖定最新權重檔：{target_model}")
 
-    # 2. 實例化模型
     vision_net = VisionPINNEdgeNet().to(device)
     fno_net = FNO1dWaveSpectralForecaster().to(device)
     dialectical_net = DialecticalSynthesizer().to(device)
@@ -302,10 +300,13 @@ def execute_master_pipeline():
     quantum_net = QuantumTopology64DEngine().to(device)
     swarm_net = SwarmPolicyNet().to(device)
 
-    # 3. 載入權重
     if os.path.exists(target_model):
         try:
-            ckpt = torch.load(target_model, map_location=device, weights_only=True)
+            try:
+                ckpt = torch.load(target_model, map_location=device, weights_only=True)
+            except Exception:
+                ckpt = torch.load(target_model, map_location=device, weights_only=False)
+                
             if isinstance(ckpt, dict) and 'vision_net' in ckpt:
                 vision_net.load_state_dict(ckpt['vision_net'])
                 fno_net.load_state_dict(ckpt['fno_net'])
@@ -317,7 +318,6 @@ def execute_master_pipeline():
         except Exception as e:
             print(f"ℹ️ 讀取權重備用邏輯運作中 ({e})")
 
-    # 4. 數據擷取與推演
     ingestion = SecureCWADataIngestionEngine()
     telemetry_raw = ingestion.fetch_latest_telemetry()
     telemetry = UnifiedMarineTelemetry(**telemetry_raw)
@@ -326,7 +326,6 @@ def execute_master_pipeline():
     x36_vec = extractor.build_normalized_vector(telemetry)
     x36_tensor = torch.tensor(x36_vec, dtype=torch.float32).unsqueeze(0).to(device)
 
-    # 5. 模型實時推算
     vision_net.eval()
     fno_net.eval()
     dialectical_net.eval()
@@ -338,11 +337,9 @@ def execute_master_pipeline():
         logits, _, _, _ = dialectical_net(x36_tensor)
         coherence = quantum_net(torch.randn(1, 64, device=device))
 
-    # 剛性熔斷否決條件
     hard_veto = (telemetry.hs_cwa > 1.5 or telemetry.delta_theta_deg >= 45 or telemetry.w_cwa >= 10.8)
     decision_text = "🔴 封島/防颱" if hard_veto else ("🟡 限制靠泊" if telemetry.delta_theta_deg >= 25 else "🟢 放行")
 
-    # 6. 生成最新 SSOT 狀態包
     ssot_payload = {
         "version": "v36D.14.0 Level 7 Operational Master",
         "timestamp": datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S CST"),
@@ -360,7 +357,6 @@ def execute_master_pipeline():
         }
     }
 
-    # 7. 寫入 SSOT 檔與渲染儀表板
     with open("latest_decision.json", "w", encoding="utf-8") as f:
         json.dump(ssot_payload, f, ensure_ascii=False, indent=2)
 
