@@ -1,19 +1,21 @@
 {
-  "version": "v36D.14.0 Level 7 Operational Master",
-  "timestamp": "2026-09-13 11:36:55 CST",
+  "version": "v36D.13.0 Level 5 Master Unified",
+  "timestamp": "2026-09-13 12:02:37 CST",
   "decision": "🔴 封島/防颱",
   "hard_veto_alert": true,
   "level6_metrics": {
-    "vision_overtopping": 1.43,
-    "kd_bias": 0.0331,
-    "fno_forecast_hs": 2.0,
-    "quantum_coherence": 0.5345
+    "vision_overtopping": 1.4,
+    "squat_m": 0.91,
+    "fno_forecast_hs": 2.02,
+    "quantum_coherence": 0.5299,
+    "kd_bias": 0.0342
   },
   "qimen_macro_consensus": {
     "consensus_rate_pct": 100.0,
     "macro_advisory_enabled": true
   },
   "guerrilla_dispatch": {
-    "tactical_summary": "執行「下午游擊撤退【南岸碼頭撤離】」"
+    "tactical_summary": "執行「下午游擊撤退【南岸碼頭撤離】」",
+    "swarm_queue": "已成功為 3 艘 Agent 客輪規劃分流靠撤航線"
   }
 }
