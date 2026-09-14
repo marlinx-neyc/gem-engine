@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: '*/15 * * * *'
   workflow_dispatch:
-  # 擴充：允許外部 Webhook 脈衝觸發，徹底解決 GitHub Cron 延遲
+  # 允許外部 Webhook 脈衝觸發，徹底解決 GitHub Cron 延遲
   repository_dispatch:
     types: [ trigger_gem_engine ]
 
@@ -42,11 +42,21 @@ jobs:
         env:
           CWA_API_KEY: ${{ secrets.CWA_API_KEY }}
           BIGGIS_API_KEY: ${{ secrets.BIGGIS_API_KEY }}
+          ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}
         run: python main_orchestrator.py
 
-      - name: Commit & Push SSOT Outputs
+      - name: Commit & Push SSOT Outputs & Model Weights
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "auto: sync SSOT latest_decision [skip ci]"
-          file_pattern: "*.json *.html"
+          commit_message: "auto: sync SSOT & update latest model weights [skip ci]"
+          file_pattern: "*.json *.html *.pt"
           branch: main
+
+      - name: Failure Rescue Webhook Alert
+        if: failure()
+        env:
+          ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}
+        run: |
+          curl -X POST -H "Content-Type: application/json" \
+            -d '{"content": "❌ 【GEM Actions 管線崩潰】Cron Pipeline 執行失敗，請檢查執行日誌！"}' \
+            $ALERT_WEBHOOK_URL || true
