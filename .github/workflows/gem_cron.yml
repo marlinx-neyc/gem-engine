@@ -2,11 +2,11 @@ name: GEM Engine Cron Pipeline
 
 on:
   schedule:
-    - cron: '*/15 * * * *'  # 每 15 分鐘定時執行
-  workflow_dispatch:       # 支援手動觸發
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
 
 permissions:
-  contents: write          # 授權自動寫入與推送權限
+  contents: write
 
 jobs:
   run-engine:
@@ -15,6 +15,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
 
       - name: Set up Python
@@ -37,5 +38,6 @@ jobs:
         run: |
           git config --local user.name "github-actions[bot]"
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -B main
           git add latest_decision.json KB_20260904_ESE_OVERTOPPING.json || true
-          git diff --quiet && git diff --staged --quiet || (git pull --rebase origin main && git commit -m "auto: sync SSOT latest_decision [skip ci]" && git push)
+          git diff --quiet && git diff --staged --quiet || (git pull --rebase origin main && git commit -m "auto: sync SSOT latest_decision [skip ci]" && git push origin main)
