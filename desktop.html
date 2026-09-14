@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GEM-V36D 龜山島海事戰術控制台 (Desktop Production Master)</title>
+  <title>GEM-V36D 龜山島海事數位雙生戰術控制台 (Desktop Production Master)</title>
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -14,8 +14,6 @@
       padding: 16px;
       overflow-x: hidden;
     }
-    
-    /* 置頂整合主卡片 */
     .header-master-card {
       background: #1e293b;
       border: 1px solid #334155;
@@ -24,9 +22,7 @@
       padding: 16px 20px;
       margin-bottom: 16px;
       contain: content;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+      display: flex; flex-direction: column; gap: 12px;
     }
     .header-top-bar { display: flex; justify-content: space-between; align-items: center; }
     .main-title-group { display: flex; align-items: center; gap: 12px; }
@@ -43,7 +39,6 @@
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     .time-group { font-size: 13px; color: #94a3b8; text-align: right; }
 
-    /* Level 5 邊緣算子 4 格網格 */
     .operator-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
     .op-card {
       background: #0f172a; border-radius: 8px; padding: 10px 14px;
@@ -52,7 +47,6 @@
     .op-title { font-size: 12px; color: #94a3b8; display: block; margin-bottom: 4px; }
     .op-val { font-size: 20px; font-weight: 700; }
 
-    /* 剛性 32% / 68% 雙欄排版 */
     .layout-container { display: flex; gap: 16px; width: 100%; contain: content; }
     .left-column { width: 32%; display: flex; flex-direction: column; gap: 16px; contain: content; }
     .right-column { width: 68%; display: flex; flex-direction: column; gap: 16px; contain: content; }
@@ -64,6 +58,7 @@
     .pinn-box { background: #0f172a; padding: 10px; border-radius: 6px; border: 1px solid #334155; }
     .badge-pass { background: #10b981; color: white; padding: 2px 6px; font-size: 11px; border-radius: 4px; }
     .badge-veto { background: #ef4444; color: white; padding: 2px 6px; font-size: 11px; border-radius: 4px; }
+    .badge-restr { background: #f59e0b; color: white; padding: 2px 6px; font-size: 11px; border-radius: 4px; }
 
     .summary-box {
       background: rgba(250, 204, 21, 0.1); border: 1px solid #facc15; color: #facc15;
@@ -74,7 +69,6 @@
     .chart-container { height: 230px; width: 100%; contain: strict; }
     .chart-large { height: 280px; width: 100%; contain: strict; }
 
-    /* 戰略三方案對比表 */
     .gt-table { width: 100%; border-collapse: collapse; font-size: 13px; }
     .gt-table th, .gt-table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid #334155; }
     .gt-table th { background: #0f172a; color: #94a3b8; }
@@ -83,7 +77,6 @@
 </head>
 <body>
 
-  <!-- 置頂一體化整合主卡片 -->
   <div class="header-master-card">
     <div class="header-top-bar">
       <div class="main-title-group">
@@ -121,8 +114,6 @@
   </div>
 
   <div class="layout-container">
-    
-    <!-- 左欄 (32%) -->
     <div class="left-column">
       
       <!-- Card 1: PINN Engine -->
@@ -177,47 +168,50 @@
         </div>
       </div>
 
-      <!-- Card 4: 颱風、長浪、天文潮與奇門氣場預判 (定性/定量/時間點) -->
+      <!-- Card 4: 颱風、長浪、南北角水動力與天文潮預判專區 (更新依據需求) -->
       <div class="card" style="border-color: #a855f7;">
-        <div class="card-title" style="color: #c084fc;">4. 🌀 颱風、長浪、天文潮與奇門預判專區</div>
+        <div class="card-title" style="color: #c084fc;">4. 🌀 颱風、長浪、南北角水動力與天文潮專區</div>
         <div style="font-size: 13px; line-height: 1.6; color: #cbd5e1;">
-          <p>• <strong>天文潮 (農曆八月)</strong>：朔望大潮 (滿潮 +1.35m / 乾潮 -0.45m)，高低潮差 1.80m</p>
-          <p>• <strong>氣壓風場與湧浪</strong>：中颱 955hPa / 暴風 250km (梯度 1.10 hPa/km) 東北季風共振</p>
-          <p>• <strong style="color:#facc15;">未來 1 個月氣象/海象宏觀趨勢推演</strong>：</p>
-          <p style="padding-left: 8px;">1. <strong>Week 1 (09/14-09/20, 農曆初四~初十)</strong>: 定量 Hs 2.5-3.8m、風速 10-14m/s，強東北季風與颱風外圍共振，巽宮長浪穿透率 75% (🔴 高危期)。</p>
-          <p style="padding-left: 8px;">2. <strong>Week 2 (09/21-09/27, 農曆十一~十八 - 朔望大潮)</strong>: 定量 Hs 1.5-2.2m、風速 7-9m/s，大潮低潮期 UKC 水深減少 0.45m (🟡 限制游擊靠泊期)。</p>
-          <p style="padding-left: 8px;">3. <strong>Week 3-4 (09/28-10/14, 農曆十九~九月初五)</strong>: 進入秋季季風主導平水期，定量 Hs 0.8-1.1m (🟢 常規開放期)，極端風陣機率降至 15%。</p>
+          
+          <p>• <strong>南北角區域實測與判準燈號</strong>：</p>
+          <div style="background: rgba(15, 23, 42, 0.6); padding: 8px 10px; border-radius: 6px; margin: 4px 0 8px 0; border: 1px solid #334155;">
+            <div style="color: #38bdf8; font-weight: bold; margin-bottom: 2px;">【北岸碼頭區域】</div>
+            風速/向：12.2 m/s (045° NE) <span class="badge-veto">VETO</span> | 浪高：3.95 m <span class="badge-veto">VETO</span><br/>
+            流速/向：1.8 kts (030° NNE) <span class="badge-restr">RESTR</span>
+            
+            <div style="color: #f59e0b; font-weight: bold; margin: 6px 0 2px 0;">【南岸碼頭區域】</div>
+            風速/向：8.5 m/s (065° ENE) <span class="badge-pass">PASS</span> | 浪高：3.71 m <span class="badge-veto">VETO</span><br/>
+            流速/向：0.9 kts (120° ESE) <span class="badge-pass">PASS</span>
+          </div>
+
+          <p>• <strong>天文潮 (農曆 08/04 - 08/10 朔望大潮)與潮差分析</strong>：</p>
+          <div style="background: rgba(15, 23, 42, 0.4); padding: 6px 8px; border-radius: 6px; margin: 4px 0 8px 0; border: 1px solid #334155;">
+            • <strong>潮差細節</strong>：滿潮位 +1.35m / 乾潮位 -0.45m (總潮差 1.80m)<br/>
+            • <strong>水水動力動態扣減</strong>：乾潮期 UKC 水深直接扣減 0.45m；滿潮期碼頭乾舷 (FB Pier) 減少 1.35m，劇烈增加越浪機率。
+          </div>
+
+          <p>• <strong>未來 1 個月氣象/海象宏觀趨勢推演</strong>：</p>
+          <p style="padding-left: 8px;">1. <strong>Week 1 (09/14-09/20, 農曆 08/04~08/10)</strong>: 定量 Hs 2.5-3.8m、風速 10-14m/s，強東北季風與颱風外圍共振 (🔴 高危期)。</p>
+          <p style="padding-left: 8px;">2. <strong>Week 2 (09/21-09/27, 農曆 08/11~08/18 朔望大潮)</strong>: 定量 Hs 1.5-2.2m、風速 7-9m/s，大潮低潮期 UKC 水深扣減 0.45m (🟡 限制游擊靠泊期)。</p>
+          <p style="padding-left: 8px;">3. <strong>Week 3-4 (09/28-10/14, 農曆 08/19~09/05)</strong>: 進入秋季季風主導平水期，定量 Hs 0.8-1.1m (🟢 常規開放期)。</p>
           <p style="color:#c084fc; margin-top:4px;">🔮 奇門氣場匹配率達 100.0% (>=70%)，已啟動宏觀參研</p>
         </div>
       </div>
 
     </div>
 
-    <!-- 右欄 (68%) -->
     <div class="right-column">
-      
-      <!-- 2x2 時間線圖表矩陣 -->
       <div class="chart-grid">
-        <div class="card">
-          <div id="hsChart" class="chart-container"></div>
-        </div>
-        <div class="card">
-          <div id="windChart" class="chart-container"></div>
-        </div>
-        <div class="card">
-          <div id="ukcChart" class="chart-container"></div>
-        </div>
-        <div class="card">
-          <div id="tpChart" class="chart-container"></div>
-        </div>
+        <div class="card"><div id="hsChart" class="chart-container"></div></div>
+        <div class="card"><div id="windChart" class="chart-container"></div></div>
+        <div class="card"><div id="ukcChart" class="chart-container"></div></div>
+        <div class="card"><div id="tpChart" class="chart-container"></div></div>
       </div>
 
-      <!-- 未來七天雙軸趨勢圖 -->
       <div class="card">
         <div id="trendChart" class="chart-large"></div>
       </div>
 
-      <!-- 戰略三方案評估 (Ground Truth Comparison) -->
       <div class="card">
         <div class="card-title">戰略三方案評估與標籤對比 (Ground Truth)</div>
         <table class="gt-table">
@@ -235,7 +229,7 @@
               <td>方案 A (傳統官方)</td>
               <td>Hs 3.71m / W 8.5m/s</td>
               <td>52.0°</td>
-              <td><span class="badge-pass" style="background:#f59e0b;">RESTR</span></td>
+              <td><span class="badge-restr">RESTR</span></td>
               <td>常規登島 (忽視港池共振風險)</td>
             </tr>
             <tr>
@@ -255,15 +249,11 @@
           </tbody>
         </table>
       </div>
-
     </div>
-
   </div>
 
   <script>
     let fetchCount = 48;
-
-    // 1. 動態時鐘與即時連線探針
     class TimeAndSSOTOrchestrator {
       constructor() {
         this.ssotUrl = 'latest_decision.json';
@@ -307,7 +297,6 @@
 
       renderSSOT(data) {
         document.getElementById('ssotTimestamp').textContent = `SSOT時間：${data.timestamp}`;
-
         let isStale = false;
         try {
           const formattedTs = data.timestamp.replace(' CST', '+08:00').replace(' ', 'T');
@@ -328,7 +317,7 @@
           document.getElementById('berthingPier').textContent = data.guerrilla_dispatch.berthing_pier;
           document.getElementById('evacuationPier').textContent = data.guerrilla_dispatch.evacuation_pier;
           if (data.guerrilla_dispatch.tactical_summary) {
-            document.getElementById('tacticalSummary').textContent = `⚠️ 戰略方案總結：${data.guerrilla_dispatch.tactical_summary}`;
+            document.getElementById('tacticalSummary').textContent = `⚠️ 戰術方案總結：${data.guerrilla_dispatch.tactical_summary}`;
           }
         }
         if (data.level5_advanced_metrics) {
@@ -353,22 +342,16 @@
       }
     }
 
-    // 2. ECharts 初始化 (懸浮燈號 + 顏色 100% 統一 + 7 天線隱藏文字 + 圖例)
     const hours = ['08:00', '10:00', '11:00', '12:00', '14:00', '16:00', '18:00'];
     const splitLineStyle = { lineStyle: { color: 'rgba(51, 65, 85, 0.5)' } };
 
-    // Hs 浪高 (紅色 #ef4444)
     const hsChart = echarts.init(document.getElementById('hsChart'));
     hsChart.setOption({
       title: { text: 'Hs 浪高演化 (m)', textStyle: { color: '#ef4444', fontSize: 14 } },
       legend: { data: ['Hs 浪高 (m)'], top: 0, right: 0, textStyle: { color: '#94a3b8' } },
       tooltip: {
         trigger: 'axis', axisPointer: { type: 'cross' },
-        formatter: params => {
-          let v = params[0].value;
-          let badge = v > 1.2 ? '🔴 VETO (超標)' : '🟢 PASS';
-          return `<b>${params[0].name}</b><br/>Hs 波高: <b>${v} m</b><br/>燈號狀態: <b>${badge}</b>`;
-        }
+        formatter: params => `<b>${params[0].name}</b><br/>Hs 波高: <b>${params[0].value} m</b><br/>燈號: <b>${params[0].value>1.2?'🔴 VETO':'🟢 PASS'}</b>`
       },
       xAxis: { type: 'category', data: hours, axisLine: { lineStyle: { color: '#64748b' } } },
       yAxis: { type: 'value', min: 0, max: 4, splitLine: splitLineStyle, axisLine: { lineStyle: { color: '#64748b' } } },
@@ -386,18 +369,13 @@
       }]
     });
 
-    // Wind 風速 (橘色 #f59e0b)
     const windChart = echarts.init(document.getElementById('windChart'));
     windChart.setOption({
       title: { text: 'Wind 風速演化 (m/s)', textStyle: { color: '#f59e0b', fontSize: 14 } },
       legend: { data: ['Wind 風速 (m/s)'], top: 0, right: 0, textStyle: { color: '#94a3b8' } },
       tooltip: {
         trigger: 'axis', axisPointer: { type: 'cross' },
-        formatter: params => {
-          let v = params[0].value;
-          let badge = v > 10.8 ? '🔴 VETO (超標)' : '🟢 PASS';
-          return `<b>${params[0].name}</b><br/>風速: <b>${v} m/s</b><br/>燈號狀態: <b>${badge}</b>`;
-        }
+        formatter: params => `<b>${params[0].name}</b><br/>風速: <b>${params[0].value} m/s</b><br/>燈號: <b>${params[0].value>10.8?'🔴 VETO':'🟢 PASS'}</b>`
       },
       xAxis: { type: 'category', data: hours, axisLine: { lineStyle: { color: '#64748b' } } },
       yAxis: { type: 'value', min: 0, max: 15, splitLine: splitLineStyle, axisLine: { lineStyle: { color: '#64748b' } } },
@@ -406,25 +384,18 @@
         type: 'line', smooth: true, itemStyle: { color: '#f59e0b' },
         markLine: {
           symbol: 'none',
-          data: [
-            { yAxis: 10.8, lineStyle: { color: '#f59e0b', type: 'dashed' }, label: { formatter: 'Wind 10.80m/s 警戒線', color: '#f59e0b' } }
-          ]
+          data: [{ yAxis: 10.8, lineStyle: { color: '#f59e0b', type: 'dashed' }, label: { formatter: 'Wind 10.80m/s 警戒線', color: '#f59e0b' } }]
         }
       }]
     });
 
-    // UKC 水深 (綠色 #10b981)
     const ukcChart = echarts.init(document.getElementById('ukcChart'));
     ukcChart.setOption({
       title: { text: 'UKC 水深演化 (m)', textStyle: { color: '#10b981', fontSize: 14 } },
       legend: { data: ['UKC 裕深 (m)'], top: 0, right: 0, textStyle: { color: '#94a3b8' } },
       tooltip: {
         trigger: 'axis', axisPointer: { type: 'cross' },
-        formatter: params => {
-          let v = params[0].value;
-          let badge = v < 1.5 ? '🔴 VETO (不足)' : '🟢 PASS';
-          return `<b>${params[0].name}</b><br/>UKC 裕深: <b>${v} m</b><br/>燈號狀態: <b>${badge}</b>`;
-        }
+        formatter: params => `<b>${params[0].name}</b><br/>UKC 裕深: <b>${params[0].value} m</b><br/>燈號: <b>${params[0].value<1.5?'🔴 VETO':'🟢 PASS'}</b>`
       },
       xAxis: { type: 'category', data: hours, axisLine: { lineStyle: { color: '#64748b' } } },
       yAxis: { type: 'value', min: 0, max: 8, splitLine: splitLineStyle, axisLine: { lineStyle: { color: '#64748b' } } },
@@ -438,18 +409,13 @@
       }]
     });
 
-    // Tp 浪週期 (紫色 #c084fc)
     const tpChart = echarts.init(document.getElementById('tpChart'));
     tpChart.setOption({
       title: { text: 'Tp 浪週期 (s)', textStyle: { color: '#c084fc', fontSize: 14 } },
       legend: { data: ['Tp 浪週期 (s)'], top: 0, right: 0, textStyle: { color: '#94a3b8' } },
       tooltip: {
         trigger: 'axis', axisPointer: { type: 'cross' },
-        formatter: params => {
-          let v = params[0].value;
-          let badge = v > 12.0 ? '🟣 WARN (長浪)' : '🟢 PASS';
-          return `<b>${params[0].name}</b><br/>Tp 週期: <b>${v} s</b><br/>燈號狀態: <b>${badge}</b>`;
-        }
+        formatter: params => `<b>${params[0].name}</b><br/>Tp 週期: <b>${params[0].value} s</b><br/>燈號: <b>${params[0].value>12.0?'🟣 WARN':'🟢 PASS'}</b>`
       },
       xAxis: { type: 'category', data: hours, axisLine: { lineStyle: { color: '#64748b' } } },
       yAxis: { type: 'value', min: 0, max: 18, splitLine: splitLineStyle, axisLine: { lineStyle: { color: '#64748b' } } },
@@ -463,26 +429,18 @@
       }]
     });
 
-    // 未來七天雙軸趨勢圖 (線條隱藏文字，依游標彈出燈號 + 警戒線同色)
     const trendChart = echarts.init(document.getElementById('trendChart'));
     trendChart.setOption({
       title: { text: '未來七天雙軸海象預測 (Hs 波高 & Wind 風速)', textStyle: { color: '#38bdf8', fontSize: 14 } },
       legend: { data: ['Hs 波高 (m)', 'Wind 風速 (m/s)'], top: 0, right: 0, textStyle: { color: '#94a3b8' } },
       tooltip: {
-        trigger: 'axis',
-        axisPointer: { type: 'cross' },
+        trigger: 'axis', axisPointer: { type: 'cross' },
         formatter: function(params) {
           let date = params[0].name;
           let hs = params[0].value;
           let wind = params[1] ? params[1].value : 0;
-          let verdictBadge = "🟢 全線開放";
-          if (hs > 1.20 || wind > 10.80) {
-            verdictBadge = "🔴 剛性封島";
-          } else if (hs > 0.90) {
-            verdictBadge = "🟡 限制靠泊";
-          }
-          return `<strong>${date}</strong><br/>` +
-                 `戰術裁決：<strong style="color:${hs>1.2?'#ef4444':'#10b981'}">${verdictBadge}</strong><br/>` +
+          let verdictBadge = (hs > 1.20 || wind > 10.80) ? "🔴 剛性封島" : (hs > 0.90 ? "🟡 限制靠泊" : "🟢 全線開放");
+          return `<strong>${date}</strong><br/>戰術裁決：<strong style="color:${hs>1.2?'#ef4444':'#10b981'}">${verdictBadge}</strong><br/>` +
                  `<span style="color:#ef4444">● Hs 波高：${hs} m</span> (警戒: 1.20m)<br/>` +
                  `<span style="color:#f59e0b">● Wind 風速：${wind} m/s</span> (警戒: 10.80m/s)`;
         }
@@ -495,8 +453,7 @@
       series: [
         {
           name: 'Hs 波高 (m)', type: 'line', smooth: true, data: [3.71, 3.2, 1.8, 0.9, 0.8, 1.1, 1.4],
-          itemStyle: { color: '#ef4444' },
-          label: { show: false }, // 依規範：隱藏折線上的重複文字，純靠游標顯示
+          itemStyle: { color: '#ef4444' }, label: { show: false },
           markLine: {
             symbol: 'none',
             data: [{ yAxis: 1.2, lineStyle: { color: '#ef4444', type: 'dashed' }, label: { formatter: 'Hs 1.20m 警戒線', color: '#ef4444' } }]
@@ -504,8 +461,7 @@
         },
         {
           name: 'Wind 風速 (m/s)', type: 'line', yAxisIndex: 1, smooth: true, data: [8.5, 12.1, 9.4, 5.2, 4.8, 6.1, 7.0],
-          itemStyle: { color: '#f59e0b' },
-          label: { show: false }, // 依規範：隱藏折線上的重複文字
+          itemStyle: { color: '#f59e0b' }, label: { show: false },
           markLine: {
             symbol: 'none',
             data: [{ yAxis: 10.8, lineStyle: { color: '#f59e0b', type: 'dashed' }, label: { formatter: 'Wind 10.80m/s 警戒線', color: '#f59e0b' } }]
@@ -517,7 +473,6 @@
     window.addEventListener('resize', () => {
       hsChart.resize(); windChart.resize(); ukcChart.resize(); tpChart.resize(); trendChart.resize();
     });
-
     document.addEventListener('DOMContentLoaded', () => new TimeAndSSOTOrchestrator());
   </script>
 </body>
