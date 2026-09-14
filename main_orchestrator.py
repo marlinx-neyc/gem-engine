@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-GEM-V36D Integrated Dynamic Guerrilla & Mobile/Desktop Schema Master Engine (v36D.29.0)
-1. 完整相容手持版與桌面版 SSOT JSON Schema：補齊 `ukc_m` (5.84m) 與 `fb_pier_m` (2.00m)，徹底解決 undefined Bug
-2. 數值精確收斂：全管線推論與遙測指標強制控制為小數點後 2 位 (round(x, 2))，杜絕前端浮點溢位
-3. PyTorch 模型 (.pt) 持久化引擎：啟動自動繼承歷史微調記憶，Hot-Swap 成功自動導出最新 .pt 檔
-4. 游擊動態調度：結合攻角有效風速 (W_eff)、動態潮位與船隻分流路徑，動態推算止登與撤離時間窗
-5. 歷史事故圖譜比對：計算餘弦相似度並產出自適應係數 (Alpha Adaptive) 主動調值警戒門檻
+GEM-V36D Three-Scheme Summary & Guerrilla Vector Master Engine (v36D.30.0)
+1. 三方案定性定量整合總結：對比方案 A(官方)、方案 B(氣象局)與方案 C(GEM-V36D)之風速攻角、波高與歷史門檻
+2. 游擊動態調度算子：將風速與風向夾角轉變 (W_eff & Delta Theta) 作為南北碼頭切換與烏石港撤離之核心輸入
+3. 完整相容 DOM Schema：補齊 `ukc_m` (5.84m) 與 `fb_pier_m` (2.00m)，徹底解決手持與桌面版 undefined Bug
+4. 數值精確收斂：全管線推論與遙測指標強制控制為小數點後 2 位 (round(x, 2))，杜絕前端浮點溢位
+5. PyTorch 模型 (.pt) 持久化引擎：啟動自動繼承歷史微調記憶，Hot-Swap 成功自動導出最新 .pt 檔
 6. 雙模金鑰注入 (Colab / GitHub Secrets) + ARDSWC / BIGGIS / CWA 多源熔斷 Circuit Breaker Protection
-7. 防快取 HTML 戰情儀表板 / SSOT JSON 自動導出與 Webhooks 即時告警推播
 """
 
 import os
@@ -135,7 +134,7 @@ def send_webhook_alert(ssot_payload: Dict[str, Any]):
         f"🌊 浪高：{physics.get('hs_pier_m', 0.0):.2f} m | 風速：{physics.get('w_local_ms', 0.0):.2f} m/s (有效攻角: {physics.get('w_effective_ms', 0.0):.2f} m/s)\n"
         f"🌊 動態潮位：{physics.get('tide_eta_m', 0.0):.2f} m | UKC 裕深：{physics.get('ukc_m', 5.84):.2f} m | 乾舷：{physics.get('fb_pier_m', 2.00):.2f} m\n"
         f"⛰️ 龜首崩塌風險比率：{physics.get('slope_landslide_risk', 0.15):.2f}\n"
-        f"📌 游擊調度推播：{guerrilla.get('tactical_summary', '無')}"
+        f"📌 三方案與游擊總結：{guerrilla.get('tactical_summary', '無')}"
     )
 
     try:
@@ -216,7 +215,7 @@ class SecureCWADataIngestionEngine:
         return {"hs_cwa": 3.71, "w_cwa": 8.50, "tp_s": 14.5, "delta_theta_deg": 52.0, "tide_eta_m": 1.20}, False
 
 # ==============================================================================
-# 4. 歷史規律比對與游擊動態調度算子 (Dynamic Guerrilla Dispatch Engine)
+# 4. 三方案定性定量總結與風向風速游擊調度算子
 # ==============================================================================
 class DynamicGuerrillaDispatchEngine:
     def __init__(self, historical_kb_path: str = "KB_20260904_ESE_OVERTOPPING.json"):
@@ -228,14 +227,13 @@ class DynamicGuerrillaDispatchEngine:
         hs_pier = telemetry.get("hs_cwa", 3.71)
         tide_eta = telemetry.get("tide_eta_m", 1.20)
         
-        # 1. 風向角度側風衝擊矢量算子: W_eff = W * |cos(delta_theta)|
+        # 1. 風向與風速動態攻角轉換算子: W_eff = W * |cos(delta_theta)|
         rad = np.radians(delta_theta)
         w_eff = round(float(w_local * abs(np.cos(rad))), 2)
         
         # 2. 歷史事故智庫比對與動態自適應調值 (Adaptive Alpha Tuning)
         alpha_tune = 1.0
         max_similarity = 0.0
-        
         if os.path.exists(self.kb_path):
             try:
                 with open(self.kb_path, "r", encoding="utf-8") as f:
@@ -249,30 +247,52 @@ class DynamicGuerrillaDispatchEngine:
             except Exception as e:
                 print(f"ℹ️ 歷史智庫讀取狀態: {e}")
 
-        # 3. 動態臨界極值門檻 (Tide & Alpha Adjusted)
+        # 3. 動態臨界極值門檻計算
         tide_penalty = 0.10 if tide_eta >= 1.50 else 0.0
         effective_w_limit = round((10.80 - tide_penalty) * alpha_tune, 2)
         effective_hs_limit = round((1.20 - tide_penalty * 0.5) * alpha_tune, 2)
         
-        # 4. 動態時窗預判 (Time-Window Forecasting)
+        # 4. 時窗預判
         now_dt = datetime.now(timezone(timedelta(hours=8)))
         margin_min = max(0, int((effective_w_limit - w_eff) * 12)) if w_eff < effective_w_limit else 0
-        
         t_stop_dt = now_dt + timedelta(minutes=margin_min)
         t_evac_dt = t_stop_dt + timedelta(minutes=45)
-        
         t_stop_str = t_stop_dt.strftime("%H:%M")
         t_evac_str = t_evac_dt.strftime("%H:%M")
 
-        # 5. 游擊碼頭靠撤與船隻路線分流處置
-        if w_eff > effective_w_limit or hs_pier > effective_hs_limit or tide_eta > 2.0:
+        # 5. 風向風速轉變作為游擊靠泊/避風決策依據 (Wind Vector Shift Driven)
+        is_over_limit = (w_eff > effective_w_limit) or (hs_pier > effective_hs_limit) or (tide_eta > 2.0)
+        
+        if is_over_limit:
             berthing = "【防颱避風/禁止靠泊】"
             evac = "【強制撤離】 -> 返航【烏石港】"
-            summary = f"⚠️ 觸發歷史自適應調值 (有效風速 {w_eff:.2f}m/s, 潮位 {tide_eta:.2f}m, 門檻 {effective_w_limit:.2f}m/s)！建議 {t_stop_str} 止登，{t_evac_str} 全員撤離至烏石港。"
-        else:
-            berthing = "【南岸權宜碼頭】" if delta_theta >= 45.0 else "【北岸碼頭】"
+            pier_reason = f"風速攻角與波高超過極值 (有效風速 {w_eff:.2f}m/s > 門檻 {effective_w_limit:.2f}m/s, 浪高 {hs_pier:.2f}m)"
+        elif delta_theta >= 45.0:
+            berthing = "【南岸權宜碼頭】"
             evac = f"{berthing} -> 備援【烏石港】"
-            summary = f"動態時窗預判：當前有效風速 {w_eff:.2f}m/s，建議 {t_stop_str} 評估止登 ({berthing})，預計 {t_evac_str} 完成乘客分流。"
+            pier_reason = f"風向夾角轉變至 Δθ={delta_theta:.1f}° (≥45° 側風推擠)，游擊調撥至【南岸權宜碼頭】靠泊"
+        else:
+            berthing = "【北岸碼頭】"
+            evac = f"{berthing} -> 備援【烏石港】"
+            pier_reason = f"風向夾角 Δθ={delta_theta:.1f}° (<45° 迎風位)，游擊調撥維持【北岸碼頭】靠泊"
+
+        # 6. 三方案定性定量概括總結 (Three-Scheme Qualitative & Quantitative Summary)
+        scheme_a = f"方案A(傳統官方): 僅憑風速 {w_local:.1f}m/s 評估"
+        scheme_b = f"方案B(氣象局): 缺乏港池越浪數據"
+        scheme_c = f"方案C(GEM-V36D): 依風向攻角轉變計算有效風速 {w_eff:.2f}m/s 與動態門檻 {effective_w_limit:.2f}m/s"
+
+        if is_over_limit:
+            tactical_summary = (
+                f"⚠️ 三方案定性定量總結：{scheme_a}與{scheme_b}預判放行/限縮；"
+                f"{scheme_c}精確比對歷史智庫(α={alpha_tune:.2f})，判定【剛性熔斷】！"
+                f"游擊調度依風向風速轉變，決策：{pier_reason}。建議 {t_stop_str} 止登，{t_evac_str} 全員撤離至烏石港。"
+            )
+        else:
+            tactical_summary = (
+                f"動態時窗預判：{scheme_a}與{scheme_b}預估全天開放；"
+                f"{scheme_c}評估有效風速在門檻內。"
+                f"游擊調度依風向風速轉變，決策：{pier_reason}。預計 {t_stop_str} 評估止登，{t_evac_str} 完成分流。"
+            )
 
         return {
             "w_effective_ms": w_eff,
@@ -280,7 +300,7 @@ class DynamicGuerrillaDispatchEngine:
             "historical_similarity": max_similarity,
             "berthing_pier": berthing,
             "evacuation_pier": evac,
-            "tactical_summary": summary,
+            "tactical_summary": tactical_summary,
             "t_stop_window": t_stop_str,
             "t_evac_window": t_evac_str
         }
@@ -610,7 +630,7 @@ class InteractiveDashboardHTMLExporter:
         </div>
     </div>
     <div class="dispatch-box">
-        📌 游擊動態調度指令：{guerrilla.get('tactical_summary', '無')}
+        📌 游擊動態調度與三方案總結：{guerrilla.get('tactical_summary', '無')}
     </div>
 </body>
 </html>"""
@@ -619,7 +639,7 @@ class InteractiveDashboardHTMLExporter:
 
 def execute_master_pipeline():
     print("=" * 75)
-    print("🚀 【GEM-V36D Dynamic Guerrilla Master Pipeline 啟動】")
+    print("🚀 【GEM-V36D Three-Scheme & Guerrilla Master Pipeline 啟動】")
     print("=" * 75)
     cst_tz = timezone(timedelta(hours=8))
     current_time_str = datetime.now(cst_tz).strftime("%Y-%m-%d %H:%M:%S CST")
@@ -649,7 +669,7 @@ def execute_master_pipeline():
         x_36d_norm = extractor.build_normalized_vector(telemetry_obj)
         x_tensor = torch.tensor(x_36d_norm, dtype=torch.float32).unsqueeze(0).to(device)
 
-        # 4. 游擊動態調度算子計算 (包含攻角風速 W_eff、潮位與歷史比對調值)
+        # 4. 游擊動態調度算子計算 (包含三方案定性定量總結與風向風速轉變調撥)
         dispatch_engine = DynamicGuerrillaDispatchEngine()
         guerrilla_result = dispatch_engine.calculate_dynamic_dispatch(telemetry_raw, x_36d_norm)
 
@@ -680,9 +700,9 @@ def execute_master_pipeline():
         )
         decision_text = "🔴 封島/防颱" if hard_veto else "🟢 放行靠泊"
 
-        # 8. 導出 SSOT JSON Payload (完整補齊 ukc_m 與 fb_pier_m，對齊手持與桌面雙控制台 DOM)
+        # 8. 導出 SSOT JSON Payload (完整對齊手持與桌面雙控制台 DOM)
         ssot_payload = {
-            "version": "v36D.29.0 Desktop & Mobile Unified Master",
+            "version": "v36D.30.0 Three-Scheme & Guerrilla Vector Master",
             "timestamp": current_time_str,
             "decision": decision_text,
             "confidence_score": 100.0 if (cwa_ok and ards_ok) else 75.0,
@@ -696,8 +716,8 @@ def execute_master_pipeline():
                 "slope_landslide_risk": round(float(slope_risk), 2),
                 "adaptive_alpha": guerrilla_result["adaptive_alpha"],
                 "historical_similarity": guerrilla_result["historical_similarity"],
-                "ukc_m": 5.84,        # 補齊 DOM 讀取 key
-                "fb_pier_m": 2.00,     # 補齊 DOM 讀取 key
+                "ukc_m": 5.84,
+                "fb_pier_m": 2.00,
                 "has_veto": hard_veto
             },
             "guerrilla_dispatch": {
@@ -724,7 +744,7 @@ def execute_master_pipeline():
     except Exception as e:
         print(f"⚠️ 觸發例外保護 ({e})，寫入備援 SSOT。")
         fallback_payload = {
-            "version": "v36D.29.0 Offline Fallback",
+            "version": "v36D.30.0 Offline Fallback",
             "timestamp": current_time_str,
             "decision": "🔴 封島/防颱",
             "confidence_score": 65.0,
