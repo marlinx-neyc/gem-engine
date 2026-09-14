@@ -1,90 +1,26 @@
 {
-  "version": "v36D.13.0 Level 5 Complete",
-  "timestamp": "2026-09-14 06:57:38 CST",
+  "version": "v36D.16.5 Zero-Crash Master",
+  "timestamp": "2026-09-14 16:57:20 CST",
   "decision": "🔴 封島/防颱",
-  "confidence_score": 100.0,
+  "confidence_score": 65.0,
+  "confidence_label": "⚠️ 65.0% [代理推算 DEGRADED]",
   "hard_veto_alert": true,
-  "precision_metrics": {
-    "converged_sigma": 0.3125,
-    "precision_gain_pct": 58.4
-  },
-  "attention_gate": {
-    "micro_physics_weight": 65.0,
-    "macro_qimen_weight": 35.0
-  },
   "physics_metrics": {
     "hs_pier_m": 3.71,
     "w_local_ms": 8.5,
     "ukc_m": 5.84,
     "fb_pier_m": 2.0,
-    "has_veto": true,
-    "hs_series": [
-      1.1,
-      1.3,
-      2.7,
-      3.71,
-      3.9,
-      3.1,
-      2.0
-    ],
-    "wind_series": [
-      6.2,
-      7.5,
-      8.5,
-      9.8,
-      10.5,
-      9.2,
-      8.0
-    ],
-    "ukc_series": [
-      6.8,
-      6.4,
-      6.0,
-      5.84,
-      5.6,
-      6.1,
-      6.5
-    ],
-    "tp_series": [
-      6.5,
-      8.2,
-      10.8,
-      14.5,
-      13.1,
-      11.0,
-      9.5
-    ],
-    "future_hs_series": [
-      1.8,
-      1.5,
-      1.3,
-      1.2,
-      1.1
-    ],
-    "future_wind_series": [
-      7.5,
-      7.0,
-      6.5,
-      6.0,
-      5.5
-    ]
+    "has_veto": true
   },
   "guerrilla_dispatch": {
     "berthing_pier": "【南岸權宜碼頭】",
-    "evacuation_pier": "【南岸權宜碼頭】 &rarr; 返航【烏石港】",
-    "guerrilla_mode": "BOTH_PIERS_DISABLED",
-    "morning_tactic": "🚨 浪高/風速超標觸發 VETO，取消常規登島班次",
-    "afternoon_tactic": "🚨 10:50/13:50 雙預警，11:20 止登【南岸碼頭】，14:20 全員強制撤離至【烏石港】",
-    "tactical_summary": "採納「方案 C (GEM-V36D)」，啟動剛性熔斷，10:50 預警/11:20 止登【南岸碼頭】，13:50 預警/14:20 全員撤離至【烏石港】。"
+    "evacuation_pier": "【南岸權宜碼頭】 -> 返航【烏石港】",
+    "tactical_summary": "執行「10:50/13:50 雙預警，11:20 止登【南岸碼頭】，14:20 全員撤離至【烏石港】」"
   },
   "level5_advanced_metrics": {
     "vision_overtopping_rate_pmin": 1.31,
-    "vessel_hydrodynamics": {
-      "vessel_name": "凱鯨號 (穿浪雙體船)",
-      "dynamic_squat_m": 0.82
-    },
+    "vision_kd_bias": 0.0295,
     "fno_forecast_mean_hs_m": 1.58,
     "quantum_topology_coherence": 0.4682
-  },
-  "qimen_macro_consensus": {}
+  }
 }
