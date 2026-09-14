@@ -238,5 +238,11 @@
     "hexagram_id": 1,
     "resolved_residual": 0.1843,
     "status": "DIALECTICAL_SELF_HEALED"
+  },
+  {
+    "timestamp": "2026-09-15 01:31:30 CST",
+    "hexagram_id": 1,
+    "resolved_residual": 0.2204,
+    "status": "DIALECTICAL_SELF_HEALED"
   }
 ]
