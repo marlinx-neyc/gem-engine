@@ -1,5 +1,5 @@
+torch
+numpy
 requests
 pydantic
-numpy
-gymnasium
-torch
+truststore
