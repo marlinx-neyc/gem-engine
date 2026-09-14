@@ -26,7 +26,8 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install torch numpy requests pydantic truststore
+          pip install --extra-index-url https://download.pytorch.org/whl/cpu torch
+          pip install numpy requests pydantic truststore
 
       - name: Execute Master Pipeline
         env:
@@ -38,5 +39,5 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "auto: sync SSOT latest_decision [skip ci]"
-          file_pattern: "latest_decision.json KB_20260904_ESE_OVERTOPPING.json"
+          file_pattern: "*.json"
           branch: main
