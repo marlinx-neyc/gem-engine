@@ -1,6 +1,6 @@
 {
   "version": "v36D.26.0 Precision Master",
-  "timestamp": "2026-09-14 20:44:37 CST",
+  "timestamp": "2026-09-14 20:46:17 CST",
   "decision": "🔴 封島/防颱",
   "confidence_score": 75.0,
   "confidence_label": "⚠️ 75.0% [部分 API 快取降級]",
@@ -18,9 +18,9 @@
     "tactical_summary": "執行「10:50/13:50 雙預警，11:20 止登【南岸碼頭】，14:20 全員撤離至【烏石港】」"
   },
   "level5_advanced_metrics": {
-    "vision_overtopping_rate_pmin": 2.34,
-    "vision_kd_bias": 0.0051,
-    "fno_forecast_mean_hs_m": 0.31,
-    "quantum_topology_coherence": 0.54
+    "vision_overtopping_rate_pmin": 2.64,
+    "vision_kd_bias": -0.0019,
+    "fno_forecast_mean_hs_m": -1.62,
+    "quantum_topology_coherence": 0.52
   }
 }
