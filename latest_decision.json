@@ -1,15 +1,15 @@
 {
-  "version": "v36D.19.0 Complete Master",
-  "timestamp": "2026-09-14 17:37:33 CST",
+  "version": "v36D.25.0 Enterprise Master",
+  "timestamp": "2026-09-14 20:04:47 CST",
   "decision": "🔴 封島/防颱",
-  "confidence_score": 65.0,
-  "confidence_label": "⚠️ 65.0% [代理推算 DEGRADED]",
+  "confidence_score": 75.0,
+  "confidence_label": "⚠️ 75.0% [部分 API 快取降級]",
   "hard_veto_alert": true,
   "physics_metrics": {
     "hs_pier_m": 3.71,
     "w_local_ms": 8.5,
+    "slope_landslide_risk": 0.1,
     "ukc_m": 5.84,
-    "fb_pier_m": 2.0,
     "has_veto": true
   },
   "guerrilla_dispatch": {
@@ -18,9 +18,9 @@
     "tactical_summary": "執行「10:50/13:50 雙預警，11:20 止登【南岸碼頭】，14:20 全員撤離至【烏石港】」"
   },
   "level5_advanced_metrics": {
-    "vision_overtopping_rate_pmin": 1.31,
-    "vision_kd_bias": 0.0295,
-    "fno_forecast_mean_hs_m": 1.58,
-    "quantum_topology_coherence": 0.4682
+    "vision_overtopping_rate_pmin": 2.5428667068481445,
+    "vision_kd_bias": 0.00010116100747836754,
+    "fno_forecast_mean_hs_m": -0.3426361382007599,
+    "quantum_topology_coherence": 0.4091452360153198
   }
 }
