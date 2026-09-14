@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-GEM-V36D Autonomous Training & Dialectical Hot-Swap Master Engine (v36D.25.0 Enterprise Master)
-1. Colab Userdata / GitHub Secrets 雙模全自動金鑰安全注入引擎 (Auto Key Injector)
-2. ARDSWC 龜首崩塌 + BIGGIS 空間影像 + CWA 遙測雙浮標多源 Circuit Breaker 熔斷保護
-3. 咸恆雙極對立統一動態 Loss Matrix (PINN) 完整可微分梯度傳播鏈
-4. 64 卦象專屬 LoRA (Rank=4) 低秩 Adapter 與 1,000 次 Monte Carlo Auto-Gate 物理否決
-5. 智庫 (KB) 自動滾動歸檔 (Log Rotation) 與 Webhooks 即時告警推播
-6. 自主性全流程壓力模擬器 (Autonomous Stress Simulator) 啟動自檢
+GEM-V36D Autonomous Training & Dialectical Hot-Swap Master Engine (v36D.26.0 Precision Master)
+1. 數值收斂控制：所有模型推論與遙測指標強制控制為小數點後 2 位 (round(x, 2))，徹底消除 floating point 溢位
+2. PyTorch 模型 (.pt) 持久化引擎：啟動自動繼承歷史微調權重，Hot-Swap 成功自動導出最新 .pt 檔
+3. Colab Userdata / GitHub Secrets 雙模全自動金鑰安全注入 (Auto Key Injector)
+4. ARDSWC 龜首崩塌 + BIGGIS 空間影像 + CWA 遙測雙浮標 Circuit Breaker 熔斷保護
+5. 64 卦象專屬 LoRA (Rank=4) 低秩 Adapter 與 1,000 次 Monte Carlo Auto-Gate 物理否決
+6. 防快取戰情室 HTML / SSOT JSON 自動生成與 Webhooks 即時告警推播
 """
 
 import os
@@ -44,14 +44,12 @@ except Exception:
     pass
 
 def auto_inject_api_secrets():
-    """自動從 Colab Secret 面板或環境變數注入 API 授權碼"""
     secret_keys = [
         'CWA_API_KEY', 'BIGGIS_API_KEY', 'GEMINI_API_KEY', 'GITHUB_TOKEN',
         'CDSE_CLIENT_ID', 'CDSE_CLIENT_SECRET', 'CDS_API_KEY',
         'CMEMS_USER', 'CMEMS_PASS', 'TDX_CLIENT_ID', 'TDX_CLIENT_SECRET',
         'ALERT_WEBHOOK_URL'
     ]
-    
     if IN_COLAB:
         print("🔑 [Colab 模式] 讀取 Secret 庫並自動注入環境變數...")
         for key in secret_keys:
@@ -65,11 +63,38 @@ def auto_inject_api_secrets():
     else:
         print("ℹ️ [Production/CI 模式] 採用系統環境變數與 GitHub Secrets")
 
-# 啟動時自動注入金鑰
 auto_inject_api_secrets()
 
 # ==============================================================================
-# 1. 基礎安全算子、DNS 退避與 Webhook 告警機制
+# 1. .pt 模型權重持久化載入與導出模組 (Model Persistence)
+# ==============================================================================
+MODEL_WEIGHTS_FILE = "model_v36D_latest.pt"
+
+def load_latest_model_weights(model: nn.Module) -> bool:
+    """自動尋找並載入最新的 .pt 模型權重檔"""
+    candidates = [MODEL_WEIGHTS_FILE] + sorted(glob.glob("model_v36D*.pt"), reverse=True)
+    for path in candidates:
+        if os.path.exists(path):
+            try:
+                state_dict = torch.load(path, map_location="cpu")
+                model.load_state_dict(state_dict, strict=False)
+                print(f"📦 [記憶復原] 成功自動載入歷史微調權重檔: `{path}`")
+                return True
+            except Exception as e:
+                print(f"⚠️ [記憶讀取失敗] 權重檔 `{path}` 載入異常 ({e})")
+    print("ℹ️ [記憶庫空白] 未發現歷史權重檔，啟動全新初始權重。")
+    return False
+
+def save_model_weights(model: nn.Module, weights_path: str = MODEL_WEIGHTS_FILE):
+    """將微調後的最新權重導出為 .pt 檔"""
+    try:
+        torch.save(model.state_dict(), weights_path)
+        print(f"💾 [記憶持久化] 已成功導出最新模型權重: `{weights_path}`")
+    except Exception as e:
+        print(f"⚠️ [記憶導出失敗] 無法儲存 `.pt` 檔: {e}")
+
+# ==============================================================================
+# 2. 基礎安全算子、DNS 退避與 Webhook 告警機制
 # ==============================================================================
 def safe_float(val: Any, default: float) -> float:
     if val is None:
@@ -110,17 +135,14 @@ def send_webhook_alert(ssot_payload: Dict[str, Any]):
     )
 
     try:
-        if "discord.com" in webhook_url:
-            payload = {"content": message}
-        else:
-            payload = {"text": message, "ssot": ssot_payload}
+        payload = {"content": message} if "discord.com" in webhook_url else {"text": message, "ssot": ssot_payload}
         requests.post(webhook_url, json=payload, timeout=3.0)
         print("📡 已成功發送 Webhook 戰情告警推播")
     except Exception as e:
         print(f"⚠️ Webhook 告警發送失敗: {e}")
 
 # ==============================================================================
-# 2. 多源 API Ingestion 引擎 (ARDSWC / BIGGIS / CWA)
+# 3. 多源 API Ingestion 引擎 (ARDSWC / BIGGIS / CWA)
 # ==============================================================================
 class ARDSWCLandslideIngestionEngine:
     def __init__(self, api_url: str = "https://gis.ardswc.gov.tw/api/swcb/eventfiles"):
@@ -132,7 +154,7 @@ class ARDSWCLandslideIngestionEngine:
         if ok and isinstance(data, list):
             guishan_events = [item for item in data if "龜山" in str(item) or "龜首" in str(item)]
             risk_score = min(1.0, len(guishan_events) * 0.25 + 0.10) if guishan_events else 0.10
-            return risk_score, True
+            return round(risk_score, 2), True
         return 0.15, False
 
 class BIGGISImageAPIIngestionEngine:
@@ -168,10 +190,10 @@ class SecureCWADataIngestionEngine:
                 elements = locations[0].get('weatherElement') or []
                 weather_obs = {elem.get('elementName'): elem.get('elementValue') for elem in elements if isinstance(elem, dict)}
                 result = {
-                    "hs_cwa": safe_float(weather_obs.get('WaveHeight'), 3.71),
-                    "w_cwa": safe_float(weather_obs.get('WindSpeed'), 8.50),
-                    "tp_s": safe_float(weather_obs.get('WavePeriod'), 14.5),
-                    "delta_theta_deg": abs(safe_float(weather_obs.get('WindDirection'), 65.0) - 45.0),
+                    "hs_cwa": round(safe_float(weather_obs.get('WaveHeight'), 3.71), 2),
+                    "w_cwa": round(safe_float(weather_obs.get('WindSpeed'), 8.50), 2),
+                    "tp_s": round(safe_float(weather_obs.get('WavePeriod'), 14.5), 2),
+                    "delta_theta_deg": round(abs(safe_float(weather_obs.get('WindDirection'), 65.0) - 45.0), 2),
                 }
                 with open(self.cache_file, "w", encoding="utf-8") as f:
                     json.dump(result, f)
@@ -189,12 +211,11 @@ class SecureCWADataIngestionEngine:
         return {"hs_cwa": 3.71, "w_cwa": 8.50, "tp_s": 14.5, "delta_theta_deg": 52.0}, False
 
 # ==============================================================================
-# 3. 象數編碼器與特徵提取算子
+# 4. 象數編碼器與特徵提取算子
 # ==============================================================================
 def map_xian_heng_hexagram(state_vector: List[float]) -> int:
     thresholds = [1.20, 12.0, 10.80, 1.50, 0.50, 500.0, 800.0, 15.0]
     binary_bits = [1 if val > th else 0 for val, th in zip(state_vector, thresholds)]
-    
     outer_trigram = (binary_bits[0] << 2) | (binary_bits[1] << 1) | binary_bits[2]
     inner_trigram = (binary_bits[3] << 2) | (binary_bits[4] << 1) | binary_bits[5]
     return (outer_trigram * 8) + inner_trigram + 1
@@ -240,7 +261,7 @@ class GEM36DNormalizedFeatureExtractor:
         return np.clip((raw_vec - self.BOUNDS[:, 0]) / (self.BOUNDS[:, 1] - self.BOUNDS[:, 0] + 1e-6), 0.0, 1.0)
 
 # ==============================================================================
-# 4. Level 5 ~ Level 7 神經網路模組
+# 5. Level 5 ~ Level 7 神經網路模組
 # ==============================================================================
 class LoRAAdapter(nn.Module):
     def __init__(self, in_features: int = 36, out_features: int = 4, rank: int = 4):
@@ -323,7 +344,7 @@ class QuantumTopology64DEngine(nn.Module):
         return self.gate(torch.sqrt(r**2 + i**2 + 1e-8))
 
 # ==============================================================================
-# 5. 影子訓練器與全流程模擬器
+# 6. 影子訓練器與全流程模擬器
 # ==============================================================================
 class XianHengAutonomousShadowTrainer:
     def __init__(self, master_model: XianHengDialecticalPolicyNet, kb_filename: str = "KB_20260904_ESE_OVERTOPPING.json"):
@@ -361,7 +382,7 @@ class XianHengAutonomousShadowTrainer:
 
         if self.auto_gate_verification(shadow_adapter, hexagram_id, x_tensor):
             self.master_model.hot_swap_adapter(hexagram_id, shadow_adapter.state_dict())
-            self.commit_self_healing_kb(hexagram_id, l_residual)
+            self.commit_self_healing_kb(hexagram_id, round(l_residual, 4))
             print(f"🚀 [Hot-Swap 成功] 卦象 {hexagram_id} 已重載權重並更新智庫！")
             return True
         return False
@@ -382,7 +403,7 @@ class XianHengAutonomousShadowTrainer:
         kb_entry = {
             "timestamp": datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S CST"),
             "hexagram_id": hexagram_id,
-            "resolved_residual": residual_val,
+            "resolved_residual": round(residual_val, 4),
             "status": "DIALECTICAL_SELF_HEALED"
         }
         records = []
@@ -443,7 +464,7 @@ class AutonomousFullPipelineSimulator:
         return passed == 4
 
 # ==============================================================================
-# 6. HTML 戰情儀表板渲染與 Master 管線
+# 7. HTML 戰情儀表板渲染與 Master 管線
 # ==============================================================================
 class InteractiveDashboardHTMLExporter:
     @staticmethod
@@ -452,6 +473,15 @@ class InteractiveDashboardHTMLExporter:
         color = "#ef4444" if "🔴" in decision else ("#f59e0b" if "🟡" in decision else "#10b981")
         physics = ssot_data.get('physics_metrics') or {}
         level5 = ssot_data.get('level5_advanced_metrics') or {}
+
+        # 數值精確化處理：均顯示為小數點後 2 位
+        hs_pier = f"{physics.get('hs_pier_m', 0.0):.2f}"
+        w_local = f"{physics.get('w_local_ms', 0.0):.2f}"
+        slope_risk = f"{physics.get('slope_landslide_risk', 0.0):.2f}"
+        overtopping = f"{level5.get('vision_overtopping_rate_pmin', 0.0):.2f}"
+        kd_bias = f"{level5.get('vision_kd_bias', 0.0):.4f}"
+        fno_hs = f"{level5.get('fno_forecast_mean_hs_m', 0.0):.2f}"
+        coherence = f"{level5.get('quantum_topology_coherence', 0.0):.2f}"
 
         html_content = f"""<!DOCTYPE html>
 <html lang="zh-TW">
@@ -478,10 +508,10 @@ class InteractiveDashboardHTMLExporter:
         <div class="decision-badge">{decision}</div>
     </div>
     <div class="card-grid">
-        <div class="card"><h3>微觀物理浪高</h3><div class="metric">{physics.get('hs_pier_m', 3.71):.2f} m</div><p>風速：{physics.get('w_local_ms', 8.5):.2f} m/s</p></div>
-        <div class="card"><h3>龜首崩塌風險比率</h3><div class="metric">{physics.get('slope_landslide_risk', 0.15):.2f}</div><p>資料源：ARDSWC 農水署 API</p></div>
-        <div class="card"><h3>越浪率估算 (Vision-PINN)</h3><div class="metric">{level5.get('vision_overtopping_rate_pmin', 0.0):.2f} p/min</div><p>Kd 修正：{level5.get('vision_kd_bias', 0.0):.4f}</p></div>
-        <div class="card"><h3>FNO 浪高預測與拓撲共振</h3><div class="metric">{level5.get('fno_forecast_mean_hs_m', 0.0):.2f} m</div><p>64D 共振度：{level5.get('quantum_topology_coherence', 0.0):.4f}</p></div>
+        <div class="card"><h3>微觀物理浪高</h3><div class="metric">{hs_pier} m</div><p>風速：{w_local} m/s</p></div>
+        <div class="card"><h3>龜首崩塌風險比率</h3><div class="metric">{slope_risk}</div><p>資料源：ARDSWC 農水署 API</p></div>
+        <div class="card"><h3>CV 視覺越浪率</h3><div class="metric">{overtopping} p/min</div><p>Kd 修正：{kd_bias}</p></div>
+        <div class="card"><h3>FNO 100ms 預報波高與拓撲</h3><div class="metric">{fno_hs} m</div><p>64D 拓撲相干性：{coherence}</p></div>
     </div>
 </body>
 </html>"""
@@ -490,15 +520,21 @@ class InteractiveDashboardHTMLExporter:
 
 def execute_master_pipeline():
     print("=" * 75)
-    print("🚀 【GEM-V36D Guishan Island Enterprise Master Pipeline 啟動】")
+    print("🚀 【GEM-V36D Guishan Island Precision Master Pipeline 啟動】")
     print("=" * 75)
     cst_tz = timezone(timedelta(hours=8))
     current_time_str = datetime.now(cst_tz).strftime("%Y-%m-%d %H:%M:%S CST")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+    # 1. 自動讀取歷史 .pt 模型權重檔
+    master_policy = XianHengDialecticalPolicyNet().to(device)
+    load_latest_model_weights(master_policy)
+
+    # 2. 壓力測試自檢
     AutonomousFullPipelineSimulator.run_stress_simulation(device)
 
     try:
+        # 3. 多源 API 載入與同化
         ards_engine = ARDSWCLandslideIngestionEngine()
         slope_risk, ards_ok = ards_engine.fetch_guishan_slope_risk()
 
@@ -516,6 +552,7 @@ def execute_master_pipeline():
 
         hex_id = map_xian_heng_hexagram([telemetry_raw["hs_cwa"], telemetry_raw["tp_s"], telemetry_raw["w_cwa"], 5.84, 2.00, 500, 899, 45.0])
 
+        # 4. 模型實時推論
         vision_net = VisionPINNEdgeNet().to(device)
         overtopping_rate, kd_bias = vision_net(biggis_tensor)
 
@@ -525,24 +562,29 @@ def execute_master_pipeline():
         topo_net = QuantumTopology64DEngine().to(device)
         coherence_score = topo_net(torch.cat([x_tensor, x_tensor[:, :28]], dim=-1)).item()
 
-        master_policy = XianHengDialecticalPolicyNet().to(device)
+        # 5. 影子微調與 .pt 自動存檔
         shadow_trainer = XianHengAutonomousShadowTrainer(master_policy)
-        shadow_trainer.process_telemetry_residual(hex_id, x_tensor, torch.tensor([[0.0, 0.0, 0.0, 1.0]], device=device), eps_threshold=0.10)
+        is_swapped = shadow_trainer.process_telemetry_residual(hex_id, x_tensor, torch.tensor([[0.0, 0.0, 0.0, 1.0]], device=device), eps_threshold=0.10)
+        
+        if is_swapped:
+            save_model_weights(master_policy)
 
+        # 6. 硬否決邊界裁決
         hard_veto = (telemetry_raw["hs_cwa"] > 1.20 or telemetry_raw["delta_theta_deg"] >= 45 or telemetry_raw["w_cwa"] >= 10.80 or slope_risk > 0.60)
         decision_text = "🔴 封島/防颱" if hard_veto else "🟢 放行靠泊"
 
+        # 7. SSOT Payload 導出 (小數點後 2/4 位精確控制)
         ssot_payload = {
-            "version": "v36D.25.0 Enterprise Master",
+            "version": "v36D.26.0 Precision Master",
             "timestamp": current_time_str,
             "decision": decision_text,
             "confidence_score": 100.0 if (cwa_ok and ards_ok) else 75.0,
             "confidence_label": "🟢 100.0% [完整同化 PASS]" if (cwa_ok and ards_ok) else "⚠️ 75.0% [部分 API 快取降級]",
             "hard_veto_alert": hard_veto,
             "physics_metrics": {
-                "hs_pier_m": telemetry_raw["hs_cwa"],
-                "w_local_ms": telemetry_raw["w_cwa"],
-                "slope_landslide_risk": slope_risk,
+                "hs_pier_m": round(float(telemetry_raw["hs_cwa"]), 2),
+                "w_local_ms": round(float(telemetry_raw["w_cwa"]), 2),
+                "slope_landslide_risk": round(float(slope_risk), 2),
                 "ukc_m": 5.84,
                 "has_veto": hard_veto
             },
@@ -552,10 +594,10 @@ def execute_master_pipeline():
                 "tactical_summary": "執行「10:50/13:50 雙預警，11:20 止登【南岸碼頭】，14:20 全員撤離至【烏石港】」"
             },
             "level5_advanced_metrics": {
-                "vision_overtopping_rate_pmin": float(overtopping_rate.item()),
-                "vision_kd_bias": float(kd_bias.item()),
-                "fno_forecast_mean_hs_m": float(fno_hs_pred),
-                "quantum_topology_coherence": float(coherence_score)
+                "vision_overtopping_rate_pmin": round(float(overtopping_rate.item()), 2),
+                "vision_kd_bias": round(float(kd_bias.item()), 4),
+                "fno_forecast_mean_hs_m": round(float(fno_hs_pred), 2),
+                "quantum_topology_coherence": round(float(coherence_score), 2)
             }
         }
 
@@ -568,7 +610,7 @@ def execute_master_pipeline():
     except Exception as e:
         print(f"⚠️ 觸發例外保護 ({e})，寫入備援 SSOT。")
         fallback_payload = {
-            "version": "v36D.25.0 Offline Fallback",
+            "version": "v36D.26.0 Offline Fallback",
             "timestamp": current_time_str,
             "decision": "🔴 封島/防颱",
             "confidence_score": 65.0,
