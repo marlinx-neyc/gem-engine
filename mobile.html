@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>GEM-V36D (v36D.16.1 Level 7) 戰術智庫 - 手持端</title>
+  <title>GEM-V36D (v36D.16.5) 戰術智庫 - 手持端</title>
   <style>
     :root {
       --bg-color: #0b1120;
@@ -18,55 +18,28 @@
     }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      background-color: var(--bg-color);
-      color: #f8fafc;
-      margin: 0;
-      padding: 12px;
+      background-color: var(--bg-color); color: #f8fafc; margin: 0; padding: 12px;
     }
-    .mobile-container {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      contain: content;
-    }
-    
-    /* 1. 置頂連線狀態與雙時鐘卡片 */
+    .mobile-container { display: flex; flex-direction: column; gap: 12px; contain: content; }
     .card-conn {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-left: 4px solid var(--blue);
-      border-radius: 8px;
-      padding: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      contain: strict;
+      background: var(--card-bg); border: 1px solid var(--border-color); border-left: 4px solid var(--blue);
+      border-radius: 8px; padding: 12px; display: flex; justify-content: space-between; align-items: center; contain: strict;
     }
     .live-dot-blue {
-      display: inline-block; width: 10px; height: 10px;
-      background-color: var(--blue); border-radius: 50%; margin-right: 6px;
-      box-shadow: 0 0 8px var(--blue); animation: pulse 1.5s infinite;
+      display: inline-block; width: 10px; height: 10px; background-color: var(--blue);
+      border-radius: 50%; margin-right: 6px; box-shadow: 0 0 8px var(--blue); animation: pulse 1.5s infinite;
     }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
-    /* 2 & 3. 告警 Banner */
     .stale-banner {
-      background: var(--red); color: #fff; padding: 10px; border-radius: 6px;
-      display: none; font-size: 0.8rem; font-weight: bold; text-align: center;
+      background: var(--red); color: #fff; padding: 10px; border-radius: 6px; display: none; font-size: 0.8rem; font-weight: bold; text-align: center;
     }
     .veto-banner {
       background: rgba(239, 68, 68, 0.25); border: 1px solid var(--red); color: #fca5a5;
       padding: 12px; border-radius: 6px; font-weight: bold; font-size: 1.1rem; text-align: center;
     }
 
-    /* 通用卡片與幾何固定 */
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 14px;
-      contain: content;
-    }
+    .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; contain: content; }
     .card-title { font-size: 0.85rem; font-weight: bold; color: #94a3b8; margin-bottom: 10px; }
     .card-ai { border: 1px solid var(--blue); }
     .card-guerrilla { border: 1px solid var(--orange); }
@@ -75,7 +48,7 @@
 
     .badge-pass { background: var(--green); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; }
     .badge-veto { background: var(--red); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; }
-    .badge-warn { background: var(--orange); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; }
+    .badge-restr { background: var(--orange); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; }
 
     .grid-2x2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .box { background: rgba(0, 0, 0, 0.2); padding: 8px; border-radius: 6px; text-align: center; border: 1px solid var(--border-color); }
@@ -89,8 +62,7 @@
     
     .nav-switch {
       display: flex; flex-direction: column; gap: 6px; padding: 10px;
-      background: var(--card-bg); border-radius: 6px; border: 1px solid var(--border-color);
-      font-size: 0.8rem; text-align: center;
+      background: var(--card-bg); border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.8rem; text-align: center;
     }
     .nav-switch a { color: var(--blue); text-decoration: none; font-weight: bold; }
   </style>
@@ -98,7 +70,6 @@
 <body>
   <div class="mobile-container">
     
-    <!-- 1. 置頂連線狀態與端側動態雙時鐘卡片 -->
     <div class="card-conn">
       <div style="font-size:0.85rem; font-weight:bold;">
         <span class="live-dot-blue"></span><span id="txt-ssot-badge-mob">● LIVE SSOT 連線</span>
@@ -109,13 +80,9 @@
       </div>
     </div>
 
-    <!-- 2. Watchdog 過期 Banner -->
     <div class="stale-banner" id="staleAlertMob">🔴 數據過期 — 遙測停滯 &gt; 30 秒，請勿進行靠泊決策！</div>
-
-    <!-- 3. Q-Mode 戰術裁決 Banner -->
     <div class="veto-banner" id="vetoBannerMob">即時裁決：<span id="txt-decision-mob">🔴 封島/防颱</span></div>
 
-    <!-- 4. AI 雙核閘卡片 -->
     <div class="card card-ai">
       <div class="card-title" style="color:var(--blue);">4. AI 雙核相對精確度與注意力閘</div>
       <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:8px;">
@@ -129,7 +96,6 @@
       </div>
     </div>
 
-    <!-- 5. PINN 物理水文邊界 -->
     <div class="card">
       <div class="card-title">5. PINN 物理水文邊界數值</div>
       <div class="grid-2x2">
@@ -140,117 +106,32 @@
       </div>
     </div>
 
-    <!-- 6. 船班官模燈號與預警時窗卡片 -->
-    <div class="card">
-      <div class="card-title">6. 船班官模燈號、預警時窗與未來 3 天預測</div>
-      <div style="font-size:0.8rem; line-height:1.5;">
-        <div>官方燈號：<span style="color:var(--green);">🟢 常規開放 (Hs &le; 1.10m)</span></div>
-        <div>GEM 剛性：<span style="color:var(--red);" id="txt-veto-status-mob">🚨 強制封島 (Hs=3.71m VETO)</span></div>
-      </div>
-      <div style="background:rgba(0,0,0,0.25); padding:8px; border-radius:6px; margin-top:6px; font-size:0.75rem; line-height:1.5;">
-        <div style="color:var(--blue); font-weight:bold; margin-bottom:2px;">🚢 船班動態與半小時預警：</div>
-        • 08:30 首班登島：<span style="color:var(--yellow);">靠泊【南岸碼頭】</span><br>
-        • 10:50 預警 (提早0.5h)：<span style="color:var(--orange);">預發止登廣播</span><br>
-        • 11:20 止登時窗：<span style="color:var(--red);">啟動封閉【南岸碼頭】</span><br>
-        • 13:50 預警 (提早0.5h)：<span style="color:var(--orange);">預發全船撤離</span><br>
-        • 14:20 強制撤離：<span style="color:var(--red);">從【南岸碼頭】返航【烏石港】</span>
-      </div>
-      <div style="font-size:0.75rem; font-weight:bold; color:#94a3b8; margin-top:8px;">📅 未來三天開、封島動態預測：</div>
-      <div class="forecast-3days-grid">
-        <div class="forecast-item">
-          <div style="font-size:0.65rem; color:#94a3b8;">明日 (D+1)</div>
-          <div style="font-size:0.8rem; font-weight:bold; color:var(--red); margin:2px 0;">🔴 封島</div>
-          <div style="font-size:0.65rem; color:#94a3b8;">Hs 3.71m</div>
-        </div>
-        <div class="forecast-item">
-          <div style="font-size:0.65rem; color:#94a3b8;">後日 (D+2)</div>
-          <div style="font-size:0.8rem; font-weight:bold; color:var(--yellow); margin:2px 0;">🟡 限制靠泊</div>
-          <div style="font-size:0.65rem; color:#94a3b8;">Hs 1.80m</div>
-        </div>
-        <div class="forecast-item">
-          <div style="font-size:0.65rem; color:#94a3b8;">大後日 (D+3)</div>
-          <div style="font-size:0.8rem; font-weight:bold; color:var(--green); margin:2px 0;">🟢 全線開放</div>
-          <div style="font-size:0.65rem; color:#94a3b8;">Hs 0.90m</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 7. 游擊調度處置卡片 -->
-    <div class="card card-guerrilla">
-      <div class="card-title" style="color:var(--orange);">7. ⚓ 游擊式動態調度處置</div>
-      <div style="font-size:0.8rem; line-height:1.5;">
-        <div>登島靠泊碼頭：<span id="txt-berth-mob" style="color:var(--yellow);">【南岸權宜碼頭】</span></div>
-        <div>撤退離島碼頭：<span id="txt-evac-mob" style="color:var(--yellow);">【南岸碼頭】 &rarr; 【烏石港】</span></div>
-        <div style="margin-top:4px; color:#94a3b8;" id="txt-tactical-mob">--</div>
-      </div>
-    </div>
-
-    <!-- 8. 颱風與奇門氣場預判卡片 -->
     <div class="card card-qimen">
-      <div class="card-title" style="color:var(--purple);">8. 🌀 颱風、雙週長浪與潮汐預判</div>
-      <div style="font-size:0.8rem; line-height:1.5;">
-        <div>中颱 (955 hPa) | 暴風半徑: 250km (梯度 1.10 hPa/km)</div>
-        <div>潮汐動態: 朔望大潮 (高潮 +1.20m / 低潮 -0.40m)</div>
-        <div style="color:var(--purple); margin-top:4px;" id="txt-qimen-mob">🔮 奇門氣場匹配率 100.0% (>=70%)</div>
+      <div class="card-title" style="color:var(--purple);">8. 🌀 颱風、南北角水動力與天文潮預判</div>
+      
+      <div style="font-size:0.75rem; line-height:1.5;">
+        <div style="color:var(--blue); font-weight:bold;">【北岸區域】</div>
+        風向/速: 12.2m/s (NE) <span class="badge-veto">VETO</span> | 浪高: 3.95m <span class="badge-veto">VETO</span><br/>
+        流速/向: 1.8kts (NNE) <span class="badge-restr">RESTR</span>
+        
+        <div style="color:var(--yellow); font-weight:bold; margin-top:4px;">【南岸區域】</div>
+        風向/速: 8.5m/s (ENE) <span class="badge-pass">PASS</span> | 浪高: 3.71m <span class="badge-veto">VETO</span><br/>
+        流速/向: 0.9kts (ESE) <span class="badge-pass">PASS</span>
+
+        <div style="background:rgba(0,0,0,0.25); padding:6px; border-radius:4px; margin-top:6px; border:1px solid var(--border-color);">
+          <div style="color:var(--purple); font-weight:bold;">🌕 天文潮 (農曆 08/04 - 08/10 大潮)</div>
+          • 滿潮 +1.35m / 乾潮 -0.45m (潮差 1.80m)<br/>
+          • 乾潮扣減 UKC 0.45m / 滿潮減少乾舷 (FB Pier) 1.35m (加速越浪)
+        </div>
       </div>
     </div>
 
-    <!-- 9. Level 5 邊緣高維算子卡片 -->
-    <div class="card card-level5">
-      <div class="card-title" style="color:var(--green);">9. 🚀 Level 5 邊緣高維算子</div>
-      <div class="grid-2x2">
-        <div class="box"><div style="font-size:0.65rem; color:#94a3b8;">CV 越浪率</div><div class="val" style="color:var(--yellow);" id="txt-overtop-mob">1.31 p/m</div></div>
-        <div class="box"><div style="font-size:0.65rem; color:#94a3b8;">Squat 沉降</div><div class="val" style="color:var(--blue);" id="txt-squat-mob">0.82 m</div></div>
-        <div class="box"><div style="font-size:0.65rem; color:#94a3b8;">FNO 預報</div><div class="val" style="color:var(--red);" id="txt-fno-mob">1.58 m</div></div>
-        <div class="box"><div style="font-size:0.65rem; color:#94a3b8;">64D 相干性</div><div class="val" style="color:var(--purple);" id="txt-coh-mob">0.4682</div></div>
-      </div>
-      <div style="font-size:0.75rem; color:#34d399; margin-top:8px;" id="txt-swarm-mob">
-        Swarm 賽局：已成功為 3 艘 Agent 客輪規劃分流
-      </div>
-    </div>
-
-    <!-- 10. 戰略三方案評估與標準檢核 (Ground Truth) -->
-    <div class="card">
-      <div class="card-title">10. 戰略三方案評估與標準檢核 (Ground Truth)</div>
-      <table class="gt-table">
-        <thead>
-          <tr><th>方案</th><th>浪高/風速數值</th><th>檢核</th><th>戰略處置</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>A 官方</td>
-            <td>Hs 3.71m / W 8.5m/s</td>
-            <td><span class="badge-warn">RESTR</span></td>
-            <td>常規登島 (忽視港池風險)</td>
-          </tr>
-          <tr>
-            <td>B 監測</td>
-            <td>Hs 3.71m / W 8.5m/s</td>
-            <td><span class="badge-pass">PASS</span></td>
-            <td>全天預報開放 (缺乏越浪數據)</td>
-          </tr>
-          <tr style="color:var(--yellow); font-weight:bold;">
-            <td>C GEM</td>
-            <td>Hs 3.71m / W 8.5m/s</td>
-            <td><span class="badge-veto">VETO</span></td>
-            <td>🔴 強制封島/14:20 撤離</td>
-          </tr>
-        </tbody>
-      </table>
-      <div style="margin-top:8px; font-size:0.75rem; color:var(--yellow); font-weight:bold; background:rgba(250,204,21,0.15); padding:6px; border-radius:4px;">
-        📌 總結：採納 GEM 方案 C 剛性熔斷，10:50/13:50 預警，11:20 止登【南岸碼頭】，14:20 強制撤離至【烏石港】。
-      </div>
-    </div>
-
-    <!-- 11. 視角切換導覽列 -->
     <div class="nav-switch">
       <span style="color:#94a3b8;">當前視角：📱 手持移動版 (mobile.html)</span>
-      <a href="index.html">🛡️ 切換至主指揮儀表板</a>
       <a href="desktop.html">💻 切換至桌面完全版</a>
     </div>
   </div>
 
-  <!-- JavaScript： Asia/Taipei 實時時鐘 + SSOT polling (Zero-Reflow) -->
   <script>
     class MobileSSOTOrchestrator {
       constructor() {
@@ -260,7 +141,6 @@
         this.startPolling();
       }
 
-      // 1. 手持端動態實時時鐘 (Asia/Taipei UTC+8 每秒運轉)
       initClock() {
         const update = () => {
           const now = new Date();
@@ -276,7 +156,6 @@
         setInterval(update, 1000);
       }
 
-      // 2. SSOT 快取刷洗與 5 秒輪詢
       startPolling() {
         const fetchSSOT = async () => {
           try {
@@ -288,60 +167,29 @@
             this.markStale(true);
           }
         };
-
         fetchSSOT();
         setInterval(fetchSSOT, 5000);
       }
 
-      // 3. 純文字節點寫入 (textContent) 鎖定幾何
       renderSSOT(data) {
         document.getElementById('txt-time-mob').textContent = data.timestamp ? data.timestamp.replace(/^.*?\s/, '') : '--';
         document.getElementById('txt-decision-mob').textContent = data.decision || '未知';
 
-        // 檢查時間差過期狀態
         let isStale = false;
         try {
           const formattedTs = data.timestamp.replace(' CST', '+08:00').replace(' ', 'T');
           const ssotTime = new Date(formattedTs).getTime();
-          const diffSec = Math.abs(Date.now() - ssotTime) / 1000;
-          if (diffSec > this.staleThresholdSec) isStale = true;
+          if (Math.abs(Date.now() - ssotTime) / 1000 > this.staleThresholdSec) isStale = true;
         } catch(e) { isStale = true; }
 
         this.markStale(isStale || data.hard_veto_alert);
 
-        if (data.confidence_score !== undefined) {
-          document.getElementById('txt-conf-mob').textContent = data.confidence_score.toFixed(1) + '%';
-        }
-        if (data.precision_metrics) {
-          document.getElementById('txt-sigma-mob').textContent = data.precision_metrics.converged_sigma;
-          document.getElementById('txt-gain-mob').textContent = '+' + data.precision_metrics.precision_gain_pct + '%';
-        }
-        if (data.attention_gate) {
-          document.getElementById('bar-micro-mob').style.width = data.attention_gate.micro_physics_weight + '%';
-          document.getElementById('bar-macro-mob').style.width = data.attention_gate.macro_qimen_weight + '%';
-        }
         if (data.physics_metrics) {
           const p = data.physics_metrics;
           document.getElementById('txt-hs-mob').textContent = p.hs_pier_m + ' m';
           document.getElementById('txt-w-mob').textContent = p.w_local_ms + ' m/s';
           document.getElementById('txt-ukc-mob').textContent = p.ukc_m + ' m';
           document.getElementById('txt-fb-mob').textContent = p.fb_pier_m + ' m';
-        }
-        if (data.guerrilla_dispatch) {
-          const g = data.guerrilla_dispatch;
-          document.getElementById('txt-berth-mob').textContent = g.berthing_pier || '--';
-          document.getElementById('txt-evac-mob').textContent = g.evacuation_pier || '--';
-          document.getElementById('txt-tactical-mob').textContent = g.tactical_summary || '--';
-        }
-        if (data.qimen_macro_consensus) {
-          document.getElementById('txt-qimen-mob').textContent = data.qimen_macro_consensus.qimen_status_prompt || '--';
-        }
-        if (data.level5_advanced_metrics) {
-          const l5 = data.level5_advanced_metrics;
-          document.getElementById('txt-overtop-mob').textContent = l5.vision_overtopping_rate_pmin + ' p/m';
-          document.getElementById('txt-squat-mob').textContent = (l5.vessel_hydrodynamics ? l5.vessel_hydrodynamics.dynamic_squat_m : 0.82) + ' m';
-          document.getElementById('txt-fno-mob').textContent = l5.fno_forecast_mean_hs_m + ' m';
-          document.getElementById('txt-coh-mob').textContent = l5.quantum_topology_coherence;
         }
       }
 
