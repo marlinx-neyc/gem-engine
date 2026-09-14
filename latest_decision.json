@@ -1,6 +1,6 @@
 {
-  "version": "v36D.26.0 Precision Master",
-  "timestamp": "2026-09-14 20:48:36 CST",
+  "version": "v36D.27.0 Dynamic Guerrilla Master",
+  "timestamp": "2026-09-14 21:00:48 CST",
   "decision": "🔴 封島/防颱",
   "confidence_score": 75.0,
   "confidence_label": "⚠️ 75.0% [部分 API 快取降級]",
@@ -8,19 +8,24 @@
   "physics_metrics": {
     "hs_pier_m": 3.71,
     "w_local_ms": 8.5,
+    "w_effective_ms": 5.23,
+    "tide_eta_m": 1.2,
     "slope_landslide_risk": 0.1,
-    "ukc_m": 5.84,
+    "adaptive_alpha": 0.75,
+    "historical_similarity": 0.95,
     "has_veto": true
   },
   "guerrilla_dispatch": {
-    "berthing_pier": "【南岸權宜碼頭】",
-    "evacuation_pier": "【南岸權宜碼頭】 -> 返航【烏石港】",
-    "tactical_summary": "執行「10:50/13:50 雙預警，11:20 止登【南岸碼頭】，14:20 全員撤離至【烏石港】」"
+    "berthing_pier": "【防颱避風/禁止靠泊】",
+    "evacuation_pier": "【強制撤離】 -> 返航【烏石港】",
+    "tactical_summary": "⚠️ 觸發歷史自適應調值 (有效風速 5.23m/s, 潮位 1.20m, 門檻 8.10m/s)！建議 21:35 止登，22:20 全員撤離至烏石港。",
+    "t_stop_window": "21:35",
+    "t_evac_window": "22:20"
   },
   "level5_advanced_metrics": {
-    "vision_overtopping_rate_pmin": 2.65,
-    "vision_kd_bias": -0.0039,
-    "fno_forecast_mean_hs_m": 0.67,
-    "quantum_topology_coherence": 0.44
+    "vision_overtopping_rate_pmin": 2.59,
+    "vision_kd_bias": -0.0034,
+    "fno_forecast_mean_hs_m": 0.08,
+    "quantum_topology_coherence": 0.49
   }
 }

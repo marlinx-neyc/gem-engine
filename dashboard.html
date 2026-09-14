@@ -12,21 +12,41 @@
         .card { background: #1e293b; padding: 20px; border-radius: 10px; border: 1px solid #334155; }
         .metric { font-size: 28px; font-weight: bold; color: #38bdf8; margin-top: 5px; }
         .decision-badge { font-size: 22px; font-weight: bold; background: #ef4444; color: white; padding: 6px 16px; border-radius: 20px; }
+        .dispatch-box { background: #0284c7; color: white; padding: 15px; border-radius: 8px; margin-top: 15px; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="header">
         <div>
             <h2>龜山島海氣象雙層整合戰情中心 (GEM-V36D Master)</h2>
-            <p style="color: #94a3b8; margin: 0;">更新時間：2026-09-14 20:48:36 CST | 版本：v36D.26.0 Precision Master</p>
+            <p style="color: #94a3b8; margin: 0;">更新時間：2026-09-14 21:00:48 CST | 版本：v36D.27.0 Dynamic Guerrilla Master</p>
         </div>
         <div class="decision-badge">🔴 封島/防颱</div>
     </div>
     <div class="card-grid">
-        <div class="card"><h3>微觀物理浪高</h3><div class="metric">3.71 m</div><p>風速：8.50 m/s</p></div>
-        <div class="card"><h3>龜首崩塌風險比率</h3><div class="metric">0.10</div><p>資料源：ARDSWC 農水署 API</p></div>
-        <div class="card"><h3>CV 視覺越浪率</h3><div class="metric">2.65 p/min</div><p>Kd 修正：-0.0039</p></div>
-        <div class="card"><h3>FNO 100ms 預報波高與拓撲</h3><div class="metric">0.67 m</div><p>64D 拓撲相干性：0.44</p></div>
+        <div class="card">
+            <h3>微觀浪高與攻角風速</h3>
+            <div class="metric">3.71 m</div>
+            <p>風速：8.50 m/s (有效攻角: 5.23 m/s)</p>
+        </div>
+        <div class="card">
+            <h3>動態潮位與自適應調值</h3>
+            <div class="metric">1.20 m</div>
+            <p>歷史比對調值 α：0.75</p>
+        </div>
+        <div class="card">
+            <h3>CV 視覺越浪與龜首風險</h3>
+            <div class="metric">2.59 p/min</div>
+            <p>龜首崩塌風險比率：0.10</p>
+        </div>
+        <div class="card">
+            <h3>FNO 預報波高與拓撲</h3>
+            <div class="metric">0.08 m</div>
+            <p>64D 拓撲相干性：0.49</p>
+        </div>
+    </div>
+    <div class="dispatch-box">
+        📌 游擊動態調度指令：⚠️ 觸發歷史自適應調值 (有效風速 5.23m/s, 潮位 1.20m, 門檻 8.10m/s)！建議 21:35 止登，22:20 全員撤離至烏石港。
     </div>
 </body>
 </html>
