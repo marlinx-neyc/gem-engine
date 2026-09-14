@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-GEM-V36D Dynamic Guerrilla Dispatch & Historical Reinforcement Master Engine (v36D.27.0)
-1. 游擊調度演算法：整合船隻路徑、停靠碼頭、風速風向攻角 (W_eff)、當日動態潮位 (Tide Eta)
-2. 歷史規律比對與強化學習自適應調值 (Historical Cosine Similarity & Adaptive Alpha)
-3. 全數值精確控制在小數點後 2 位 (round(x, 2))，徹底杜絕浮點數溢位
-4. PyTorch 模型 (.pt) 自動載入與影子增量微調 (Shadow Fine-tuning) 權重持久化
-5. ARDSWC 崩塌 + BIGGIS 衛星影像 + CWA 遙測雙浮標熔斷保護與 Webhook 自動告警
+GEM-V36D Integrated Dynamic Guerrilla & Model Persistence Master Engine (v36D.28.0)
+1. 數值精確收斂：全管線推論與遙測指標強制控制為小數點後 2 位 (round(x, 2))，杜絕前端浮點溢位
+2. PyTorch 模型 (.pt) 持久化引擎：啟動自動繼承歷史微調記憶，Hot-Swap 成功自動導出最新 .pt 檔
+3. 游擊動態調度：結合攻角有效風速 (W_eff)、動態潮位與船隻分流路徑，動態推算止登與撤離時間窗
+4. 歷史事故圖譜比對：計算餘弦相似度並產出自適應係數 (Alpha Adaptive) 主動調值警戒門檻
+5. 雙模金鑰注入 (Colab / GitHub Secrets) + ARDSWC / BIGGIS / CWA 多源熔斷 Circuit Breaker Protection
+6. 防快取 HTML 戰情儀表板 / SSOT JSON 自動導出與 Webhooks 即時告警推播
 """
 
 import os
@@ -43,6 +44,7 @@ except Exception:
     pass
 
 def auto_inject_api_secrets():
+    """自動從 Colab Secret 面板或環境變數注入 API 授權碼"""
     secret_keys = [
         'CWA_API_KEY', 'BIGGIS_API_KEY', 'GEMINI_API_KEY', 'GITHUB_TOKEN',
         'CDSE_CLIENT_ID', 'CDSE_CLIENT_SECRET', 'CDS_API_KEY',
@@ -65,11 +67,12 @@ def auto_inject_api_secrets():
 auto_inject_api_secrets()
 
 # ==============================================================================
-# 1. .pt 模型權重持久化載入與導出模組 (Model Persistence)
+# 1. .pt 模型權重持久化載入與導出模組 (Persistence Engine)
 # ==============================================================================
 MODEL_WEIGHTS_FILE = "model_v36D_latest.pt"
 
 def load_latest_model_weights(model: nn.Module) -> bool:
+    """自動尋找並載入最新的 .pt 模型權重檔"""
     candidates = [MODEL_WEIGHTS_FILE] + sorted(glob.glob("model_v36D*.pt"), reverse=True)
     for path in candidates:
         if os.path.exists(path):
@@ -84,6 +87,7 @@ def load_latest_model_weights(model: nn.Module) -> bool:
     return False
 
 def save_model_weights(model: nn.Module, weights_path: str = MODEL_WEIGHTS_FILE):
+    """將微調後的最新權重導出為 .pt 檔"""
     try:
         torch.save(model.state_dict(), weights_path)
         print(f"💾 [記憶持久化] 已成功導出最新模型權重: `{weights_path}`")
@@ -128,7 +132,7 @@ def send_webhook_alert(ssot_payload: Dict[str, Any]):
         f"⏰ 時間：{timestamp}\n"
         f"🎯 決策：{decision}\n"
         f"🌊 浪高：{physics.get('hs_pier_m', 0.0):.2f} m | 風速：{physics.get('w_local_ms', 0.0):.2f} m/s (有效攻角: {physics.get('w_effective_ms', 0.0):.2f} m/s)\n"
-        f"🌊 動態潮位：{physics.get('tide_eta_m', 0.0):.2f} m | 歷史自適應調值: {physics.get('adaptive_alpha', 1.0):.2f}\n"
+        f"🌊 動態潮位：{physics.get('tide_eta_m', 0.0):.2f} m | 歷史自適應調值 α: {physics.get('adaptive_alpha', 1.0):.2f}\n"
         f"⛰️ 龜首崩塌風險比率：{physics.get('slope_landslide_risk', 0.15):.2f}\n"
         f"📌 游擊調度推播：{guerrilla.get('tactical_summary', '無')}"
     )
@@ -223,11 +227,11 @@ class DynamicGuerrillaDispatchEngine:
         hs_pier = telemetry.get("hs_cwa", 3.71)
         tide_eta = telemetry.get("tide_eta_m", 1.20)
         
-        # 1. 計算攻角有效風速向量 (W_eff = W * cos(delta_theta))
+        # 1. 風向角度側風衝擊矢量算子: W_eff = W * |cos(delta_theta)|
         rad = np.radians(delta_theta)
         w_eff = round(float(w_local * abs(np.cos(rad))), 2)
         
-        # 2. 歷史事故圖譜與特徵餘弦相似度比對 (Cosine Similarity & Pattern Matching)
+        # 2. 歷史事故智庫比對與動態自適應調值 (Adaptive Alpha Tuning)
         alpha_tune = 1.0
         max_similarity = 0.0
         
@@ -236,22 +240,20 @@ class DynamicGuerrillaDispatchEngine:
                 with open(self.kb_path, "r", encoding="utf-8") as f:
                     hist_records = json.load(f)
                     if isinstance(hist_records, list) and len(hist_records) > 0:
-                        # 擷取歷史殘差與臨界特徵比對
                         residuals = [rec.get("resolved_residual", 0.0) for rec in hist_records]
                         high_risk_count = sum(1 for r in residuals if r > 0.15)
                         if high_risk_count > 0:
-                            # 歷史高越浪事故重複率 > 20% 時，自動敏感下修 15% 門檻
                             alpha_tune = round(max(0.75, 1.0 - (high_risk_count / len(hist_records)) * 0.30), 2)
                             max_similarity = round(min(0.99, 0.70 + (high_risk_count / len(hist_records)) * 0.25), 2)
             except Exception as e:
-                print(f"ℹ️ 歷史智庫比對讀取說明: {e}")
+                print(f"ℹ️ 歷史智庫讀取狀態: {e}")
 
-        # 3. 結合潮位與有效風力之動態臨界極值門檻 (Tide-Adjusted Limits)
-        tide_penalty = 0.10 if tide_eta >= 1.50 else 0.0  # 大潮潮位超過 1.5m 額外懲罰
+        # 3. 動態臨界極值門檻 (Tide & Alpha Adjusted)
+        tide_penalty = 0.10 if tide_eta >= 1.50 else 0.0
         effective_w_limit = round((10.80 - tide_penalty) * alpha_tune, 2)
         effective_hs_limit = round((1.20 - tide_penalty * 0.5) * alpha_tune, 2)
         
-        # 4. 時窗動態預判 (Time-Window Forecasting)
+        # 4. 動態時窗預判 (Time-Window Forecasting)
         now_dt = datetime.now(timezone(timedelta(hours=8)))
         margin_min = max(0, int((effective_w_limit - w_eff) * 12)) if w_eff < effective_w_limit else 0
         
@@ -261,13 +263,12 @@ class DynamicGuerrillaDispatchEngine:
         t_stop_str = t_stop_dt.strftime("%H:%M")
         t_evac_str = t_evac_dt.strftime("%H:%M")
 
-        # 5. 游擊碼頭靠撤與船隻路線調撥決策 (Swarm Pier Selection)
+        # 5. 游擊碼頭靠撤與船隻路線分流處置
         if w_eff > effective_w_limit or hs_pier > effective_hs_limit or tide_eta > 2.0:
             berthing = "【防颱避風/禁止靠泊】"
             evac = "【強制撤離】 -> 返航【烏石港】"
             summary = f"⚠️ 觸發歷史自適應調值 (有效風速 {w_eff:.2f}m/s, 潮位 {tide_eta:.2f}m, 門檻 {effective_w_limit:.2f}m/s)！建議 {t_stop_str} 止登，{t_evac_str} 全員撤離至烏石港。"
         else:
-            # 風向角度分流：角度 >= 45° 側風轉向南岸碼頭，否則停靠北岸
             berthing = "【南岸權宜碼頭】" if delta_theta >= 45.0 else "【北岸碼頭】"
             evac = f"{berthing} -> 備援【烏石港】"
             summary = f"動態時窗預判：當前有效風速 {w_eff:.2f}m/s，建議 {t_stop_str} 評估止登 ({berthing})，預計 {t_evac_str} 完成乘客分流。"
@@ -334,7 +335,7 @@ class GEM36DNormalizedFeatureExtractor:
         return np.clip((raw_vec - self.BOUNDS[:, 0]) / (self.BOUNDS[:, 1] - self.BOUNDS[:, 0] + 1e-6), 0.0, 1.0)
 
 # ==============================================================================
-# 6. Level 5 ~ Level 7 神經網路與強化學習模型
+# 6. Level 5 ~ Level 7 神經網路與強化學習模組
 # ==============================================================================
 class LoRAAdapter(nn.Module):
     def __init__(self, in_features: int = 36, out_features: int = 4, rank: int = 4):
@@ -548,7 +549,6 @@ class InteractiveDashboardHTMLExporter:
         level5 = ssot_data.get('level5_advanced_metrics') or {}
         guerrilla = ssot_data.get('guerrilla_dispatch') or {}
 
-        # 所有小數精確控制在兩位
         hs_pier = f"{physics.get('hs_pier_m', 0.0):.2f}"
         w_local = f"{physics.get('w_local_ms', 0.0):.2f}"
         w_eff = f"{physics.get('w_effective_ms', 0.0):.2f}"
@@ -586,7 +586,7 @@ class InteractiveDashboardHTMLExporter:
     </div>
     <div class="card-grid">
         <div class="card">
-            <h3>微觀浪高與攻角風速</h3>
+            <h3>微觀物理浪高與攻角風速</h3>
             <div class="metric">{hs_pier} m</div>
             <p>風速：{w_local} m/s (有效攻角: {w_eff} m/s)</p>
         </div>
@@ -626,11 +626,11 @@ def execute_master_pipeline():
     master_policy = XianHengDialecticalPolicyNet().to(device)
     load_latest_model_weights(master_policy)
 
-    # 2. 執行 4/4 項壓力模擬測試
+    # 2. 執行 4/4 項壓力模擬自檢
     AutonomousFullPipelineSimulator.run_stress_simulation(device)
 
     try:
-        # 3. API 多源數據擷取
+        # 3. API 多源數據擷取與同化
         ards_engine = ARDSWCLandslideIngestionEngine()
         slope_risk, ards_ok = ards_engine.fetch_guishan_slope_risk()
 
@@ -679,7 +679,7 @@ def execute_master_pipeline():
 
         # 8. 導出 SSOT JSON Payload (數值控制在小數點後 2/4 位)
         ssot_payload = {
-            "version": "v36D.27.0 Dynamic Guerrilla Master",
+            "version": "v36D.28.0 Integrated Master",
             "timestamp": current_time_str,
             "decision": decision_text,
             "confidence_score": 100.0 if (cwa_ok and ards_ok) else 75.0,
@@ -719,7 +719,7 @@ def execute_master_pipeline():
     except Exception as e:
         print(f"⚠️ 觸發例外保護 ({e})，寫入備援 SSOT。")
         fallback_payload = {
-            "version": "v36D.27.0 Offline Fallback",
+            "version": "v36D.28.0 Offline Fallback",
             "timestamp": current_time_str,
             "decision": "🔴 封島/防颱",
             "confidence_score": 65.0,
