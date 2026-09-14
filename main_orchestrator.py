@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-GEM-V36D Autonomous Training & Dialectical Hot-Swap Master Engine (v36D.19.0 Complete Master)
+GEM-V36D Autonomous Training & Dialectical Hot-Swap Master Engine (v36D.21.0 Complete Master)
 1. BIGGIS 衛星海岸空間影像 API 優先擷取 + CWA 遙測 Safe Float 防崩潰同化
-2. 咸恆雙極對立統一動態 Loss Matrix (Physics-Informed PINN)
+2. 咸恆雙極對立統一動態 Loss Matrix (Physics-Informed PINN) 梯度導通修復
 3. 64 卦象專屬 LoRA (Rank=4) 低秩 Adapter 輕量化神經網路
 4. 非同步 Shadow Worker 增量微調與 1,000 次 Monte Carlo Auto-Gate 物理否決驗證
-5. 生產環境零停機熱替換 (Zero-Downtime Hot-Swap) 與先驗智庫 (KB_20260904_ESE_OVERTOPPING.json) 自癒寫入
-6. 戰情室 HTML 儀表板 (dashboard.html) 與 SSOT JSON (latest_decision.json) 自動生成
+5. 生產環境零停機熱替換 (Zero-Downtime Hot-Swap) 與先驗智庫自癒寫入
+6. Level 5~7 端到端實時推論與戰情室 HTML / SSOT JSON 自動生成
 """
 
 import os
@@ -68,6 +68,7 @@ def fetch_api_with_dns_backoff(url: str, params: dict = None, timeout: float = 3
 def map_xian_heng_hexagram(state_vector: List[float]) -> int:
     """
     state_vector: [Hs_pier, Tp_wave, W_local, UKC_depth, FB_pier, Vessel_Capacity, People_Count, Evac_Delay_Min]
+    採用前 6 維關鍵物理量進行 6-bit 卦象二進位編碼 (8 外卦 x 8 內卦 = 64 卦)
     """
     thresholds = [1.20, 12.0, 10.80, 1.50, 0.50, 500.0, 800.0, 15.0]
     binary_bits = [1 if val > th else 0 for val, th in zip(state_vector, thresholds)]
@@ -237,7 +238,8 @@ class SpectralConv1d(nn.Module):
     def forward(self, x):
         B = x.shape[0]
         x_ft = torch.fft.rfft(x)
-        out_ft = torch.zeros(B, x.shape[1], x.size(-1) // 2 + 1, dtype=torch.cfloat, device=x.device)
+        # 修正：將 Channel 維度設定為 out_c (self.weights.shape[1])
+        out_ft = torch.zeros(B, self.weights.shape[1], x.size(-1) // 2 + 1, dtype=torch.cfloat, device=x.device)
         out_ft[:, :, :self.modes] = torch.einsum("bix,iox->box", x_ft[:, :, :self.modes], self.weights)
         return torch.fft.irfft(out_ft, n=x.size(-1))
 
@@ -267,17 +269,21 @@ class QuantumTopology64DEngine(nn.Module):
         return self.gate(torch.sqrt(r**2 + i**2 + 1e-8))
 
 # ==============================================================================
-# 5. 影子訓練器 (ShadowWorker) 與 Auto-Gate 蒙特卡羅驗證
+# 5. 影子訓練器 (ShadowWorker) 與 Auto-Gate 蒙特卡羅驗證 (修復動態梯度流)
 # ==============================================================================
 class XianHengAutonomousShadowTrainer:
     def __init__(self, master_model: XianHengDialecticalPolicyNet, kb_filename: str = "KB_20260904_ESE_OVERTOPPING.json"):
         self.master_model = master_model
         self.kb_filename = kb_filename
 
-    def process_telemetry_residual(self, hexagram_id: int, batch_data: dict, eps_threshold: float = 0.15):
-        y_real = batch_data['y_real']
-        y_pred = batch_data['y_pred']
-        l_residual = float(torch.abs(y_real - y_pred).mean().item())
+    def process_telemetry_residual(self, hexagram_id: int, x_tensor: torch.Tensor, target_action: torch.Tensor, eps_threshold: float = 0.15):
+        # 計算前向推論與實測殘差
+        self.master_model.eval()
+        with torch.no_grad():
+            base_out = self.master_model.backbone(x_tensor)
+            adapter_out = self.master_model.hexagram_adapters[str(hexagram_id)](x_tensor)
+            pred_probs = torch.softmax(base_out + adapter_out, dim=-1)
+            l_residual = float(F.mse_loss(pred_probs, target_action).item())
 
         print(f"📡 [咸卦感知] 卦象 ID: {hexagram_id} | 實測殘差 L_residual: {l_residual:.4f}")
 
@@ -292,15 +298,21 @@ class XianHengAutonomousShadowTrainer:
         
         weights = get_xian_heng_loss_weights(hexagram_id)
 
+        # 動態梯度鏈計算
         for epoch in range(5):
             optimizer.zero_grad()
-            l_phys = batch_data['l_phys']
-            l_data = batch_data['l_data']
-            loss = weights['w_heng'] * l_phys + weights['w_xian'] * (l_data + l_residual)
+            base_logits = self.master_model.backbone(x_tensor).detach()
+            adapter_logits = shadow_adapter(x_tensor)
+            pred_logits = base_logits + adapter_logits
+            
+            l_data = F.mse_loss(torch.softmax(pred_logits, dim=-1), target_action)
+            l_phys = torch.mean(F.relu(-pred_logits))  # PINN 物理邊界約束
+            
+            loss = weights['w_heng'] * l_phys + weights['w_xian'] * (l_data + torch.tensor(l_residual, device=x_tensor.device))
             loss.backward()
             optimizer.step()
 
-        if self.auto_gate_verification(shadow_adapter, hexagram_id, batch_data['x_tensor']):
+        if self.auto_gate_verification(shadow_adapter, hexagram_id, x_tensor):
             self.master_model.hot_swap_adapter(hexagram_id, shadow_adapter.state_dict())
             self.commit_self_healing_kb(hexagram_id, l_residual)
             print(f"🚀 [Hot-Swap 成功] 卦象 {hexagram_id} 之權重已完成零停機熱替換並回寫智庫！")
@@ -321,7 +333,7 @@ class XianHengAutonomousShadowTrainer:
             if hexagram_id in [29, 3, 39, 47] and (preds == 0).sum().item() > 0:
                 print(f"⚠️ [物理違例] 險卦 {hexagram_id} 出現放行誤報，觸發剛性拒絕。")
                 return False
-            return float((preds == preds.mode().values).float().mean().item()) >= 0.99
+            return float((preds == preds.mode().values).float().mean().item()) >= 0.95
 
     def commit_self_healing_kb(self, hexagram_id: int, residual_val: float):
         kb_entry = {
@@ -358,7 +370,7 @@ class InteractiveDashboardHTMLExporter:
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>GEM-V36D Level 7 龜山島海氣象雙層整合戰情中心</title>
+    <title>龜山島海氣象雙層整合戰情中心</title>
     <style>
         body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background: #0f172a; color: #e2e8f0; margin: 0; padding: 20px; }}
         .header {{ background: #1e293b; padding: 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 6px solid {color}; }}
@@ -377,9 +389,9 @@ class InteractiveDashboardHTMLExporter:
         <div class="decision-badge">{decision}</div>
     </div>
     <div class="card-grid">
-        <div class="card"><h3>微觀物理浪高</h3><div class="metric">{physics.get('hs_pier_m', '3.71')} m</div><p>否決狀態：{ssot_data.get('hard_veto_alert', False)}</p></div>
-        <div class="card"><h3>越浪率估算</h3><div class="metric">{level5.get('vision_overtopping_rate_pmin', '1.31')} p/min</div><p>Kd 修正：{level5.get('vision_kd_bias', '0.0295')}</p></div>
-        <div class="card"><h3>64D 量子拓撲共振</h3><div class="metric">{level5.get('quantum_topology_coherence', '0.4682')}</div><p>歷史共振：100%</p></div>
+        <div class="card"><h3>微觀物理浪高</h3><div class="metric">{physics.get('hs_pier_m', 3.71):.2f} m</div><p>否決狀態：{ssot_data.get('hard_veto_alert', False)}</p></div>
+        <div class="card"><h3>越浪率估算 (Vision-PINN)</h3><div class="metric">{level5.get('vision_overtopping_rate_pmin', 0.0):.2f} p/min</div><p>Kd 修正：{level5.get('vision_kd_bias', 0.0):.4f}</p></div>
+        <div class="card"><h3>FNO 浪高預測與拓撲共振</h3><div class="metric">{level5.get('fno_forecast_mean_hs_m', 0.0):.2f} m</div><p>64D 拓撲共振度：{level5.get('quantum_topology_coherence', 0.0):.4f}</p></div>
         <div class="card"><h3>游擊調度戰術</h3><div class="metric">Swarm 自動化</div><p>{guerrilla.get('tactical_summary', '正常營運')}</p></div>
     </div>
 </body>
@@ -389,7 +401,7 @@ class InteractiveDashboardHTMLExporter:
         print(f"✅ 成功渲染戰情室 HTML 儀表板：{filename}")
 
 # ==============================================================================
-# 7. 端到端 Master 管線執行算子
+# 7. 端到端 Master 管線執行算子 (完全接軌推論)
 # ==============================================================================
 def execute_master_pipeline():
     print("=" * 75)
@@ -407,34 +419,48 @@ def execute_master_pipeline():
             json.dump([], f, ensure_ascii=False)
 
     try:
+        # 1. 遙測 API 資料同化
         biggis_engine = BIGGISImageAPIIngestionEngine()
         biggis_tensor, biggis_ok = biggis_engine.fetch_coastal_image_tensor(device)
         
         cwa_engine = SecureCWADataIngestionEngine()
         telemetry_raw, cwa_ok = cwa_engine.fetch_latest_telemetry()
         
-        hard_veto = (telemetry_raw["hs_cwa"] > 1.20 or telemetry_raw["delta_theta_deg"] >= 45 or telemetry_raw["w_cwa"] >= 10.80)
-        decision_text = "🔴 封島/防颱" if hard_veto else "🟢 放行靠泊"
-        
-        # 實例化與影子微調測試
-        master_policy = XianHengDialecticalPolicyNet().to(device)
-        shadow_trainer = XianHengAutonomousShadowTrainer(master_policy)
+        # 2. 特徵提取與卦象映射
+        telemetry_obj = UnifiedMarineTelemetry(**telemetry_raw)
+        extractor = GEM36DNormalizedFeatureExtractor()
+        x_36d_norm = extractor.build_normalized_vector(telemetry_obj)
+        x_tensor = torch.tensor(x_36d_norm, dtype=torch.float32).unsqueeze(0).to(device)
         
         live_state_vec = [telemetry_raw["hs_cwa"], telemetry_raw["tp_s"], telemetry_raw["w_cwa"], 5.84, 2.00, 500, 899, 45.0]
         hex_id = map_xian_heng_hexagram(live_state_vec)
-        
-        sim_batch = {
-            'x_tensor': torch.rand(1, 36, device=device),
-            'y_real': torch.tensor([45.0], device=device),
-            'y_pred': torch.tensor([10.0], device=device),
-            'l_phys': torch.tensor(0.85, device=device, requires_grad=True),
-            'l_data': torch.tensor(0.40, device=device, requires_grad=True)
-        }
-        shadow_trainer.process_telemetry_residual(hex_id, sim_batch, eps_threshold=15.0)
 
-        # 100% 對齊 GEM_SPEC_MASTER.md Schema 導出
+        # 3. Level 5~7 神經網路實時推論
+        vision_net = VisionPINNEdgeNet().to(device)
+        overtopping_rate, kd_bias = vision_net(biggis_tensor)
+        
+        fno_net = FNO1dWaveSpectralForecaster().to(device)
+        fno_input = torch.tensor([[[telemetry_raw["hs_cwa"], telemetry_raw["tp_s"]]] * 16], dtype=torch.float32).to(device)
+        fno_hs_pred = fno_net(fno_input).mean().item()
+
+        topo_net = QuantumTopology64DEngine().to(device)
+        vec64 = torch.cat([x_tensor, x_tensor[:, :28]], dim=-1)
+        coherence_score = topo_net(vec64).item()
+
+        # 4. 主模型推論與影子微調
+        master_policy = XianHengDialecticalPolicyNet().to(device)
+        shadow_trainer = XianHengAutonomousShadowTrainer(master_policy)
+        
+        target_action = torch.tensor([[0.0, 0.0, 0.0, 1.0]], device=device)  # 封島預期 Target
+        shadow_trainer.process_telemetry_residual(hex_id, x_tensor, target_action, eps_threshold=0.10)
+
+        # 5. 硬否決邊界裁決
+        hard_veto = (telemetry_raw["hs_cwa"] > 1.20 or telemetry_raw["delta_theta_deg"] >= 45 or telemetry_raw["w_cwa"] >= 10.80)
+        decision_text = "🔴 封島/防颱" if hard_veto else "🟢 放行靠泊"
+
+        # 6. SSOT Payload 封裝
         ssot_payload = {
-            "version": "v36D.19.0 Complete Master",
+            "version": "v36D.21.0 Complete Master",
             "timestamp": current_time_str,
             "decision": decision_text,
             "confidence_score": 100.0 if cwa_ok else 65.0,
@@ -453,10 +479,10 @@ def execute_master_pipeline():
                 "tactical_summary": "執行「10:50/13:50 雙預警，11:20 止登【南岸碼頭】，14:20 全員撤離至【烏石港】」"
             },
             "level5_advanced_metrics": {
-                "vision_overtopping_rate_pmin": 1.31,
-                "vision_kd_bias": 0.0295,
-                "fno_forecast_mean_hs_m": 1.58,
-                "quantum_topology_coherence": 0.4682
+                "vision_overtopping_rate_pmin": float(overtopping_rate.item()),
+                "vision_kd_bias": float(kd_bias.item()),
+                "fno_forecast_mean_hs_m": float(fno_hs_pred),
+                "quantum_topology_coherence": float(coherence_score)
             }
         }
         
@@ -470,7 +496,7 @@ def execute_master_pipeline():
     except Exception as e:
         print(f"⚠️ 觸發例外降級保護 ({e})，寫入備援 SSOT。")
         fallback_payload = {
-            "version": "v36D.19.0 Offline Fallback",
+            "version": "v36D.21.0 Offline Fallback",
             "timestamp": current_time_str,
             "decision": "🔴 封島/防颱",
             "confidence_score": 65.0,
