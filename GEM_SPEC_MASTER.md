@@ -202,4 +202,4 @@ JSON
 1. 最高雙柱與抗過期原則：嚴格遵守 GEM_SPEC_MASTER.md 的「版面幾何固定 (CLS = 0)」、「數據單向更新 (Data-Only SSOT)」與「Asia/Taipei 30 秒 Watchdog 過期防衛」。絕不改動 HTML/CSS 幾何骨架，前端僅透過 textContent 靜態對接 latest_decision.json。
 2. 對接規範版本：v36D.16.5 Level 7 Complete Master（含南北角水動力矩陣、天文潮差扣減影響、懸浮燈號 Tooltip、七天趨勢圖隱藏實體數字、心跳連線計數與 CI/CD 零崩潰自癒機制）。
 3. 本次修改需求：[在此填入您想調整的細節，例如：請更新 desktop.html 內的預警廣播時間為 10:45]
-4. 輸出要求：僅輸出修改後的受影響檔案完整程式碼。
+4. 輸出要求：僅輸出修改後的受影響檔案完整程式碼。比對、分析、優化、整合成一版
