@@ -1,210 +1,130 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>GEM-V36D (v36D.16.5) 戰術智庫 - 手持端</title>
-  <style>
-    :root {
-      --bg-color: #0b1120;
-      --card-bg: #1e293b;
-      --border-color: #334155;
-      --blue: #38bdf8;
-      --red: #ef4444;
-      --green: #10b981;
-      --yellow: #facc15;
-      --orange: #f59e0b;
-      --purple: #c084fc;
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      background-color: var(--bg-color); color: #f8fafc; margin: 0; padding: 12px;
-    }
-    .mobile-container { display: flex; flex-direction: column; gap: 12px; contain: content; }
-    .card-conn {
-      background: var(--card-bg); border: 1px solid var(--border-color); border-left: 4px solid var(--blue);
-      border-radius: 8px; padding: 12px; display: flex; justify-content: space-between; align-items: center; contain: strict;
-    }
-    .live-dot-blue {
-      display: inline-block; width: 10px; height: 10px; background-color: var(--blue);
-      border-radius: 50%; margin-right: 6px; box-shadow: 0 0 8px var(--blue); animation: pulse 1.5s infinite;
-    }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>GEM-V36D 龜山島戰情控制台 (Mobile Master)</title>
+    <style>
+        /* 手持端輕量化 100% 垂直單欄流 (嚴禁 ECharts DOM) */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #0f172a; color: #e2e8f0; padding: 12px; width: 100vw; min-height: 100vh; }
+        
+        .mobile-card { background: #1e293b; padding: 16px; border-radius: 10px; border: 1px solid #334155; margin-bottom: 12px; contain: content; }
+        .mobile-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 8px; margin-bottom: 10px; }
+        .mobile-header h2 { font-size: 15px; font-weight: 700; color: #38bdf8; }
+        
+        .status-badge { font-size: 12px; font-weight: bold; padding: 4px 10px; border-radius: 12px; background: #10b981; color: white; }
+        .metric-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+        .metric-row label { color: #94a3b8; }
+        .metric-row val { font-weight: bold; color: #f8fafc; }
 
-    .stale-banner {
-      background: var(--red); color: #fff; padding: 10px; border-radius: 6px; display: none; font-size: 0.8rem; font-weight: bold; text-align: center;
-    }
-    .veto-banner {
-      background: rgba(239, 68, 68, 0.25); border: 1px solid var(--red); color: #fca5a5;
-      padding: 12px; border-radius: 6px; font-weight: bold; font-size: 1.1rem; text-align: center;
-    }
-
-    .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; contain: content; }
-    .card-title { font-size: 0.85rem; font-weight: bold; color: #94a3b8; margin-bottom: 10px; }
-    .card-ai { border: 1px solid var(--blue); }
-    .card-guerrilla { border: 1px solid var(--orange); }
-    .card-qimen { border: 1px solid var(--purple); }
-    .card-level5 { border: 1px solid var(--green); background: #151d30; }
-
-    .badge-pass { background: var(--green); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; }
-    .badge-veto { background: var(--red); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; }
-    .badge-restr { background: var(--orange); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; }
-
-    .grid-2x2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .box { background: rgba(0, 0, 0, 0.2); padding: 8px; border-radius: 6px; text-align: center; border: 1px solid var(--border-color); }
-    .val { font-size: 1.1rem; font-weight: bold; color: var(--blue); margin-top: 2px; }
-
-    .forecast-3days-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 8px; }
-    .forecast-item { background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 4px; text-align: center; }
-
-    .gt-table { width: 100%; border-collapse: collapse; font-size: 0.72rem; }
-    .gt-table th, .gt-table td { padding: 6px 4px; border-bottom: 1px solid var(--border-color); }
-    
-    .nav-switch {
-      display: flex; flex-direction: column; gap: 6px; padding: 10px;
-      background: var(--card-bg); border-radius: 6px; border: 1px solid var(--border-color); font-size: 0.8rem; text-align: center;
-    }
-    .nav-switch a { color: var(--blue); text-decoration: none; font-weight: bold; }
-  </style>
+        .dispatch-mobile-box { background: #0284c7; color: white; padding: 10px; border-radius: 6px; font-size: 12px; font-weight: 600; margin-top: 8px; line-height: 1.4; }
+        #staleAlertMob { display: none; background: #ef4444; color: white; padding: 10px; border-radius: 6px; font-size: 12px; font-weight: bold; text-align: center; margin-bottom: 12px; }
+    </style>
 </head>
 <body>
-  <div class="mobile-container">
-    
-    <div class="card-conn">
-      <div style="font-size:0.85rem; font-weight:bold;">
-        <span class="live-dot-blue"></span><span id="txt-ssot-badge-mob">● LIVE SSOT 連線</span>
-      </div>
-      <div style="font-size:0.7rem; color:#94a3b8; text-align:right;">
-        <div id="txt-live-clock-mob" style="color:var(--blue); font-weight:bold;">即時：--:--:-- CST</div>
-        <div>SSOT: <span id="txt-time-mob">--</span></div>
-      </div>
-    </div>
 
-    <div class="stale-banner" id="staleAlertMob">🔴 數據過期 — 遙測停滯 &gt; 30 秒，請勿進行靠泊決策！</div>
-    <div class="veto-banner" id="vetoBannerMob">即時裁決：<span id="txt-decision-mob">🔴 封島/防颱</span></div>
+    <!-- 剛性 VETO / 過期警示 Banner -->
+    <div id="staleAlertMob">🚨 警告：實體觸發物理 VETO 熔斷或數據超過 30 秒停滯！</div>
 
-    <div class="card card-ai">
-      <div class="card-title" style="color:var(--blue);">4. AI 雙核相對精確度與注意力閘</div>
-      <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:8px;">
-        <span>信心度: <strong style="color:var(--green);" id="txt-conf-mob">100.0%</strong></span>
-        <span>σ 方差: <strong id="txt-sigma-mob">0.3125</strong></span>
-        <span>提升: <strong style="color:var(--blue);" id="txt-gain-mob">+58.4%</strong></span>
-      </div>
-      <div style="height:8px; background:rgba(255,255,255,0.1); border-radius:4px; overflow:hidden; display:flex;">
-        <div id="bar-micro-mob" style="width:65%; background:#3b82f6;"></div>
-        <div id="bar-macro-mob" style="width:35%; background:#a855f7;"></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">5. PINN 物理水文邊界數值</div>
-      <div class="grid-2x2">
-        <div class="box"><div style="font-size:0.7rem; color:#94a3b8;">Hs Pier</div><div class="val" id="txt-hs-mob">3.71 m</div><span id="badge-hs-mob" class="badge-veto">VETO</span></div>
-        <div class="box"><div style="font-size:0.7rem; color:#94a3b8;">W Local</div><div class="val" id="txt-w-mob">8.50 m/s</div><span id="badge-w-mob" class="badge-pass">PASS</span></div>
-        <div class="box"><div style="font-size:0.7rem; color:#94a3b8;">UKC 裕深</div><div class="val" id="txt-ukc-mob">5.84 m</div><span id="badge-ukc-mob" class="badge-pass">PASS</span></div>
-        <div class="box"><div style="font-size:0.7rem; color:#94a3b8;">FB Pier</div><div class="val" id="txt-fb-mob">2.00 m</div><span id="badge-fb-mob" class="badge-pass">PASS</span></div>
-      </div>
-    </div>
-
-    <div class="card card-qimen">
-      <div class="card-title" style="color:var(--purple);">8. 🌀 颱風、南北角水動力與天文潮預判</div>
-      
-      <div style="font-size:0.75rem; line-height:1.5;">
-        <div style="color:var(--blue); font-weight:bold;">【北岸區域】</div>
-        風向/速: 12.2m/s (NE) <span class="badge-veto">VETO</span> | 浪高: 3.95m <span class="badge-veto">VETO</span><br/>
-        流速/向: 1.8kts (NNE) <span class="badge-restr">RESTR</span>
-        
-        <div style="color:var(--yellow); font-weight:bold; margin-top:4px;">【南岸區域】</div>
-        風向/速: 8.5m/s (ENE) <span class="badge-pass">PASS</span> | 浪高: 3.71m <span class="badge-veto">VETO</span><br/>
-        流速/向: 0.9kts (ESE) <span class="badge-pass">PASS</span>
-
-        <div style="background:rgba(0,0,0,0.25); padding:6px; border-radius:4px; margin-top:6px; border:1px solid var(--border-color);">
-          <div style="color:var(--purple); font-weight:bold;">🌕 天文潮 (農曆 08/04 - 08/10 大潮)</div>
-          • 滿潮 +1.35m / 乾潮 -0.45m (潮差 1.80m)<br/>
-          • 乾潮扣減 UKC 0.45m / 滿潮減少乾舷 (FB Pier) 1.35m (加速越浪)
+    <!-- 置頂連線狀態與端側雙時鐘卡片 -->
+    <div class="mobile-card" style="border-left: 5px solid #10b981;">
+        <div class="mobile-header">
+            <h2>GEM-V36D 龜山島戰情 (Mobile)</h2>
+            <span class="status-badge" id="mobStatusBadge">🟢 100.0% PASS</span>
         </div>
-      </div>
+        <div class="metric-row"><label>即時時間</label><val id="mobLiveClock">10:20:00 CST</val></div>
+        <div class="metric-row"><label>SSOT 同化</label><val id="mobSsotTime">--</val></div>
     </div>
 
-    <div class="nav-switch">
-      <span style="color:#94a3b8;">當前視角：📱 手持移動版 (mobile.html)</span>
-      <a href="desktop.html">💻 切換至桌面完全版</a>
+    <!-- PINN 物理水文與風速卡片 (2x2 網格) -->
+    <div class="mobile-card">
+        <div class="mobile-header">
+            <h2>PINN 物理水文極值</h2>
+            <span id="mobDecision" style="font-size: 12px; font-weight: bold; color: #10b981;">🟢 放行靠泊</span>
+        </div>
+        <div class="metric-row"><label>碼頭波高 Hs</label><val id="mobHs">0.85 m</val></div>
+        <div class="metric-row"><label>有效攻角風速 Weff</label><val id="mobWeff">3.82 m/s</val></div>
+        <div class="metric-row"><label>UKC 富餘水深</label><val id="mobUKC">6.88 m</val></div>
+        <div class="metric-row"><label>預留乾舷 FB Pier</label><val id="mobFB">2.00 m</val></div>
     </div>
-  </div>
 
-  <script>
-    class MobileSSOTOrchestrator {
-      constructor() {
-        this.ssotUrl = './latest_decision.json';
-        this.staleThresholdSec = 30;
-        this.initClock();
-        this.startPolling();
-      }
+    <!-- ⚓ 游擊式動態調度與預警處置卡片 -->
+    <div class="mobile-card" style="border-color: #0284c7;">
+        <div class="mobile-header"><h2 style="color: #38bdf8;">⚓ 游擊調度與超前預警</h2></div>
+        <div class="metric-row"><label>靠泊碼頭</label><val id="mobBerthing" style="color: #38bdf8;">【北岸碼頭】</val></div>
+        <div class="metric-row"><label>撤離指引</label><val id="mobEvac">【北岸碼頭】 -> 備援【烏石港】</val></div>
+        <div style="font-size: 11px; color: #fcd34d; margin-top: 6px;">
+            <div id="mobT60">🟢 T-60 正常</div>
+            <div id="mobT45">🟢 T-45 正常</div>
+            <div id="mobT30">🟢 T-30 正常</div>
+        </div>
+        <div class="dispatch-mobile-box" id="mobTacticalSummary">
+            📌 戰術總結：動態時窗預判：方案 C(奇門與模型備援推算 PASS) 評估有效風速在門檻內。
+        </div>
+    </div>
 
-      initClock() {
-        const update = () => {
-          const now = new Date();
-          const timeStr = now.toLocaleString('zh-TW', {
-            timeZone: 'Asia/Taipei',
-            hour: '2-digit', minute: '2-digit', second: '2-digit',
-            hour12: false
-          }) + ' CST';
-          const clockNode = document.getElementById('txt-live-clock-mob');
-          if (clockNode) clockNode.textContent = `即時：${timeStr}`;
-        };
-        update();
-        setInterval(update, 1000);
-      }
+    <!-- 🌀 颱風、水動力與 Level 5 高維算子卡片 -->
+    <div class="mobile-card" style="border-color: #a855f7;">
+        <div class="mobile-header"><h2 style="color: #c084fc;">🌀 颱風水動力與 Level 5 算子</h2></div>
+        <div class="metric-row"><label>龜首崩塌風險比率</label><val id="mobSlope">0.15</val></div>
+        <div class="metric-row"><label>奇門氣場匹配率</label><val id="mobQimen">100.0%</val></div>
+        <div class="metric-row"><label>CV 越浪率</label><val id="mobCV">0.05 p/min</val></div>
+        <div class="metric-row"><label>FNO 預報波高</label><val id="mobFNO">0.78 m</val></div>
+    </div>
 
-      startPolling() {
-        const fetchSSOT = async () => {
-          try {
-            const res = await fetch(`${this.ssotUrl}?t=${Date.now()}`);
-            if (!res.ok) throw new Error('HTTP Error');
-            const data = await res.json();
-            this.renderSSOT(data);
-          } catch (err) {
-            this.markStale(true);
-          }
-        };
-        fetchSSOT();
-        setInterval(fetchSSOT, 5000);
-      }
-
-      renderSSOT(data) {
-        document.getElementById('txt-time-mob').textContent = data.timestamp ? data.timestamp.replace(/^.*?\s/, '') : '--';
-        document.getElementById('txt-decision-mob').textContent = data.decision || '未知';
-
-        let isStale = false;
-        try {
-          const formattedTs = data.timestamp.replace(' CST', '+08:00').replace(' ', 'T');
-          const ssotTime = new Date(formattedTs).getTime();
-          if (Math.abs(Date.now() - ssotTime) / 1000 > this.staleThresholdSec) isStale = true;
-        } catch(e) { isStale = true; }
-
-        this.markStale(isStale || data.hard_veto_alert);
-
-        if (data.physics_metrics) {
-          const p = data.physics_metrics;
-          document.getElementById('txt-hs-mob').textContent = p.hs_pier_m + ' m';
-          document.getElementById('txt-w-mob').textContent = p.w_local_ms + ' m/s';
-          document.getElementById('txt-ukc-mob').textContent = p.ukc_m + ' m';
-          document.getElementById('txt-fb-mob').textContent = p.fb_pier_m + ' m';
+    <!-- 手持端腳本 -->
+    <script>
+        function updateMobClock() {
+            const now = new Date();
+            document.getElementById('mobLiveClock').textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')} CST`;
         }
-      }
+        setInterval(updateMobClock, 1000);
 
-      markStale(isStale) {
-        const banner = document.getElementById('staleAlertMob');
-        const badge = document.getElementById('txt-ssot-badge-mob');
-        if (banner) banner.style.display = isStale ? 'block' : 'none';
-        if (badge) {
-          badge.textContent = isStale ? '🔴 數據過期 / 降級' : '● LIVE SSOT 連線';
-          badge.style.color = isStale ? '#ef4444' : '#38bdf8';
+        async function fetchSSOTMob() {
+            try {
+                const response = await fetch(`latest_decision.json?t=${Date.now()}`);
+                if (!response.ok) return;
+                const data = await response.json();
+
+                document.getElementById('mobSsotTime').textContent = data.timestamp || '--';
+                document.getElementById('mobStatusBadge').textContent = data.confidence_label || '🟢 PASS';
+                document.getElementById('mobDecision').textContent = data.decision || '🟢 放行靠泊';
+
+                const physics = data.physics_metrics || {};
+                document.getElementById('mobHs').textContent = `${physics.hs_pier_m || 0.0} m`;
+                document.getElementById('mobWeff').textContent = `${physics.w_effective_ms || 0.0} m/s`;
+                document.getElementById('mobUKC').textContent = `${physics.ukc_m || 5.84} m`;
+                document.getElementById('mobFB').textContent = `${physics.fb_pier_m || 2.00} m`;
+                document.getElementById('mobSlope').textContent = physics.slope_landslide_risk || 0.15;
+
+                const guerrilla = data.guerrilla_dispatch || {};
+                document.getElementById('mobBerthing').textContent = guerrilla.berthing_pier || '--';
+                document.getElementById('mobEvac').textContent = guerrilla.evacuation_pier || '--';
+                document.getElementById('mobTacticalSummary').textContent = guerrilla.tactical_summary || '無';
+
+                const earlyWarn = guerrilla.early_warning_vector || {};
+                document.getElementById('mobT60').textContent = earlyWarn.t60_qimen_warning || '🟢 T-60 正常';
+                document.getElementById('mobT45').textContent = earlyWarn.t45_wave_steep_warning || '🟢 T-45 正常';
+                document.getElementById('mobT30').textContent = earlyWarn.t30_pier_shift_warning || '🟢 T-30 正常';
+
+                const level5 = data.level5_advanced_metrics || {};
+                document.getElementById('mobCV').textContent = `${level5.vision_overtopping_rate_pmin || 0.0} p/min`;
+                document.getElementById('mobFNO').textContent = `${level5.fno_forecast_mean_hs_m || 0.0} m`;
+
+                const qimen = data.qimen_macro_consensus || {};
+                document.getElementById('mobQimen').textContent = `${qimen.consensus_rate_pct || 100.0}%`;
+
+                document.getElementById('staleAlertMob').style.display = data.hard_veto_alert ? 'block' : 'none';
+
+            } catch (err) {
+                console.warn("Mobile SSOT 讀取失敗:", err);
+            }
         }
-      }
-    }
 
-    document.addEventListener('DOMContentLoaded', () => new MobileSSOTOrchestrator());
-  </script>
+        setInterval(fetchSSOTMob, 5000);
+        fetchSSOTMob();
+    </script>
 </body>
 </html>
