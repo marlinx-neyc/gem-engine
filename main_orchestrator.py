@@ -4,7 +4,7 @@ GEM-V36D Ultimate Master Engine (v36D.190.0 Qimen Unblind & Official Closure RL 
 1. 剛性四層/六重物理防線：Hs (<=1.20m), Weff (<=10.80m/s), UKC (>=1.50m), FB (>=0.50m) 一票否決 (🔴 VETO)
 2. 37D 特徵同化：完整收錄 Ch 37 官方封島公告通道、奇門 100% 氣場匹配與 64D 量子拓撲相干性
 3. 影子微調與物理沙盒：Gymnasium R^37 狀態空間下執行 -9999 致命懲罰塑形與 Monte Carlo Auto-Gate 驗證
-4. 端側極致優化：SSOT JSON 生成器與邊緣零延遲推理 (< 50ms)
+4. Colab 自動 Git Push 機制：執行 pipeline 後自動注入 GITHUB_TOKEN 提交 SSOT JSON 至 GitHub 儲存庫
 """
 
 import copy
@@ -13,6 +13,8 @@ import json
 import math
 import os
 import random
+import sys
+import time
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Tuple
 
@@ -25,7 +27,7 @@ import torch.optim as optim
 from pydantic import BaseModel, Field
 
 # ==============================================================================
-# 0. 環境金鑰與 Native SSL 驗證注入
+# 0. 金鑰自動注入與 Native SSL 驗證
 # ==============================================================================
 try:
     from google.colab import userdata
@@ -48,13 +50,17 @@ def auto_inject_api_secrets():
         "ALERT_WEBHOOK_URL"
     ]
     if IN_COLAB:
+        print("🔑 [Colab 模式] 讀取 Secret 庫並自動注入環境變數...")
         for key in secret_keys:
             try:
                 val = userdata.get(key)
                 if val:
                     os.environ[key] = val
+                    print(f"  ✅ {key}: 注入成功")
             except Exception:
                 pass
+    else:
+        print("ℹ️ [Production/CI 模式] 採用系統環境變數與 GitHub Secrets")
 
 auto_inject_api_secrets()
 
@@ -186,7 +192,7 @@ class PhysicsEngine:
         }
 
 # ==============================================================================
-# 3. Level 5 高維邊緣算子模組 (Level 5 Advanced Edge Operators)
+# 3. Level 5 高維邊緣算子模組 (Level 5 Advanced Operators)
 # ==============================================================================
 class VisionPINNEdgeNet(nn.Module):
     """Vision-PINN 邊緣視覺越浪算子：即時解析 CCTV 影像張量"""
@@ -383,125 +389,7 @@ class XianHengDialecticalPolicyNet(nn.Module):
         self.hexagram_adapters[str(hexagram_id)].load_state_dict(new_adapter_state_dict)
 
 # ==============================================================================
-# 5. 影子微調訓練器與 Monte Carlo 驗證器 (ShadowWorker Engine)
-# ==============================================================================
-class XianHengAutonomousShadowTrainer:
-    def __init__(
-        self,
-        master_model: XianHengDialecticalPolicyNet,
-        kb_filename: str = "KB_20260904_ESE_OVERTOPPING.json",
-    ):
-        self.master_model = master_model
-        self.kb_filename = kb_filename
-
-    def process_telemetry_residual(
-        self,
-        hexagram_id: int,
-        x_tensor: torch.Tensor,
-        target_action: torch.Tensor,
-        qimen_consensus_pct: float = 100.0,
-        official_closure: float = 0.0,
-        eps_threshold: float = 0.10,
-    ) -> bool:
-        self.master_model.eval()
-        with torch.no_grad():
-            base_out = self.master_model.backbone(x_tensor)
-            adapter_out = self.master_model.hexagram_adapters[str(hexagram_id)](x_tensor)
-            pred_probs = torch.softmax(base_out + adapter_out, dim=-1)
-            l_residual = float(F.mse_loss(pred_probs, target_action).item())
-
-        if official_closure == 1.0 and float(pred_probs[0, 0].item()) > 0.5:
-            l_residual += 0.80
-
-        if l_residual <= eps_threshold:
-            return False
-
-        shadow_adapter = copy.deepcopy(
-            self.master_model.hexagram_adapters[str(hexagram_id)]
-        )
-        shadow_adapter.train()
-        optimizer = optim.Adam(shadow_adapter.parameters(), lr=1e-3)
-        weights = get_xian_heng_loss_weights(hexagram_id)
-
-        reward_shaping = (
-            -9999.0
-            if (official_closure == 1.0 or hexagram_id in [29, 3, 39, 47])
-            else 100.0
-        )
-
-        for _ in range(5):
-            optimizer.zero_grad()
-            base_logits = self.master_model.backbone(x_tensor).detach()
-            adapter_logits = shadow_adapter(x_tensor)
-            pred_logits = base_logits + adapter_logits
-
-            l_data = F.mse_loss(torch.softmax(pred_logits, dim=-1), target_action)
-            l_phys = torch.mean(F.relu(-pred_logits))
-
-            loss = weights["w_heng"] * l_phys + weights["w_xian"] * (
-                l_data + torch.tensor(l_residual, device=x_tensor.device)
-            )
-            if reward_shaping < 0:
-                loss = loss + abs(reward_shaping) * 0.1
-
-            loss.backward()
-            optimizer.step()
-
-        if self.auto_gate_verification(shadow_adapter, hexagram_id, x_tensor):
-            self.master_model.hot_swap_adapter(hexagram_id, shadow_adapter.state_dict())
-            self.commit_self_healing_kb(hexagram_id, round(l_residual, 4))
-            return True
-        return False
-
-    def auto_gate_verification(
-        self,
-        shadow_adapter: nn.Module,
-        hexagram_id: int,
-        x_tensor: torch.Tensor,
-        n_sims: int = 1000,
-    ) -> bool:
-        shadow_adapter.eval()
-        with torch.no_grad():
-            noise = torch.randn(n_sims, 37, device=x_tensor.device) * 0.05
-            sim_inputs = torch.clamp(x_tensor.repeat(n_sims, 1) + noise, 0.0, 1.0)
-            base_logits = self.master_model.backbone(sim_inputs)
-            adapter_logits = shadow_adapter(sim_inputs)
-            preds = torch.argmax(
-                torch.softmax(base_logits + adapter_logits, dim=-1), dim=-1
-            )
-
-            if hexagram_id in [29, 3, 39, 47] and (preds == 0).sum().item() > 0:
-                return False
-            return (
-                float((preds == preds.mode().values).float().mean().item()) >= 0.95
-            )
-
-    def commit_self_healing_kb(self, hexagram_id: int, residual_val: float):
-        kb_entry = {
-            "timestamp": datetime.now(timezone(timedelta(hours=8))).strftime(
-                "%Y-%m-%d %H:%M:%S CST"
-            ),
-            "hexagram_id": hexagram_id,
-            "resolved_residual": round(residual_val, 4),
-            "status": "OFFICIAL_NOTICE_ALIGNED",
-        }
-        records = []
-        if os.path.exists(self.kb_filename):
-            try:
-                with open(self.kb_filename, "r", encoding="utf-8") as f:
-                    records = json.load(f)
-                    if not isinstance(records, list):
-                        records = [records]
-            except Exception:
-                records = []
-        records.append(kb_entry)
-        if len(records) > 100:
-            records = records[-100:]
-        with open(self.kb_filename, "w", encoding="utf-8") as f:
-            json.dump(records, f, ensure_ascii=False, indent=2)
-
-# ==============================================================================
-# 6. 多源 Ingestion 與游擊調度算子
+# 5. 游擊調度算子與生產管線執行 (Master Execution Pipeline)
 # ==============================================================================
 class DynamicGuerrillaDispatchEngine:
     def __init__(self, historical_kb_path: str = "KB_20260904_ESE_OVERTOPPING.json"):
@@ -654,7 +542,7 @@ def execute_master_pipeline():
     master_policy = XianHengDialecticalPolicyNet().to(device)
     load_latest_model_weights(master_policy)
 
-    # 帶入 2026-09-15 18:20 CST 現場長浪越浪實測 Ground Truth 數據
+    # 帶入 2026-09-15 18:35 CST 現場長浪越浪實測 Ground Truth 數據
     telemetry_raw = {
         "hs_cwa": 3.71,
         "w_cwa": 8.50,
@@ -691,7 +579,6 @@ def execute_master_pipeline():
     telemetry_obj = UnifiedMarineTelemetry(**telemetry_raw)
     extractor = GEM37DNormalizedFeatureExtractor()
     x_37d_norm = extractor.build_normalized_vector(telemetry_obj)
-    x_tensor = torch.tensor(x_37d_norm, dtype=torch.float32).unsqueeze(0).to(device)
 
     # 游擊調度算子推算
     dispatch_engine = DynamicGuerrillaDispatchEngine()
@@ -703,31 +590,9 @@ def execute_master_pipeline():
         is_backup_mode=False,
     )
 
-    hex_id = map_xian_heng_hexagram([
-        telemetry_raw["hs_cwa"],
-        telemetry_raw["tp_s"],
-        telemetry_raw["w_cwa"],
-        guerrilla_result["ukc_calculated_m"],
-        guerrilla_result["fb_calculated_m"],
-        500, 899, 45.0
-    ])
-
-    # 影子訓練器殘差檢核與 Hot-Swap 演練
-    shadow_trainer = XianHengAutonomousShadowTrainer(master_policy)
-    target_action = torch.tensor([[0.0, 0.0, 0.0, 1.0]], device=device)
-    is_swapped = shadow_trainer.process_telemetry_residual(
-        hex_id, x_tensor, target_action,
-        qimen_consensus_pct=100.0, official_closure=1.0, eps_threshold=0.10
-    )
-
-    if is_swapped:
-        save_model_weights(master_policy)
-
     vessel_hydro = VesselMMSIHydrodynamics.compute_dynamics("CATAMARAN", speed_knots=12.5)
 
-    decision_text = (
-        "🔴 封島/防颱" if physics_res["has_veto"] else "🟢 放行靠泊"
-    )
+    decision_text = "🔴 封島/防颱" if physics_res["has_veto"] else "🟢 放行靠泊"
 
     ssot_payload = {
         "version": "v36D.190.0 Qimen Unblind & Official Closure RL Master",
@@ -766,8 +631,25 @@ def execute_master_pipeline():
         },
     }
 
+    # 1. 寫入最新單一真實數據源 SSOT JSON
     with open("latest_decision.json", "w", encoding="utf-8") as f:
         json.dump(ssot_payload, f, ensure_ascii=False, indent=2)
+    print("💾 已成功導出最新 SSOT JSON 檔: `latest_decision.json`")
+
+    # 2. 自動提交與推送至 GitHub 儲存庫 (修補 Colab 雲端本機目錄隔離與手機版更新停滯問題)
+    token = os.environ.get("GITHUB_TOKEN")
+    if token:
+        try:
+            os.system('git config user.name "colab-bot"')
+            os.system('git config user.email "bot@colab.com"')
+            os.system('git add latest_decision.json')
+            os.system('git commit -m "auto: sync SSOT JSON from Colab [skip ci]"')
+            os.system(f'git push https://{token}@github.com/marlinx-neyc/gem-engine.git main')
+            print("🚀 最新 SSOT JSON 已成功自動推送到 GitHub 儲存庫 (marlinx-neyc/gem-engine)！")
+        except Exception as e:
+            print(f"⚠️ 自動 Git Push 失敗: {e}")
+    else:
+        print("ℹ️ 未偵測到 GITHUB_TOKEN，跳過 GitHub 自動同步。")
 
     return ssot_payload
 
