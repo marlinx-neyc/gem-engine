@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>GEM-V36D 龜山島雙層整合海事戰術控制台 (Desktop Master v36D.160.0)</title>
+    <title>GEM-V36D 龜山島雙層整合海事戰術控制台 (Desktop Master v36D.165.0)</title>
     <!-- ECharts CDN -->
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <style>
@@ -70,28 +70,28 @@
                 <span class="blue-pulse-dot"></span> 龜山島雙層整合海事戰術控制台
             </h1>
             <p>
-                即時時間：<span id="liveClock">2026/09/15 11:58:48 CST</span> | 
+                即時時間：<span id="liveClock">2026/09/15 12:20:00 CST</span> | 
                 SSOT 同化：<span id="ssotTimestamp">--</span> | 
-                心跳通報：<span id="heartbeatCount" style="color: #38bdf8; font-weight: bold;">196</span> 次 |
+                心跳通報：<span id="heartbeatCount" style="color: #38bdf8; font-weight: bold;">205</span> 次 |
                 狀態：<span id="ssotStatusBadge" style="color: #10b981; font-weight: bold;">🟢 100.0% [完整同化 PASS]</span>
             </p>
             <div class="hybrid-ratio-box">
                 <div class="ratio-labels">
-                    <span>科學物理 <b id="txtPhysicsRatio">66%</b></span>
-                    <span>奇門氣場 <b id="txtQimenRatio">34%</b></span>
+                    <span>科學物理 <b id="txtPhysicsRatio">65%</b></span>
+                    <span>奇門氣場 <b id="txtQimenRatio">35%</b></span>
                 </div>
                 <div class="ratio-bar-bg">
-                    <div class="ratio-bar-fill" id="barPhysics" style="width: 66%;"></div>
-                    <div class="ratio-bar-qimen" id="barQimen" style="width: 34%;"></div>
+                    <div class="ratio-bar-fill" id="barPhysics" style="width: 65%;"></div>
+                    <div class="ratio-bar-qimen" id="barQimen" style="width: 35%;"></div>
                 </div>
             </div>
         </div>
 
         <div class="level5-mini-grid">
-            <div class="level5-card"><label>CV 越浪率</label><span id="valCV" style="color: #facc15;">2.56 p/min</span></div>
+            <div class="level5-card"><label>CV 越浪率</label><span id="valCV" style="color: #facc15;">1.31 p/min</span></div>
             <div class="level5-card"><label>MMSI 沉降</label><span id="valSquat" style="color: #38bdf8;">0.82 m</span></div>
-            <div class="level5-card"><label>FNO 100ms 預報</label><span id="valFNO" style="color: #ef4444;">-0.94 m</span></div>
-            <div class="level5-card"><label>64D 拓撲相干</label><span id="valTopo" style="color: #c084fc;">0.50</span></div>
+            <div class="level5-card"><label>FNO 100ms 預報</label><span id="valFNO" style="color: #ef4444;">1.58 m</span></div>
+            <div class="level5-card"><label>64D 拓撲相干</label><span id="valTopo" style="color: #c084fc;">0.47</span></div>
         </div>
     </div>
 
@@ -212,7 +212,7 @@
     </div>
 
     <script>
-        let heartbeatCounter = 196;
+        let heartbeatCounter = 205;
         function updateLiveClock() {
             const now = new Date();
             const year = now.getFullYear();
@@ -230,7 +230,8 @@
         }
         setInterval(updateLiveClock, 1000);
 
-        const initChart = (id, name, title, color, lineVal, unit, vetoCheck) => {
+        // 2x2 時間線圖表：獨立數據鏈 + 完整 markLine 標籤顯示
+        const initChart = (id, name, title, color, lineVal, unit, vetoCheck, chartData) => {
             const chart = echarts.init(document.getElementById(id));
             chart.setOption({
                 title: { text: title, textStyle: { color: '#94a3b8', fontSize: 11 } },
@@ -245,21 +246,22 @@
                         return `${pt.name}<br/>${pt.seriesName}: <b>${val} ${unit}</b> ${badge}`;
                     }
                 },
-                grid: { top: 30, bottom: 20, left: 35, right: 35 },
+                grid: { top: 30, bottom: 20, left: 40, right: 55 },
                 xAxis: { type: 'category', data: ['08:00', '10:00', '11:20', '12:00', '14:20', '16:00'], axisLine: { lineStyle: { color: '#334155' } } },
-                yAxis: { type: 'value', splitLine: { lineStyle: { color: '#1e293b' } } },
+                yAxis: { type: 'value', splitLine: { lineStyle: { color: '#1e293b' } }, axisLabel: { color: '#94a3b8', fontSize: 10 } },
                 series: [{ 
                     name: name,
                     type: 'line', 
                     smooth: true, 
-                    data: [0.60, 0.80, 0.95, 1.10, 0.90, 0.70], 
+                    data: chartData, 
                     lineStyle: { color: color },
+                    itemStyle: { color: color },
                     markLine: {
                         symbol: 'none',
                         data: [
-                            { yAxis: lineVal, name: '門檻', lineStyle: { type: 'dashed', color: color }, label: { formatter: `${name} ${lineVal}${unit}`, color: color, position: 'end' } },
-                            { xAxis: '11:20', lineStyle: { type: 'dashed', color: '#facc15' }, label: { formatter: '11:20 止登', color: '#facc15' } },
-                            { xAxis: '14:20', lineStyle: { type: 'dashed', color: '#facc15' }, label: { formatter: '14:20 撤離', color: '#facc15' } }
+                            { yAxis: lineVal, name: '門檻', lineStyle: { type: 'dashed', color: color, width: 1.5 }, label: { formatter: `${name} ${lineVal}${unit}`, color: color, position: 'end', fontSize: 10 } },
+                            { xAxis: '11:20', lineStyle: { type: 'dashed', color: '#facc15' }, label: { formatter: '11:20 止登', color: '#facc15', fontSize: 10 } },
+                            { xAxis: '14:20', lineStyle: { type: 'dashed', color: '#facc15' }, label: { formatter: '14:20 撤離', color: '#facc15', fontSize: 10 } }
                         ]
                     }
                 }]
@@ -267,11 +269,12 @@
             return chart;
         };
 
-        initChart('chartHs', 'Hs 浪高', 'Hs 碼頭波高 (m)', '#ef4444', 1.20, 'm', v => v > 1.20);
-        initChart('chartWind', 'Wind 風速', 'Wind 攻角風速 (m/s)', '#f59e0b', 10.80, 'm/s', v => v >= 10.80);
-        initChart('chartUKC', 'UKC 水深', 'UKC 富餘水深 (m)', '#10b981', 1.50, 'm', v => v < 1.50);
-        initChart('chartTp', 'Tp 湧浪', 'Tp 湧浪週期 (s)', '#c084fc', 12.0, 's', v => v > 12.0);
+        initChart('chartHs', 'Hs 浪高', 'Hs 碼頭波高 (m)', '#ef4444', 1.20, 'm', v => v > 1.20, [0.65, 0.85, 1.05, 1.25, 1.10, 0.80]);
+        initChart('chartWind', 'Wind 風速', 'Wind 攻角風速 (m/s)', '#f59e0b', 10.80, 'm/s', v => v >= 10.80, [6.20, 7.50, 9.20, 11.20, 9.80, 7.10]);
+        initChart('chartUKC', 'UKC 水深', 'UKC 富餘水深 (m)', '#10b981', 1.50, 'm', v => v < 1.50, [7.28, 6.80, 5.90, 5.20, 5.80, 6.90]);
+        initChart('chartTp', 'Tp 湧浪', 'Tp 湧浪週期 (s)', '#c084fc', 12.0, 's', v => v > 12.0, [6.5, 8.0, 10.2, 12.5, 11.0, 8.2]);
 
+        // 未來 7 天雙軸趨勢圖：全平滑折線 + 50% 透明網格 + 雙 Y 軸 markLine 防重疊
         const chart7Days = echarts.init(document.getElementById('chart7Days'));
         chart7Days.setOption({
             legend: { show: true, textStyle: { color: '#94a3b8', fontSize: 10 }, right: 10, top: 0 },
@@ -286,23 +289,23 @@
                     return `${params[0].name}<br/>Hs 波高: <b>${hs} m</b><br/>Wind 風速: <b>${wind} m/s</b><br/>裁決: <b>${decision}</b>`;
                 }
             },
-            grid: { top: 35, bottom: 25, left: 40, right: 40 },
+            grid: { top: 35, bottom: 25, left: 45, right: 60 },
             xAxis: { type: 'category', data: ['D+1', 'D+2', 'D+3', 'D+4', 'D+5', 'D+6', 'D+7'], axisLine: { lineStyle: { color: '#334155' } } },
             yAxis: [
-                { type: 'value', name: 'Hs (m)', splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.15)' } } },
-                { type: 'value', name: 'Wind (m/s)', splitLine: { show: false } }
+                { type: 'value', name: 'Hs (m)', splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.15)' } }, axisLabel: { color: '#94a3b8', fontSize: 10 } },
+                { type: 'value', name: 'Wind (m/s)', splitLine: { show: false }, axisLabel: { color: '#94a3b8', fontSize: 10 } }
             ],
             series: [
                 { 
                     name: 'Hs 波高', 
                     type: 'line', 
                     smooth: true,
-                    data: [0.80, 0.85, 0.90, 1.10, 0.95, 0.75, 0.60], 
+                    data: [0.80, 0.85, 0.90, 1.25, 0.95, 0.75, 0.60], 
                     lineStyle: { color: '#ef4444' },
                     itemStyle: { color: '#ef4444' },
                     markLine: { 
                         symbol: 'none', 
-                        data: [{ yAxis: 1.20, lineStyle: { type: 'dashed', color: '#ef4444' }, label: { formatter: 'Hs 1.20m', color: '#ef4444', position: 'end' } }] 
+                        data: [{ yAxis: 1.20, lineStyle: { type: 'dashed', color: '#ef4444', width: 1.5 }, label: { formatter: 'Hs 1.20m', color: '#ef4444', position: 'start', fontSize: 10 } }] 
                     }
                 },
                 { 
@@ -310,12 +313,12 @@
                     type: 'line', 
                     yAxisIndex: 1, 
                     smooth: true,
-                    data: [6.50, 7.20, 8.50, 9.80, 8.10, 6.00, 5.50], 
+                    data: [6.50, 7.20, 8.50, 11.20, 8.10, 6.00, 5.50], 
                     lineStyle: { color: '#f59e0b' },
                     itemStyle: { color: '#f59e0b' },
                     markLine: { 
                         symbol: 'none', 
-                        data: [{ yAxis: 10.80, lineStyle: { type: 'dashed', color: '#f59e0b' }, label: { formatter: 'Wind 10.80m/s', color: '#f59e0b', position: 'end' } }] 
+                        data: [{ yAxis: 10.80, lineStyle: { type: 'dashed', color: '#f59e0b', width: 1.5 }, label: { formatter: 'Wind 10.80m/s', color: '#f59e0b', position: 'end', fontSize: 10 } }] 
                     }
                 }
             ]
