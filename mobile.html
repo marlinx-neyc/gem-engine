@@ -49,6 +49,30 @@
       border-bottom: 1px solid var(--card-border);
       padding-bottom: 6px;
     }
+    
+    /* 藍色心跳呼吸燈與狀態計數器規格 */
+    .heartbeat-box {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--accent-blue);
+    }
+    .pulse-dot {
+      width: 10px;
+      height: 10px;
+      background-color: var(--accent-blue);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-blue);
+      animation: pulse 1.5s infinite ease-in-out;
+      display: inline-block;
+    }
+    @keyframes pulse {
+      0% { opacity: 0.3; transform: scale(0.85); }
+      50% { opacity: 1; transform: scale(1.15); box-shadow: 0 0 12px var(--accent-blue); }
+      100% { opacity: 0.3; transform: scale(0.85); }
+    }
+
     .banner {
       padding: 10px;
       border-radius: 6px;
@@ -59,6 +83,7 @@
     }
     .banner-veto { background-color: rgba(239, 68, 68, 0.2); border: 1px solid var(--status-veto); color: var(--status-veto); }
     .banner-warn { background-color: rgba(250, 204, 21, 0.2); border: 1px solid var(--status-warn); color: var(--status-warn); }
+    
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
     .metric-box {
       background: rgba(255, 255, 255, 0.03);
@@ -75,16 +100,20 @@
 </head>
 <body>
   <div class="mobile-container">
-    <!-- 置頂時鐘與連線卡片 -->
+    <!-- 1. 置頂雙時鐘與藍色心跳呼吸燈卡片 -->
     <div class="card">
       <div class="card-title">
         <span>🐢 龜山島數位雙生 (Mobile)</span>
-        <span id="conn-status" class="text-pass">● 實時</span>
+        <div class="heartbeat-box">
+          <span class="pulse-dot"></span>
+          <span id="conn-status">連線中</span>
+        </div>
       </div>
-      <div style="font-size: 0.8rem; color: var(--text-muted);">
-        最後更新：<span id="update-timestamp">載入中...</span>
+      <div style="font-size: 0.82rem; color: var(--text-muted); display: flex; justify-content: space-between; margin-top: 4px;">
+        <span>SSOT 時間：<strong id="update-timestamp" style="color: var(--text-main);">載入中...</strong></span>
+        <span>心跳計數：<strong id="heartbeat-count" style="color: var(--accent-blue);">0</strong> 次</span>
       </div>
-      <div style="font-size: 1.2rem; font-weight: bold; margin-top: 6px; color: var(--accent-blue);" id="decision-badge">
+      <div style="font-size: 1.2rem; font-weight: bold; margin-top: 8px; color: var(--accent-blue);" id="decision-badge">
         --
       </div>
     </div>
@@ -94,7 +123,7 @@
 
     <!-- Card 1: PINN Engine 即時水文門檻比對 -->
     <div class="card">
-      <div class="card-title">1. PINN 即時水文門檻</div>
+      <div class="card-title">1. PINN 即時水文門檻比對</div>
       <div class="grid-2">
         <div class="metric-box">
           <div>碼頭波高 (Hs)</div>
@@ -117,7 +146,7 @@
 
     <!-- Card 2: 預警時窗與戰略總結 -->
     <div class="card">
-      <div class="card-title">2. 開島決策與預警時窗</div>
+      <div class="card-title">2. 當日預警時窗與雙端開島決策</div>
       <div class="grid-2">
         <div class="metric-box">
           <div>07:30 當日開島</div>
@@ -128,11 +157,11 @@
           <div id="m-open-tomorrow" class="metric-value">--</div>
         </div>
         <div class="metric-box">
-          <div>預估止登時間</div>
+          <div>11:20 預估止登</div>
           <div id="m-t-stop" class="metric-value">--</div>
         </div>
         <div class="metric-box">
-          <div>強制撤離時間</div>
+          <div>14:20 強制撤離</div>
           <div id="m-t-evac" class="metric-value">--</div>
         </div>
       </div>
@@ -140,7 +169,7 @@
 
     <!-- Card 3: ⚓ 游擊調度卡片 -->
     <div class="card" style="border-color: rgba(250, 204, 21, 0.4);">
-      <div class="card-title" style="color: var(--status-warn);">3. ⚓ 游擊式動態調度</div>
+      <div class="card-title" style="color: var(--status-warn);">3. ⚓ 游擊式動態調度與超前預警</div>
       <div style="font-size: 0.85rem; margin-bottom: 6px;">
         靠泊碼頭：<strong id="m-berthing">--</strong><br>
         撤離指引：<span id="m-evac">--</span>
@@ -162,21 +191,29 @@
   </div>
 
   <script>
+    let heartbeatCounter = 0;
+
     async function updateMobileDashboard() {
+      // 增加動態心跳計數
+      heartbeatCounter += 1;
+      document.getElementById('heartbeat-count').textContent = heartbeatCounter.toString();
+
       try {
-        // 1. 強制帶入毫秒時間戳記繞過手機端瀏覽器快取
+        // 帶入動態時間戳記繞過手機瀏覽器快取
         const res = await fetch(`latest_decision.json?_t=${Date.now()}`, { cache: 'no-store' });
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
 
-        // 2. 純文字節點寫入 (Zero-Reflow CLS = 0)
-        document.getElementById('update-timestamp').textContent = data.timestamp || '未提供';
+        // 1. 同步 SSOT 時間戳記與連線狀態
+        document.getElementById('conn-status').textContent = '實時連線';
+        document.getElementById('conn-status').className = 'text-pass';
+        document.getElementById('update-timestamp').textContent = data.timestamp || '未同步';
         
         const decBadge = document.getElementById('decision-badge');
         decBadge.textContent = `${data.decision} (${data.confidence_label || ''})`;
         decBadge.className = data.hard_veto_alert ? 'text-veto' : 'text-pass';
 
-        // Banner 狀態動態控制
+        // 2. Watchdog Banner 控制
         const bannerEl = document.getElementById('watchdog-banner');
         if (data.hard_veto_alert) {
           bannerEl.style.display = 'block';
@@ -186,7 +223,7 @@
           bannerEl.style.display = 'none';
         }
 
-        // Card 1 數值更新
+        // 3. Card 1 物理極值
         const p = data.physics_metrics || {};
         const elHs = document.getElementById('m-hs');
         elHs.textContent = `${p.hs_pier_m ?? '--'} m`;
@@ -204,19 +241,19 @@
         elFb.textContent = `${p.fb_pier_m ?? '--'} m`;
         elFb.className = `metric-value ${p.pass_fb === false ? 'text-veto' : 'text-pass'}`;
 
-        // Card 2 時窗與開島
+        // 4. Card 2 時窗與開島
         const g = data.guerrilla_dispatch || {};
         document.getElementById('m-open-today').textContent = g.open_island_0730 || '--';
         document.getElementById('m-open-tomorrow').textContent = g.open_island_1630_tomorrow || '--';
         document.getElementById('m-t-stop').textContent = g.t_stop_window || '--';
         document.getElementById('m-t-evac').textContent = g.t_evac_window || '--';
 
-        // Card 3 游擊調度
+        // 5. Card 3 游擊調度
         document.getElementById('m-berthing').textContent = g.berthing_pier || '--';
         document.getElementById('m-evac').textContent = g.evacuation_pier || '--';
         document.getElementById('m-tactical-summary').textContent = g.tactical_summary || '--';
 
-        // Card 4 Level 5 算子
+        // 6. Card 4 Level 5 算子
         const l5 = data.level5_advanced_metrics || {};
         const vHydro = l5.vessel_hydrodynamics || {};
         document.getElementById('m-squat').textContent = `${vHydro.dynamic_squat_m ?? '--'} m`;
@@ -229,12 +266,12 @@
 
       } catch (err) {
         console.error('Mobile fetch error:', err);
-        document.getElementById('conn-status').textContent = '● 中斷';
+        document.getElementById('conn-status').textContent = '連線中斷';
         document.getElementById('conn-status').className = 'text-veto';
       }
     }
 
-    // 初始化與輪詢設定 (每 5 秒自動更新)
+    // 初始化與 5 秒動態輪詢
     updateMobileDashboard();
     setInterval(updateMobileDashboard, 5000);
   </script>
