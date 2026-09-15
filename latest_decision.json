@@ -1,6 +1,6 @@
 {
   "version": "v36D.120.0 Green Pass & Qimen Master",
-  "timestamp": "2026-09-15 10:51:05 CST",
+  "timestamp": "2026-09-15 11:01:17 CST",
   "decision": "🔴 封島/防颱",
   "confidence_score": 85.0,
   "confidence_label": "🟢 85.0% [奇門與模型備援 PASS]",
@@ -26,16 +26,16 @@
       "t45_wave_steep_warning": "🟡 T-45 湧浪海象預警：長浪週期 Tp=14.5s (>12.0s Kd=1.00 共振穿透) 趨勢預警",
       "t30_pier_shift_warning": "🟡 T-30 移防預警：風向偏轉 (Δθ=52.0° >= 45° 側風) 且橫流 1.8kts，指引切換至【南岸權宜碼頭】"
     },
-    "tactical_summary": "⚠️ 三方案定性定量總結：方案A(傳統官方): 僅憑風速 8.5m/s 評估與方案B(氣象署): 缺乏港池越浪、湧浪週期與 Squat 數據預判放行/限縮；方案C(GEM-V36D Ground Truth): 依攻角風速 5.23m/s、湧浪 Kd=1.00 與動態門檻 7.67m/s (奇門與模型備援推算PASS)精確比對全海象歷史智庫(α=0.71)，判定【剛性熔斷】！游擊調度決策：觸發全海象 PINN 剛性否決 (有效風速 5.23m/s, 浪高 3.71m, 湧浪 Tp=14.5s)。建議 11:20 止登，12:05 全員撤離至烏石港。",
-    "t_stop_window": "11:20",
-    "t_evac_window": "12:05",
+    "tactical_summary": "⚠️ 三方案定性定量總結：方案A(傳統官方): 僅憑風速 8.5m/s 評估與方案B(氣象署): 缺乏港池越浪、湧浪週期與 Squat 數據預判放行/限縮；方案C(GEM-V36D Ground Truth): 依攻角風速 5.23m/s、湧浪 Kd=1.00 與動態門檻 7.67m/s (奇門與模型備援推算PASS)精確比對全海象歷史智庫(α=0.71)，判定【剛性熔斷】！游擊調度決策：觸發全海象 PINN 剛性否決 (有效風速 5.23m/s, 浪高 3.71m, 湧浪 Tp=14.5s)。建議 11:30 止登，12:15 全員撤離至烏石港。",
+    "t_stop_window": "11:30",
+    "t_evac_window": "12:15",
     "is_backup_mode": true
   },
   "level5_advanced_metrics": {
-    "vision_overtopping_rate_pmin": 2.55,
-    "vision_kd_bias": -0.0061,
-    "fno_forecast_mean_hs_m": -0.01,
-    "quantum_topology_coherence": 0.58
+    "vision_overtopping_rate_pmin": 2.66,
+    "vision_kd_bias": -0.0005,
+    "fno_forecast_mean_hs_m": 0.98,
+    "quantum_topology_coherence": 0.53
   },
   "qimen_macro_consensus": {
     "consensus_rate_pct": 85.0,
