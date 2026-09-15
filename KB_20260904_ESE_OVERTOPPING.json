@@ -478,5 +478,17 @@
     "hexagram_id": 55,
     "resolved_residual": 0.1797,
     "status": "DIALECTICAL_SELF_HEALED"
+  },
+  {
+    "timestamp": "2026-09-15 10:31:28 CST",
+    "hexagram_id": 1,
+    "resolved_residual": 0.191,
+    "status": "DIALECTICAL_SELF_HEALED"
+  },
+  {
+    "timestamp": "2026-09-15 10:31:38 CST",
+    "hexagram_id": 55,
+    "resolved_residual": 0.179,
+    "status": "DIALECTICAL_SELF_HEALED"
   }
 ]
