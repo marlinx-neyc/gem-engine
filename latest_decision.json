@@ -1,45 +1,56 @@
 {
-  "version": "v36D.160.0 Green Pass & Full Chart Master",
-  "timestamp": "2026-09-15 14:10:36 CST",
-  "decision": "🟢 放行靠泊",
-  "confidence_score": 85.0,
-  "confidence_label": "🟢 85.0% [奇門與模型備援 PASS]",
-  "hard_veto_alert": false,
+  "version": "v36D.180.0 Qimen Unblind & Official Closure RL Master",
+  "timestamp": "2026-09-15 16:59:23 CST",
+  "decision": "🔴 封島/防颱",
+  "confidence_score": 100.0,
+  "confidence_label": "🟢 100.0% [完整同化 PASS]",
+  "hard_veto_alert": true,
   "physics_metrics": {
-    "hs_pier_m": 0.85,
-    "w_local_ms": 6.2,
-    "w_effective_ms": 5.99,
-    "tide_eta_m": 1.2,
-    "s_quat_m": 0.82,
-    "ukc_m": 7.28,
-    "fb_pier_m": 2.0,
-    "slope_landslide_risk": 0.1,
-    "adaptive_alpha": 0.71,
-    "historical_similarity": 0.95,
-    "has_veto": false
+    "hs_pier_m": 3.71,
+    "w_local_ms": 8.5,
+    "w_effective_ms": 6.01,
+    "ukc_m": 0.27,
+    "fb_pier_m": 0.15,
+    "pass_hs": false,
+    "pass_w": true,
+    "pass_ukc": false,
+    "pass_fb": false,
+    "has_veto": true,
+    "kd": 1.0,
+    "kw": 1.0,
+    "adaptive_alpha": 0.85
   },
   "guerrilla_dispatch": {
-    "berthing_pier": "【北岸碼頭】",
-    "evacuation_pier": "【北岸碼頭】 -> 備援【烏石港】",
+    "berthing_pier": "【防颱避風/禁止靠泊】",
+    "evacuation_pier": "【強制撤離】 -> 返航【烏石港】",
     "early_warning_vector": {
-      "t60_qimen_warning": "🟡 T-60 氣場與颱壓預警：奇門同化匹配率 85.0% >= 70%，已解鎖 64D 拓撲 Attention Gate (Macro Bias 0.40)",
-      "t45_wave_steep_warning": "🟢 T-45 正常",
-      "t30_pier_shift_warning": "🟢 T-30 正常"
+      "t60_qimen_warning": "🟡 T-60 氣場預警：奇門同化匹配率 100.0% >= 70%，已解鎖 64D 拓撲 Macro Bias 0.40",
+      "t45_wave_steep_warning": "🟡 T-45 湧浪海象預警：長浪週期 Tp=15.5s (>10.0s Kd=1.00 港池共振) 趨勢預警",
+      "t30_pier_shift_warning": "🟡 T-30 移防預警：風向偏轉 (Δθ=45.0° >= 35° 側風) 且橫流 0.9kts，指引切換至【南岸權宜碼頭】"
     },
-    "tactical_summary": "📌 游擊處置決策：風向夾角 Δθ=15.0° (<45° 迎風位)，游擊調撥維持【北岸碼頭】靠泊。預計 14:30 評估止登，15:15 完成分流。（三方案總結：方案A(傳統官方): 僅憑風速 6.2m/s 評估與方案B(氣象署): 缺乏港池越浪、湧浪週期與 Squat 數據預估全天開放；方案C(GEM-V36D Ground Truth): 依攻角風速 5.99m/s、湧浪 Kd=1.00 與動態門檻 7.67m/s (奇門與模型備援推算PASS)評估有效風速、湧浪與 UKC 裕深在安全門檻內）",
-    "t_stop_window": "14:30",
-    "t_evac_window": "15:15",
-    "is_backup_mode": true
+    "tactical_summary": "⚠️ 三方案定性定量總結：方案A(傳統官方): 僅憑風速 8.5m/s 評估與方案B(氣象署): 缺乏港池越浪、湧浪週期與 Squat 數據預判放行/限縮；方案C(GEM-V36D Ground Truth): 依攻角風速 6.01m/s、湧浪 Kd=1.00 與奇門解盲門檻 7.02m/s精確比對全海象歷史智庫與奇門解盲(α=0.65)，判定【剛性熔斷】！游擊調度決策：官方公告預警封島。建議 17:11 止登，17:56 全員撤離至烏石港。",
+    "t_stop_window": "17:11",
+    "t_evac_window": "17:56",
+    "is_backup_mode": false,
+    "open_island_0730": "🔴 封島",
+    "open_island_1630_tomorrow": "🔴 預警封島"
   },
   "level5_advanced_metrics": {
-    "vision_overtopping_rate_pmin": 2.51,
-    "vision_kd_bias": 0.0033,
-    "fno_forecast_mean_hs_m": -0.08,
-    "quantum_topology_coherence": 0.46
+    "vision_overtopping_rate_pmin": 1.31,
+    "vision_kd_bias": 0.0295,
+    "vessel_hydrodynamics": {
+      "vessel_name": "凱鯨號 (穿浪雙體船)",
+      "vessel_type": "CATAMARAN",
+      "dynamic_squat_m": 0.34,
+      "roll_deg": 3.2,
+      "pitch_deg": 3.4
+    },
+    "fno_forecast_mean_hs_m": 1.58,
+    "quantum_topology_coherence": 0.4682
   },
   "qimen_macro_consensus": {
-    "consensus_rate_pct": 85.0,
+    "consensus_rate_pct": 100.0,
     "macro_advisory_enabled": true,
-    "qimen_status_prompt": "🔮 奇門氣場匹配率達 85.0% (>=70%)，已啟動 Attention Gate 宏觀參研與訊息差備援"
+    "qimen_status_prompt": "🔮 奇門氣場匹配率達 100.0% (>=70%)，已啟動 Attention Gate 宏觀解盲與預警性門檻對齊"
   }
 }
