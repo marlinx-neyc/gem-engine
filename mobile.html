@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>GEM-V36D 龜山島戰情控制台 (Mobile Master)</title>
+    <title>GEM-V36D 龜山島戰情控制台 (Mobile Master v36D.160.0)</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #0f172a; color: #e2e8f0; padding: 12px; width: 100vw; min-height: 100vh; font-variant-numeric: tabular-nums; }
@@ -26,12 +26,13 @@
         .badge-pass { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
 
         .dispatch-mobile-box { background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; color: #fef08a; padding: 8px; border-radius: 6px; font-size: 11px; font-weight: 600; margin-top: 6px; line-height: 1.4; }
-        #staleAlertMob { display: none; background: #ef4444; color: white; padding: 10px; border-radius: 6px; font-size: 12px; font-weight: bold; text-align: center; margin-bottom: 10px; }
+        #staleAlertMob { display: none; color: white; padding: 10px; border-radius: 6px; font-size: 12px; font-weight: bold; text-align: center; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-    <div id="staleAlertMob">🚨 警告：實體觸發物理 VETO 熔斷或數據超過 30 秒停滯！</div>
+    <!-- 手持端動態 Banner 分流容器 -->
+    <div id="staleAlertMob"></div>
 
     <!-- 置頂狀態卡片 -->
     <div class="mobile-card" style="border-left: 4px solid #10b981;" id="mobHeaderCard">
@@ -41,7 +42,7 @@
         </div>
         <div class="metric-row"><label>即時時間</label><div class="val-group" id="mobLiveClock">10:52:52 CST</div></div>
         <div class="metric-row"><label>SSOT 同化</label><div class="val-group" id="mobSsotTime">--</div></div>
-        <div class="metric-row"><label>心跳通報</label><div class="val-group" style="color: #38bdf8;" id="mobHeartbeat">176 次</div></div>
+        <div class="metric-row"><label>心跳通報</label><div class="val-group" style="color: #38bdf8;" id="mobHeartbeat">194 次</div></div>
     </div>
 
     <!-- 1. PINN 水文極值 -->
@@ -80,18 +81,18 @@
         </div>
     </div>
 
-    <!-- 2. 預警時窗與當日/明日開島處置 -->
+    <!-- 2. 預警時窗與開島處置 -->
     <div class="mobile-card">
         <div class="mobile-header"><h2>2. 預警時窗與開島處置</h2></div>
         <div style="font-size: 11px; color: #cbd5e1; line-height: 1.6;">
-            <p>• <b>07:30 當日開島</b>：官方放行 | GEM <span id="mobOpen0730" style="color: #10b981; font-weight: bold;">🟢 可開島</span></p>
+            <p>• <b>07:30 當日開島</b>：官方放行 | GEM <span id="mobOpen0730" style="font-weight: bold;">🟢 可開島</span></p>
             <p>• 10:50 預警演練 | 11:20 止登【南岸】</p>
             <p>• 13:50 清島演練 | 14:20 強制撤離【烏石港】</p>
-            <p>• <b>16:30 明日開島</b>：官方暫定 | GEM <span id="mobOpen1630Tomorrow" style="color: #ef4444; font-weight: bold;">🔴 預警封島</span></p>
+            <p>• <b>16:30 明日開島</b>：官方暫定 | GEM <span id="mobOpen1630Tomorrow" style="font-weight: bold;">🔴 預警封島</span></p>
         </div>
     </div>
 
-    <!-- 3. ⚓ 游擊調度卡片 (含戰術處置決策) -->
+    <!-- 3. ⚓ 游擊調度卡片 -->
     <div class="mobile-card" style="border-color: #f59e0b;">
         <div class="mobile-header"><h2 style="color: #f59e0b;">3. ⚓ 游擊調度與超前預警</h2></div>
         <div class="metric-row"><label>靠泊碼頭</label><div class="val-group" id="mobBerthing" style="color: #f59e0b;">【南岸權宜碼頭】</div></div>
@@ -102,7 +103,7 @@
             <div id="mobT30">🟡 T-30 移防預警觸發</div>
         </div>
         <div class="dispatch-mobile-box" id="mobTacticalSummary">
-            📌 游擊處置決策：觸發全海象 PINN 剛性否決 (有效風速 5.23m/s, 浪高 3.71m, 湧浪 Tp=14.5s)。建議 11:02 止登，11:47 全員撤離至烏石港。
+            📌 游擊處置決策：載入中...
         </div>
     </div>
 
@@ -117,7 +118,7 @@
     </div>
 
     <script>
-        let heartbeatCounter = 176;
+        let heartbeatCounter = 194;
         function updateMobClock() {
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');
@@ -141,6 +142,12 @@
                 const safeFix = (val, def=0.0) => Number(val ?? def).toFixed(2);
                 const isVeto = data.hard_veto_alert || false;
 
+                // 時間差計算 (雙重過期判斷)
+                let ssotTime = data.timestamp ? new Date(data.timestamp.replace(' CST', '')).getTime() : 0;
+                let timeDiffSec = ssotTime > 0 ? Math.abs(Date.now() - ssotTime) / 1000 : 0;
+                let isBackup = data.guerrilla_dispatch?.is_backup_mode || false;
+                let isStale = timeDiffSec > 30 && !isBackup;
+
                 document.getElementById('mobSsotTime').textContent = data.timestamp || '--';
                 
                 const statusBadge = document.getElementById('mobStatusBadge');
@@ -149,6 +156,10 @@
                     statusBadge.textContent = '🔴 0.0% VETO';
                     statusBadge.style.background = '#ef4444';
                     mobHeaderCard.style.borderLeftColor = '#ef4444';
+                } else if (isBackup) {
+                    statusBadge.textContent = '🟢 85.0% PASS';
+                    statusBadge.style.background = '#10b981';
+                    mobHeaderCard.style.borderLeftColor = '#10b981';
                 } else {
                     statusBadge.textContent = data.confidence_label || '🟢 100.0% PASS';
                     statusBadge.style.background = '#10b981';
@@ -190,9 +201,9 @@
                 document.getElementById('mobEvac').textContent = guerrilla.evacuation_pier || '--';
                 document.getElementById('mobTacticalSummary').textContent = guerrilla.tactical_summary || '無';
 
-                // 開島時窗動態綁定
+                // 雙端開島時窗動態綁定
                 const mobOpen0730 = document.getElementById('mobOpen0730');
-                mobOpen0730.textContent = guerrilla.open_island_0730 || '🔴 封島';
+                mobOpen0730.textContent = guerrilla.open_island_0730 || '🟢 可開島';
                 mobOpen0730.style.color = (guerrilla.open_island_0730 || '').includes('🟢') ? '#10b981' : '#ef4444';
 
                 const mobOpen1630 = document.getElementById('mobOpen1630Tomorrow');
@@ -210,7 +221,19 @@
                 document.getElementById('mobCV').textContent = `${safeFix(level5.vision_overtopping_rate_pmin, 1.31)} p/min / ${safeFix(physics.s_quat_m, 0.82)}m`;
                 document.getElementById('mobFNO').textContent = `${safeFix(level5.fno_forecast_mean_hs_m, 1.58)}m / ${safeFix(level5.quantum_topology_coherence, 0.47)}`;
 
-                document.getElementById('staleAlertMob').style.display = isVeto ? 'block' : 'none';
+                // 恪守 v36D.160.0 規範之動態 Banner 切換
+                const mobBanner = document.getElementById('staleAlertMob');
+                if (isVeto) {
+                    mobBanner.style.display = 'block';
+                    mobBanner.style.background = '#ef4444';
+                    mobBanner.textContent = '🚨 警示：實體觸發物理 VETO 熔斷（浪高/風速/水深超標），強制執行防颱封島管制！';
+                } else if (isStale) {
+                    mobBanner.style.display = 'block';
+                    mobBanner.style.background = '#f59e0b';
+                    mobBanner.textContent = '⚠️ 警示：雙重遙測中斷且數據超過 30 秒未更新，進入過期唯讀保護模式！';
+                } else {
+                    mobBanner.style.display = 'none'; // 備援放行與常規放行時 100% 隱藏 Banner
+                }
 
             } catch (err) {
                 console.warn("Mobile SSOT 讀取失敗:", err);
