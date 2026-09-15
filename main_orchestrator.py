@@ -29,34 +29,23 @@ from pydantic import BaseModel, Field
 # ==============================================================================
 try:
     from google.colab import userdata
-
     IN_COLAB = True
 except ImportError:
     IN_COLAB = False
 
 try:
     import truststore
-
     truststore.inject_into_ssl()
     print("🔒 已啟用作業系統 Native Trust Store，維持 HTTPS 嚴格驗證")
 except Exception:
     pass
 
-
 def auto_inject_api_secrets():
     secret_keys = [
-        "CWA_API_KEY",
-        "BIGGIS_API_KEY",
-        "GEMINI_API_KEY",
-        "GITHUB_TOKEN",
-        "CDSE_CLIENT_ID",
-        "CDSE_CLIENT_SECRET",
-        "CDS_API_KEY",
-        "CMEMS_USER",
-        "CMEMS_PASS",
-        "TDX_CLIENT_ID",
-        "TDX_CLIENT_SECRET",
-        "ALERT_WEBHOOK_URL",
+        "CWA_API_KEY", "BIGGIS_API_KEY", "GEMINI_API_KEY", "GITHUB_TOKEN",
+        "CDSE_CLIENT_ID", "CDSE_CLIENT_SECRET", "CDS_API_KEY",
+        "CMEMS_USER", "CMEMS_PASS", "TDX_CLIENT_ID", "TDX_CLIENT_SECRET",
+        "ALERT_WEBHOOK_URL"
     ]
     if IN_COLAB:
         for key in secret_keys:
@@ -67,14 +56,12 @@ def auto_inject_api_secrets():
             except Exception:
                 pass
 
-
 auto_inject_api_secrets()
 
 # ==============================================================================
 # 1. 剛性四層/六重物理防線與水動力算子 (Physics & VETO Engine)
 # ==============================================================================
 MODEL_WEIGHTS_FILE = "model_v36D_latest.pt"
-
 
 class PhysicsEngine:
     """龜山島剛性四層物理防線與微觀水動力算子引擎"""
@@ -162,9 +149,8 @@ class PhysicsEngine:
             "adaptive_alpha": adaptive_alpha,
         }
 
-
 # ==============================================================================
-# 2. Level 5 高維邊緣算子模組 (Level 5 Advanced Operators)
+# 2. Level 5 高維邊緣算子模組 (Level 5 Advanced Edge Operators)
 # ==============================================================================
 class VisionPINNEdgeNet(nn.Module):
     """Vision-PINN 邊緣視覺越浪算子：即時解析 CCTV 影像張量"""
@@ -190,9 +176,7 @@ class VisionPINNEdgeNet(nn.Module):
         out = self.fc(self.conv(x).view(x.size(0), -1))
         return out[:, 0] * 5.0, (out[:, 1] - 0.5) * 0.2
 
-
 class SpectralConv1d(nn.Module):
-
     def __init__(self, in_c, out_c, modes):
         super().__init__()
         self.modes = modes
@@ -205,17 +189,12 @@ class SpectralConv1d(nn.Module):
         B = x.shape[0]
         x_ft = torch.fft.rfft(x)
         out_ft = torch.zeros(
-            B,
-            self.weights.shape[1],
-            x.size(-1) // 2 + 1,
-            dtype=torch.cfloat,
-            device=x.device,
+            B, self.weights.shape[1], x.size(-1) // 2 + 1, dtype=torch.cfloat, device=x.device
         )
         out_ft[:, :, : self.modes] = torch.einsum(
             "bix,iox->box", x_ft[:, :, : self.modes], self.weights
         )
         return torch.fft.irfft(out_ft, n=x.size(-1))
-
 
 class FNO1dWaveSpectralForecaster(nn.Module):
     """FNO 100ms 超速頻譜預報算子：推演未來 3 小時港池平均波高"""
@@ -233,14 +212,11 @@ class FNO1dWaveSpectralForecaster(nn.Module):
         x_out = F.gelu(self.conv0(x_in) + self.w0(x_in)).permute(0, 2, 1)
         return self.fc2(self.fc1(x_out)).squeeze(-1)
 
-
 class VesselMMSIHydrodynamics:
     """MMSI 專屬水動力算子：精算雙體客輪深水蹲沉量 (Squat) 與 6DOF 姿態"""
 
     @staticmethod
-    def compute_dynamics(
-        vessel_type: str, speed_knots: float
-    ) -> Dict[str, float]:
+    def compute_dynamics(vessel_type: str, speed_knots: float) -> Dict[str, float]:
         v_ms = speed_knots * 0.51444
         if vessel_type == "CATAMARAN":
             squat = 0.08 * (v_ms**2) / 9.81
@@ -255,7 +231,6 @@ class VesselMMSIHydrodynamics:
             "roll_deg": round(roll, 1),
             "pitch_deg": round(pitch, 1),
         }
-
 
 class QuantumTopology64DEngine(nn.Module):
     """64D 太乙奇門量子拓撲同化器"""
@@ -272,23 +247,15 @@ class QuantumTopology64DEngine(nn.Module):
         r, i = self.proj_r(vec64), self.proj_i(vec64)
         return self.gate(torch.sqrt(r**2 + i**2 + 1e-8))
 
-
 # ==============================================================================
 # 3. 象數編碼器、37D 特徵提取器與神經網路
 # ==============================================================================
 def map_xian_heng_hexagram(state_vector: List[float]) -> int:
     thresholds = [1.20, 10.0, 10.80, 1.50, 0.50, 500.0, 800.0, 15.0]
-    binary_bits = [
-        1 if val > th else 0 for val, th in zip(state_vector, thresholds)
-    ]
-    outer_trigram = (
-        (binary_bits[0] << 2) | (binary_bits[1] << 1) | binary_bits[2]
-    )
-    inner_trigram = (
-        (binary_bits[3] << 2) | (binary_bits[4] << 1) | binary_bits[5]
-    )
+    binary_bits = [1 if val > th else 0 for val, th in zip(state_vector, thresholds)]
+    outer_trigram = (binary_bits[0] << 2) | (binary_bits[1] << 1) | binary_bits[2]
+    inner_trigram = (binary_bits[3] << 2) | (binary_bits[4] << 1) | binary_bits[5]
     return (outer_trigram * 8) + inner_trigram + 1
-
 
 def get_xian_heng_loss_weights(hexagram_id: int) -> Dict[str, float]:
     DANGEROUS_HEXAGRAMS = [29, 3, 39, 47]
@@ -296,7 +263,6 @@ def get_xian_heng_loss_weights(hexagram_id: int) -> Dict[str, float]:
         return {"w_heng": 0.85, "w_xian": 0.15, "veto_penalty": -9999.0}
     else:
         return {"w_heng": 0.30, "w_xian": 0.70, "veto_penalty": 0.0}
-
 
 class UnifiedMarineTelemetry(BaseModel):
     sender_id: str = Field(default="CWA_API_REALTIME")
@@ -315,108 +281,33 @@ class UnifiedMarineTelemetry(BaseModel):
     typhoon_dist_km: float = Field(default=650.0)
     pressure_gradient_2d: float = Field(default=1.10)
 
-
 class GEM37DNormalizedFeatureExtractor:
-
-    BOUNDS = np.array(
-        [
-            [0.0, 10.0],
-            [0.0, 50.0],
-            [-1.0, 5.0],
-            [0.0, 5.0],
-            [0.0, 5.0],
-            [0.0, 20.0],
-            [0.0, 10.0],
-            [0.0, 100.0],
-            [0.0, 0.5],
-            [1.0, 2.5],
-            [0.0, 90.0],
-            [0.0, 0.1],
-            [0.0, 0.5],
-            [0.0, 5.0],
-            [0.0, 20.0],
-            [0.0, 1.0],
-            [0.0, 15.0],
-            [-1.0, 1.0],
-            [-0.5, 0.5],
-            [0.0, 1.0],
-            [0.0, 1.0],
-            [0.0, 1000.0],
-            [0.0, 10.0],
-            [0.0, 25.0],
-            [0.0, 1.0],
-            [-1.0, 1.0],
-            [-1.0, 1.0],
-            [0.0, 1.0],
-            [0.0, 3.0],
-            [0.0, 2.0],
-            [0.0, 18.6],
-            [0.0, 60.0],
-            [0.0, 1.0],
-            [0.0, 24.0],
-            [0.0, 100.0],
-            [0.0, 1.0],
-            [0.0, 1.0],
-        ],
-        dtype=np.float32,
-    )
+    BOUNDS = np.array([
+        [0.0, 10.0], [0.0, 50.0], [-1.0, 5.0], [0.0, 5.0], [0.0, 5.0],
+        [0.0, 20.0], [0.0, 10.0], [0.0, 100.0], [0.0, 0.5], [1.0, 2.5],
+        [0.0, 90.0], [0.0, 0.1], [0.0, 0.5], [0.0, 5.0], [0.0, 20.0],
+        [0.0, 1.0], [0.0, 15.0], [-1.0, 1.0], [-0.5, 0.5], [0.0, 1.0],
+        [0.0, 1.0], [0.0, 1000.0], [0.0, 10.0], [0.0, 25.0], [0.0, 1.0],
+        [-1.0, 1.0], [-1.0, 1.0], [0.0, 1.0], [0.0, 3.0], [0.0, 2.0],
+        [0.0, 18.6], [0.0, 60.0], [0.0, 1.0], [0.0, 24.0], [0.0, 100.0], [0.0, 1.0],
+        [0.0, 1.0]
+    ], dtype=np.float32)
 
     def build_normalized_vector(self, t: UnifiedMarineTelemetry) -> np.ndarray:
-        raw_vec = np.array(
-            [
-                t.hs_cwa,
-                t.w_cwa,
-                t.tide_eta_m,
-                0.25,
-                1.0,
-                1.5,
-                0.8,
-                35.0,
-                0.08,
-                1.15,
-                25.0,
-                0.025,
-                0.04,
-                1.20,
-                t.slope_landslide_risk,
-                float(t.active_pier_select),
-                t.namr_multibeam_depth_m,
-                0.15,
-                0.05,
-                0.15,
-                0.10,
-                t.typhoon_dist_km,
-                t.pressure_gradient_2d,
-                t.tp_s,
-                0.5,
-                0.5,
-                0.5,
-                0.35,
-                1.15,
-                0.20,
-                9.3,
-                30.0,
-                0.0,
-                15.0,
-                t.qimen_consensus_pct,
-                0.2,
-                t.official_closure_status,
-            ],
-            dtype=np.float32,
-        )
+        raw_vec = np.array([
+            t.hs_cwa, t.w_cwa, t.tide_eta_m, 0.25, 1.0, 1.5, 0.8, 35.0, 0.08, 1.15,
+            25.0, 0.025, 0.04, 1.20, t.slope_landslide_risk, float(t.active_pier_select), t.namr_multibeam_depth_m,
+            0.15, 0.05, 0.15, 0.10, t.typhoon_dist_km, t.pressure_gradient_2d, t.tp_s, 0.5,
+            0.5, 0.5, 0.35, 1.15, 0.20, 9.3, 30.0, 0.0, 15.0, t.qimen_consensus_pct, 0.2,
+            t.official_closure_status
+        ], dtype=np.float32)
         return np.clip(
-            (raw_vec - self.BOUNDS[:, 0])
-            / (self.BOUNDS[:, 1] - self.BOUNDS[:, 0] + 1e-6),
-            0.0,
-            1.0,
+            (raw_vec - self.BOUNDS[:, 0]) / (self.BOUNDS[:, 1] - self.BOUNDS[:, 0] + 1e-6),
+            0.0, 1.0
         )
-
 
 class LoRAAdapter(nn.Module):
-
-    def __init__(
-        self, in_features: int = 37, out_features: int = 4, rank: int = 4
-    ):
+    def __init__(self, in_features: int = 37, out_features: int = 4, rank: int = 4):
         super().__init__()
         self.lora_A = nn.Parameter(torch.randn(in_features, rank) * 0.01)
         self.lora_B = nn.Parameter(torch.zeros(rank, out_features))
@@ -425,9 +316,7 @@ class LoRAAdapter(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return (x @ self.lora_A @ self.lora_B) * self.scale
 
-
 class XianHengDialecticalPolicyNet(nn.Module):
-
     def __init__(self, state_dim: int = 37, action_dim: int = 4):
         super().__init__()
         self.backbone = nn.Sequential(
@@ -440,10 +329,7 @@ class XianHengDialecticalPolicyNet(nn.Module):
         )
 
     def forward(
-        self,
-        x: torch.Tensor,
-        hexagram_id: int,
-        qimen_consensus_pct: float = 100.0,
+        self, x: torch.Tensor, hexagram_id: int, qimen_consensus_pct: float = 100.0
     ) -> torch.Tensor:
         macro_weight = 0.40 if qimen_consensus_pct >= 70.0 else 0.15
         base_logits = self.backbone(x)
@@ -458,20 +344,13 @@ class XianHengDialecticalPolicyNet(nn.Module):
         return torch.softmax(combined_logits, dim=-1)
 
     def hot_swap_adapter(self, hexagram_id: int, new_adapter_state_dict: dict):
-        self.hexagram_adapters[str(hexagram_id)].load_state_dict(
-            new_adapter_state_dict
-        )
-
+        self.hexagram_adapters[str(hexagram_id)].load_state_dict(new_adapter_state_dict)
 
 # ==============================================================================
 # 4. 游擊調度算子與生產管線執行 (Master Execution Pipeline)
 # ==============================================================================
 class DynamicGuerrillaDispatchEngine:
-
-    def __init__(
-        self,
-        historical_kb_path: str = "KB_20260904_ESE_OVERTOPPING.json",
-    ):
+    def __init__(self, historical_kb_path: str = "KB_20260904_ESE_OVERTOPPING.json"):
         self.kb_path = historical_kb_path
 
     def calculate_dynamic_dispatch(
@@ -509,31 +388,14 @@ class DynamicGuerrillaDispatchEngine:
                 with open(self.kb_path, "r", encoding="utf-8") as f:
                     hist_records = json.load(f)
                     if isinstance(hist_records, list) and len(hist_records) > 0:
-                        residuals = [
-                            rec.get("resolved_residual", 0.0)
-                            for rec in hist_records
-                        ]
-                        high_risk_count = sum(
-                            1 for r in residuals if r > 0.15
-                        )
+                        residuals = [rec.get("resolved_residual", 0.0) for rec in hist_records]
+                        high_risk_count = sum(1 for r in residuals if r > 0.15)
                         if high_risk_count > 0:
                             alpha_tune = round(
-                                max(
-                                    0.65,
-                                    alpha_tune
-                                    - (high_risk_count / len(hist_records))
-                                    * 0.25,
-                                ),
-                                2,
+                                max(0.65, alpha_tune - (high_risk_count / len(hist_records)) * 0.25), 2
                             )
                             max_similarity = round(
-                                min(
-                                    0.99,
-                                    0.70
-                                    + (high_risk_count / len(hist_records))
-                                    * 0.25,
-                                ),
-                                2,
+                                min(0.99, 0.70 + (high_risk_count / len(hist_records)) * 0.25), 2
                             )
             except Exception:
                 pass
@@ -545,40 +407,26 @@ class DynamicGuerrillaDispatchEngine:
         effective_hs_limit = round(1.20 * alpha_tune, 2)
 
         t60_unlocked = qimen_consensus_pct >= 70.0
-        t45_warn = (
-            hs_pier > 1.00
-            or (tp_swell > 10.0 and hs_pier > 0.75)
-            or (w_eff > 6.0)
-        )
+        t45_warn = hs_pier > 1.00 or (tp_swell > 10.0 and hs_pier > 0.75) or (w_eff > 6.0)
         t30_warn = delta_theta >= 35.0 or current_kts >= 1.8
 
         early_warning_vector = {
             "t60_qimen_warning": (
-                f"🟡 T-60 氣場預警：奇門同化匹配率 {qimen_consensus_pct:.1f}% >="
-                " 70%，已解鎖 64D 拓撲 Macro Bias 0.40"
-                if t60_unlocked
-                else "🟢 T-60 氣場正常"
+                f"🟡 T-60 氣場預警：奇門同化匹配率 {qimen_consensus_pct:.1f}% >= 70%，已解鎖 64D 拓撲 Macro Bias 0.40"
+                if t60_unlocked else "🟢 T-60 氣場正常"
             ),
             "t45_wave_steep_warning": (
-                f"🟡 T-45 湧浪海象預警：長浪週期 Tp={tp_swell:.1f}s (>10.0s Kd=1.00"
-                " 港池共振) 趨勢預警"
-                if t45_warn
-                else "🟢 T-45 正常"
+                f"🟡 T-45 湧浪海象預警：長浪週期 Tp={tp_swell:.1f}s (>10.0s Kd=1.00 港池共振) 趨勢預警"
+                if t45_warn else "🟢 T-45 正常"
             ),
             "t30_pier_shift_warning": (
-                f"🟡 T-30 移防預警：風向偏轉 (Δθ={delta_theta:.1f}° >= 35° 側風)"
-                f" 且橫流 {current_kts:.1f}kts，指引切換至【南岸權宜碼頭】"
-                if t30_warn
-                else "🟢 T-30 正常"
+                f"🟡 T-30 移防預警：風向偏轉 (Δθ={delta_theta:.1f}° >= 35° 側風) 且橫流 {current_kts:.1f}kts，指引切換至【南岸權宜碼頭】"
+                if t30_warn else "🟢 T-30 正常"
             ),
         }
 
         now_dt = datetime.now(timezone(timedelta(hours=8)))
-        margin_min = (
-            max(0, int((effective_w_limit - w_eff) * 12))
-            if w_eff < effective_w_limit
-            else 0
-        )
+        margin_min = max(0, int((effective_w_limit - w_eff) * 12)) if w_eff < effective_w_limit else 0
         t_stop_dt = now_dt + timedelta(minutes=margin_min)
         t_evac_dt = t_stop_dt + timedelta(minutes=45)
         t_stop_str = t_stop_dt.strftime("%H:%M")
@@ -599,47 +447,32 @@ class DynamicGuerrillaDispatchEngine:
             pier_reason = (
                 "官方公告預警封島"
                 if official_closure == 1.0
-                else (
-                    f"觸發全海象 PINN 剛性否決 (有效風速 {w_eff:.2f}m/s, 浪高"
-                    f" {hs_pier:.2f}m, 湧浪 Tp={tp_swell:.1f}s)"
-                )
+                else f"觸發全海象 PINN 剛性否決 (有效風速 {w_eff:.2f}m/s, 浪高 {hs_pier:.2f}m, 湧浪 Tp={tp_swell:.1f}s)"
             )
         elif delta_theta >= 35.0:
             berthing = "【南岸權宜碼頭】"
             evac = f"{berthing} -> 備援【烏石港】"
-            pier_reason = (
-                f"風向夾角轉變至 Δθ={delta_theta:.1f}° (≥35°"
-                " 側風推擠)，游擊調撥至【南岸權宜碼頭】靠泊"
-            )
+            pier_reason = f"風向夾角轉變至 Δθ={delta_theta:.1f}° (≥35° 側風推擠)，游擊調撥至【南岸權宜碼頭】靠泊"
         else:
             berthing = "【北岸碼頭】"
             evac = f"{berthing} -> 備援【烏石港】"
-            pier_reason = (
-                f"風向夹角 Δθ={delta_theta:.1f}° (<35°"
-                " 迎風位)，游擊調撥維持【北岸碼頭】靠泊"
-            )
+            pier_reason = f"風向夾角 Δθ={delta_theta:.1f}° (<35° 迎風位)，游擊調撥維持【北岸碼頭】靠泊"
 
         backup_tag = " (奇門與模型備援推算PASS)" if is_backup_mode else ""
         scheme_a = f"方案A(傳統官方): 僅憑風速 {w_local:.1f}m/s 評估"
         scheme_b = f"方案B(氣象署): 缺乏港池越浪、湧浪週期與 Squat 數據"
-        scheme_c = (
-            f"方案C(GEM-V36D Ground Truth): 依攻角風速 {w_eff:.2f}m/s、湧浪"
-            f" Kd=1.00 與奇門解盲門檻 {effective_w_limit:.2f}m/s{backup_tag}"
-        )
+        scheme_c = f"方案C(GEM-V36D Ground Truth): 依攻角風速 {w_eff:.2f}m/s、湧浪 Kd=1.00 與奇門解盲門檻 {effective_w_limit:.2f}m/s{backup_tag}"
 
         if is_over_limit:
             tactical_summary = (
                 f"⚠️ 三方案定性定量總結：{scheme_a}與{scheme_b}預判放行/限縮；"
                 f"{scheme_c}精確比對全海象歷史智庫與奇門解盲(α={alpha_tune:.2f})，判定【剛性熔斷】！"
-                f"游擊調度決策：{pier_reason}。建議 {t_stop_str} 止登，{t_evac_str}"
-                " 全員撤離至烏石港。"
+                f"游擊調度決策：{pier_reason}。建議 {t_stop_str} 止登，{t_evac_str} 全員撤離至烏石港。"
             )
         else:
             tactical_summary = (
-                f"📌 游擊處置決策：{pier_reason}。預計 {t_stop_str}"
-                f" 評估止登，{t_evac_str} 完成分流。"
-                f"（三方案總結：{scheme_a}與{scheme_b}預估全天開放；{scheme_c}評估有效風速、湧浪與"
-                " UKC 裕深在安全門檻內）"
+                f"📌 游擊處置決策：{pier_reason}。預計 {t_stop_str} 評估止登，{t_evac_str} 完成分流。"
+                f"（三方案總結：{scheme_a}與{scheme_b}預估全天開放；{scheme_c}評估有效風速、湧浪與 UKC 裕深在安全門檻內）"
             )
 
         return {
@@ -656,11 +489,8 @@ class DynamicGuerrillaDispatchEngine:
             "t_evac_window": t_evac_str,
             "is_backup_mode": is_backup_mode,
             "open_island_0730": "🔴 封島" if is_over_limit else "🟢 可開島",
-            "open_island_1630_tomorrow": (
-                "🔴 預警封島" if is_over_limit else "🟢 預測開放"
-            ),
+            "open_island_1630_tomorrow": "🔴 預警封島" if is_over_limit else "🟢 預測開放",
         }
-
 
 def execute_master_pipeline():
     cst_tz = timezone(timedelta(hours=8))
@@ -669,7 +499,7 @@ def execute_master_pipeline():
 
     master_policy = XianHengDialecticalPolicyNet().to(device)
 
-    # 帶入 2026-09-15 17:08 CST 現場長浪越浪實測 Ground Truth 數據
+    # 帶入 2026-09-15 17:11 CST 現場長浪越浪實測 Ground Truth 數據
     telemetry_raw = {
         "hs_cwa": 3.71,
         "w_cwa": 8.50,
@@ -681,7 +511,7 @@ def execute_master_pipeline():
         "slope_landslide_risk": 0.15,
         "namr_multibeam_depth_m": 8.50,
         "qimen_consensus_pct": 100.0,
-        "official_closure_status": 1.0,  # 官方發布封島公告 (Ch 37)
+        "official_closure_status": 1.0,  # 東北角風管處官網發布封島公告 (Ch 37)
         "active_pier_select": 0,
         "typhoon_dist_km": 650.0,
         "pressure_gradient_2d": 1.10,
@@ -717,13 +547,9 @@ def execute_master_pipeline():
         is_backup_mode=False,
     )
 
-    vessel_hydro = VesselMMSIHydrodynamics.compute_dynamics(
-        "CATAMARAN", speed_knots=12.5
-    )
+    vessel_hydro = VesselMMSIHydrodynamics.compute_dynamics("CATAMARAN", speed_knots=12.5)
 
-    decision_text = (
-        "🔴 封島/防颱" if physics_res["has_veto"] else "🟢 放行靠泊"
-    )
+    decision_text = "🔴 封島/防颱" if physics_res["has_veto"] else "🟢 放行靠泊"
 
     ssot_payload = {
         "version": "v36D.180.0 Qimen Unblind & Official Closure RL Master",
@@ -758,10 +584,7 @@ def execute_master_pipeline():
         "qimen_macro_consensus": {
             "consensus_rate_pct": 100.0,
             "macro_advisory_enabled": True,
-            "qimen_status_prompt": (
-                "🔮 奇門氣場匹配率達 100.0%"
-                " (>=70%)，已啟動 Attention Gate 宏觀解盲與預警性門檻對齊"
-            ),
+            "qimen_status_prompt": "🔮 奇門氣場匹配率達 100.0% (>=70%)，已啟動 Attention Gate 宏觀解盲與預警性門檻對齊",
         },
     }
 
@@ -769,7 +592,6 @@ def execute_master_pipeline():
         json.dump(ssot_payload, f, ensure_ascii=False, indent=2)
 
     return ssot_payload
-
 
 if __name__ == "__main__":
     output_ssot = execute_master_pipeline()
