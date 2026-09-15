@@ -1,6 +1,6 @@
 {
   "version": "v36D.200.0 Qimen Unblind & Official Closure RL Master",
-  "timestamp": "2026-09-15 19:41:45 CST",
+  "timestamp": "2026-09-15 23:42:29 CST",
   "decision": "🔴 封島/防颱",
   "confidence_score": 100.0,
   "confidence_label": "🟢 100.0% [完整同化 PASS]",
@@ -28,9 +28,9 @@
       "t45_wave_steep_warning": "🟡 T-45 湧浪海象預警：長浪週期 Tp=15.5s (>10.0s Kd=1.00 港池共振) 趨勢預警",
       "t30_pier_shift_warning": "🟡 T-30 移防預警：風向偏轉 (Δθ=45.0° >= 35° 側風) 且橫流 0.9kts，指引切換至【南岸權宜碼頭】"
     },
-    "tactical_summary": "⚠️ 三方案定性定量總結：方案A(傳統官方): 僅憑風速 8.5m/s 評估與方案B(氣象署): 缺乏港池越浪、湧浪週期與 Squat 數據預判放行/限縮；方案C(GEM-V36D Ground Truth): 依攻角風速 6.01m/s、湧浪 Kd=1.00 與奇門解盲門檻 7.02m/s精確比對全海象歷史智庫與奇門解盲(α=0.65)，判定【剛性熔斷】！游擊調度決策：官方公告預警封島。建議 19:53 止登，20:38 全員撤離至烏石港。",
-    "t_stop_window": "19:53",
-    "t_evac_window": "20:38",
+    "tactical_summary": "⚠️ 三方案定性定量總結：方案A(傳統官方): 僅憑風速 8.5m/s 評估與方案B(氣象署): 缺乏港池越浪、湧浪週期與 Squat 數據預判放行/限縮；方案C(GEM-V36D Ground Truth): 依攻角風速 6.01m/s、湧浪 Kd=1.00 與奇門解盲門檻 7.02m/s精確比對全海象歷史智庫與奇門解盲(α=0.65)，判定【剛性熔斷】！游擊調度決策：官方公告預警封島。建議 23:54 止登，00:39 全員撤離至烏石港。",
+    "t_stop_window": "23:54",
+    "t_evac_window": "00:39",
     "is_backup_mode": false,
     "open_island_0730": "🔴 封島",
     "open_island_1630_tomorrow": "🔴 預警封島"
