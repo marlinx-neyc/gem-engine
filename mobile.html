@@ -31,10 +31,8 @@
 </head>
 <body>
 
-    <!-- 手持端動態 Banner 分流容器 -->
     <div id="staleAlertMob"></div>
 
-    <!-- 置頂狀態卡片 -->
     <div class="mobile-card" style="border-left: 4px solid #10b981;" id="mobHeaderCard">
         <div class="mobile-header">
             <h2><span class="blue-pulse-dot"></span> GEM-V36D 龜山島戰情 (Mobile)</h2>
@@ -42,94 +40,57 @@
         </div>
         <div class="metric-row"><label>即時時間</label><div class="val-group" id="mobLiveClock">10:52:52 CST</div></div>
         <div class="metric-row"><label>SSOT 同化</label><div class="val-group" id="mobSsotTime">--</div></div>
-        <div class="metric-row"><label>心跳通報</label><div class="val-group" style="color: #38bdf8;" id="mobHeartbeat">194 次</div></div>
+        <div class="metric-row"><label>心跳通報</label><div class="val-group" style="color: #38bdf8;" id="mobHeartbeat">196 次</div></div>
     </div>
 
-    <!-- 1. PINN 水文極值 -->
     <div class="mobile-card">
         <div class="mobile-header">
             <h2>1. PINN 水文極值</h2>
-            <span id="mobDecision" style="font-size: 12px; font-weight: bold; color: #ef4444;">🔴 封島/防颱</span>
+            <span id="mobDecision" style="font-size: 12px; font-weight: bold; color: #10b981;">🟢 放行靠泊</span>
         </div>
-        <div class="metric-row">
-            <label>碼頭波高 Hs</label>
-            <div class="val-group">
-                <span id="mobHs">3.71 m</span>
-                <span class="metric-badge badge-veto" id="badgeMobHs">VETO</span>
-            </div>
-        </div>
-        <div class="metric-row">
-            <label>區域風速 W Local</label>
-            <div class="val-group">
-                <span id="mobWLocal">8.50 m/s</span>
-                <span class="metric-badge badge-pass" id="badgeMobWLocal">PASS</span>
-            </div>
-        </div>
-        <div class="metric-row">
-            <label>UKC 富餘水深</label>
-            <div class="val-group">
-                <span id="mobUKC">5.84 m</span>
-                <span class="metric-badge badge-pass" id="badgeMobUKC">PASS</span>
-            </div>
-        </div>
-        <div class="metric-row">
-            <label>預留乾舷 FB Pier</label>
-            <div class="val-group">
-                <span id="mobFB">2.00 m</span>
-                <span class="metric-badge badge-pass" id="badgeMobFB">PASS</span>
-            </div>
-        </div>
+        <div class="metric-row"><label>碼頭波高 Hs</label><div class="val-group" id="mobHs">0.85 m (PASS)</div></div>
+        <div class="metric-row"><label>區域風速 W Local</label><div class="val-group" id="mobWLocal">6.20 m/s (PASS)</div></div>
+        <div class="metric-row"><label>UKC 富餘水深</label><div class="val-group" id="mobUKC">7.28 m (PASS)</div></div>
+        <div class="metric-row"><label>預留乾舷 FB Pier</label><div class="val-group" id="mobFB">2.00 m (PASS)</div></div>
     </div>
 
-    <!-- 2. 預警時窗與開島處置 -->
     <div class="mobile-card">
         <div class="mobile-header"><h2>2. 預警時窗與開島處置</h2></div>
         <div style="font-size: 11px; color: #cbd5e1; line-height: 1.6;">
-            <p>• <b>07:30 當日開島</b>：官方放行 | GEM <span id="mobOpen0730" style="font-weight: bold;">🟢 可開島</span></p>
+            <p>• <b>07:30 當日開島</b>：官方放行 | GEM <span id="mobOpen0730" style="color: #10b981; font-weight: bold;">🟢 可開島</span></p>
             <p>• 10:50 預警演練 | 11:20 止登【南岸】</p>
             <p>• 13:50 清島演練 | 14:20 強制撤離【烏石港】</p>
-            <p>• <b>16:30 明日開島</b>：官方暫定 | GEM <span id="mobOpen1630Tomorrow" style="font-weight: bold;">🔴 預警封島</span></p>
+            <p>• <b>16:30 明日開島</b>：官方暫定 | GEM <span id="mobOpen1630Tomorrow" style="color: #10b981; font-weight: bold;">🟢 預測開放</span></p>
         </div>
     </div>
 
-    <!-- 3. ⚓ 游擊調度卡片 -->
     <div class="mobile-card" style="border-color: #f59e0b;">
         <div class="mobile-header"><h2 style="color: #f59e0b;">3. ⚓ 游擊調度與超前預警</h2></div>
-        <div class="metric-row"><label>靠泊碼頭</label><div class="val-group" id="mobBerthing" style="color: #f59e0b;">【南岸權宜碼頭】</div></div>
-        <div class="metric-row"><label>撤離指引</label><div class="val-group" id="mobEvac">【南岸碼頭】 -&gt; 【烏石港】</div></div>
+        <div class="metric-row"><label>靠泊碼頭</label><div class="val-group" id="mobBerthing" style="color: #38bdf8;">【北岸碼頭】</div></div>
+        <div class="metric-row"><label>撤離指引</label><div class="val-group" id="mobEvac">【北岸碼頭】 -&gt; 【烏石港】</div></div>
         <div style="font-size: 10px; color: #fcd34d; margin-top: 4px; line-height: 1.4;">
-            <div id="mobT60">🟡 T-60 氣場預警觸發</div>
-            <div id="mobT45">🟡 T-45 湧浪陡升預警觸發</div>
-            <div id="mobT30">🟡 T-30 移防預警觸發</div>
+            <div id="mobT60">🟢 T-60 氣場正常</div>
+            <div id="mobT45">🟢 T-45 海象正常</div>
+            <div id="mobT30">🟢 T-30 移防正常</div>
         </div>
         <div class="dispatch-mobile-box" id="mobTacticalSummary">
-            📌 游擊處置決策：載入中...
+            📌 游擊處置決策：海象安全在門檻內，預計 15:30 評估止登，16:15 完成分流。
         </div>
     </div>
 
-    <!-- 4. 🌀 颱風水動力與 Level 5 算子卡片 -->
     <div class="mobile-card" style="border-color: #a855f7;">
         <div class="mobile-header"><h2 style="color: #c084fc;">4. 🌀 颱風水動力與 Level 5 算子</h2></div>
-        <div class="metric-row"><label>北岸區域</label><div class="val-group" style="color: #ef4444;">12.20m/s VETO | 3.95m VETO</div></div>
-        <div class="metric-row"><label>南岸區域</label><div class="val-group" style="color: #f59e0b;">8.50m/s PASS | 3.71m VETO</div></div>
+        <div class="metric-row"><label>北岸區域</label><div class="val-group" style="color: #10b981;">6.20m/s PASS | 0.85m PASS</div></div>
+        <div class="metric-row"><label>南岸區域</label><div class="val-group" style="color: #10b981;">5.80m/s PASS | 0.80m PASS</div></div>
         <div class="metric-row"><label>崩塌風險 / 奇門</label><div class="val-group" id="mobSlope">0.15 / 85.00%</div></div>
-        <div class="metric-row"><label>CV 越浪 / Squat</label><div class="val-group" id="mobCV">1.31 p/min / 0.82m</div></div>
-        <div class="metric-row"><label>FNO 預報 / 拓撲</label><div class="val-group" id="mobFNO">1.58m / 0.47</div></div>
+        <div class="metric-row"><label>CV 越浪 / Squat</label><div class="val-group" id="mobCV">2.56 p/min / 0.82m</div></div>
+        <div class="metric-row"><label>FNO 預報 / 拓撲</label><div class="val-group" id="mobFNO">-0.94m / 0.50</div></div>
     </div>
 
     <script>
-        let heartbeatCounter = 194;
         function updateMobClock() {
             const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            document.getElementById('mobLiveClock').textContent = `${hours}:${minutes}:${seconds} CST`;
-            
-            if (now.getSeconds() % 5 === 0) {
-                heartbeatCounter++;
-                document.getElementById('mobHeartbeat').textContent = `${heartbeatCounter} 次`;
-            }
+            document.getElementById('mobLiveClock').textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')} CST`;
         }
         setInterval(updateMobClock, 1000);
 
@@ -142,7 +103,6 @@
                 const safeFix = (val, def=0.0) => Number(val ?? def).toFixed(2);
                 const isVeto = data.hard_veto_alert || false;
 
-                // 時間差計算 (雙重過期判斷)
                 let ssotTime = data.timestamp ? new Date(data.timestamp.replace(' CST', '')).getTime() : 0;
                 let timeDiffSec = ssotTime > 0 ? Math.abs(Date.now() - ssotTime) / 1000 : 0;
                 let isBackup = data.guerrilla_dispatch?.is_backup_mode || false;
@@ -151,63 +111,40 @@
                 document.getElementById('mobSsotTime').textContent = data.timestamp || '--';
                 
                 const statusBadge = document.getElementById('mobStatusBadge');
-                const mobHeaderCard = document.getElementById('mobHeaderCard');
                 if (isVeto) {
                     statusBadge.textContent = '🔴 0.0% VETO';
                     statusBadge.style.background = '#ef4444';
-                    mobHeaderCard.style.borderLeftColor = '#ef4444';
+                    document.getElementById('mobHeaderCard').style.borderLeftColor = '#ef4444';
                 } else if (isBackup) {
                     statusBadge.textContent = '🟢 85.0% PASS';
                     statusBadge.style.background = '#10b981';
-                    mobHeaderCard.style.borderLeftColor = '#10b981';
+                    document.getElementById('mobHeaderCard').style.borderLeftColor = '#10b981';
                 } else {
                     statusBadge.textContent = data.confidence_label || '🟢 100.0% PASS';
                     statusBadge.style.background = '#10b981';
-                    mobHeaderCard.style.borderLeftColor = '#10b981';
+                    document.getElementById('mobHeaderCard').style.borderLeftColor = '#10b981';
                 }
 
                 document.getElementById('mobDecision').textContent = data.decision || '🟢 放行靠泊';
                 document.getElementById('mobDecision').style.color = isVeto ? '#ef4444' : '#10b981';
 
                 const physics = data.physics_metrics || {};
-                const hsVal = Number(physics.hs_pier_m ?? 0.0);
-                const wVal = Number(physics.w_local_ms ?? 0.0);
-                const ukcVal = Number(physics.ukc_m ?? 5.84);
-                const fbVal = Number(physics.fb_pier_m ?? 2.00);
-
-                document.getElementById('mobHs').textContent = `${hsVal.toFixed(2)} m`;
-                document.getElementById('mobWLocal').textContent = `${wVal.toFixed(2)} m/s`;
-                document.getElementById('mobUKC').textContent = `${ukcVal.toFixed(2)} m`;
-                document.getElementById('mobFB').textContent = `${fbVal.toFixed(2)} m`;
-
-                const updateMobBadge = (id, isVetoCond, vetoTxt, passTxt) => {
-                    const badge = document.getElementById(id);
-                    if (isVetoCond) {
-                        badge.className = "metric-badge badge-veto";
-                        badge.textContent = vetoTxt;
-                    } else {
-                        badge.className = "metric-badge badge-pass";
-                        badge.textContent = passTxt;
-                    }
-                };
-
-                updateMobBadge('badgeMobHs', hsVal > 1.20, 'VETO', 'PASS');
-                updateMobBadge('badgeMobWLocal', wVal >= 10.80, 'VETO', 'PASS');
-                updateMobBadge('badgeMobUKC', ukcVal < 1.50, 'VETO', 'PASS');
-                updateMobBadge('badgeMobFB', fbVal < 0.50, 'VETO', 'PASS');
+                document.getElementById('mobHs').textContent = `${safeFix(physics.hs_pier_m)} m`;
+                document.getElementById('mobWLocal').textContent = `${safeFix(physics.w_local_ms)} m/s`;
+                document.getElementById('mobUKC').textContent = `${safeFix(physics.ukc_m, 5.84)} m`;
+                document.getElementById('mobFB').textContent = `${safeFix(physics.fb_pier_m, 2.00)} m`;
 
                 const guerrilla = data.guerrilla_dispatch || {};
                 document.getElementById('mobBerthing').textContent = guerrilla.berthing_pier || '--';
                 document.getElementById('mobEvac').textContent = guerrilla.evacuation_pier || '--';
                 document.getElementById('mobTacticalSummary').textContent = guerrilla.tactical_summary || '無';
 
-                // 雙端開島時窗動態綁定
                 const mobOpen0730 = document.getElementById('mobOpen0730');
                 mobOpen0730.textContent = guerrilla.open_island_0730 || '🟢 可開島';
                 mobOpen0730.style.color = (guerrilla.open_island_0730 || '').includes('🟢') ? '#10b981' : '#ef4444';
 
                 const mobOpen1630 = document.getElementById('mobOpen1630Tomorrow');
-                mobOpen1630.textContent = guerrilla.open_island_1630_tomorrow || '🔴 預警封島';
+                mobOpen1630.textContent = guerrilla.open_island_1630_tomorrow || '🟢 預測開放';
                 mobOpen1630.style.color = (guerrilla.open_island_1630_tomorrow || '').includes('🟢') ? '#10b981' : '#ef4444';
 
                 const earlyWarn = guerrilla.early_warning_vector || {};
@@ -218,10 +155,9 @@
                 const level5 = data.level5_advanced_metrics || {};
                 const qimen = data.qimen_macro_consensus || {};
                 document.getElementById('mobSlope').textContent = `${safeFix(physics.slope_landslide_risk, 0.15)} / ${safeFix(qimen.consensus_rate_pct, 85.0)}%`;
-                document.getElementById('mobCV').textContent = `${safeFix(level5.vision_overtopping_rate_pmin, 1.31)} p/min / ${safeFix(physics.s_quat_m, 0.82)}m`;
-                document.getElementById('mobFNO').textContent = `${safeFix(level5.fno_forecast_mean_hs_m, 1.58)}m / ${safeFix(level5.quantum_topology_coherence, 0.47)}`;
+                document.getElementById('mobCV').textContent = `${safeFix(level5.vision_overtopping_rate_pmin, 2.56)} p/min / ${safeFix(physics.s_quat_m, 0.82)}m`;
+                document.getElementById('mobFNO').textContent = `${safeFix(level5.fno_forecast_mean_hs_m, -0.94)}m / ${safeFix(level5.quantum_topology_coherence, 0.50)}`;
 
-                // 恪守 v36D.160.0 規範之動態 Banner 切換
                 const mobBanner = document.getElementById('staleAlertMob');
                 if (isVeto) {
                     mobBanner.style.display = 'block';
@@ -232,7 +168,7 @@
                     mobBanner.style.background = '#f59e0b';
                     mobBanner.textContent = '⚠️ 警示：雙重遙測中斷且數據超過 30 秒未更新，進入過期唯讀保護模式！';
                 } else {
-                    mobBanner.style.display = 'none'; // 備援放行與常規放行時 100% 隱藏 Banner
+                    mobBanner.style.display = 'none';
                 }
 
             } catch (err) {
