@@ -6,7 +6,6 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <title>GEM-V36D 龜山島戰情控制台 (Mobile Master)</title>
     <style>
-        /* 手持端輕量化 100% 垂直單欄流 (嚴禁 ECharts DOM) */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #0f172a; color: #e2e8f0; padding: 12px; width: 100vw; min-height: 100vh; }
         
@@ -25,20 +24,17 @@
 </head>
 <body>
 
-    <!-- 剛性 VETO / 過期警示 Banner -->
     <div id="staleAlertMob">🚨 警告：實體觸發物理 VETO 熔斷或數據超過 30 秒停滯！</div>
 
-    <!-- 置頂連線狀態與端側雙時鐘卡片 -->
-    <div class="mobile-card" style="border-left: 5px solid #10b981;">
+    <div class="mobile-card" style="border-left: 5px solid #10b981;" id="mobHeaderCard">
         <div class="mobile-header">
             <h2>GEM-V36D 龜山島戰情 (Mobile)</h2>
             <span class="status-badge" id="mobStatusBadge">🟢 100.0% PASS</span>
         </div>
-        <div class="metric-row"><label>即時時間</label><val id="mobLiveClock">10:20:00 CST</val></div>
+        <div class="metric-row"><label>即時時間</label><val id="mobLiveClock">10:40:00 CST</val></div>
         <div class="metric-row"><label>SSOT 同化</label><val id="mobSsotTime">--</val></div>
     </div>
 
-    <!-- PINN 物理水文與風速卡片 (2x2 網格) -->
     <div class="mobile-card">
         <div class="mobile-header">
             <h2>PINN 物理水文極值</h2>
@@ -50,7 +46,6 @@
         <div class="metric-row"><label>預留乾舷 FB Pier</label><val id="mobFB">2.00 m</val></div>
     </div>
 
-    <!-- ⚓ 游擊式動態調度與預警處置卡片 -->
     <div class="mobile-card" style="border-color: #0284c7;">
         <div class="mobile-header"><h2 style="color: #38bdf8;">⚓ 游擊調度與超前預警</h2></div>
         <div class="metric-row"><label>靠泊碼頭</label><val id="mobBerthing" style="color: #38bdf8;">【北岸碼頭】</val></div>
@@ -65,7 +60,6 @@
         </div>
     </div>
 
-    <!-- 🌀 颱風、水動力與 Level 5 高維算子卡片 -->
     <div class="mobile-card" style="border-color: #a855f7;">
         <div class="mobile-header"><h2 style="color: #c084fc;">🌀 颱風水動力與 Level 5 算子</h2></div>
         <div class="metric-row"><label>龜首崩塌風險比率</label><val id="mobSlope">0.15</val></div>
@@ -74,7 +68,6 @@
         <div class="metric-row"><label>FNO 預報波高</label><val id="mobFNO">0.78 m</val></div>
     </div>
 
-    <!-- 手持端腳本 -->
     <script>
         function updateMobClock() {
             const now = new Date();
@@ -88,16 +81,31 @@
                 if (!response.ok) return;
                 const data = await response.json();
 
+                const safeFix = (val, def=0.0) => Number(val ?? def).toFixed(2);
+                const isVeto = data.hard_veto_alert || false;
+
                 document.getElementById('mobSsotTime').textContent = data.timestamp || '--';
-                document.getElementById('mobStatusBadge').textContent = data.confidence_label || '🟢 PASS';
+                
+                const statusBadge = document.getElementById('mobStatusBadge');
+                if (isVeto) {
+                    statusBadge.textContent = '🔴 0.0% VETO';
+                    statusBadge.style.background = '#ef4444';
+                    document.getElementById('mobHeaderCard').style.borderLeftColor = '#ef4444';
+                } else {
+                    statusBadge.textContent = data.confidence_label || '🟢 100.0% PASS';
+                    statusBadge.style.background = '#10b981';
+                    document.getElementById('mobHeaderCard').style.borderLeftColor = '#10b981';
+                }
+
                 document.getElementById('mobDecision').textContent = data.decision || '🟢 放行靠泊';
+                document.getElementById('mobDecision').style.color = isVeto ? '#ef4444' : '#10b981';
 
                 const physics = data.physics_metrics || {};
-                document.getElementById('mobHs').textContent = `${physics.hs_pier_m || 0.0} m`;
-                document.getElementById('mobWeff').textContent = `${physics.w_effective_ms || 0.0} m/s`;
-                document.getElementById('mobUKC').textContent = `${physics.ukc_m || 5.84} m`;
-                document.getElementById('mobFB').textContent = `${physics.fb_pier_m || 2.00} m`;
-                document.getElementById('mobSlope').textContent = physics.slope_landslide_risk || 0.15;
+                document.getElementById('mobHs').textContent = `${safeFix(physics.hs_pier_m)} m`;
+                document.getElementById('mobWeff').textContent = `${safeFix(physics.w_effective_ms)} m/s`;
+                document.getElementById('mobUKC').textContent = `${safeFix(physics.ukc_m, 5.84)} m`;
+                document.getElementById('mobFB').textContent = `${safeFix(physics.fb_pier_m, 2.00)} m`;
+                document.getElementById('mobSlope').textContent = safeFix(physics.slope_landslide_risk, 0.15);
 
                 const guerrilla = data.guerrilla_dispatch || {};
                 document.getElementById('mobBerthing').textContent = guerrilla.berthing_pier || '--';
@@ -110,13 +118,13 @@
                 document.getElementById('mobT30').textContent = earlyWarn.t30_pier_shift_warning || '🟢 T-30 正常';
 
                 const level5 = data.level5_advanced_metrics || {};
-                document.getElementById('mobCV').textContent = `${level5.vision_overtopping_rate_pmin || 0.0} p/min`;
-                document.getElementById('mobFNO').textContent = `${level5.fno_forecast_mean_hs_m || 0.0} m`;
+                document.getElementById('mobCV').textContent = `${safeFix(level5.vision_overtopping_rate_pmin)} p/min`;
+                document.getElementById('mobFNO').textContent = `${safeFix(level5.fno_forecast_mean_hs_m)} m`;
 
                 const qimen = data.qimen_macro_consensus || {};
-                document.getElementById('mobQimen').textContent = `${qimen.consensus_rate_pct || 100.0}%`;
+                document.getElementById('mobQimen').textContent = `${safeFix(qimen.consensus_rate_pct, 100.0)}%`;
 
-                document.getElementById('staleAlertMob').style.display = data.hard_veto_alert ? 'block' : 'none';
+                document.getElementById('staleAlertMob').style.display = isVeto ? 'block' : 'none';
 
             } catch (err) {
                 console.warn("Mobile SSOT 讀取失敗:", err);
