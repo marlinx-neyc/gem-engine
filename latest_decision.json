@@ -1,6 +1,6 @@
 {
   "version": "v36D.160.0 Green Pass & Full Chart Master",
-  "timestamp": "2026-09-15 12:31:28 CST",
+  "timestamp": "2026-09-15 12:57:35 CST",
   "decision": "🟢 放行靠泊",
   "confidence_score": 85.0,
   "confidence_label": "🟢 85.0% [奇門與模型備援 PASS]",
@@ -26,18 +26,18 @@
       "t45_wave_steep_warning": "🟢 T-45 正常",
       "t30_pier_shift_warning": "🟢 T-30 正常"
     },
-    "tactical_summary": "📌 游擊處置決策：風向夾角 Δθ=15.0° (<45° 迎風位)，游擊調撥維持【北岸碼頭】靠泊。預計 12:51 評估止登，13:36 完成分流。（三方案總結：方案A(傳統官方): 僅憑風速 6.2m/s 評估與方案B(氣象署): 缺乏港池越浪、湧浪週期與 Squat 數據預估全天開放；方案C(GEM-V36D Ground Truth): 依攻角風速 5.99m/s、湧浪 Kd=1.00 與動態門檻 7.67m/s (奇門與模型備援推算PASS)評估有效風速、湧浪與 UKC 裕深在安全門檻內）",
-    "t_stop_window": "12:51",
-    "t_evac_window": "13:36",
+    "tactical_summary": "📌 游擊處置決策：風向夾角 Δθ=15.0° (<45° 迎風位)，游擊調撥維持【北岸碼頭】靠泊。預計 13:17 評估止登，14:02 完成分流。（三方案總結：方案A(傳統官方): 僅憑風速 6.2m/s 評估與方案B(氣象署): 缺乏港池越浪、湧浪週期與 Squat 數據預估全天開放；方案C(GEM-V36D Ground Truth): 依攻角風速 5.99m/s、湧浪 Kd=1.00 與動態門檻 7.67m/s (奇門與模型備援推算PASS)評估有效風速、湧浪與 UKC 裕深在安全門檻內）",
+    "t_stop_window": "13:17",
+    "t_evac_window": "14:02",
     "is_backup_mode": true,
     "open_island_0730": "🟢 可開島",
     "open_island_1630_tomorrow": "🟢 預測開放"
   },
   "level5_advanced_metrics": {
-    "vision_overtopping_rate_pmin": 2.34,
-    "vision_kd_bias": 0.0014,
-    "fno_forecast_mean_hs_m": -0.84,
-    "quantum_topology_coherence": 0.48
+    "vision_overtopping_rate_pmin": 2.4,
+    "vision_kd_bias": -0.0063,
+    "fno_forecast_mean_hs_m": -0.05,
+    "quantum_topology_coherence": 0.55
   },
   "qimen_macro_consensus": {
     "consensus_rate_pct": 85.0,
