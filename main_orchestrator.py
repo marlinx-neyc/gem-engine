@@ -616,7 +616,7 @@ class DynamicGuerrillaDispatchEngine:
             evac = f"{berthing} -> 備援【烏石港】"
             pier_reason = (
                 f"風向夾角 Δθ={delta_theta:.1f}° (<35°"
-                " 迎風位)，游擊調撥維持【北岸碼頭】靠泊"
+                " 迎風位)，游擊調撥維持【北岸碼头】靠泊"
             )
 
         backup_tag = " (奇門與模型備援推算PASS)" if is_backup_mode else ""
@@ -669,7 +669,7 @@ def execute_master_pipeline():
 
     master_policy = XianHengDialecticalPolicyNet().to(device)
 
-    # 帶入 2026-09-15 16:51 CST 現場長浪越浪實測 Ground Truth 數據
+    # 帶入 2026-09-15 17:02 CST 現場長浪越浪實測 Ground Truth 數據
     telemetry_raw = {
         "hs_cwa": 3.71,
         "w_cwa": 8.50,
