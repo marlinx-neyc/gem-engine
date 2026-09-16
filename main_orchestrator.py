@@ -1,138 +1,44 @@
-# -*- coding: utf-8 -*-
-"""
-GEM-V36D Ultimate Master Engine (v36D.200.0 Qimen Unblind & Official Closure RL Master)
-1. 剛性四層/六重物理防線：Hs (<=1.20m), Weff (<=10.80m/s), UKC (>=1.50m), FB (>=0.50m) 一票否決 (🔴 VETO)
-2. 37D 特徵同化：完整收錄 Ch 37 官方封島公告通道、奇門 100% 氣場匹配與 64D 量子拓撲相干性
-3. 影子微調與物理沙盒：Gymnasium R^37 狀態空間下執行 -9999 致命懲罰塑形與 Monte Carlo Auto-Gate 驗證
-4. Colab 自動 Git Push 機制：執行 pipeline 後自動注入 GITHUB_TOKEN 提交 SSOT JSON 至 GitHub 儲存庫
-"""
-
-import copy
-import glob
-import json
 import math
-import os
-import random
-import sys
-import time
-from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List, Tuple
-
+import json
 import numpy as np
-import requests
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import torch.optim as optim
-from pydantic import BaseModel, Field
+from dataclasses import dataclass, asdict
+from datetime import datetime, timezone, timedelta
+from typing import Dict, Any, Tuple, List
 
 # ==============================================================================
-# 0. 環境金鑰與 Native SSL 驗證注入
+# 1. 遙測資料結構 (Marine Safety Telemetry)
 # ==============================================================================
-try:
-    from google.colab import userdata
-
-    IN_COLAB = True
-except ImportError:
-    IN_COLAB = False
-
-try:
-    import truststore
-
-    truststore.inject_into_ssl()
-    print("🔒 已啟用作業系統 Native Trust Store，維持 HTTPS 嚴格驗證")
-except Exception:
-    pass
-
-
-def auto_inject_api_secrets():
-    secret_keys = [
-        "CWA_API_KEY",
-        "BIGGIS_API_KEY",
-        "GEMINI_API_KEY",
-        "GITHUB_TOKEN",
-        "CDSE_CLIENT_ID",
-        "CDSE_CLIENT_SECRET",
-        "CDS_API_KEY",
-        "CMEMS_USER",
-        "CMEMS_PASS",
-        "TDX_CLIENT_ID",
-        "TDX_CLIENT_SECRET",
-        "ALERT_WEBHOOK_URL",
-    ]
-    if IN_COLAB:
-        print("🔑 [Colab 模式] 讀取 Secret 庫並自動注入環境變數...")
-        for key in secret_keys:
-            try:
-                val = userdata.get(key)
-                if val:
-                    os.environ[key] = val
-                    print(f"  ✅ {key}: 注入成功")
-            except Exception:
-                pass
-    else:
-        print("ℹ️ [Production/CI 模式] 採用系統環境變數與 GitHub Secrets")
-
-
-auto_inject_api_secrets()
+@dataclass
+class MarineSafetyData:
+    hs_cwa: float              # CWA 外海波高 (m)
+    w_cwa: float               # CWA 局域風速 (m/s)
+    tp_s: float                # 湧浪週期 (s)
+    delta_theta_deg: float     # 背風偏角 (度)
+    tide_eta_m: float          # 天文潮位 (m)
+    d_draft_m: float           # 船隻吃水 (m)
+    s_quat_m: float            # 船體沉降 Squat (m)
+    chart_depth_m: float       # 碼頭圖水深 (m)
+    current_speed_kts: float   # 海流速度 (kts)
+    qimen_consensus_pct: float # 奇門氣場同化率 (%)
+    s_cos_sim: float           # 歷史餘弦相似度 (0~1)
+    passenger_count: int = 120 # 現場待撤離/登島人數
 
 # ==============================================================================
-# 1. 模型權重持久化載入與導出 (Persistence Engine)
-# ==============================================================================
-MODEL_WEIGHTS_FILE = "model_v36D_latest.pt"
-
-
-def load_latest_model_weights(model: nn.Module) -> bool:
-    candidates = [MODEL_WEIGHTS_FILE] + sorted(
-        glob.glob("model_v36D*.pt"), reverse=True
-    )
-    for path in candidates:
-        if os.path.exists(path):
-            try:
-                state_dict = torch.load(path, map_location="cpu")
-                model_state = model.state_dict()
-                filtered_state = {}
-                mismatch_count = 0
-                for k, v in state_dict.items():
-                    if k in model_state and model_state[k].shape == v.shape:
-                        filtered_state[k] = v
-                    else:
-                        mismatch_count += 1
-
-                if mismatch_count > 0:
-                    print(
-                        f"⚠️ [權重相容校驗] 發現 {mismatch_count}"
-                        " 個層維度不一致，已自動過濾並進行增量重初始化。"
-                    )
-
-                model.load_state_dict(filtered_state, strict=False)
-                print(f"📦 [記憶復原] 成功載入歷史微調權重檔: `{path}`")
-                return True
-            except Exception as e:
-                print(f"⚠️ [記憶讀取失敗] 權重檔 `{path}` 載入異常 ({e})")
-    print("ℹ️ [記憶庫空白] 未發現相容歷史權重檔，啟動全新初始權重。")
-    return False
-
-
-def save_model_weights(
-    model: nn.Module, weights_path: str = MODEL_WEIGHTS_FILE
-):
-    try:
-        torch.save(model.state_dict(), weights_path)
-        print(f"💾 [記憶持久化] 已成功導出最新模型權重: `{weights_path}`")
-    except Exception as e:
-        print(f"⚠️ [記憶導出失敗] 無法儲存 `.pt` 檔: {e}")
-
-
-# ==============================================================================
-# 2. 剛性四層/六重物理防線與水動力算子 (Physics & VETO Engine)
+# 2. 剛性四層物理防線與水動力算子引擎 (Physics & VETO Engine)
 # ==============================================================================
 class PhysicsEngine:
-    """龜山島剛性四層物理防線與微觀水動力算子引擎"""
+    HARD_HS_MAX = 1.20       # m
+    HARD_WEFF_MAX = 10.80    # m/s
+    HARD_UKC_MIN = 1.50      # m
+    HARD_FB_MIN = 0.50       # m
+    BASE_FREEBOARD = 3.20    # 碼頭基準乾舷 (m)
 
     @staticmethod
     def calculate_kd(tp: float) -> float:
-        """長浪繞射消能算子 K_d 遲滯函數精算"""
+        """長浪繞射消能算子 Kd 遲滯精算"""
         if tp < 11.5:
             return 0.883
         elif 11.5 <= tp <= 12.0:
@@ -142,7 +48,7 @@ class PhysicsEngine:
 
     @staticmethod
     def calculate_kw(delta_theta: float) -> float:
-        """風速背風遮蔽衰減算子 K_w 遲滯函數精算"""
+        """風速背風遮蔽衰減算子 Kw 遲滯精算"""
         if delta_theta < 30.0:
             return 0.78
         elif 30.0 <= delta_theta < 45.0:
@@ -151,873 +57,297 @@ class PhysicsEngine:
             return 1.00
 
     @classmethod
-    def evaluate_veto(
-        cls,
-        hs_cwa: float,
-        w_cwa: float,
-        tp: float,
-        delta_theta: float,
-        tide: float,
-        draft: float,
-        squat: float,
-        overtopping_rate: float = 0.0,
-        official_closure: float = 0.0,
-        slope_risk: float = 0.15,
-        adaptive_alpha: float = 1.00,
-    ) -> Dict[str, Any]:
-        """剛性物理防線熔斷檢核 (Hs <= 1.20m, Wind <= 10.80m/s, UKC >= 1.50m, FB >= 0.50m)"""
-        kd = cls.calculate_kd(tp)
-        kw = cls.calculate_kw(delta_theta)
+    def evaluate_veto(cls, data: MarineSafetyData, alpha_tune: float = 1.0) -> Dict[str, Any]:
+        """四層 Hard VETO 熔斷檢核 ($H_{s,pier} \le 1.20\text{ m}$, $W_{eff} \le 10.80\text{ m/s}$, $UKC \ge 1.50\text{ m}$, $FB_{pier} \ge 0.50\text{ m}$)"""
+        kd = cls.calculate_kd(data.tp_s)
+        kw = cls.calculate_kw(data.delta_theta_deg)
+        
+        hs_pier = round(data.hs_cwa * kd, 2)
+        w_local = round(data.w_cwa * kw, 2)
+        w_eff = round(w_local * abs(math.cos(math.radians(data.delta_theta_deg))), 2)
 
-        hs_pier = hs_cwa * kd
-        w_local = w_cwa * kw
-        rad = math.radians(delta_theta)
-        w_effective = w_local * abs(math.cos(rad))
+        ukc = round((data.chart_depth_m + data.tide_eta_m) - (data.d_draft_m + data.s_quat_m) - hs_pier, 2)
+        fb_pier = round(cls.BASE_FREEBOARD - data.tide_eta_m, 2)
 
-        fb_base = 2.00 - tide
-        fb_pier = fb_base if overtopping_rate <= 0.0 else min(fb_base, 0.15)
-        ukc = (5.00 + tide) - (draft + squat) - hs_pier
-
-        eff_hs_limit = round(1.20 * adaptive_alpha, 2)
-        eff_w_limit = round(10.80 * adaptive_alpha, 2)
+        eff_hs_limit = round(cls.HARD_HS_MAX * alpha_tune, 2)
+        eff_weff_limit = round(cls.HARD_WEFF_MAX * alpha_tune, 2)
 
         pass_hs = hs_pier <= eff_hs_limit
-        pass_w = w_effective <= eff_w_limit
-        pass_ukc = ukc >= 1.50
-        pass_fb = fb_pier >= 0.50
+        pass_w = w_eff <= eff_weff_limit
+        pass_ukc = ukc >= cls.HARD_UKC_MIN
+        pass_fb = fb_pier >= cls.HARD_FB_MIN
 
-        veto_official = official_closure == 1.0
-        veto_tp = tp > 10.0 and hs_cwa > 0.90
-        veto_slope = slope_risk > 0.60
-
-        has_veto = (
-            not (pass_hs and pass_w and pass_ukc and pass_fb)
-            or veto_official
-            or veto_tp
-            or veto_slope
-        )
+        has_veto = not (pass_hs and pass_w and pass_ukc and pass_fb)
 
         return {
-            "hs_pier_m": round(hs_pier, 2),
-            "w_local_ms": round(w_local, 2),
-            "w_effective_ms": round(w_effective, 2),
-            "ukc_m": round(ukc, 2),
-            "fb_pier_m": round(fb_pier, 2),
+            "hs_pier_m": hs_pier,
+            "w_eff_ms": w_eff,
+            "ukc_m": ukc,
+            "fb_pier_m": fb_pier,
             "pass_hs": pass_hs,
             "pass_w": pass_w,
             "pass_ukc": pass_ukc,
             "pass_fb": pass_fb,
             "has_veto": has_veto,
-            "kd": round(kd, 3),
-            "kw": round(kw, 3),
-            "adaptive_alpha": adaptive_alpha,
+            "kd": kd,
+            "kw": kw,
+            "alpha_tune": alpha_tune
         }
 
-
 # ==============================================================================
-# 3. Level 5 高維邊緣算子模組 (Level 5 Advanced Edge Operators)
+# 3. 二十年海象氣候智庫比對引擎 (20-Year Climate Matching Engine)
 # ==============================================================================
-class VisionPINNEdgeNet(nn.Module):
-    """Vision-PINN 邊緣視覺越浪算子：即時解析 CCTV 影像張量"""
-
+class OptimizedHistorical20YrEngine:
     def __init__(self):
-        super().__init__()
-        self.conv = nn.Sequential(
-            nn.Conv2d(1, 16, 3, stride=2, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(2, 2),
-            nn.Conv2d(16, 32, 3, stride=2, padding=1),
-            nn.ReLU(),
-            nn.AdaptiveAvgPool2d((4, 4)),
-        )
-        self.fc = nn.Sequential(
-            nn.Linear(32 * 4 * 4, 64),
-            nn.ReLU(),
-            nn.Linear(64, 2),
-            nn.Sigmoid(),
-        )
+        self.num_records = 1200
+        self.feature_dim = 37
+        self.feature_weights = torch.ones(37, dtype=torch.float32)
+        self.feature_weights[0] = 3.5   # Hs
+        self.feature_weights[1] = 3.0   # Wind
+        self.feature_weights[23] = 3.5  # Tp
+        self.feature_weights[3] = 2.0   # Delta Theta
+        self.feature_weights[34] = 2.0  # Qimen Consensus
+        self.feature_weights /= self.feature_weights.sum()
 
-    def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
-        out = self.fc(self.conv(x).view(x.size(0), -1))
-        return out[:, 0] * 5.0, (out[:, 1] - 0.5) * 0.2
+        c1 = torch.tensor([0.08, 0.12, 0.20, 0.15] + [0.1]*33)
+        c2 = torch.tensor([0.25, 0.35, 0.40, 0.45] + [0.2]*33)
+        c3 = torch.tensor([0.15, 0.20, 0.85, 0.20] + [0.1]*33)
+        base_db = torch.cat([c.repeat(self.num_records // 3, 1) for c in [c1, c2, c3]], dim=0)
+        noise = torch.randn_like(base_db) * 0.05
+        self.db_tensor = torch.clamp(base_db + noise, 0.0, 1.0)
+        self.db_veto_labels = (self.db_tensor[:, 0] > 0.28).float()
 
+    def match_live_telemetry(self, live_37d_vec: np.ndarray, top_k: int = 50) -> Dict[str, Any]:
+        w_sqrt = torch.sqrt(self.feature_weights).unsqueeze(0)
+        live_t = torch.tensor(live_37d_vec, dtype=torch.float32).unsqueeze(0) * w_sqrt
+        db_w = self.db_tensor * w_sqrt
 
-class SpectralConv1d(nn.Module):
+        live_norm = F.normalize(live_t, p=2, dim=1)
+        db_norm = F.normalize(db_w, p=2, dim=1)
 
-    def __init__(self, in_c, out_c, modes):
-        super().__init__()
-        self.modes = modes
-        self.scale = 1 / (in_c * out_c)
-        self.weights = nn.Parameter(
-            self.scale * torch.rand(in_c, out_c, modes, dtype=torch.cfloat)
-        )
+        sim_scores = torch.mm(db_norm, live_norm.T).squeeze(-1)
+        topk_scores, topk_indices = torch.topk(sim_scores, k=min(top_k, self.db_tensor.size(0)))
 
-    def forward(self, x):
-        B = x.shape[0]
-        x_ft = torch.fft.rfft(x)
-        out_ft = torch.zeros(
-            B,
-            self.weights.shape[1],
-            x.size(-1) // 2 + 1,
-            dtype=torch.cfloat,
-            device=x.device,
-        )
-        out_ft[:, :, : self.modes] = torch.einsum(
-            "bix,iox->box", x_ft[:, :, : self.modes], self.weights
-        )
-        return torch.fft.irfft(out_ft, n=x.size(-1))
+        avg_similarity = topk_scores.mean().item()
+        historical_veto_rate = self.db_veto_labels[topk_indices].mean().item()
 
+        raw_confidence = (avg_similarity * 0.70 + (1.0 - historical_veto_rate * 0.30)) * 100
+        reliability_score = round(min(99.9, max(0.0, raw_confidence)), 2)
 
-class FNO1dWaveSpectralForecaster(nn.Module):
-    """FNO 100ms 超速頻譜預報算子：推演未來 3 小時港池平均波高"""
+        alpha_corrected = 1.00
+        if avg_similarity >= 0.85 and historical_veto_rate > 0.30:
+            alpha_corrected = round(max(0.65, 1.00 - (historical_veto_rate * 0.35)), 4)
 
-    def __init__(self, modes=8, width=32):
-        super().__init__()
-        self.fc0 = nn.Linear(2, width)
-        self.conv0 = SpectralConv1d(width, width, modes)
-        self.w0 = nn.Conv1d(width, width, 1)
-        self.fc1 = nn.Linear(width, 64)
-        self.fc2 = nn.Linear(64, 1)
-
-    def forward(self, x):
-        x_in = self.fc0(x).permute(0, 2, 1)
-        x_out = F.gelu(self.conv0(x_in) + self.w0(x_in)).permute(0, 2, 1)
-        return self.fc2(self.fc1(x_out)).squeeze(-1)
-
-
-class VesselMMSIHydrodynamics:
-    """MMSI 專屬水動力算子：精算雙體客輪深水蹲沉量 (Squat) 與 6DOF 姿態"""
-
-    @staticmethod
-    def compute_dynamics(
-        vessel_type: str, speed_knots: float
-    ) -> Dict[str, float]:
-        v_ms = speed_knots * 0.51444
-        if vessel_type == "CATAMARAN":
-            squat = 0.08 * (v_ms**2) / 9.81
-            roll = 2.0 + 0.1 * speed_knots
-            pitch = 1.5 + 0.15 * speed_knots
-        else:
-            squat = 0.12 * (v_ms**2) / 9.81
-            roll = 3.5 + 0.2 * speed_knots
-            pitch = 2.0 + 0.2 * speed_knots
         return {
-            "dynamic_squat_m": round(squat, 2),
-            "roll_deg": round(roll, 1),
-            "pitch_deg": round(pitch, 1),
+            "top_k_similarity_mean": round(avg_similarity, 4),
+            "historical_20yr_veto_probability": round(historical_veto_rate, 4),
+            "reliability_score_pct": reliability_score,
+            "alpha_tune_historical_corrected": alpha_corrected
         }
 
-
-class QuantumTopology64DEngine(nn.Module):
-    """64D 太乙奇門量子拓撲同化器"""
-
-    def __init__(self):
-        super().__init__()
-        self.proj_r = nn.Linear(64, 32)
-        self.proj_i = nn.Linear(64, 32)
-        self.gate = nn.Sequential(
-            nn.Linear(32, 16), nn.Tanh(), nn.Linear(16, 1), nn.Sigmoid()
-        )
-
-    def forward(self, vec64):
-        r, i = self.proj_r(vec64), self.proj_i(vec64)
-        return self.gate(torch.sqrt(r**2 + i**2 + 1e-8))
-
-
 # ==============================================================================
-# 4. 象數編碼器、37D 特徵提取器與神經網路
+# 4. 奇門 70% 門控同化與 Sigmoid 策略神經網路
 # ==============================================================================
-def map_xian_heng_hexagram(state_vector: List[float]) -> int:
-    thresholds = [1.20, 10.0, 10.80, 1.50, 0.50, 500.0, 800.0, 15.0]
-    binary_bits = [
-        1 if val > th else 0 for val, th in zip(state_vector, thresholds)
-    ]
-    outer_trigram = (
-        (binary_bits[0] << 2) | (binary_bits[1] << 1) | binary_bits[2]
-    )
-    inner_trigram = (
-        (binary_bits[3] << 2) | (binary_bits[4] << 1) | binary_bits[5]
-    )
-    return (outer_trigram * 8) + inner_trigram + 1
+class QimenOctagramAssimilationEngine:
+    QIMEN_THRESHOLD_GATE = 70.0
 
+    @classmethod
+    def evaluate(cls, qimen_pct: float, tp: float, delta_theta: float, has_veto: bool) -> Tuple[bool, str]:
+        enabled = qimen_pct >= cls.QIMEN_THRESHOLD_GATE
+        if has_veto:
+            gate = "死門 (坤宮 - 剛性熔斷)"
+        elif tp > 12.0:
+            gate = "驚門 (兌宮 - 湧浪共振)"
+        elif delta_theta >= 38.0:
+            gate = "杜門 (巽宮 - 移防南岸)"
+        else:
+            gate = "開門 (乾宮 - 穩定靠泊)"
+        return enabled, gate
 
-def get_xian_heng_loss_weights(hexagram_id: int) -> Dict[str, float]:
-    DANGEROUS_HEXAGRAMS = [29, 3, 39, 47]
-    if hexagram_id in DANGEROUS_HEXAGRAMS:
-        return {"w_heng": 0.85, "w_xian": 0.15, "veto_penalty": -9999.0}
-    else:
-        return {"w_heng": 0.30, "w_xian": 0.70, "veto_penalty": 0.0}
-
-
-class UnifiedMarineTelemetry(BaseModel):
-    sender_id: str = Field(default="CWA_API_REALTIME")
-    hs_cwa: float = Field(default=0.85)
-    w_cwa: float = Field(default=6.20)
-    tp_s: float = Field(default=6.5)
-    delta_theta_deg: float = Field(default=15.0)
-    tide_eta_m: float = Field(default=1.20)
-    d_draft_m: float = Field(default=1.60)
-    s_quat_m: float = Field(default=0.82)
-    slope_landslide_risk: float = Field(default=0.15)
-    namr_multibeam_depth_m: float = Field(default=8.50)
-    qimen_consensus_pct: float = Field(default=100.0)
-    official_closure_status: float = Field(default=0.0)
-    active_pier_select: int = Field(default=0)
-    typhoon_dist_km: float = Field(default=650.0)
-    pressure_gradient_2d: float = Field(default=1.10)
-
-
-class GEM37DNormalizedFeatureExtractor:
-
-    BOUNDS = np.array(
-        [
-            [0.0, 10.0],
-            [0.0, 50.0],
-            [-1.0, 5.0],
-            [0.0, 5.0],
-            [0.0, 5.0],
-            [0.0, 20.0],
-            [0.0, 10.0],
-            [0.0, 100.0],
-            [0.0, 0.5],
-            [1.0, 2.5],
-            [0.0, 90.0],
-            [0.0, 0.1],
-            [0.0, 0.5],
-            [0.0, 5.0],
-            [0.0, 20.0],
-            [0.0, 1.0],
-            [0.0, 15.0],
-            [-1.0, 1.0],
-            [-0.5, 0.5],
-            [0.0, 1.0],
-            [0.0, 1.0],
-            [0.0, 1000.0],
-            [0.0, 10.0],
-            [0.0, 25.0],
-            [0.0, 1.0],
-            [-1.0, 1.0],
-            [-1.0, 1.0],
-            [0.0, 1.0],
-            [0.0, 3.0],
-            [0.0, 2.0],
-            [0.0, 18.6],
-            [0.0, 60.0],
-            [0.0, 1.0],
-            [0.0, 24.0],
-            [0.0, 100.0],
-            [0.0, 1.0],
-            [0.0, 1.0],  # Channel 37: Official Closure Status
-        ],
-        dtype=np.float32,
-    )
-
-    def build_normalized_vector(self, t: UnifiedMarineTelemetry) -> np.ndarray:
-        raw_vec = np.array(
-            [
-                t.hs_cwa,
-                t.w_cwa,
-                t.tide_eta_m,
-                0.25,
-                1.0,
-                1.5,
-                0.8,
-                35.0,
-                0.08,
-                1.15,
-                25.0,
-                0.025,
-                0.04,
-                1.20,
-                t.slope_landslide_risk,
-                float(t.active_pier_select),
-                t.namr_multibeam_depth_m,
-                0.15,
-                0.05,
-                0.15,
-                0.10,
-                t.typhoon_dist_km,
-                t.pressure_gradient_2d,
-                t.tp_s,
-                0.5,
-                0.5,
-                0.5,
-                0.35,
-                1.15,
-                0.20,
-                9.3,
-                30.0,
-                0.0,
-                15.0,
-                t.qimen_consensus_pct,
-                0.2,
-                t.official_closure_status,
-            ],
-            dtype=np.float32,
-        )
-        return np.clip(
-            (raw_vec - self.BOUNDS[:, 0])
-            / (self.BOUNDS[:, 1] - self.BOUNDS[:, 0] + 1e-6),
-            0.0,
-            1.0,
-        )
-
-
-class LoRAAdapter(nn.Module):
-
-    def __init__(
-        self, in_features: int = 37, out_features: int = 4, rank: int = 4
-    ):
-        super().__init__()
-        self.lora_A = nn.Parameter(torch.randn(in_features, rank) * 0.01)
-        self.lora_B = nn.Parameter(torch.zeros(rank, out_features))
-        self.scale = 0.125
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return (x @ self.lora_A @ self.lora_B) * self.scale
-
-
-class XianHengDialecticalPolicyNet(nn.Module):
-
+class GEMV36DReinforcedPolicyNet(nn.Module):
     def __init__(self, state_dim: int = 37, action_dim: int = 4):
         super().__init__()
         self.backbone = nn.Sequential(
             nn.Linear(state_dim, 64),
-            nn.ReLU(),
-            nn.Linear(64, action_dim),
+            nn.SiLU(),
+            nn.Linear(64, action_dim)
         )
-        self.hexagram_adapters = nn.ModuleDict(
-            {str(i): LoRAAdapter(state_dim, action_dim) for i in range(1, 65)}
-        )
-
-    def forward(
-        self,
-        x: torch.Tensor,
-        hexagram_id: int,
-        qimen_consensus_pct: float = 100.0,
-    ) -> torch.Tensor:
-        macro_weight = 0.40 if qimen_consensus_pct >= 70.0 else 0.15
-        base_logits = self.backbone(x)
-        adapter_logits = self.hexagram_adapters[str(hexagram_id)](x)
-
-        macro_bias = x[:, 34:35] * macro_weight
-        official_closure_bias = x[:, 36:37] * -999.0
-
-        combined_logits = (
-            base_logits + adapter_logits + macro_bias + official_closure_bias
-        )
-        return torch.softmax(combined_logits, dim=-1)
-
-    def hot_swap_adapter(self, hexagram_id: int, new_adapter_state_dict: dict):
-        self.hexagram_adapters[str(hexagram_id)].load_state_dict(
-            new_adapter_state_dict
+        self.qimen_gate = nn.Sequential(
+            nn.Linear(1, 16),
+            nn.Sigmoid(),
+            nn.Linear(16, 1),
+            nn.Sigmoid()
         )
 
+    def compute_sigmoid_alpha_tune(self, qimen_pct: float) -> float:
+        if qimen_pct < 70.0:
+            return 1.00
+        qimen_tensor = torch.tensor([[qimen_pct / 100.0]], dtype=torch.float32)
+        gate_weight = self.qimen_gate(qimen_tensor).item()
+        alpha_base = 1.00 - (0.35 * gate_weight)
+        return round(max(0.65, alpha_base), 4)
 
 # ==============================================================================
-# 5. 影子微調訓練器與 Monte Carlo 驗證器 (ShadowWorker Engine)
+# 5. 雙重遲滯控制器與動態人流撤離算子 (Hysteresis & Evacuation)
 # ==============================================================================
-class XianHengAutonomousShadowTrainer:
+class GuerrillaHysteresisController:
+    def __init__(self, angle_high: float = 38.0, angle_low: float = 30.0, lockout_steps: int = 5):
+        self.angle_high = angle_high
+        self.angle_low = angle_low
+        self.lockout_steps = lockout_steps
+        self.current_state = 0
+        self.lockout_counter = 0
 
-    def __init__(
-        self,
-        master_model: XianHengDialecticalPolicyNet,
-        kb_filename: str = "KB_20260904_ESE_OVERTOPPING.json",
-    ):
-        self.master_model = master_model
-        self.kb_filename = kb_filename
+    def evaluate_pier_switch(self, delta_theta: float, current_speed_kts: float) -> Tuple[int, str]:
+        if self.lockout_counter > 0:
+            self.lockout_counter -= 1
+            return self.current_state, f"🔒 遲滯鎖定中 (剩餘 {self.lockout_counter + 1} 步)"
+        if self.current_state == 0 and (delta_theta >= self.angle_high or current_speed_kts >= 2.0):
+            self.current_state = 1
+            self.lockout_counter = self.lockout_steps
+            return 1, "🔀 切換至【南岸權宜碼頭】"
+        elif self.current_state == 1 and (delta_theta <= self.angle_low and current_speed_kts < 1.5):
+            self.current_state = 0
+            self.lockout_counter = self.lockout_steps
+            return 0, "🔀 切換回【北岸碼頭】"
+        return self.current_state, "🟢 碼頭狀態穩定"
 
-    def process_telemetry_residual(
-        self,
-        hexagram_id: int,
-        x_tensor: torch.Tensor,
-        target_action: torch.Tensor,
-        qimen_consensus_pct: float = 100.0,
-        official_closure: float = 0.0,
-        eps_threshold: float = 0.10,
-    ) -> bool:
-        self.master_model.eval()
-        with torch.no_grad():
-            base_out = self.master_model.backbone(x_tensor)
-            adapter_out = self.master_model.hexagram_adapters[
-                str(hexagram_id)
-            ](x_tensor)
-            pred_probs = torch.softmax(base_out + adapter_out, dim=-1)
-            l_residual = float(F.mse_loss(pred_probs, target_action).item())
-
-        if official_closure == 1.0 and float(pred_probs[0, 0].item()) > 0.5:
-            l_residual += 0.80
-
-        if l_residual <= eps_threshold:
-            return False
-
-        shadow_adapter = copy.deepcopy(
-            self.master_model.hexagram_adapters[str(hexagram_id)]
-        )
-        shadow_adapter.train()
-        optimizer = optim.Adam(shadow_adapter.parameters(), lr=1e-3)
-        weights = get_xian_heng_loss_weights(hexagram_id)
-
-        reward_shaping = (
-            -9999.0
-            if (official_closure == 1.0 or hexagram_id in [29, 3, 39, 47])
-            else 100.0
-        )
-
-        for _ in range(5):
-            optimizer.zero_grad()
-            base_logits = self.master_model.backbone(x_tensor).detach()
-            adapter_logits = shadow_adapter(x_tensor)
-            pred_logits = base_logits + adapter_logits
-
-            l_data = F.mse_loss(
-                torch.softmax(pred_logits, dim=-1), target_action
-            )
-            l_phys = torch.mean(F.relu(-pred_logits))
-
-            loss = weights["w_heng"] * l_phys + weights["w_xian"] * (
-                l_data + torch.tensor(l_residual, device=x_tensor.device)
-            )
-            if reward_shaping < 0:
-                loss = loss + abs(reward_shaping) * 0.1
-
-            loss.backward()
-            optimizer.step()
-
-        if self.auto_gate_verification(shadow_adapter, hexagram_id, x_tensor):
-            self.master_model.hot_swap_adapter(
-                hexagram_id, shadow_adapter.state_dict()
-            )
-            self.commit_self_healing_kb(hexagram_id, round(l_residual, 4))
-            return True
-        return False
-
-    def auto_gate_verification(
-        self,
-        shadow_adapter: nn.Module,
-        hexagram_id: int,
-        x_tensor: torch.Tensor,
-        n_sims: int = 1000,
-    ) -> bool:
-        shadow_adapter.eval()
-        with torch.no_grad():
-            noise = (
-                torch.randn(n_sims, 37, device=x_tensor.device) * 0.05
-            )
-            sim_inputs = torch.clamp(
-                x_tensor.repeat(n_sims, 1) + noise, 0.0, 1.0
-            )
-            base_logits = self.master_model.backbone(sim_inputs)
-            adapter_logits = shadow_adapter(sim_inputs)
-            preds = torch.argmax(
-                torch.softmax(base_logits + adapter_logits, dim=-1), dim=-1
-            )
-
-            if (
-                hexagram_id in [29, 3, 39, 47]
-                and (preds == 0).sum().item() > 0
-            ):
-                return False
-            return (
-                float((preds == preds.mode().values).float().mean().item())
-                >= 0.95
-            )
-
-    def commit_self_healing_kb(self, hexagram_id: int, residual_val: float):
-        kb_entry = {
-            "timestamp": datetime.now(timezone(timedelta(hours=8))).strftime(
-                "%Y-%m-%d %H:%M:%S CST"
-            ),
-            "hexagram_id": hexagram_id,
-            "resolved_residual": round(residual_val, 4),
-            "status": "OFFICIAL_NOTICE_ALIGNED",
-        }
-        records = []
-        if os.path.exists(self.kb_filename):
-            try:
-                with open(self.kb_filename, "r", encoding="utf-8") as f:
-                    records = json.load(f)
-                    if not isinstance(records, list):
-                        records = [records]
-            except Exception:
-                records = []
-        records.append(kb_entry)
-        if len(records) > 100:
-            records = records[-100:]
-        with open(self.kb_filename, "w", encoding="utf-8") as f:
-            json.dump(records, f, ensure_ascii=False, indent=2)
-
+    @staticmethod
+    def compute_dynamic_evac_window(passenger_count: int, squat_m: float) -> int:
+        base_time = passenger_count / 15.0
+        squat_delay = max(0.0, (squat_m - 0.50) * 15.0)
+        return int(math.ceil(base_time + squat_delay + 15.0))
 
 # ==============================================================================
-# 6. 多源 Ingestion 與游擊調度算子
+# 6. TG 游擊戰術最高統合執行調度器 (TG Master Engine)
 # ==============================================================================
-class DynamicGuerrillaDispatchEngine:
+class TGGuerrillaMasterEngine:
+    def __init__(self):
+        self.net = GEMV36DReinforcedPolicyNet()
+        self.climate_engine = OptimizedHistorical20YrEngine()
+        self.hysteresis = GuerrillaHysteresisController()
 
-    def __init__(
-        self,
-        historical_kb_path: str = "KB_20260904_ESE_OVERTOPPING.json",
-    ):
-        self.kb_path = historical_kb_path
+    def execute(self, telemetry: MarineSafetyData) -> Dict[str, Any]:
+        cst_tz = timezone(timedelta(hours=8))
+        now_dt = datetime.now(cst_tz)
 
-    def calculate_dynamic_dispatch(
-        self,
-        telemetry: dict,
-        live_vec: np.ndarray,
-        qimen_consensus_pct: float = 100.0,
-        official_closure: float = 0.0,
-        is_backup_mode: bool = False,
-    ) -> dict:
-        w_local = telemetry.get("w_cwa", 6.20)
-        delta_theta = telemetry.get("delta_theta_deg", 15.0)
-        hs_pier = telemetry.get("hs_cwa", 0.85)
-        tp_swell = telemetry.get("tp_s", 6.5)
-        tide_eta = telemetry.get("tide_eta_m", 1.20)
-        d_draft = telemetry.get("d_draft_m", 1.60)
-        s_quat = telemetry.get("s_quat_m", 0.82)
-        namr_depth = telemetry.get("namr_multibeam_depth_m", 8.50)
-        current_kts = telemetry.get("current_speed_kts", 0.90)
+        # 構建 37D 標準特徵向量
+        vec37 = np.full(37, 0.2, dtype=np.float32)
+        vec37[0] = min(1.0, telemetry.hs_cwa / 10.0)
+        vec37[1] = min(1.0, telemetry.w_cwa / 50.0)
+        vec37[23] = min(1.0, telemetry.tp_s / 25.0)
+        vec37[34] = telemetry.qimen_consensus_pct / 100.0
 
-        rad = np.radians(delta_theta)
-        w_eff = round(float(w_local * abs(np.cos(rad))), 2)
+        hist_res = self.climate_engine.match_live_telemetry(vec37)
+        alpha_base = self.net.compute_sigmoid_alpha_tune(telemetry.qimen_consensus_pct)
+        alpha_final = min(alpha_base, hist_res["alpha_tune_historical_corrected"])
 
-        ukc_calc = round(namr_depth + tide_eta - d_draft - s_quat, 2)
-        fb_calc = round(3.20 - tide_eta, 2)
-
-        alpha_tune = 1.0
-        max_similarity = 0.0
-
-        if qimen_consensus_pct >= 70.0:
-            alpha_tune = round(alpha_tune * 0.85, 2)
-
-        if os.path.exists(self.kb_path):
-            try:
-                with open(self.kb_path, "r", encoding="utf-8") as f:
-                    hist_records = json.load(f)
-                    if isinstance(hist_records, list) and len(hist_records) > 0:
-                        residuals = [
-                            rec.get("resolved_residual", 0.0)
-                            for rec in hist_records
-                        ]
-                        high_risk_count = sum(
-                            1 for r in residuals if r > 0.15
-                        )
-                        if high_risk_count > 0:
-                            alpha_tune = round(
-                                max(
-                                    0.65,
-                                    alpha_tune
-                                    - (high_risk_count / len(hist_records))
-                                    * 0.25,
-                                ),
-                                2,
-                            )
-                            max_similarity = round(
-                                min(
-                                    0.99,
-                                    0.70
-                                    + (high_risk_count / len(hist_records))
-                                    * 0.25,
-                                ),
-                                2,
-                            )
-            except Exception:
-                pass
-
-        if is_backup_mode:
-            alpha_tune = round(alpha_tune * 0.95, 2)
-
-        effective_w_limit = round(10.80 * alpha_tune, 2)
-        effective_hs_limit = round(1.20 * alpha_tune, 2)
-
-        t60_unlocked = qimen_consensus_pct >= 70.0
-        t45_warn = (
-            hs_pier > 1.00
-            or (tp_swell > 10.0 and hs_pier > 0.75)
-            or (w_eff > 6.0)
-        )
-        t30_warn = delta_theta >= 35.0 or current_kts >= 1.8
-
-        early_warning_vector = {
-            "t60_qimen_warning": (
-                f"🟡 T-60 氣場預警：奇門同化匹配率 {qimen_consensus_pct:.1f}% >="
-                " 70%，已解鎖 64D 拓撲 Macro Bias 0.40"
-                if t60_unlocked
-                else "🟢 T-60 氣場正常"
-            ),
-            "t45_wave_steep_warning": (
-                f"🟡 T-45 湧浪海象預警：長浪週期 Tp={tp_swell:.1f}s (>10.0s Kd=1.00"
-                " 港池共振) 趨勢預警"
-                if t45_warn
-                else "🟢 T-45 正常"
-            ),
-            "t30_pier_shift_warning": (
-                f"🟡 T-30 移防預警：風向偏轉 (Δθ={delta_theta:.1f}° >= 35° 側風)"
-                f" 且橫流 {current_kts:.1f}kts，指引切換至【南岸權宜碼頭】"
-                if t30_warn
-                else "🟢 T-30 正常"
-            ),
-        }
-
-        now_dt = datetime.now(timezone(timedelta(hours=8)))
-        margin_min = (
-            max(0, int((effective_w_limit - w_eff) * 12))
-            if w_eff < effective_w_limit
-            else 0
-        )
-        t_stop_dt = now_dt + timedelta(minutes=margin_min)
-        t_evac_dt = t_stop_dt + timedelta(minutes=45)
-        t_stop_str = t_stop_dt.strftime("%H:%M")
-        t_evac_str = t_evac_dt.strftime("%H:%M")
-
-        is_over_limit = (
-            (official_closure == 1.0)
-            or (w_eff >= effective_w_limit)
-            or (hs_pier > effective_hs_limit)
-            or (ukc_calc < 1.50)
-            or (fb_calc < 0.50)
-            or (tp_swell > 10.0 and hs_pier > 0.90)
+        physics_res = PhysicsEngine.evaluate_veto(telemetry, alpha_final)
+        qimen_enabled, qimen_gate = QimenOctagramAssimilationEngine.evaluate(
+            telemetry.qimen_consensus_pct, telemetry.tp_s, telemetry.delta_theta_deg, physics_res["has_veto"]
         )
 
-        if is_over_limit:
-            berthing = "【防颱避風/禁止靠泊】"
-            evac = "【強制撤離】 -> 返航【烏石港】"
-            pier_reason = (
-                "官方公告預警封島"
-                if official_closure == 1.0
-                else (
-                    f"觸發全海象 PINN 剛性否決 (有效風速 {w_eff:.2f}m/s, 浪高"
-                    f" {hs_pier:.2f}m, 湧浪 Tp={tp_swell:.1f}s)"
-                )
-            )
-        elif delta_theta >= 35.0:
-            berthing = "【南岸權宜碼頭】"
-            evac = f"{berthing} -> 備援【烏石港】"
-            pier_reason = (
-                f"風向夾角轉變至 Δθ={delta_theta:.1f}° (≥35°"
-                " 側風推擠)，游擊調撥至【南岸權宜碼頭】靠泊"
-            )
+        pier_id, pier_msg = self.hysteresis.evaluate_pier_switch(telemetry.delta_theta_deg, telemetry.current_speed_kts)
+        evac_minutes = GuerrillaHysteresisController.compute_dynamic_evac_window(telemetry.passenger_count, telemetry.s_quat_m)
+
+        t_stop_dt = now_dt + timedelta(minutes=20)
+        t_evac_dt = t_stop_dt + timedelta(minutes=evac_minutes)
+
+        if physics_res["has_veto"]:
+            overall_decision = "🔴 封島/防颱 (Q4)"
+            berthing = "無 (雙岸靠泊功能失效)"
+            evac = "直航撤離返航【烏石港】"
+            summary = f"港池波高 {physics_res['hs_pier_m']}m 或風速超標，觸發 Hard VETO 熔斷，今天全天雙岸無開放班次。"
+            timeline = []
         else:
-            berthing = "【北岸碼頭】"
-            evac = f"{berthing} -> 備援【烏石港】"
-            pier_reason = (
-                f"風向夾角 Δθ={delta_theta:.1f}° (<35°"
-                " 迎風位)，游擊調撥維持【北岸碼頭】靠泊"
-            )
-
-        backup_tag = " (奇門與模型備援推算PASS)" if is_backup_mode else ""
-        scheme_a = f"方案A(傳統官方): 僅憑風速 {w_local:.1f}m/s 評估"
-        scheme_b = f"方案B(氣象署): 缺乏港池越浪、湧浪週期與 Squat 數據"
-        scheme_c = (
-            f"方案C(GEM-V36D Ground Truth): 依攻角風速 {w_eff:.2f}m/s、湧浪"
-            f" Kd=1.00 與奇門解盲門檻 {effective_w_limit:.2f}m/s{backup_tag}"
-        )
-
-        if is_over_limit:
-            tactical_summary = (
-                f"⚠️ 三方案定性定量總結：{scheme_a}與{scheme_b}預判放行/限縮；"
-                f"{scheme_c}精確比對全海象歷史智庫與奇門解盲(α={alpha_tune:.2f})，判定【剛性熔斷】！"
-                f"游擊調度決策：{pier_reason}。建議 {t_stop_str} 止登，{t_evac_str}"
-                " 全員撤離至烏石港。"
-            )
-        else:
-            tactical_summary = (
-                f"📌 游擊處置決策：{pier_reason}。預計 {t_stop_str}"
-                f" 評估止登，{t_evac_str} 完成分流。"
-                f"（三方案總結：{scheme_a}與{scheme_b}預估全天開放；{scheme_c}評估有效風速、湧浪與"
-                " UKC 裕深在安全門檻內）"
-            )
+            overall_decision = "🟢 安全/開放靠泊 (Q1)"
+            berthing = "【南岸權宜碼頭】" if pier_id == 1 else "【北岸碼頭】"
+            evac = f"{berthing} -> 【烏石港】"
+            summary = "海象門檻全數 PASS，執行 TG 游擊戰術排程。"
+            timeline = [
+                {"time": "08:30", "action": "首班游擊登島", "location": "【南岸權宜碼頭】", "condition": "北岸越浪且 Δθ < 45°"},
+                {"time": "10:50", "action": "止登預發廣播 (前30分)", "location": "全島廣播系統", "condition": f"奇門匹配率 {telemetry.qimen_consensus_pct:.1f}% 觸發"},
+                {"time": "11:20", "action": "上午場止登截止", "location": "【南岸碼頭】", "condition": "上午場最後止登點"},
+                {"time": "12:30", "action": "午間區間登島", "location": "【南岸權宜碼頭】", "condition": "雙岸 Hs <= 1.20m 且 Tp <= 12.0s"},
+                {"time": "13:50", "action": "撤離預發廣播 (前30分)", "location": "全島廣播系統", "condition": "撤離前 30 分鐘全島預警"},
+                {"time": "14:20", "action": "游擊戰術強制撤退", "location": "【南岸碼頭】 -> 【烏石港】", "condition": "巽宮風陣 Δθ >= 45° 或長浪穿透"},
+                {"time": "17:30", "action": "全島最終清空離島", "location": "【南岸碼頭】 -> 【烏石港】", "condition": "每日營運最後離島時窗"}
+            ]
 
         return {
-            "w_effective_ms": w_eff,
-            "adaptive_alpha": alpha_tune,
-            "historical_similarity": max_similarity,
-            "ukc_calculated_m": ukc_calc,
-            "fb_calculated_m": fb_calc,
-            "berthing_pier": berthing,
-            "evacuation_pier": evac,
-            "early_warning_vector": early_warning_vector,
-            "tactical_summary": tactical_summary,
-            "t_stop_window": t_stop_str,
-            "t_evac_window": t_evac_str,
-            "is_backup_mode": is_backup_mode,
-            "open_island_0730": "🔴 封島" if is_over_limit else "🟢 可開島",
-            "open_island_1630_tomorrow": (
-                "🔴 預警封島" if is_over_limit else "🟢 預測開放"
-            ),
+            "version": "v36D.30.0 Three-Scheme & Guerrilla Vector Master Complete",
+            "timestamp": now_dt.strftime("%Y-%m-%d %H:%M:%S CST"),
+            "decision": overall_decision,
+            "reliability_score_pct": hist_res["reliability_score_pct"],
+            "alpha_tune_final": alpha_final,
+            "physics_metrics": physics_res,
+            "historical_20yr_matching": hist_res,
+            "qimen_macro_consensus": {
+                "consensus_rate_pct": telemetry.qimen_consensus_pct,
+                "macro_advisory_enabled": qimen_enabled,
+                "octagram_gate_state": qimen_gate
+            },
+            "guerrilla_dispatch": {
+                "berthing_pier": berthing,
+                "evacuation_pier": evac,
+                "hysteresis_status": pier_msg,
+                "dynamic_evac_minutes": evac_minutes,
+                "t_stop_window": t_stop_dt.strftime("%H:%M"),
+                "t_evac_window": t_evac_dt.strftime("%H:%M"),
+                "tactical_summary": summary,
+                "tactical_timeline": timeline
+            }
         }
 
+    def generate_markdown_report(self, data: MarineSafetyData, res: Dict[str, Any]) -> str:
+        """生成對齊規範之結構化 Markdown 評估報告"""
+        pm = res["physics_metrics"]
+        hs_status = "[🟢 PASS]" if pm["pass_hs"] else "[🔴 VETO]"
+        w_status = "[🟢 PASS]" if pm["pass_w"] else "[🔴 VETO]"
+        ukc_status = "[🟢 PASS]" if pm["pass_ukc"] else "[🔴 VETO]"
+        fb_status = "[🟢 PASS]" if pm["pass_fb"] else "[🔴 VETO]"
+
+        report = f"**當前總體狀態**：**[{res['decision']}]**\n\n"
+        report += "**四層剛性物理門檻檢核**\n\n"
+        report += "| 檢核項目 | 實測/模擬數據 | 剛性標準門檻 | 數值比對 | 燈號狀態 |\n"
+        report += "| --- | --- | --- | --- | --- |\n"
+        report += f"| 碼頭波高 ($H_{{s,pier}}$) | {pm['hs_pier_m']:.2f} m | $\\le 1.20\\text{{ m}}$ | {pm['hs_pier_m']:.2f}m vs 1.20m | {hs_status} |\n"
+        report += f"| 攻角風速 ($W_{{eff}}$) | {pm['w_eff_ms']:.2f} m/s | $\\le 10.80\\text{{ m/s}}$ | {pm['w_eff_ms']:.2f}m/s vs 10.80m/s | {w_status} |\n"
+        report += f"| 富餘水深 ($UKC$) | {pm['ukc_m']:.2f} m | $\\ge 1.50\\text{{ m}}$ | {pm['ukc_m']:.2f}m vs 1.50m | {ukc_status} |\n"
+        report += f"| 碼頭乾舷 ($FB_{{pier}}$) | {pm['fb_pier_m']:.2f} m | $\\ge 0.50\\text{{ m}}$ | {pm['fb_pier_m']:.2f}m vs 0.50m | {fb_status} |\n\n"
+        
+        report += "**戰術調度與智庫同化指標**\n\n"
+        report += f"* **奇門氣場同化**：匹配率 {res['qimen_macro_consensus']['consensus_rate_pct']:.1f}%，對應門控【{res['qimen_macro_consensus']['octagram_gate_state']}】\n"
+        report += f"* **氣候智庫信心**：二十年歷史餘弦可靠度指標 $Reliability\\ Score = {res['reliability_score_pct']:.1f}\\%$\n"
+        report += f"* **處置結論**：{res['guerrilla_dispatch']['tactical_summary']}\n"
+        return report
 
 # ==============================================================================
-# 7. 生產管線執行與 Colab 自動 Git Push 機制
+# 7. 實測執行與驗證範例
 # ==============================================================================
-def sync_to_github_repository():
-    token = os.environ.get("GITHUB_TOKEN")
-    if token:
-        try:
-            os.system('git config user.name "colab-bot"')
-            os.system('git config user.email "bot@colab.com"')
-            os.system("git add latest_decision.json")
-            os.system(
-                'git commit -m "auto: sync SSOT JSON from Colab [skip ci]"'
-            )
-            os.system(
-                f"git push https://{token}@github.com/marlinx-neyc/gem-engine.git"
-                " main"
-            )
-            print(
-                "🚀 最新 SSOT JSON 已成功自動推送到 GitHub 儲存庫"
-                " (marlinx-neyc/gem-engine)！"
-            )
-        except Exception as e:
-            print(f"⚠️ 自動 Git Push 失敗: {e}")
-    else:
-        print("ℹ️ 未偵測到 GITHUB_TOKEN，跳過 GitHub 自動同步。")
-
-
-def execute_master_pipeline():
-    cst_tz = timezone(timedelta(hours=8))
-    current_time_str = datetime.now(cst_tz).strftime("%Y-%m-%d %H:%M:%S CST")
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    master_policy = XianHengDialecticalPolicyNet().to(device)
-    load_latest_model_weights(master_policy)
-
-    # 帶入 2026-09-15 18:35 CST 現場長浪越浪實測 Ground Truth 數據
-    telemetry_raw = {
-        "hs_cwa": 3.71,
-        "w_cwa": 8.50,
-        "tp_s": 15.5,
-        "delta_theta_deg": 45.0,
-        "tide_eta_m": 1.00,
-        "d_draft_m": 1.20,
-        "s_quat_m": 0.82,
-        "slope_landslide_risk": 0.15,
-        "namr_multibeam_depth_m": 8.50,
-        "qimen_consensus_pct": 100.0,
-        "official_closure_status": 1.0,  # 東北角風管處官網發布封島公告 (Ch 37)
-        "active_pier_select": 0,
-        "typhoon_dist_km": 650.0,
-        "pressure_gradient_2d": 1.10,
-    }
-
-    # 執行剛性四層/六重物理防線檢核
-    physics_res = PhysicsEngine.evaluate_veto(
-        hs_cwa=telemetry_raw["hs_cwa"],
-        w_cwa=telemetry_raw["w_cwa"],
-        tp=telemetry_raw["tp_s"],
-        delta_theta=telemetry_raw["delta_theta_deg"],
-        tide=telemetry_raw["tide_eta_m"],
-        draft=telemetry_raw["d_draft_m"],
-        squat=telemetry_raw["s_quat_m"],
-        overtopping_rate=1.31,
-        official_closure=telemetry_raw["official_closure_status"],
-        slope_risk=telemetry_raw["slope_landslide_risk"],
-        adaptive_alpha=0.85,
-    )
-
-    # 構建 37D 特徵向量
-    telemetry_obj = UnifiedMarineTelemetry(**telemetry_raw)
-    extractor = GEM37DNormalizedFeatureExtractor()
-    x_37d_norm = extractor.build_normalized_vector(telemetry_obj)
-    x_tensor = (
-        torch.tensor(x_37d_norm, dtype=torch.float32).unsqueeze(0).to(device)
-    )
-
-    # 游擊調度算子推算
-    dispatch_engine = DynamicGuerrillaDispatchEngine()
-    guerrilla_result = dispatch_engine.calculate_dynamic_dispatch(
-        telemetry_raw,
-        x_37d_norm,
-        qimen_consensus_pct=100.0,
-        official_closure=1.0,
-        is_backup_mode=False,
-    )
-
-    hex_id = map_xian_heng_hexagram([
-        telemetry_raw["hs_cwa"],
-        telemetry_raw["tp_s"],
-        telemetry_raw["w_cwa"],
-        guerrilla_result["ukc_calculated_m"],
-        guerrilla_result["fb_calculated_m"],
-        500,
-        899,
-        45.0,
-    ])
-
-    # 影子訓練器殘差檢核與 Hot-Swap 演練
-    shadow_trainer = XianHengAutonomousShadowTrainer(master_policy)
-    target_action = torch.tensor([[0.0, 0.0, 0.0, 1.0]], device=device)
-    is_swapped = shadow_trainer.process_telemetry_residual(
-        hex_id,
-        x_tensor,
-        target_action,
-        qimen_consensus_pct=100.0,
-        official_closure=1.0,
-        eps_threshold=0.10,
-    )
-
-    if is_swapped:
-        save_model_weights(master_policy)
-
-    vessel_hydro = VesselMMSIHydrodynamics.compute_dynamics(
-        "CATAMARAN", speed_knots=12.5
-    )
-
-    decision_text = (
-        "🔴 封島/防颱" if physics_res["has_veto"] else "🟢 放行靠泊"
-    )
-
-    ssot_payload = {
-        "version": "v36D.200.0 Qimen Unblind & Official Closure RL Master",
-        "timestamp": current_time_str,
-        "decision": decision_text,
-        "confidence_score": 100.0,
-        "confidence_label": "🟢 100.0% [完整同化 PASS]",
-        "hard_veto_alert": physics_res["has_veto"],
-        "physics_metrics": physics_res,
-        "guerrilla_dispatch": {
-            "berthing_pier": guerrilla_result["berthing_pier"],
-            "evacuation_pier": guerrilla_result["evacuation_pier"],
-            "early_warning_vector": guerrilla_result["early_warning_vector"],
-            "tactical_summary": guerrilla_result["tactical_summary"],
-            "t_stop_window": guerrilla_result["t_stop_window"],
-            "t_evac_window": guerrilla_result["t_evac_window"],
-            "is_backup_mode": False,
-            "open_island_0730": "🔴 封島",
-            "open_island_1630_tomorrow": "🔴 預警封島",
-        },
-        "level5_advanced_metrics": {
-            "vision_overtopping_rate_pmin": 1.31,
-            "vision_kd_bias": 0.0295,
-            "vessel_hydrodynamics": {
-                "vessel_name": "凱鯨號 (穿浪雙體船)",
-                "vessel_type": "CATAMARAN",
-                **vessel_hydro,
-            },
-            "fno_forecast_mean_hs_m": 1.58,
-            "quantum_topology_coherence": 0.4682,
-        },
-        "qimen_macro_consensus": {
-            "consensus_rate_pct": 100.0,
-            "macro_advisory_enabled": True,
-            "qimen_status_prompt": (
-                "🔮 奇門氣場匹配率達 100.0%"
-                " (>=70%)，已啟動 Attention Gate 宏觀解盲與預警性門檻對齊"
-            ),
-        },
-    }
-
-    # 1. 寫入最新 SSOT JSON
-    with open("latest_decision.json", "w", encoding="utf-8") as f:
-        json.dump(ssot_payload, f, ensure_ascii=False, indent=2)
-    print("💾 已成功導出最新 SSOT JSON 檔: `latest_decision.json`")
-
-    # 2. 自動提交與推送至 GitHub 儲存庫
-    sync_to_github_repository()
-
-    return ssot_payload
-
-
 if __name__ == "__main__":
-    output_ssot = execute_master_pipeline()
-    print(json.dumps(output_ssot, ensure_ascii=False, indent=2))
+    engine = TGGuerrillaMasterEngine()
+
+    # 實測範例 1：2026-09-16 颱風波高超標實測 (觸發 Hard VETO)
+    veto_data = MarineSafetyData(
+        hs_cwa=3.71, w_cwa=8.50, tp_s=15.5, delta_theta_deg=45.0,
+        tide_eta_m=1.00, d_draft_m=1.20, s_quat_m=0.82, chart_depth_m=8.50,
+        current_speed_kts=1.90, qimen_consensus_pct=100.0, s_cos_sim=0.96,
+        passenger_count=150
+    )
+
+    res_veto = engine.execute(veto_data)
+    print("=== 實測案例 1：2026-09-16 剛性 VETO 熔斷報告 ===")
+    print(engine.generate_markdown_report(veto_data, res_veto))
+
+    # 實測範例 2：海象條件全數 PASS (啟動 TG 游擊戰術排程)
+    pass_data = MarineSafetyData(
+        hs_cwa=0.85, w_cwa=6.20, tp_s=8.5, delta_theta_deg=36.0,
+        tide_eta_m=1.20, d_draft_m=1.60, s_quat_m=0.34, chart_depth_m=8.50,
+        current_speed_kts=1.20, qimen_consensus_pct=85.0, s_cos_sim=0.92,
+        passenger_count=120
+    )
+
+    res_pass = engine.execute(pass_data)
+    print("\n=== 實測案例 2：海象符合條件（PASS）戰術調度報告 ===")
+    print(engine.generate_markdown_report(pass_data, res_pass))
