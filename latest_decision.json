@@ -1,39 +1,43 @@
 {
-  "version": "v36D.200.0 Qimen Unblind & Official Closure RL Master",
-  "timestamp": "2026-09-16 13:03:11 CST",
+  "version": "v36D.30.0 Three-Scheme & Guerrilla Vector Master Complete",
+  "timestamp": "2026-09-16 20:33:57 CST",
   "decision": "🔴 封島/防颱",
   "confidence_score": 100.0,
   "confidence_label": "🟢 100.0% [完整同化 PASS]",
   "hard_veto_alert": true,
+  "precision_metrics": {
+    "converged_sigma": 0.3125,
+    "precision_gain_pct": 58.4
+  },
+  "attention_gate": {
+    "micro_physics_weight": 65.0,
+    "macro_qimen_weight": 35.0
+  },
   "physics_metrics": {
     "hs_pier_m": 3.71,
     "w_local_ms": 8.5,
-    "w_effective_ms": 6.01,
-    "ukc_m": 0.27,
-    "fb_pier_m": 0.15,
+    "w_eff_ms": 6.01,
+    "alpha_adaptive": 1.0,
+    "ukc_m": 3.77,
+    "fb_pier_m": 2.2,
     "pass_hs": false,
     "pass_w": true,
-    "pass_ukc": false,
-    "pass_fb": false,
+    "pass_ukc": true,
+    "pass_fb": true,
     "has_veto": true,
     "kd": 1.0,
     "kw": 1.0,
-    "adaptive_alpha": 0.85
+    "north_pier_status": "[🔴 VETO]",
+    "south_pier_status": "[🔴 VETO]"
   },
   "guerrilla_dispatch": {
-    "berthing_pier": "【防颱避風/禁止靠泊】",
-    "evacuation_pier": "【強制撤離】 -> 返航【烏石港】",
-    "early_warning_vector": {
-      "t60_qimen_warning": "🟡 T-60 氣場預警：奇門同化匹配率 100.0% >= 70%，已解鎖 64D 拓撲 Macro Bias 0.40",
-      "t45_wave_steep_warning": "🟡 T-45 湧浪海象預警：長浪週期 Tp=15.5s (>10.0s Kd=1.00 港池共振) 趨勢預警",
-      "t30_pier_shift_warning": "🟡 T-30 移防預警：風向偏轉 (Δθ=45.0° >= 35° 側風) 且橫流 0.9kts，指引切換至【南岸權宜碼頭】"
-    },
-    "tactical_summary": "⚠️ 三方案定性定量總結：方案A(傳統官方): 僅憑風速 8.5m/s 評估與方案B(氣象署): 缺乏港池越浪、湧浪週期與 Squat 數據預判放行/限縮；方案C(GEM-V36D Ground Truth): 依攻角風速 6.01m/s、湧浪 Kd=1.00 與奇門解盲門檻 7.02m/s精確比對全海象歷史智庫與奇門解盲(α=0.65)，判定【剛性熔斷】！游擊調度決策：官方公告預警封島。建議 13:15 止登，14:00 全員撤離至烏石港。",
-    "t_stop_window": "13:15",
-    "t_evac_window": "14:00",
-    "is_backup_mode": false,
-    "open_island_0730": "🔴 封島",
-    "open_island_1630_tomorrow": "🔴 預警封島"
+    "berthing_pier": "【南岸權宜碼頭】",
+    "evacuation_pier": "【南岸權宜碼頭】 -> 返航【烏石港】",
+    "guerrilla_mode": "BOTH_PIERS_DISABLED",
+    "morning_tactic": "⚠️ 上午游擊調撥：北岸越浪，08:30 班次改至【南岸權宜碼頭】靠泊",
+    "afternoon_tactic": "🚨 下午游擊撤退：10:50/13:50 雙預警，11:20 止登，14:20 全員撤離至【烏石港】",
+    "tactical_summary": "執行「10:50/13:50 雙預警廣播，11:20 止登【南岸碼頭】，14:20 全員撤離返航【烏石港】」",
+    "tactical_timeline": []
   },
   "level5_advanced_metrics": {
     "vision_overtopping_rate_pmin": 1.31,
@@ -41,16 +45,41 @@
     "vessel_hydrodynamics": {
       "vessel_name": "凱鯨號 (穿浪雙體船)",
       "vessel_type": "CATAMARAN",
-      "dynamic_squat_m": 0.34,
-      "roll_deg": 3.2,
-      "pitch_deg": 3.4
+      "dynamic_squat_m": 0.82,
+      "roll_deg": 3.3,
+      "pitch_deg": 4.4
     },
     "fno_forecast_mean_hs_m": 1.58,
-    "quantum_topology_coherence": 0.4682
+    "quantum_topology_coherence": 0.4682,
+    "swarm_dispatch_plan": [
+      {
+        "agent_id": 1,
+        "vessel_label": "凱鯨號 (Agent 1)",
+        "assigned_pier": "【南岸權宜碼頭】",
+        "tactical_action": "直航返航烏石港"
+      }
+    ]
+  },
+  "rl_agent_diagnostics": {
+    "state_vector_10d": [
+      3.7100000381469727,
+      8.5,
+      3.7699999809265137,
+      2.200000047683716,
+      15.5,
+      45.0,
+      0.96875,
+      0.9599999785423279,
+      1.0,
+      1.0
+    ],
+    "action_selected": 3,
+    "reward_score": 100.0,
+    "latency_ms": 12.4
   },
   "qimen_macro_consensus": {
     "consensus_rate_pct": 100.0,
     "macro_advisory_enabled": true,
-    "qimen_status_prompt": "🔮 奇門氣場匹配率達 100.0% (>=70%)，已啟動 Attention Gate 宏觀解盲與預警性門檻對齊"
+    "qimen_status_prompt": "🔮 奇門氣場匹配率達 100.0% (>=70%)，已啟動宏觀參研決策與預警提示"
   }
 }
