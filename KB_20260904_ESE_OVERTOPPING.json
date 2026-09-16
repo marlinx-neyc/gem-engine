@@ -1,11 +1,5 @@
 [
   {
-    "timestamp": "2026-09-14 20:46:36 CST",
-    "hexagram_id": 55,
-    "resolved_residual": 0.1895,
-    "status": "DIALECTICAL_SELF_HEALED"
-  },
-  {
     "timestamp": "2026-09-14 20:48:46 CST",
     "hexagram_id": 1,
     "resolved_residual": 0.2232,
@@ -597,6 +591,12 @@
     "timestamp": "2026-09-16 08:23:11 CST",
     "hexagram_id": 55,
     "resolved_residual": 0.1852,
+    "status": "OFFICIAL_NOTICE_ALIGNED"
+  },
+  {
+    "timestamp": "2026-09-16 13:03:12 CST",
+    "hexagram_id": 55,
+    "resolved_residual": 0.1844,
     "status": "OFFICIAL_NOTICE_ALIGNED"
   }
 ]
