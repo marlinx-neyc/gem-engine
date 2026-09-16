@@ -25,9 +25,43 @@ class MarineSafetyData:
     qimen_consensus_pct: float # 奇門氣場同化率 (%)
     s_cos_sim: float           # 歷史餘弦相似度 (0~1)
     passenger_count: int = 120 # 現場待撤離/登島人數
+    slope_landslide_risk: float = 0.15
+    official_closure_status: float = 0.0
+    active_pier_select: int = 0
+    typhoon_dist_km: float = 650.0
+    pressure_gradient_2d: float = 1.10
 
 # ==============================================================================
-# 2. 剛性四層物理防線與水動力算子引擎 (Physics & VETO Engine)
+# 2. 37D 特徵張量全通道同構化轉譯器 (Feature Extractor)
+# ==============================================================================
+class GEM37DNormalizedFeatureExtractor:
+    BOUNDS = np.array([
+        [0.0, 10.0], [0.0, 50.0], [-1.0, 5.0], [0.0, 5.0], [0.0, 5.0],
+        [0.0, 20.0], [0.0, 10.0], [0.0, 100.0], [0.0, 0.5], [1.0, 2.5],
+        [0.0, 90.0], [0.0, 0.1], [0.0, 0.5], [0.0, 5.0], [0.0, 20.0],
+        [0.0, 1.0], [0.0, 15.0], [-1.0, 1.0], [-0.5, 0.5], [0.0, 1.0],
+        [0.0, 1.0], [0.0, 1000.0], [0.0, 10.0], [0.0, 25.0], [0.0, 1.0],
+        [-1.0, 1.0], [-1.0, 1.0], [0.0, 1.0], [0.0, 3.0], [0.0, 2.0],
+        [0.0, 18.6], [0.0, 60.0], [0.0, 1.0], [0.0, 24.0], [0.0, 100.0],
+        [0.0, 1.0], [0.0, 1.0]
+    ], dtype=np.float32)
+
+    def build_normalized_vector(self, t: MarineSafetyData) -> np.ndarray:
+        raw_vec = np.array([
+            t.hs_cwa, t.w_cwa, t.tide_eta_m, 0.25, 1.0, 1.5, 0.8, 35.0,
+            0.08, 1.15, 25.0, 0.025, 0.04, 1.20, t.slope_landslide_risk,
+            float(t.active_pier_select), t.chart_depth_m, 0.15,
+            0.05, 0.15, 0.10, t.typhoon_dist_km, t.pressure_gradient_2d,
+            t.tp_s, 0.5, 0.5, 0.5, 0.35, 1.15, 0.20, 9.3, 30.0, 0.0,
+            15.0, t.qimen_consensus_pct, 0.2, t.official_closure_status
+        ], dtype=np.float32)
+        return np.clip(
+            (raw_vec - self.BOUNDS[:, 0]) / (self.BOUNDS[:, 1] - self.BOUNDS[:, 0] + 1e-6),
+            0.0, 1.0
+        )
+
+# ==============================================================================
+# 3. 剛性四層物理防線與水動力算子引擎 (Physics & VETO Engine)
 # ==============================================================================
 class PhysicsEngine:
     HARD_HS_MAX = 1.20       # m
@@ -58,7 +92,7 @@ class PhysicsEngine:
 
     @classmethod
     def evaluate_veto(cls, data: MarineSafetyData, alpha_tune: float = 1.0) -> Dict[str, Any]:
-        """四層 Hard VETO 熔斷檢核 ($H_{s,pier} \le 1.20\text{ m}$, $W_{eff} \le 10.80\text{ m/s}$, $UKC \ge 1.50\text{ m}$, $FB_{pier} \ge 0.50\text{ m}$)"""
+        r"""四層 Hard VETO 熔斷檢核 ($H_{s,pier} \le 1.20\text{ m}$, $W_{eff} \le 10.80\text{ m/s}$, $UKC \ge 1.50\text{ m}$, $FB_{pier} \ge 0.50\text{ m}$)"""
         kd = cls.calculate_kd(data.tp_s)
         kw = cls.calculate_kw(data.delta_theta_deg)
         
@@ -95,7 +129,7 @@ class PhysicsEngine:
         }
 
 # ==============================================================================
-# 3. 二十年海象氣候智庫比對引擎 (20-Year Climate Matching Engine)
+# 4. 二十年海象氣候智庫比對引擎 (20-Year Climate Matching Engine)
 # ==============================================================================
 class OptimizedHistorical20YrEngine:
     def __init__(self):
@@ -146,7 +180,7 @@ class OptimizedHistorical20YrEngine:
         }
 
 # ==============================================================================
-# 4. 奇門 70% 門控同化與 Sigmoid 策略神經網路
+# 5. 奇門 70% 門控同化與 Sigmoid 策略神經網路
 # ==============================================================================
 class QimenOctagramAssimilationEngine:
     QIMEN_THRESHOLD_GATE = 70.0
@@ -188,7 +222,7 @@ class GEMV36DReinforcedPolicyNet(nn.Module):
         return round(max(0.65, alpha_base), 4)
 
 # ==============================================================================
-# 5. 雙重遲滯控制器與動態人流撤離算子 (Hysteresis & Evacuation)
+# 6. 雙重遲滯控制器與動態人流撤離算子 (Hysteresis & Evacuation)
 # ==============================================================================
 class GuerrillaHysteresisController:
     def __init__(self, angle_high: float = 38.0, angle_low: float = 30.0, lockout_steps: int = 5):
@@ -219,24 +253,21 @@ class GuerrillaHysteresisController:
         return int(math.ceil(base_time + squat_delay + 15.0))
 
 # ==============================================================================
-# 6. TG 游擊戰術最高統合執行調度器 (TG Master Engine)
+# 7. TG 游擊戰術最高統合執行調度器 (TG Master Engine)
 # ==============================================================================
 class TGGuerrillaMasterEngine:
     def __init__(self):
         self.net = GEMV36DReinforcedPolicyNet()
         self.climate_engine = OptimizedHistorical20YrEngine()
         self.hysteresis = GuerrillaHysteresisController()
+        self.extractor = GEM37DNormalizedFeatureExtractor()
 
     def execute(self, telemetry: MarineSafetyData) -> Dict[str, Any]:
         cst_tz = timezone(timedelta(hours=8))
         now_dt = datetime.now(cst_tz)
 
-        # 構建 37D 標準特徵向量
-        vec37 = np.full(37, 0.2, dtype=np.float32)
-        vec37[0] = min(1.0, telemetry.hs_cwa / 10.0)
-        vec37[1] = min(1.0, telemetry.w_cwa / 50.0)
-        vec37[23] = min(1.0, telemetry.tp_s / 25.0)
-        vec37[34] = telemetry.qimen_consensus_pct / 100.0
+        # 採用 37D 特徵轉譯器同構化特徵向量
+        vec37 = self.extractor.build_normalized_vector(telemetry)
 
         hist_res = self.climate_engine.match_live_telemetry(vec37)
         alpha_base = self.net.compute_sigmoid_alpha_tune(telemetry.qimen_consensus_pct)
@@ -302,6 +333,9 @@ class TGGuerrillaMasterEngine:
     def generate_markdown_report(self, data: MarineSafetyData, res: Dict[str, Any]) -> str:
         """生成對齊規範之結構化 Markdown 評估報告"""
         pm = res["physics_metrics"]
+        eff_hs_limit = round(PhysicsEngine.HARD_HS_MAX * pm['alpha_tune'], 2)
+        eff_weff_limit = round(PhysicsEngine.HARD_WEFF_MAX * pm['alpha_tune'], 2)
+
         hs_status = "[🟢 PASS]" if pm["pass_hs"] else "[🔴 VETO]"
         w_status = "[🟢 PASS]" if pm["pass_w"] else "[🔴 VETO]"
         ukc_status = "[🟢 PASS]" if pm["pass_ukc"] else "[🔴 VETO]"
@@ -311,8 +345,8 @@ class TGGuerrillaMasterEngine:
         report += "**四層剛性物理門檻檢核**\n\n"
         report += "| 檢核項目 | 實測/模擬數據 | 剛性標準門檻 | 數值比對 | 燈號狀態 |\n"
         report += "| --- | --- | --- | --- | --- |\n"
-        report += f"| 碼頭波高 ($H_{{s,pier}}$) | {pm['hs_pier_m']:.2f} m | $\\le 1.20\\text{{ m}}$ | {pm['hs_pier_m']:.2f}m vs 1.20m | {hs_status} |\n"
-        report += f"| 攻角風速 ($W_{{eff}}$) | {pm['w_eff_ms']:.2f} m/s | $\\le 10.80\\text{{ m/s}}$ | {pm['w_eff_ms']:.2f}m/s vs 10.80m/s | {w_status} |\n"
+        report += f"| 碼頭波高 ($H_{{s,pier}}$) | {pm['hs_pier_m']:.2f} m | $\\le {eff_hs_limit:.2f}\\text{{ m}}$ | {pm['hs_pier_m']:.2f}m vs {eff_hs_limit:.2f}m | {hs_status} |\n"
+        report += f"| 攻角風速 ($W_{{eff}}$) | {pm['w_eff_ms']:.2f} m/s | $\\le {eff_weff_limit:.2f}\\text{{ m/s}}$ | {pm['w_eff_ms']:.2f}m/s vs {eff_weff_limit:.2f}m/s | {w_status} |\n"
         report += f"| 富餘水深 ($UKC$) | {pm['ukc_m']:.2f} m | $\\ge 1.50\\text{{ m}}$ | {pm['ukc_m']:.2f}m vs 1.50m | {ukc_status} |\n"
         report += f"| 碼頭乾舷 ($FB_{{pier}}$) | {pm['fb_pier_m']:.2f} m | $\\ge 0.50\\text{{ m}}$ | {pm['fb_pier_m']:.2f}m vs 0.50m | {fb_status} |\n\n"
         
@@ -323,7 +357,7 @@ class TGGuerrillaMasterEngine:
         return report
 
 # ==============================================================================
-# 7. 實測執行與驗證範例
+# 8. 實測執行與驗證範例
 # ==============================================================================
 if __name__ == "__main__":
     engine = TGGuerrillaMasterEngine()
