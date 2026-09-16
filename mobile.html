@@ -77,7 +77,6 @@
       border: 1px solid rgba(56, 189, 248, 0.2);
     }
 
-    /* 官方 vs 模型判斷比對卡片 */
     .cmp-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -94,7 +93,6 @@
     .cmp-title { font-size: 10px; color: var(--text-sub); margin-bottom: 2px; }
     .cmp-value { font-size: 12px; font-weight: bold; }
 
-    /* 藍色心跳動態呼吸燈動畫 */
     .blue-heart-dot {
       display: inline-block;
       width: 8px;
@@ -115,7 +113,7 @@
 </head>
 <body>
 
-  <!-- 1. 頂部狀態、藍色心跳與【官方 vs 模型判斷比對警示框】 -->
+  <!-- 1. 頂部狀態、藍色心跳與雙端比對警示框 -->
   <div class="card">
     <div style="display: flex; justify-content: space-between; align-items: center;">
       <span style="font-size: 14px; font-weight: bold;">🐢 龜山島雙層戰術控制台</span>
@@ -130,7 +128,7 @@
       </div>
     </div>
 
-    <!-- 官方 vs 模型判斷比對矩陣卡片 -->
+    <!-- 官方 vs 模型判斷比對 -->
     <div class="cmp-grid">
       <div class="cmp-box">
         <div class="cmp-title">🏛️ 官方裁決 (Official)</div>
@@ -142,9 +140,9 @@
       </div>
     </div>
 
-    <!-- 警示文字動態推播 Banner -->
+    <!-- 警示 Banner -->
     <div id="alert-banner" style="font-size: 11px; color: var(--veto-color); background: rgba(239, 68, 68, 0.15); padding: 6px; border-radius: 4px; margin-top: 6px; border: 1px solid rgba(239, 68, 68, 0.3);">
-      🚨 <strong>雙端比對警示：</strong>官方暫定放行，但 GEM 模型偵測碼頭波高 3.71m 超標，已強制觸發 VETO 剛性熔斷保護！
+      🚨 <strong>雙端比對警示：</strong>官方暫定放行，但 GEM 模型偵測波高 3.71m 超標，已強制觸發 VETO 剛性熔斷保護！
     </div>
   </div>
 
@@ -189,7 +187,7 @@
     </table>
   </div>
 
-  <!-- 3. 未來 3 天 (T+24h ~ T+72h) 登封島趨勢預判矩陣 -->
+  <!-- 3. 未來 3 天登封島趨勢預判矩陣 -->
   <div class="card">
     <div class="card-title">2. 📅 未來 3 天登封島預判 (T+24h ~ T+72h)</div>
     <table class="data-table">
@@ -275,10 +273,91 @@
     </table>
   </div>
 
+  <!-- 5. 🌀 颱風、長浪、南北角水動力與天文潮專區 -->
+  <div class="card">
+    <div class="card-title">4. 🌀 颱風、長浪、南北角水動力與天文潮專區</div>
+    
+    <table class="data-table" style="margin-bottom: 8px;">
+      <thead>
+        <tr>
+          <th>區域碼頭</th>
+          <th>風速</th>
+          <th>浪高</th>
+          <th>流速</th>
+          <th>狀態</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>【北岸碼頭】</strong></td>
+          <td>6.20 m/s</td>
+          <td>0.85 m</td>
+          <td>0.90 kts</td>
+          <td><span class="badge badge-pass">🟢 PASS</span></td>
+        </tr>
+        <tr>
+          <td><strong>【南岸碼頭】</strong></td>
+          <td>5.80 m/s</td>
+          <td>0.80 m</td>
+          <td>0.70 kts</td>
+          <td><span class="badge badge-pass">🟢 PASS</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 11px; margin-bottom: 8px;">
+      <div style="background: rgba(255,255,255,0.03); padding: 6px; border-radius: 4px; border: 1px solid var(--border-color);">
+        <span style="color: var(--text-sub);">龜首崩塌風險：</span><strong style="color: var(--warn-color);">0.15</strong>
+      </div>
+      <div style="background: rgba(255,255,255,0.03); padding: 6px; border-radius: 4px; border: 1px solid var(--border-color);">
+        <span style="color: var(--text-sub);">奇門同化率：</span><strong style="color: var(--blue-heart);">100.0%</strong>
+      </div>
+    </div>
+
+    <div style="font-size: 11px; color: var(--text-sub); background: rgba(0,0,0,0.25); padding: 6px 8px; border-radius: 4px; border-left: 3px solid var(--blue-heart); line-height: 1.5;">
+      • <strong>天文潮位：</strong>朔望大潮 1.80m，乾潮扣減 UKC 0.45m，滿潮扣減乾舷 FB 1.35m。<br>
+      • <strong>長浪穿透：</strong>湧浪週期 $T_p = 15.5\text{s}$ ($>10\text{s}$ 港池共振 $K_d = 1.00$)。
+    </div>
+  </div>
+
+  <!-- 6. 游擊調度與方案評估比對 -->
+  <div class="card">
+    <div class="card-title">5. ⚓ 游擊調度與方案評估比對</div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>方案</th>
+          <th>風速採樣</th>
+          <th>波高採樣</th>
+          <th>最終決策</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>方案 A (傳統官方)</td>
+          <td>10.80 m/s</td>
+          <td>單點浮標</td>
+          <td><span class="badge badge-pass">放行靠泊</span></td>
+        </tr>
+        <tr>
+          <td>方案 B (氣象署)</td>
+          <td>10.80 m/s</td>
+          <td>網格預報</td>
+          <td><span class="badge badge-warn">限制靠泊</span></td>
+        </tr>
+        <tr style="background: rgba(239, 68, 68, 0.1);">
+          <td><strong>方案 C (GEM)</strong></td>
+          <td><strong>動態攻角 Weff</strong></td>
+          <td><strong>PINN 港池越浪</strong></td>
+          <td><span class="badge badge-veto">🔴 剛性熔斷</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
 <script>
   let heartbeatCount = 0;
 
-  // 1. 原生即時秒針（1000ms 跳動，不卡死）
   function startLiveClock() {
     setInterval(() => {
       const now = new Date();
@@ -287,14 +366,12 @@
     }, 1000);
   }
 
-  // 2. SSOT 數據輪詢與官方/模型雙端裁決自動解析
   async function fetchSSOTData() {
     try {
       const response = await fetch('https://raw.githubusercontent.com/marlinx-neyc/gem-engine/main/latest_decision.json?t=' + Date.now());
       if (response.ok) {
         const data = await response.json();
         
-        // 藍色心跳累計
         heartbeatCount++;
         document.getElementById('heartbeat-counter').innerText = heartbeatCount;
         
@@ -302,7 +379,6 @@
           document.getElementById('ssot-time').innerText = data.timestamp.split(' ')[1] || data.timestamp;
         }
 
-        // 解析官方與 GEM 模型比對結果
         const officialStatus = data.official_closure_status === 1.0 ? '🔴 官方封島' : '🟢 官方放行';
         const modelDecision = data.decision || '🔴 剛性熔斷';
         
@@ -314,7 +390,6 @@
         badge.className = isVeto ? 'badge badge-veto' : 'badge badge-pass';
         badge.innerText = modelDecision;
 
-        // 動態調整 Banner 警示文字
         const banner = document.getElementById('alert-banner');
         if (officialStatus.includes('🟢') && isVeto) {
           banner.style.color = 'var(--veto-color)';
@@ -334,10 +409,9 @@
     }
   }
 
-  // 3. 初始化與休眠喚醒監聽
   startLiveClock();
   fetchSSOTData();
-  setInterval(fetchSSOTData, 10000); // 每 10 秒更新
+  setInterval(fetchSSOTData, 10000);
 
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
