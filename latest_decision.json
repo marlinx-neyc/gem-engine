@@ -1,6 +1,6 @@
 {
   "version": "v36D.30.0 Three-Scheme & Guerrilla Vector Master Complete",
-  "timestamp": "2026-09-17 10:50:57 CST",
+  "timestamp": "2026-09-17 14:33:19 CST",
   "decision": "🔴 封島/防颱",
   "confidence_score": 100.0,
   "confidence_label": "🟢 100.0% [完整同化 PASS]",
@@ -15,9 +15,9 @@
   },
   "physics_metrics": {
     "hs_pier_m": 3.71,
-    "w_local_ms": 8.5,
-    "w_eff_ms": 6.01,
-    "alpha_adaptive": 1.0,
+    "w_local_ms": 6.63,
+    "w_eff_ms": 6.4,
+    "alpha_adaptive": 0.9421,
     "ukc_m": 3.77,
     "fb_pier_m": 2.2,
     "pass_hs": false,
@@ -26,18 +26,56 @@
     "pass_fb": true,
     "has_veto": true,
     "kd": 1.0,
-    "kw": 1.0,
+    "kw": 0.78,
     "north_pier_status": "[🔴 VETO]",
     "south_pier_status": "[🔴 VETO]"
   },
+  "hydrothermal_geothermal_gate": {
+    "high_tide_time": "09:30",
+    "peak_release_time": "13:00",
+    "risk_window_start": "11:30",
+    "risk_window_end": "14:30",
+    "warning": "強酸水團 (pH 1.75~2.0) 與高溫羽狀流擴散峰值期，牛奶海水下活動與 SUP 全線暫停"
+  },
   "guerrilla_dispatch": {
     "berthing_pier": "【南岸權宜碼頭】",
-    "evacuation_pier": "【南岸權宜碼頭】 -> 返航【烏石港】",
+    "evacuation_pier": "【南岸權宜碼頭】 → 返航【烏石港】",
     "guerrilla_mode": "BOTH_PIERS_DISABLED",
     "morning_tactic": "⚠️ 上午游擊調撥：北岸越浪，08:30 班次改至【南岸權宜碼頭】靠泊",
     "afternoon_tactic": "🚨 下午游擊撤退：10:50/13:50 雙預警，11:20 止登，14:20 全員撤離至【烏石港】",
-    "tactical_summary": "執行「10:50/13:50 雙預警廣播，11:20 止登【南岸碼頭】，14:20 全員撤離返航【烏石港】」",
-    "tactical_timeline": []
+    "tactical_summary": "執行「10:50/13:50 雙預警，11:20 止登【南岸碼頭】，14:20 全員撤離至【烏石港】」",
+    "tactical_timeline": [
+      {
+        "time": "08:30",
+        "action": "首班游擊預警",
+        "location": "【南岸權宜碼頭】",
+        "condition": "北岸越浪切換"
+      },
+      {
+        "time": "10:50",
+        "action": "止登預發廣播 (前30分)",
+        "location": "全島廣播系統",
+        "condition": "止登前 30 分鐘預警"
+      },
+      {
+        "time": "11:20",
+        "action": "上午場止登截止",
+        "location": "【南岸權宜碼頭】",
+        "condition": "上午極限止登點"
+      },
+      {
+        "time": "13:50",
+        "action": "撤離預發廣播 (前30分)",
+        "location": "全島廣播系統",
+        "condition": "撤離前 30 分鐘預警"
+      },
+      {
+        "time": "14:20",
+        "action": "游擊戰術強制撤退",
+        "location": "【南岸權宜碼頭】 → 【烏石港】",
+        "condition": "全員清島撤離返航"
+      }
+    ]
   },
   "level5_advanced_metrics": {
     "vision_overtopping_rate_pmin": 1.31,
@@ -63,13 +101,13 @@
   "rl_agent_diagnostics": {
     "state_vector_10d": [
       3.7100000381469727,
-      8.5,
+      6.630000114440918,
       3.7699999809265137,
       2.200000047683716,
-      15.5,
-      45.0,
-      0.96875,
-      0.9599999785423279,
+      12.5,
+      15.0,
+      0.78125,
+      0.9420999884605408,
       1.0,
       1.0
     ],
