@@ -142,7 +142,7 @@
 
     <!-- 警示 Banner -->
     <div id="alert-banner" style="font-size: 11px; color: var(--veto-color); background: rgba(239, 68, 68, 0.15); padding: 6px; border-radius: 4px; margin-top: 6px; border: 1px solid rgba(239, 68, 68, 0.3);">
-      🚨 <strong>雙端比對警示：</strong>官方暫定放行，但 GEM 模型偵測波高 3.71m 超標，已強制觸發 VETO 剛性熔斷保護！
+      🚨 <strong>雙端比對警示：</strong>官方暫定放行，但 GEM 模型已偵測海象超標，強制觸發 VETO 剛性熔斷保護！
     </div>
   </div>
 
@@ -161,27 +161,27 @@
       <tbody>
         <tr>
           <td>碼頭波高 (Hs Pier)</td>
-          <td><strong style="color: var(--veto-color);">3.71 m</strong></td>
-          <td>&le; 0.96 m</td>
-          <td><span class="badge badge-veto">🔴 VETO</span></td>
+          <td><strong id="val-hs" style="color: var(--veto-color);">3.71 m</strong></td>
+          <td>&le; 1.20 m</td>
+          <td><span id="badge-hs" class="badge badge-veto">🔴 VETO</span></td>
         </tr>
         <tr>
           <td>攻角有效風速 (Weff)</td>
-          <td>6.01 m/s</td>
-          <td>&le; 8.62 m/s</td>
-          <td><span class="badge badge-pass">🟢 PASS</span></td>
+          <td><strong id="val-weff">6.01 m/s</strong></td>
+          <td>&le; 10.80 m/s</td>
+          <td><span id="badge-weff" class="badge badge-pass">🟢 PASS</span></td>
         </tr>
         <tr>
           <td>富餘水深 (UKC)</td>
-          <td>3.77 m</td>
+          <td><strong id="val-ukc">3.77 m</strong></td>
           <td>&ge; 1.50 m</td>
-          <td><span class="badge badge-pass">🟢 PASS</span></td>
+          <td><span id="badge-ukc" class="badge badge-pass">🟢 PASS</span></td>
         </tr>
         <tr>
           <td>預留乾舷 (FB)</td>
-          <td>2.20 m</td>
+          <td><strong id="val-fb">2.20 m</strong></td>
           <td>&ge; 0.50 m</td>
-          <td><span class="badge badge-pass">🟢 PASS</span></td>
+          <td><span id="badge-fb" class="badge badge-pass">🟢 PASS</span></td>
         </tr>
       </tbody>
     </table>
@@ -290,33 +290,33 @@
       <tbody>
         <tr>
           <td><strong>【北岸碼頭】</strong></td>
-          <td>6.20 m/s</td>
-          <td>0.85 m</td>
+          <td id="north-w">6.20 m/s</td>
+          <td id="north-hs">0.85 m</td>
           <td>0.90 kts</td>
-          <td><span class="badge badge-pass">🟢 PASS</span></td>
+          <td><span id="north-badge" class="badge badge-pass">🟢 PASS</span></td>
         </tr>
         <tr>
           <td><strong>【南岸碼頭】</strong></td>
-          <td>5.80 m/s</td>
-          <td>0.80 m</td>
+          <td id="south-w">5.80 m/s</td>
+          <td id="south-hs">0.80 m</td>
           <td>0.70 kts</td>
-          <td><span class="badge badge-pass">🟢 PASS</span></td>
+          <td><span id="south-badge" class="badge badge-pass">🟢 PASS</span></td>
         </tr>
       </tbody>
     </table>
 
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 11px; margin-bottom: 8px;">
       <div style="background: rgba(255,255,255,0.03); padding: 6px; border-radius: 4px; border: 1px solid var(--border-color);">
-        <span style="color: var(--text-sub);">龜首崩塌風險：</span><strong style="color: var(--warn-color);">0.15</strong>
+        <span style="color: var(--text-sub);">龜首崩塌風險：</span><strong id="val-slope" style="color: var(--warn-color);">0.15</strong>
       </div>
       <div style="background: rgba(255,255,255,0.03); padding: 6px; border-radius: 4px; border: 1px solid var(--border-color);">
-        <span style="color: var(--text-sub);">奇門同化率：</span><strong style="color: var(--blue-heart);">100.0%</strong>
+        <span style="color: var(--text-sub);">奇門同化率：</span><strong id="val-qimen" style="color: var(--blue-heart);">100.0%</strong>
       </div>
     </div>
 
     <div style="font-size: 11px; color: var(--text-sub); background: rgba(0,0,0,0.25); padding: 6px 8px; border-radius: 4px; border-left: 3px solid var(--blue-heart); line-height: 1.5;">
       • <strong>天文潮位：</strong>朔望大潮 1.80m，乾潮扣減 UKC 0.45m，滿潮扣減乾舷 FB 1.35m。<br>
-      • <strong>長浪穿透：</strong>湧浪週期 $T_p = 15.5\text{s}$ ($>10\text{s}$ 港池共振 $K_d = 1.00$)。
+      • <strong>長浪穿透：</strong>湧浪週期 Tp = 15.5s (&gt; 10s 觸發港池共振 Kd = 1.00)。
     </div>
   </div>
 
@@ -368,7 +368,7 @@
 
   async function fetchSSOTData() {
     try {
-      const response = await fetch('https://raw.githubusercontent.com/marlinx-neyc/gem-engine/main/latest_decision.json?t=' + Date.now());
+      const response = await fetch('latest_decision.json?t=' + Date.now());
       if (response.ok) {
         const data = await response.json();
         
@@ -385,7 +385,7 @@
         document.getElementById('official-decision').innerText = officialStatus;
         document.getElementById('model-decision').innerText = modelDecision;
 
-        const isVeto = modelDecision.includes('🔴') || modelDecision.includes('封島');
+        const isVeto = data.hard_veto_alert || modelDecision.includes('🔴') || modelDecision.includes('封島');
         const badge = document.getElementById('decision-badge');
         badge.className = isVeto ? 'badge badge-veto' : 'badge badge-pass';
         badge.innerText = modelDecision;
@@ -393,15 +393,91 @@
         const banner = document.getElementById('alert-banner');
         if (officialStatus.includes('🟢') && isVeto) {
           banner.style.color = 'var(--veto-color)';
+          banner.style.background = 'rgba(239, 68, 68, 0.15)';
+          banner.style.borderColor = 'rgba(239, 68, 68, 0.3)';
           banner.innerHTML = '🚨 <strong>預警分歧：</strong>官方顯示開放，但 GEM 模型已偵測波高/浪況超標，強制觸發剛性熔斷！';
         } else if (isVeto) {
           banner.style.color = 'var(--veto-color)';
+          banner.style.background = 'rgba(239, 68, 68, 0.15)';
+          banner.style.borderColor = 'rgba(239, 68, 68, 0.3)';
           banner.innerHTML = '🚨 <strong>雙端一致：</strong>官方與 GEM 模型同步判定封島/防颱管制。';
         } else {
           banner.style.color = 'var(--pass-color)';
           banner.style.background = 'rgba(34, 197, 94, 0.15)';
           banner.style.borderColor = 'rgba(34, 197, 94, 0.3)';
           banner.innerHTML = '🟢 <strong>海象安全：</strong>雙端判定符合靠泊標準，執行正常游擊調度。';
+        }
+
+        // 動態水文門檻資料更新
+        const physics = data.physics_metrics || {};
+        const hsVal = Number(physics.hs_pier_m ?? 3.71);
+        const wVal = Number(physics.w_local_ms ?? 6.01);
+        const ukcVal = Number(physics.ukc_m ?? 3.77);
+        const fbVal = Number(physics.fb_pier_m ?? 2.20);
+
+        const elHs = document.getElementById('val-hs');
+        if (elHs) elHs.innerText = `${hsVal.toFixed(2)} m`;
+        const bgHs = document.getElementById('badge-hs');
+        if (bgHs) {
+          bgHs.className = hsVal > 1.20 ? 'badge badge-veto' : 'badge badge-pass';
+          bgHs.innerText = hsVal > 1.20 ? '🔴 VETO' : '🟢 PASS';
+        }
+
+        const elWeff = document.getElementById('val-weff');
+        if (elWeff) elWeff.innerText = `${wVal.toFixed(2)} m/s`;
+        const bgWeff = document.getElementById('badge-weff');
+        if (bgWeff) {
+          bgWeff.className = wVal >= 10.80 ? 'badge badge-veto' : 'badge badge-pass';
+          bgWeff.innerText = wVal >= 10.80 ? '🔴 VETO' : '🟢 PASS';
+        }
+
+        const elUkc = document.getElementById('val-ukc');
+        if (elUkc) elUkc.innerText = `${ukcVal.toFixed(2)} m`;
+        const bgUkc = document.getElementById('badge-ukc');
+        if (bgUkc) {
+          bgUkc.className = ukcVal < 1.50 ? 'badge badge-veto' : 'badge badge-pass';
+          bgUkc.innerText = ukcVal < 1.50 ? '🔴 VETO' : '🟢 PASS';
+        }
+
+        const elFb = document.getElementById('val-fb');
+        if (elFb) elFb.innerText = `${fbVal.toFixed(2)} m`;
+        const bgFb = document.getElementById('badge-fb');
+        if (bgFb) {
+          bgFb.className = fbVal < 0.50 ? 'badge badge-veto' : 'badge badge-pass';
+          bgFb.innerText = fbVal < 0.50 ? '🔴 VETO' : '🟢 PASS';
+        }
+
+        // 南北角區域水動力更新
+        const northHs = physics.north_pier?.hs_m ?? hsVal;
+        const northW = physics.north_pier?.w_ms ?? wVal;
+        const southHs = physics.south_pier?.hs_m ?? (hsVal * 0.94);
+        const southW = physics.south_pier?.w_ms ?? (wVal * 0.935);
+
+        const elNorthW = document.getElementById('north-w');
+        if (elNorthW) elNorthW.innerText = `${Number(northW).toFixed(2)} m/s`;
+        const elNorthHs = document.getElementById('north-hs');
+        if (elNorthHs) elNorthHs.innerText = `${Number(northHs).toFixed(2)} m`;
+        const bgNorth = document.getElementById('north-badge');
+        if (bgNorth) {
+          bgNorth.className = northHs > 1.20 ? 'badge badge-veto' : 'badge badge-pass';
+          bgNorth.innerText = northHs > 1.20 ? '🔴 VETO' : '🟢 PASS';
+        }
+
+        const elSouthW = document.getElementById('south-w');
+        if (elSouthW) elSouthW.innerText = `${Number(southW).toFixed(2)} m/s`;
+        const elSouthHs = document.getElementById('south-hs');
+        if (elSouthHs) elSouthHs.innerText = `${Number(southHs).toFixed(2)} m`;
+        const bgSouth = document.getElementById('south-badge');
+        if (bgSouth) {
+          bgSouth.className = southHs > 1.20 ? 'badge badge-veto' : 'badge badge-pass';
+          bgSouth.innerText = southHs > 1.20 ? '🔴 VETO' : '🟢 PASS';
+        }
+
+        if (physics.slope_landslide_risk !== undefined) {
+          document.getElementById('val-slope').innerText = Number(physics.slope_landslide_risk).toFixed(2);
+        }
+        if (data.qimen_macro_consensus?.consensus_rate_pct !== undefined) {
+          document.getElementById('val-qimen').innerText = `${Number(data.qimen_macro_consensus.consensus_rate_pct).toFixed(1)}%`;
         }
       }
     } catch (err) {
@@ -411,7 +487,7 @@
 
   startLiveClock();
   fetchSSOTData();
-  setInterval(fetchSSOTData, 10000);
+  setInterval(fetchSSOTData, 5000);
 
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
