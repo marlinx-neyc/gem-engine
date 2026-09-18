@@ -30,6 +30,7 @@
       border-radius: 8px;
       padding: 10px;
       margin-bottom: 8px;
+      contain: content;
     }
     .card-title {
       font-size: 14px;
@@ -44,6 +45,7 @@
       border-collapse: collapse;
       font-size: 12px;
       text-align: left;
+      font-variant-numeric: tabular-nums;
     }
     .data-table th, .data-table td {
       padding: 6px 8px;
@@ -65,9 +67,9 @@
     .badge-warn { background: rgba(245, 158, 11, 0.2); color: var(--warn-color); }
     
     .status-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 4px;
       font-size: 11px;
       color: var(--text-sub);
       margin-top: 6px;
@@ -75,6 +77,12 @@
       padding: 6px 8px;
       border-radius: 4px;
       border: 1px solid rgba(56, 189, 248, 0.2);
+      font-variant-numeric: tabular-nums;
+    }
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     .cmp-grid {
@@ -121,10 +129,14 @@
     </div>
     
     <div class="status-bar">
-      <div>即時：<strong id="live-clock" style="color: #fff;">--:--:-- CST</strong></div>
-      <div>SSOT：<strong id="ssot-time" style="color: #fff;">--:--:--</strong></div>
-      <div style="color: var(--blue-heart); font-weight: bold;">
-        <span class="blue-heart-dot"></span>心跳：<span id="heartbeat-counter">0</span> 次
+      <div class="status-row">
+        <div>即時：<strong id="live-clock" style="color: #fff;">----/--/-- --:--:-- CST</strong></div>
+        <div style="color: var(--blue-heart); font-weight: bold;">
+          <span class="blue-heart-dot"></span>心跳：<span id="heartbeat-counter">0</span> 次
+        </div>
+      </div>
+      <div class="status-row">
+        <div>SSOT：<strong id="ssot-time" style="color: #fff;">----/--/-- --:--:-- CST</strong></div>
       </div>
     </div>
 
@@ -202,21 +214,21 @@
       </thead>
       <tbody>
         <tr>
-          <td><strong>明日 (T+24h)</strong></td>
+          <td><strong id="date-t24">明日 (T+24h)</strong></td>
           <td>1.58 m</td>
           <td>7.20 m/s</td>
           <td>0.81</td>
           <td><span class="badge badge-veto">🔴 預警封島</span></td>
         </tr>
         <tr>
-          <td><strong>後天 (T+48h)</strong></td>
+          <td><strong id="date-t48">後天 (T+48h)</strong></td>
           <td>0.82 m</td>
           <td>5.10 m/s</td>
           <td>0.85</td>
           <td><span class="badge badge-pass">🟢 預測開放</span></td>
         </tr>
         <tr>
-          <td><strong>大後天 (T+72h)</strong></td>
+          <td><strong id="date-t72">大後天 (T+72h)</strong></td>
           <td>0.75 m</td>
           <td>4.80 m/s</td>
           <td>0.85</td>
@@ -361,9 +373,37 @@
   function startLiveClock() {
     setInterval(() => {
       const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
       const timeStr = now.toLocaleTimeString('zh-TW', { hour12: false, timeZone: 'Asia/Taipei' });
-      document.getElementById('live-clock').innerText = timeStr + ' CST';
+      document.getElementById('live-clock').innerText = `${year}/${month}/${day} ${timeStr} CST`;
     }, 1000);
+  }
+
+  function updateFutureDates(baseTimestamp) {
+    let baseDate = new Date();
+    if (baseTimestamp) {
+      const cleanStr = baseTimestamp.replace(' CST', '').replace(' ', 'T');
+      const parsed = new Date(cleanStr);
+      if (!isNaN(parsed.getTime())) {
+        baseDate = parsed;
+      }
+    }
+    
+    const d1 = new Date(baseDate); d1.setDate(d1.getDate() + 1);
+    const d2 = new Date(baseDate); d2.setDate(d2.getDate() + 2);
+    const d3 = new Date(baseDate); d3.setDate(d3.getDate() + 3);
+
+    const fmt = (d) => `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
+
+    const el1 = document.getElementById('date-t24');
+    const el2 = document.getElementById('date-t48');
+    const el3 = document.getElementById('date-t72');
+
+    if (el1) el1.innerText = `明日 ${fmt(d1)} (T+24h)`;
+    if (el2) el2.innerText = `後天 ${fmt(d2)} (T+48h)`;
+    if (el3) el3.innerText = `大後天 ${fmt(d3)} (T+72h)`;
   }
 
   async function fetchSSOTData() {
@@ -376,7 +416,10 @@
         document.getElementById('heartbeat-counter').innerText = heartbeatCount;
         
         if (data.timestamp) {
-          document.getElementById('ssot-time').innerText = data.timestamp.split(' ')[1] || data.timestamp;
+          document.getElementById('ssot-time').innerText = data.timestamp;
+          updateFutureDates(data.timestamp);
+        } else {
+          updateFutureDates(null);
         }
 
         const officialStatus = data.official_closure_status === 1.0 ? '🔴 官方封島' : '🟢 官方放行';
@@ -482,6 +525,7 @@
       }
     } catch (err) {
       console.warn("SSOT 即時輪詢重試中...");
+      updateFutureDates(null);
     }
   }
 
