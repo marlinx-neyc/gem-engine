@@ -9,12 +9,13 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.optim as optim
 
 # ==============================================================================
-# 1. 安全數值解析算子
+# 1. 安全數值解析算子 (Anti-Crash Safe Parsers)
 # ==============================================================================
 def safe_float(val: Any, default: float) -> float:
-    """防範外部 API 回傳 null, None, '-' 或異常字串引發系統崩潰"""
+    """防範外部 API 或影像解析回傳 null, None, '-' 或異常字串引發系統崩潰"""
     if val is None:
         return default
     try:
@@ -24,7 +25,7 @@ def safe_float(val: Any, default: float) -> float:
         return default
 
 # ==============================================================================
-# 2. 遙測與高維水文資料結構
+# 2. 遙測、ATS 航跡與影片 AI 視覺資料結構
 # ==============================================================================
 @dataclass
 class MarineSafetyData:
@@ -34,19 +35,21 @@ class MarineSafetyData:
     delta_theta_deg: float     # 401 高地背風偏角 (度)
     tide_eta_m: float          # 天文潮位與升水 (m)
     d_draft_m: float           # 船隻吃水 (m)
-    s_quat_m: float            # TDX AIS 船體動態沉降 Squat (m)
+    s_quat_m: float            # ATS/AIS 船體動態沉降 Squat (m)
     chart_depth_m: float       # 碼頭圖水深 (m)
     current_speed_kts: float   # 海流速度 (kts)
     qimen_consensus_pct: float # 奇門氣場同化率 (%)
-    s_cos_sim: float           # 歷史餘弦相似度
+    s_cos_sim: float           # 20年歷史餘弦相似度 (0~1)
     high_tide_time_str: str    # 滿潮時間字串 (YYYY-MM-DD HH:MM:SS)
-    passenger_count: int = 150 # 待撤離/登島人數
+    video_overtopping_rate: float = 0.0 # 短影片 AI 萃取越浪率 (次/分)
+    video_kd_bias: float = 0.0          # 影片解析波高衰減偏差
+    passenger_count: int = 150          # 待撤離/登島人數
     slope_landslide_risk: float = 0.15
     official_closure_status: float = 0.0
 
     @classmethod
     def from_api_json(cls, raw_data: Dict[str, Any]) -> 'MarineSafetyData':
-        """從多源 API 自動反序列化並實施強健化數值轉換"""
+        """從多源 API 與影片 AI 特徵 JSON 自動反序列化"""
         cst_now = datetime.datetime.now(timezone(timedelta(hours=8)))
         default_high_tide = f"{cst_now.strftime('%Y-%m-%d')} 09:30:00"
         
@@ -63,6 +66,8 @@ class MarineSafetyData:
             qimen_consensus_pct=safe_float(raw_data.get("qimen_consensus_pct"), 100.0),
             s_cos_sim=safe_float(raw_data.get("s_cos_sim"), 0.9421),
             high_tide_time_str=str(raw_data.get("high_tide_time_str", default_high_tide)),
+            video_overtopping_rate=safe_float(raw_data.get("video_overtopping_rate"), 1.31),
+            video_kd_bias=safe_float(raw_data.get("video_kd_bias"), 0.0295),
             passenger_count=int(safe_float(raw_data.get("passenger_count"), 150)),
             slope_landslide_risk=safe_float(raw_data.get("slope_landslide_risk"), 0.15),
             official_closure_status=safe_float(raw_data.get("official_closure_status"), 0.0)
@@ -100,10 +105,7 @@ class GEM37DNormalizedFeatureExtractor:
 # 4. 熱泉水靜壓動態避險視窗算子
 # ==============================================================================
 def calculate_hydrothermal_risk_window(high_tide_str: str) -> Dict[str, Any]:
-    """
-    依據潮汐 API 與水靜壓公式精算熱泉擴散峰值視窗
-    物理公式：Time_peak = Time_HighTide + 3.5 hours
-    """
+    """依據潮汐 API 與水靜壓公式精算熱泉擴散峰值視窗 T_peak = T_HighTide + 3.5h"""
     try:
         high_tide_dt = datetime.datetime.strptime(high_tide_str, "%Y-%m-%d %H:%M:%S")
         peak_dt = high_tide_dt + datetime.timedelta(hours=3.5)
@@ -137,18 +139,19 @@ class PhysicsEngine:
     BASE_FREEBOARD = 3.20    # m
 
     @staticmethod
-    def calculate_kd(tp: float) -> float:
-        """長浪繞射消能算子 Kd 遲滯帶精算"""
+    def calculate_kd(tp: float, video_bias: float = 0.0) -> float:
+        """長浪繞射消能算子 Kd 遲滯帶精算與影片 AI 偏差修復"""
         if tp < 11.5:
-            return 0.883
+            base_kd = 0.883
         elif 11.5 <= tp <= 12.0:
-            return 0.883 + (1.00 - 0.883) * ((tp - 11.5) / 0.5)
+            base_kd = 0.883 + (1.00 - 0.883) * ((tp - 11.5) / 0.5)
         else:
-            return 1.00
+            base_kd = 1.00
+        return min(1.00, base_kd + video_bias)
 
     @staticmethod
     def calculate_kw(delta_theta: float) -> float:
-        """攻角背風遮蔽衰減算子 Kw 遲滯帶精算"""
+        """攻角背风遮蔽衰減算子 Kw 遲滯帶精算"""
         if delta_theta < 30.0:
             return 0.78
         elif 30.0 <= delta_theta < 45.0:
@@ -159,7 +162,7 @@ class PhysicsEngine:
     @classmethod
     def evaluate_veto(cls, data: MarineSafetyData, alpha_tune: float = 0.9421) -> Dict[str, Any]:
         """剛性四層物理防線檢核與 Level 7 南北角雙區水動力解算"""
-        kd = cls.calculate_kd(data.tp_s)
+        kd = cls.calculate_kd(data.tp_s, data.video_kd_bias)
         kw = cls.calculate_kw(data.delta_theta_deg)
         
         # 水動力算子解算 Hs_pier 與 W_eff
@@ -206,13 +209,38 @@ class PhysicsEngine:
         }
 
 # ==============================================================================
-# 6. Level 5 高維邊緣算子整合
+# 6. 奇門 70% 同化門控算子
+# ==============================================================================
+class QimenAssimilationEngine:
+    QIMEN_THRESHOLD = 70.0
+
+    @classmethod
+    def evaluate(cls, qimen_pct: float, tp: float, delta_theta: float, has_veto: bool) -> Dict[str, Any]:
+        enabled = qimen_pct >= cls.QIMEN_THRESHOLD
+        if has_veto:
+            gate = "死門 (坤宮 - 剛性熔斷)"
+        elif tp > 12.0:
+            gate = "驚門 (兌宮 - 湧浪共振)"
+        elif delta_theta >= 38.0:
+            gate = "杜門 (巽宮 - 移防南岸)"
+        else:
+            gate = "開門 (乾宮 - 穩定靠泊)"
+            
+        prompt = f"🔮 奇門氣場匹配率達 {qimen_pct:.1f}% (>=70%)，已啟動宏觀參研決策與預警提示" if enabled else "⚠️ 奇門同化率未達 70% 門控，僅採納微觀水動力數據"
+        return {
+            "enabled": enabled,
+            "gate_state": gate,
+            "prompt": prompt
+        }
+
+# ==============================================================================
+# 7. Level 5 高維邊緣算子整合 (Vision-PINN 短影片特徵)
 # ==============================================================================
 class Level5AdvancedOperators:
     @staticmethod
     def compute_all(data: MarineSafetyData, hs_pier: float) -> Dict[str, Any]:
         """精算 Vision-PINN, MMSI 水動力, FNO 預報, 64D 量子拓撲與 Swarm 賽局"""
-        vision_overtopping = round(1.20 + (hs_pier * 0.03), 2)
+        vision_overtopping = round(max(data.video_overtopping_rate, 1.20 + (hs_pier * 0.03)), 2)
         fno_hs_mean = round(data.hs_cwa, 2)
         coherence = round(0.35 + (data.qimen_consensus_pct / 100.0) * 0.1182, 4)
 
@@ -235,7 +263,7 @@ class Level5AdvancedOperators:
 
         return {
             "vision_overtopping_rate_pmin": vision_overtopping,
-            "vision_kd_bias": 0.0295,
+            "vision_kd_bias": data.video_kd_bias,
             "vessel_hydrodynamics": vessel_info,
             "fno_forecast_mean_hs_m": fno_hs_mean,
             "quantum_topology_coherence": coherence,
@@ -243,7 +271,7 @@ class Level5AdvancedOperators:
         }
 
 # ==============================================================================
-# 7. Gymnasium 10D 狀態空間 RL 代理程式環境
+# 8. Gymnasium 10D 強化學習代理人與自主訓練內核
 # ==============================================================================
 class GymnasiumGuerrillaEnv:
     def __init__(self):
@@ -291,14 +319,43 @@ class GuerrillaRLPolicyNet(nn.Module):
         reward = 100.0 if (has_veto and action == 3) else (150.0 if not has_veto and action == 0 else -9999.0)
         return action, reward
 
+def train_rl_agent(policy_net: GuerrillaRLPolicyNet, episodes: int = 100):
+    """自主強化學習增量訓練內核 (RL Fine-Tuning Loop)"""
+    optimizer = optim.Adam(policy_net.parameters(), lr=0.001)
+    env = GymnasiumGuerrillaEnv()
+    
+    for _ in range(episodes):
+        sim_hs = np.random.uniform(0.5, 4.5)
+        sim_w = np.random.uniform(3.0, 15.0)
+        sim_data = MarineSafetyData(
+            hs_cwa=sim_hs, w_cwa=sim_w, tp_s=np.random.uniform(8.0, 16.0),
+            delta_theta_deg=np.random.uniform(0, 90), tide_eta_m=1.0, d_draft_m=1.2,
+            s_quat_m=0.8, chart_depth_m=8.5, current_speed_kts=1.5, qimen_consensus_pct=85.0,
+            s_cos_sim=0.9, high_tide_time_str="2026-09-18 09:30:00"
+        )
+        physics = PhysicsEngine.evaluate_veto(sim_data)
+        state_vec = env.build_state_vector(sim_data, physics)
+        
+        action, reward = policy_net.select_action_with_mask(state_vec, physics["has_veto"])
+        
+        state_t = torch.tensor(state_vec, dtype=torch.float32).unsqueeze(0)
+        logits = policy_net.fc(state_t)
+        target = torch.tensor([action], dtype=torch.long)
+        loss = F.cross_entropy(logits, target) * (-reward / 100.0)
+        
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
 # ==============================================================================
-# 8. TG 游擊戰術最高統合執行調度器 (TG Master Engine)
+# 9. TG 游擊戰術最高統合執行調度器 (TG Master Engine)
 # ==============================================================================
 class TGGuerrillaMasterEngine:
     def __init__(self):
         self.rl_env = GymnasiumGuerrillaEnv()
         self.rl_policy = GuerrillaRLPolicyNet()
         self.extractor = GEM37DNormalizedFeatureExtractor()
+        train_rl_agent(self.rl_policy, episodes=50)
 
     def execute(self, telemetry: MarineSafetyData) -> Dict[str, Any]:
         cst_tz = timezone(timedelta(hours=8))
@@ -307,17 +364,22 @@ class TGGuerrillaMasterEngine:
         # 1. 四層剛性防線與 Level 7 水動力解算
         physics_res = PhysicsEngine.evaluate_veto(telemetry, telemetry.s_cos_sim)
 
-        # 2. Gymnasium RL 10D 狀態向量與動作掩碼選擇
+        # 2. 奇門 70% 同化門控判定
+        qimen_res = QimenAssimilationEngine.evaluate(
+            telemetry.qimen_consensus_pct, telemetry.tp_s, telemetry.delta_theta_deg, physics_res["has_veto"]
+        )
+
+        # 3. Gymnasium RL 10D 狀態向量與動作掩碼選擇
         state_vec = self.rl_env.build_state_vector(telemetry, physics_res)
         action, rl_reward = self.rl_policy.select_action_with_mask(state_vec, physics_res["has_veto"])
 
-        # 3. Level 5 高維邊緣算子解算
+        # 4. Level 5 高維邊緣算子解算
         level5_res = Level5AdvancedOperators.compute_all(telemetry, physics_res["hs_pier_m"])
 
-        # 4. 熱泉動態避險視窗
+        # 5. 熱泉動態避險視窗
         hydrothermal_info = calculate_hydrothermal_risk_window(telemetry.high_tide_time_str)
 
-        # 5. 游擊動態調撥時窗邏輯與雙預警時間軸
+        # 6. 游擊動態調撥時窗邏輯與雙預警時間軸
         if physics_res["has_veto"]:
             overall_decision = "🔴 封島/防颱"
             berthing = "【南岸權宜碼頭】"
@@ -347,9 +409,9 @@ class TGGuerrillaMasterEngine:
                 {"time": "14:20", "action": "下午場常規撤離", "location": evac, "condition": "例行清島"}
             ]
 
-        # 6. 構建符合 SSOT JSON Schema 最高標準之 Payload
+        # 7. 構建全域單一真實數據源 (SSOT) JSON Payload
         output_payload = {
-            "version": "v36D.30.0 Three-Scheme & Guerrilla Vector Master Complete",
+            "version": "v36D.330.0 Three-Scheme & Guerrilla Vector Master Complete",
             "timestamp": now_dt.strftime("%Y-%m-%d %H:%M:%S CST"),
             "decision": overall_decision,
             "confidence_score": 100.0,
@@ -383,8 +445,9 @@ class TGGuerrillaMasterEngine:
             },
             "qimen_macro_consensus": {
                 "consensus_rate_pct": telemetry.qimen_consensus_pct,
-                "macro_advisory_enabled": telemetry.qimen_consensus_pct >= 70.0,
-                "qimen_status_prompt": f"🔮 奇門氣場匹配率達 {telemetry.qimen_consensus_pct:.1f}% (>=70%)，已啟動宏觀參研決策與預警提示"
+                "macro_advisory_enabled": qimen_res["enabled"],
+                "octagram_gate_state": qimen_res["gate_state"],
+                "qimen_status_prompt": qimen_res["prompt"]
             }
         }
         return output_payload
@@ -395,7 +458,7 @@ class TGGuerrillaMasterEngine:
             json.dump(payload, f, ensure_ascii=False, indent=2)
 
 # ==============================================================================
-# 9. 全自動執行進入點
+# 10. 全自動執行與檢核進入點
 # ==============================================================================
 if __name__ == "__main__":
     raw_api_sample = {
@@ -409,7 +472,9 @@ if __name__ == "__main__":
         "chart_depth_m": 8.50,
         "current_speed_kts": 1.90,
         "qimen_consensus_pct": 100.0,
-        "s_cos_sim": 0.9421
+        "s_cos_sim": 0.9421,
+        "video_overtopping_rate": 1.31,
+        "video_kd_bias": 0.0295
     }
     
     telemetry = MarineSafetyData.from_api_json(raw_api_sample)
@@ -421,6 +486,6 @@ if __name__ == "__main__":
     print(f"總體決策：{decision_result['decision']}")
     print(f"碼頭動態波高：{decision_result['physics_metrics']['hs_pier_m']}m (門檻 <= 1.20m)")
     print(f"攻角有效風速：{decision_result['physics_metrics']['w_eff_ms']}m/s (門檻 <= 10.80m/s)")
-    print(f"熱泉避險峰值：{decision_result['hydrothermal_geothermal_gate']['peak_release_time']}")
+    print(f"奇門同化門控：{decision_result['qimen_macro_consensus']['qimen_status_prompt']}")
     print(f"RL 代理動作：Action {decision_result['rl_agent_diagnostics']['action_selected']} (獎勵: {decision_result['rl_agent_diagnostics']['reward_score']})")
     print(f"SSOT JSON 檔已更新：latest_decision.json")
