@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>GEM-V36D 龜山島雙層整合海事戰術控制台 (Desktop Master v36D.165.0)</title>
+    <title>GEM-V36D 龜山島雙層整合海事戰術控制台 (Desktop Master v36D.200.0)</title>
     <!-- ECharts CDN -->
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <style>
@@ -34,7 +34,7 @@
             font-variant-numeric: tabular-nums; 
         }
         
-        /* Header 區域 */
+        /* Header 區域 - 剛性幾何鎖定 (CLS = 0) */
         .dashboard-header-master { 
             width: 100%; 
             height: 120px; 
@@ -66,10 +66,10 @@
         .level5-card label { font-size: 10px; color: var(--text-secondary); display: block; }
         .level5-card span { font-size: 15px; font-weight: 700; }
 
-        /* 主佈局 */
+        /* 主佈局 - 左 35% / 右 65% 剛性雙欄 */
         .dashboard-main-layout { display: flex; gap: 20px; width: 100%; margin-top: 20px; }
-        .layout-left-tactical { flex: 0 0 38%; max-width: 38%; contain: content; display: flex; flex-direction: column; gap: 15px; }
-        .layout-right-charts { flex: 0 0 62%; max-width: 62%; contain: content; display: flex; flex-direction: column; gap: 15px; }
+        .layout-left-tactical { flex: 0 0 35%; max-width: 35%; contain: content; display: flex; flex-direction: column; gap: 15px; }
+        .layout-right-charts { flex: 0 0 65%; max-width: 65%; contain: content; display: flex; flex-direction: column; gap: 15px; }
 
         .card { background: var(--card-bg); padding: 18px; border-radius: 12px; border: 1px solid var(--card-border); contain: content; }
         .card-header { font-size: 14px; font-weight: 700; color: var(--accent-blue); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border); padding-bottom: 8px; }
@@ -103,14 +103,14 @@
         .hydro-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             margin-top: 8px;
             border-radius: 6px;
             overflow: hidden;
             border: 1px solid var(--card-border);
         }
         .hydro-table th, .hydro-table td {
-            padding: 8px 10px;
+            padding: 7px 9px;
             text-align: left;
             border-bottom: 1px solid var(--card-border);
         }
@@ -118,36 +118,43 @@
             background-color: var(--table-header-bg);
             color: #e2e8f0;
             font-weight: 600;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
         }
         .hydro-table tr:last-child td { border-bottom: none; }
         .hydro-table td:first-child { font-weight: 600; color: var(--text-secondary); width: 28%; }
 
-        /* 統計與預測區塊 */
-        .prediction-stats {
-            display: flex;
-            gap: 16px;
-            margin-top: 10px;
-            background: rgba(0, 0, 0, 0.25);
-            padding: 10px 14px;
-            border-radius: 8px;
+        /* 圖表區塊 */
+        .chart-container-2x2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; height: 350px; }
+        .chart-box { width: 100%; height: 165px; background: var(--bg-color); border-radius: 8px; border: 1px solid var(--card-border); padding: 8px; }
+        .chart-box-large { width: 100%; height: 200px; background: var(--bg-color); border-radius: 8px; border: 1px solid var(--card-border); padding: 8px; }
+
+        /* 右下統一整合卡片專用樣式 */
+        .qimen-grid-2x2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            font-size: 12px;
+            margin-bottom: 14px;
+        }
+        .qimen-item {
+            background: var(--bg-color);
+            padding: 10px;
+            border-radius: 6px;
             border: 1px solid var(--card-border);
         }
-        .stat-item { display: flex; flex-direction: column; gap: 2px; }
-        .stat-label { font-size: 0.75rem; color: var(--text-secondary); }
-        .stat-value { font-size: 1.1rem; font-weight: 700; }
-        .stat-value.risk { color: var(--status-pass); }
-        .stat-value.match { color: var(--accent-purple); }
-
-        /* 圖表區塊 */
-        .chart-container-2x2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; height: 380px; }
-        .chart-box { width: 100%; height: 180px; background: var(--bg-color); border-radius: 8px; border: 1px solid var(--card-border); padding: 8px; }
-        .chart-box-large { width: 100%; height: 220px; background: var(--bg-color); border-radius: 8px; border: 1px solid var(--card-border); padding: 8px; }
-
+        .qimen-item-title {
+            color: var(--text-secondary);
+            font-size: 11px;
+            margin-bottom: 4px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
         .comparison-table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; margin-top: 6px; }
         .comparison-table th, .comparison-table td { padding: 8px; border-bottom: 1px solid var(--card-border); }
         .comparison-table th { background: var(--bg-color); color: var(--text-secondary); }
-        .highlight-row { background: rgba(56, 189, 248, 0.1); font-weight: bold; color: var(--accent-blue); }
+        .highlight-row { background: rgba(239, 68, 68, 0.12); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -161,7 +168,7 @@
                 <span class="blue-pulse-dot"></span> 龜山島雙層整合海事戰術控制台
             </h1>
             <p>
-                即時時間：<span id="liveClock">2026/09/18 09:43:50 CST</span> | 
+                即時時間：<span id="liveClock">2026/09/18 20:22:31 CST</span> | 
                 SSOT 同化：<span id="ssotTimestamp">--</span> | 
                 心跳通報：<span id="heartbeatCount" style="color: var(--accent-blue); font-weight: bold;">205</span> 次 |
                 狀態：<span id="ssotStatusBadge" style="color: var(--status-pass); font-weight: bold;">🟢 100.0% [完整同化 PASS]</span>
@@ -189,7 +196,7 @@
     <!-- 主佈局網格 -->
     <div class="dashboard-main-layout">
         
-        <!-- 左欄戰術監控 (38%) -->
+        <!-- 左欄戰術監控 (35%) -->
         <div class="layout-left-tactical">
             
             <!-- Card 1: PINN 水文門檻 -->
@@ -254,20 +261,20 @@
                 </div>
             </div>
 
-            <!-- Card 4: 颱風季風長浪與奇門 30 天長期預測專區 (全面修訂版) -->
-            <div class="card" style="border-color: var(--accent-purple);">
-                <div class="card-header" style="color: var(--accent-purple);">
-                    <span>4. 🌀 颱風、季風、長浪與奇門 30 天長期預測專區</span>
+            <!-- Card 4: 📍 南北岸即時水文與風浪監測 (實測數據專區) -->
+            <div class="card">
+                <div class="card-header">
+                    <span>4. 📍 南北岸即時水文與風浪監測</span>
                 </div>
                 
                 <div style="font-size: 12px; line-height: 1.5;">
                     <p style="color: #cbd5e1; font-weight: bold; margin-bottom: 4px;">📍 目前颱風與海象實測：</p>
-                    <p style="font-size: 11px; color: var(--text-secondary); margin-left: 6px;">
+                    <p style="font-size: 11px; color: var(--text-secondary); margin-left: 6px; margin-bottom: 8px;">
                         • 東南東 <span class="highlight-value">450 km</span> 中颱，中心氣壓 <span class="highlight-value">955 hPa</span>，暴風半徑 <span class="highlight-value">200 km</span>。<br>
                         • W<sub>eff</sub> = <span class="highlight-value" id="valWeff">6.40 m/s</span> <span class="metric-badge badge-pass" id="badgeWeff">🟢 PASS</span> | T<sub>p</sub> = <span class="highlight-value" id="valTp">15.5 s</span> (K<sub>d</sub> = 1.00 港池共振穿透)
                     </p>
 
-                    <p style="color: #cbd5e1; font-weight: bold; margin-top: 10px;">🌊 南北岸即時水文與氣象監測：</p>
+                    <p style="color: #cbd5e1; font-weight: bold;">🌊 南北岸即時水文比對：</p>
                     <table class="hydro-table">
                         <thead>
                             <tr>
@@ -288,45 +295,29 @@
                                 <td><span class="highlight-value" id="valSouthHs">1.85 m</span> <span class="metric-badge badge-warn" id="badgeSouthHs">🟡 警戒中</span></td>
                             </tr>
                             <tr>
-                                <td>流速 (轉向時間)</td>
+                                <td>流速 (轉向)</td>
                                 <td><span class="highlight-value" id="valNorthFlow">1.4 kts</span> (向NW / 11:20轉)</td>
                                 <td><span class="highlight-value" id="valSouthFlow">0.9 kts</span> (向W / 12:00轉)</td>
                             </tr>
                             <tr>
-                                <td>潮汐變化 (漲/退)</td>
+                                <td>潮汐變化</td>
                                 <td>
-                                    10:45 漲潮最高 (+1.25m)<br>
-                                    <span style="color:var(--text-secondary)">17:10 退潮最低 (+0.15m)</span>
+                                    10:45 漲潮 (+1.25m)<br>
+                                    <span style="color:var(--text-secondary)">17:10 退潮 (+0.15m)</span>
                                 </td>
                                 <td>
-                                    10:40 漲潮最高 (+1.22m)<br>
-                                    <span style="color:var(--text-secondary)">17:05 退潮最低 (+0.18m)</span>
+                                    10:40 漲潮 (+1.22m)<br>
+                                    <span style="color:var(--text-secondary)">17:05 退潮 (+0.18m)</span>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
-
-                    <p style="color: #cbd5e1; font-weight: bold; margin-top: 10px;">🔮 奇門宏觀預測 (未來 30 天趨勢)：</p>
-                    <p style="font-size: 11px; color: var(--text-secondary); margin-left: 6px;">
-                        • 巽宮氣場低壓帶持續活躍，未來 30 天東北季風與長浪共振加劇，長浪（T<sub>p</sub> &gt; 12.0s）穿透港池頻率預估達 <span class="highlight-value">68%</span>，提早緊縮門檻 α = <span class="highlight-value" id="valAlphaQimen">0.85</span>。
-                    </p>
-
-                    <div class="prediction-stats">
-                        <div class="stat-item">
-                            <span class="stat-label">邊坡崩塌風險</span>
-                            <span class="stat-value risk" id="valSlope">0.15</span>
-                        </div>
-                        <div class="stat-item" style="margin-left: 20px;">
-                            <span class="stat-label">奇門匹配率</span>
-                            <span class="stat-value match" id="valQimen">100.00%</span>
-                        </div>
-                    </div>
                 </div>
             </div>
 
         </div>
 
-        <!-- 右欄圖表分析 (62%) -->
+        <!-- 右欄圖表分析與右下統一卡片 (65%) -->
         <div class="layout-right-charts">
             
             <div class="card">
@@ -344,27 +335,89 @@
                 <div class="chart-box-large" id="chart7Days"></div>
             </div>
 
-            <!-- 方案評估比對與 Ground Truth 總結 -->
-            <div class="card">
-                <div class="card-header">Ground Truth 三方案評估比對</div>
-                <table class="comparison-table">
-                    <thead>
-                        <tr><th>評估方案</th><th>有效風速門檻</th><th>波高採樣</th><th>防線決策</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>方案 A (傳統官方)</td><td>10.80 m/s (無攻角)</td><td>單點浮標</td><td>放行靠泊</td></tr>
-                        <tr><td>方案 B (氣象署區域)</td><td>10.80 m/s (無越浪)</td><td>網格預報</td><td>限制靠泊</td></tr>
-                        <tr class="highlight-row">
-                            <td>方案 C (GEM-V36D Ground Truth)</td>
-                            <td>動態攻角 Weff &amp; α 下修</td>
-                            <td>PINN 港池越浪</td>
-                            <td id="tableSchemeCDecision" style="color: var(--status-danger);">🔴 Hard VETO 剛性熔斷</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <p style="font-size: 11px; color: #fca5a5; margin-top: 10px; background: rgba(239, 68, 68, 0.12); padding: 8px 12px; border-left: 4px solid var(--status-danger); border-radius: 0 4px 4px 0;">
-                    <b>📌 Ground Truth 方案總結：</b>傳統方案 A 與 B 因未考量港池共振與蓋頂越浪而誤判放行，方案 C 透過動態風速與 PINN 越浪監測發動 Hard VETO，強制執行剛性熔斷與防颱封島管制。
-                </p>
+            <!-- 右下方統一整合卡片：奇門 30 天宏觀預測 + Ground Truth 三方案評估總結 -->
+            <div class="card" style="border: 1px solid #a855f7; background: #181726;">
+                
+                <!-- 1. 奇門 30 天宏觀預測專區 -->
+                <div style="border-bottom: 1px solid var(--card-border); padding-bottom: 12px; margin-bottom: 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span style="font-size: 15px; font-weight: 700; color: #c084fc;">🔮 奇門 30 天宏觀水文氣象預測</span>
+                        <div style="display: flex; gap: 6px;">
+                            <span style="background: rgba(192, 132, 252, 0.2); color: #c084fc; padding: 2px 8px; border-radius: 4px; font-size: 11px; border: 1px solid #c084fc;">
+                                奇門匹配率 <b id="valQimen">100.00%</b>
+                            </span>
+                            <span style="background: rgba(16, 185, 129, 0.2); color: var(--status-pass); padding: 2px 8px; border-radius: 4px; font-size: 11px; border: 1px solid var(--status-pass);">
+                                崩塌風險 <b id="valSlope">0.15</b>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- 2x2 奇門五大水文要素預測網格 -->
+                    <div class="qimen-grid-2x2">
+                        <div class="qimen-item" style="border-left: 3px solid #818cf8;">
+                            <div class="qimen-item-title">🌀 颱風與低氣壓趨勢</div>
+                            <div style="color: #e2e8f0;">巽宮氣場低壓帶持續活躍，預估未來 30 天內有 1~2 個外圍環流靠近，氣壓壓差維持偏低狀態。</div>
+                        </div>
+                        
+                        <div class="qimen-item" style="border-left: 3px solid #38bdf8;">
+                            <div class="qimen-item-title">💨 風速與風向變化</div>
+                            <div style="color: #e2e8f0;">東北季風效應加劇，主導偏東至東北東風（ENE），平均風速 6.0~12.0 m/s，陣風概率達 45%。</div>
+                        </div>
+
+                        <div class="qimen-item" style="border-left: 3px solid #facc15;">
+                            <div class="qimen-item-title">🌊 長浪穿透 (Swell)</div>
+                            <div style="color: #e2e8f0;">長浪（<i>T</i><sub>p</sub> &gt; 12.0s）穿透港池頻率預估達 <span class="highlight-value">68%</span>，觸發港池共振與浪面過高風險。</div>
+                        </div>
+
+                        <div class="qimen-item" style="border-left: 3px solid #f87171;">
+                            <div class="qimen-item-title">🌊 湧浪與蓋頂 (Surge & Overtopping)</div>
+                            <div style="color: #e2e8f0;">潮汐高潮位疊加波浪湧升，越浪率上升，自適應門檻已自動提早緊縮至 α = <span class="highlight-value" id="valAlphaQimen">0.85</span>。</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Ground Truth 三方案評估與總結 -->
+                <div>
+                    <div style="font-size: 14px; font-weight: 700; color: var(--accent-blue); margin-bottom: 8px;">
+                        📊 Ground Truth 三方案評估比對
+                    </div>
+                    
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>評估方案</th>
+                                <th>有效風速門檻</th>
+                                <th>波高採樣</th>
+                                <th>防線決策</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>方案 A (傳統官方)</td>
+                                <td>10.80 m/s (無攻角)</td>
+                                <td>單點浮標</td>
+                                <td style="color: var(--status-pass);">放行靠泊</td>
+                            </tr>
+                            <tr>
+                                <td>方案 B (氣象署區域)</td>
+                                <td>10.80 m/s (無越浪)</td>
+                                <td>網格預報</td>
+                                <td style="color: var(--status-warn);">限制靠泊</td>
+                            </tr>
+                            <tr class="highlight-row">
+                                <td style="color: #f87171;">方案 C (GEM-V36D Ground Truth)</td>
+                                <td style="color: #f87171;">動態攻角 <i>W</i><sub>eff</sub> &amp; α 下修</td>
+                                <td style="color: #f87171;">PINN 港池越浪</td>
+                                <td id="tableSchemeCDecision" style="color: var(--status-danger);">🔴 Hard VETO 剛性熔斷</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <p style="font-size: 11px; color: #fca5a5; margin-top: 10px; background: rgba(239, 68, 68, 0.15); padding: 10px 12px; border-left: 4px solid var(--status-danger); border-radius: 0 4px 4px 0; line-height: 1.5;">
+                        <b>📌 Ground Truth 方案總結：</b>傳統方案 A 與 B 因未考量港池共振與蓋頂越浪而誤判放行，方案 C 透過動態風速與 PINN 越浪監測發動 Hard VETO，強制執行剛性熔斷與防颱封島管制。
+                    </p>
+                </div>
+
             </div>
 
         </div>
@@ -391,7 +444,7 @@
         }
         setInterval(updateLiveClock, 1000);
 
-        // 2x2 時間線圖表化初始化
+        // 2x2 時間線圖表初始化
         const initChart = (id, name, title, color, lineVal, unit, vetoCheck, chartData) => {
             const chart = echarts.init(document.getElementById(id));
             chart.setOption({
