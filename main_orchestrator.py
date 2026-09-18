@@ -151,7 +151,7 @@ class PhysicsEngine:
 
     @staticmethod
     def calculate_kw(delta_theta: float) -> float:
-        """攻角背风遮蔽衰減算子 Kw 遲滯帶精算"""
+        """攻角背風遮蔽衰減算子 Kw 遲滯帶精算"""
         if delta_theta < 30.0:
             return 0.78
         elif 30.0 <= delta_theta < 45.0:
