@@ -1,6 +1,6 @@
 {
   "version": "v36D.330.0 Three-Scheme & Guerrilla Vector Master Complete",
-  "timestamp": "2026-09-19 15:42:15 CST",
+  "timestamp": "2026-09-19 16:17:44 CST",
   "decision": "🔴 封島/防颱",
   "confidence_score": 100.0,
   "confidence_label": "🟢 100.0% [完整同化 PASS]",
@@ -14,11 +14,11 @@
     "macro_qimen_weight": 35.0
   },
   "physics_metrics": {
-    "hs_pier_m": 3.71,
+    "hs_pier_m": 1.39,
     "w_local_ms": 6.63,
     "w_eff_ms": 6.4,
     "alpha_adaptive": 0.9421,
-    "ukc_m": 3.77,
+    "ukc_m": 6.09,
     "fb_pier_m": 2.2,
     "pass_hs": false,
     "pass_w": true,
@@ -120,12 +120,12 @@
     ]
   },
   "typhoon_longterm_forecast": {
-    "typhoon_status": "東南東 450 km 中颱，中心氣壓 955 hPa，暴風半徑 200 km",
+    "typhoon_status": "東南東 450 km 中颱，中心氣壓 955 hPa，暴风半徑 200 km",
     "qimen_1month_monsoon_swell": "巽宮氣場低壓帶活躍，未來 30 天東北季風共振加劇，長浪 (Tp > 12.0s) 穿透頻率達 68%，宜加強靠泊防線",
     "hydrothermal_1month_outlook": "月體大潮期海水靜水壓劇烈波動，滿潮後 3.5 小時強酸水團 (pH 1.75~2.0) 擴散範圍達最大值"
   },
   "typhoon_qimen_prediction": {
-    "typhoon_status": "東南東 450 km 中颱，中心氣壓 955 hPa，暴風半徑 200 km",
+    "typhoon_status": "東南東 450 km 中颱，中心氣壓 955 hPa，暴风半徑 200 km",
     "qimen_1month_monsoon_swell": "巽宮氣場低壓帶活躍，未來 30 天東北季風共振加劇，長浪 (Tp > 12.0s) 穿透頻率達 68%，宜加強靠泊防線",
     "hydrothermal_1month_outlook": "月體大潮期海水靜水壓劇烈波動，滿潮後 3.5 小時強酸水團 (pH 1.75~2.0) 擴散範圍達最大值"
   },
@@ -152,9 +152,9 @@
   },
   "rl_agent_diagnostics": {
     "state_vector_10d": [
-      3.7100000381469727,
+      1.3899999856948853,
       6.630000114440918,
-      3.7699999809265137,
+      6.090000152587891,
       2.200000047683716,
       12.5,
       15.0,
