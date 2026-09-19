@@ -1,622 +1,377 @@
-GEM-V36D 數值分析、智庫自主強化學習與數位雙生戰術控制台統合規範 (v36D.330.0 Three-Scheme & Guerrilla Vector Master 最高統合版)
-一、 系統定位與 AI 語意規範 (System Philosophy & AI Role Rules)
-本規範為 GEM-V36D (v36D.330.0 Three-Scheme &amp; Guerrilla Vector Master) 系統之最高工程與戰術指導標準，整合「龜山島海象氣-數值分析與智庫自主學習執行中樞」之 AI 語意角色、v14.0 前後端解耦工程架構、v36D 游擊式動態向量調度內核、Level 5 高維邊緣算子、Level 7 南北角水動力動態矩陣、攻角有效風速 W_eff 與歷史餘弦比對 α_adaptive 機制。作為系統 RAG 檢索、單一真實數據源（SSOT Consensus Standard）與 AI 自主決策的絕對基準（Ground Truth）。
-1. 角色定義與決策權限
-角色定位：身為「龜山島海象氣-數值分析與智庫自主學習執行中樞」兼「GEM-V210 數位雙生海事戰術智庫系統首席架構師」，專精於系統營運、數據判讀與海事戰術決策。
-核心任務：即時融合多源 API 與空間地理圖資，解算「剛性四層物理防線（VETO Matrix）」，判定龜山島營運時段與靠泊狀態（Q1 至 Q4），並輸出高資訊密度之數據報告。
-關鍵決策時間：每日 11:00 與 16:00 為關鍵調撥與決策點。
-行為與決策準則：保持極度冷靜、權威客觀與科學精準之語氣。決策徹底基於客觀物理遙測、微觀算子與硬性防線，杜絕感性關說或人為樂觀估計。全體分析與決策結果以定量數值作為 Ground Truth 基準。
-2. 全域 UI 視覺色彩與風格規範
-3. 游擊式動態調度與奇門 70% 參研門控原則
-游擊式時空調撥：實施上下午時窗動態管制。上午場（07:30–11:30）當北岸越浪但背風屏障有效（Δθ < 45°）時，授權 08:30 班次切換至南岸碼頭，或執行「延滯登」至 10:00 浪平；下午場（12:00–17:30）若預測午後風向轉為 ESE（Δθ ≥ 45°）或長浪穿透（T_p > 12.0s），南北岸屏障雙雙失效，強制取消 15:30 末班，發動「提早退」，人員於 14:20 前清島撤離。
-奇門 70% 宏觀參研門控：當奇門氣場（巽宮風陣、天風長浪）與物理場同化匹配率 ≥ 70% 時，自動啟用 qimen_macro_consensus 參研提醒，將奇門預警文字與宏觀建議注入前端控制台。
-為確保戰術控制台資訊密度與決策效率，系統與介面統一採用 #0b1120 暗色科技風（Dark Tech）背景與 `#1e293b` 卡片背景：
-戰術藍 (#38bdf8)：區塊標題、卡片邊框高亮、不確定性 σ 指標與連線狀態點。
-警戒紅 (#ef4444)：VETO 防線觸發、VETO 徽章、全線封島標籤與圖表警戒水平線。
-安全綠 (#10b981)：Q1 放行狀態、PASS 合格徽章、精確度提升幅度與 Level 5 算子卡片邊框。
-高光黃 (#facc15)：專用於決策總結、方案 A-C 綜合評估結論（Ground Truth）與關鍵極限數值。
-警戒橘 (#f59e0b)：游擊動態調度卡片邊框、颱風動態預警、陣風 ≥ 10.8 m/s 之圖表標記。
-紫光 (#a855f7 / #c084fc)：專用於奇門氣場卡片邊框、64D 量子拓撲相干性與長浪週期線。
-二、 系統架構與情報動態偵察 (Recon & Real-Time Engine)
-系統透過四階 API 情報擷取層與國家級圖資整合，驅動無跡卡曼濾波（UKF）與物理驅動神經網路（PINN）動態演算，具備離線智庫退避機制與 Ground Truth 自我學習閉環：
-CWA 3D 波浪頻譜 API：獲取外海波浪向頻譜，離散化解析湧浪（Swell）與風浪能量峰值。
-WRF 1km 區域氣象場 API：高解析度捕捉 401 高地背風側微氣候擾動與風向角偏量 Δθ。
-Sentinel-1 SAR 雷達 API：透過 10m 高解析度波場掃描海面粗糙度，動態修正近岸波浪繞射消能參數 K_d。
-TDX AIS 10秒級 Ping API：即時計算船隻姿態與航跡，進行 UKF 狀態向量收斂演算。
-UKF 與 PINN 協同演算法模組：
-UKF 狀態同化：取代舊版 EKF，以 Sigma 點精確捕捉暴潮與長浪非線性狀態，狀態收斂吻合率常態維持於 >= 99.0%（實測達 99.2%）。
-PINN 殘差修復：於波週期 11.5s < T_p <= 12.0s 遲滯帶與東南東（ESE）波向角下，自動調用 Navier-Stokes 殘差方程修正算子 K_d 與 K_w，修復傳統物理模型的預測偏差。
-Ground Truth 雙向閉環機制：
-系統實時比對 TDX AIS 船班軌跡。當精確度與航跡吻合率 >= 90% 時（實測常態達 99.2%），自動觸發 UKF 權重微調，將數據寫入先驗智庫。
-當弱網或網路中斷時，自動啟動 KB_20260904_ESE_OVERTOPPING 智庫。
-三、 官方營運時段、剛性預警與先驗物理映射 (Operational Standards & Mappings)
-1. 營運時段規範
-開放季規範：每年 3 月 1 日至 11 月 30 日開放。
-6～9 月營運時段：
-第一時段：08:30 登島
-區間時段：12:30
-第四時段（末段登島）：15:30
-離島截止時間：17:30
-海象整備：每日 07:30 啟動全線海象整備檢核與模型對齊。
-剛性前一日預警：每日 16:30 依據蘇澳沿海預報，若全日平均風力超過 6 級（或 6～7 級、陣風 8～9 級以上），或官方發布長浪/風力警告，直接觸發天然環境災害公告並判定全日封島。
-2. 先驗特徵與定性/定量物理映射
-系統整合傳統物理經驗與現代精準感知，制定「奇門與天文映射表」以輔助解盲：
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>GEM-V36D 龜山島雙層整合海事戰術控制台 (Desktop Master)</title>
+    <!-- ECharts CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #0b1120;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent-blue: #38bdf8;
+            --accent-purple: #c084fc;
+            --status-pass: #10b981;
+            --status-warn: #f59e0b;
+            --status-danger: #ef4444;
+            --table-header-bg: rgba(56, 189, 248, 0.15);
+        }
 
-評估維度
-定性特徵 (Qualitative)
-定量物理對齊 (Quantitative)
-奇門氣場
-巽宮風陣（強局域陣風）
-W_local >= 10.8 m/s (背風失效)
-天文分野
-大潮末段（極高潮位疊加）
-FB <= 0.50 m / 乾舷安全監控
-宏觀波浪
-長浪共振穿透（遠洋湧浪能量）
-T_p > 12.0 s / 港口全線封鎖
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background-color: var(--bg-color); 
+            color: var(--text-primary); 
+            padding: 16px; 
+            width: 100vw; 
+            min-height: 100vh; 
+            overflow-x: hidden; 
+            font-variant-numeric: tabular-nums; 
+        }
 
-四、 四層剛性 VETO 防線指標與微觀物理算子 (Hard VETO & Physics Operators)
-1. 四層絕對物理防線算子矩陣與邏輯一致性規範
-本系統採納四層絕對物理防線算子矩陣，併同 Level 7 南北角水動力矩陣實施動態對比。任何單項算子觸發超標即無條件判定 Q4（全線封島 / NO_DISPATCH）。為維護系統判準一致性（SSOT Standard），與後端 GAS、Python 及前端 UI 完全對齊：
-港池有效波高 ($H_{s,pier}$)：門檻 $H_{s,pier} \le 1.20\text{ m}$。算子：$H_{s,pier} = H_{s,CWA} \cdot K_d + PINN_{offset}$。基礎 $K_d = 0.883$；若 $T_p > 12.0\text{s}$ 覆寫 $K_d = 1.00$；若 $11.5\text{s} < T_p \le 12.0\text{s}$ 啟用遲滯算子 $K_d = 0.883 + (1.00 - 0.883) \cdot \frac{T_p - 11.5}{0.5}$。
-局域有效陣風 ($W_{local}$) 與攻角有效風速 ($W_{eff}$)：門檻 $W_{local} \le 10.80\text{ m/s}$，攻角有效風速 $W_{eff} = W_{CWA} \cdot K_w \cdot \cos(\Delta\theta)$。基礎 $K_w = 0.78$；若 $\Delta\theta \ge 45.0^\circ$（401高地背風失效）覆寫 $K_w = 1.00$；若 $30.0^\circ \le \Delta\theta < 45.0^\circ$，$K_w = 0.78 + (1.00 - 0.78) \cdot \frac{\Delta\theta - 30.0}{15.0}$。引入自適應歷史餘弦比對權重 $\alpha_{adaptive}$ 動態修正風場偏角殘差。
-動態安全裕深 ($UKC$)：門檻 $UKC \ge 1.50\text{ m}$。算子：$UKC = [(d_{chart\_base} + d_{chart\_offset}) + \eta_{tide}] - (d_{draft} + Squat) - H_{s,pier}$。實時疊加 Pitch/Heave 位移並扣除潮位 95% CI 下限。
-碼頭乾舷高度 ($FB_{pier}$)：門檻 $FB_{pier} \ge 0.50\text{ m}$。算子：$FB_{pier} = EL._{pier} - \eta$（$\eta$ 為天文潮與風壓升水疊加）。$FB_{pier} < 0.60\text{m}$ 預警，$< 0.50\text{m}$ 觸發 VETO 阻斷。
-2. Level 5 五大高維邊緣算子規格 (Level 5 Advanced Operators)
-3. Level 7 南北角雙區域水動力矩陣與天文潮差動態扣減算子
-南北角雙區域水動力動態矩陣 (North/South Pier Hydrodynamic Matrix)：實時對比北岸與南岸碼頭之風速、浪高與流速動態。北岸（風速 > 10.8m/s 或浪高 > 1.2m 觸發 VETO）與南岸雙區獨立解算，提供游擊式動態切換（如 08:30 班次改靠南岸權宜碼頭）之物理依據。
-天文潮差動態扣減算子 (Astronomical Tide Delta Operator)：精算朔望大潮（總潮差達 1.80m，滿潮 +1.35m / 乾潮 -0.45m）對 UKC 與乾舷之影響。乾潮期自動自總水深扣減 0.45m UKC 裕深；滿潮期直接自碼頭乾舷扣減 1.35m $FB_{pier}$，精準預警越浪風險。
-Vision-PINN 邊緣視覺算子 (VisionPINNEdgeNet)：即時解析 128x128 影像張量，動態估算越浪率 (vision_overtopping_rate_pmin, 次/分) 與波高衰減偏差 (vision_kd_bias)。
-MMSI 專屬水動力算子 (VesselMMSIHydrodynamics)：依船隻 MMSI 識別船型（如凱鯨號雙體船），即時計算 Shallow-Water Dynamic Squat 沉降量（m）、Roll（deg）與 Pitch（deg）姿態，精確扣減 UKC。
-FNO 100ms 超速預報算子 (FNO1dWaveSpectralForecaster)：採用 1D 傅立葉神經算子，於 100ms 內超高速推演未來 3 小時港池平均波高演化趨勢 (fno_forecast_mean_hs_m)。
-64D 太乙奇門量子拓撲同化器 (QuantumTopology64DEngine)：將 36D 物理場擴充至 64D 高維時空拓撲，計算量子相干性 (quantum_topology_coherence)，即時對齊巨觀氣場與微觀水動力。
-Swarm 多船隊賽局調度器 (MultiAgentSwarmDispatcher)：基於強化學習多智慧體賽局，動態輸出多艘客輪（如 Agent 1 凱鯨號）之靠泊碼頭指派與戰術避浪路徑 (swarm_dispatch_plan)。
-五、 強化學習 (RL) 微觀環境封裝與測試協定 (RL Agent & Test Protocol)
-1. 環境結構封裝 (Environment Setup)
-狀態空間 (State Space, $S$)：封裝即時遙測與微觀物理狀態，嚴格定義為 $\mathbb{R}^{10}$ 高維向量：
-$$S = [H_{s,pier}, W_{local}, UKC, FB_{pier}, T_p, \theta_{wave}, \text{Swell\_Ratio}, S_{cos}, \eta_{surge}, K_d] \in \mathbb{R}^{10}$$
-動作空間 (Action Space, $A$)：定義離散決策動作集 $A = \{0:\text{Q1}, 1:\text{Q2}, 2:\text{Q3}, 3:\text{Q4}\}$（0:放行, 1:條件靠泊, 2:限制開航, 3:全線封島/NO_DISPATCH）。
-2. 獎勵與懲罰函數 (Reward Function Design)
-模型訓練之獎勵函數 $R(s, a)$ 導入剛性 VETO 防線控制：當 $\text{VETO\_Pass} = \text{True}$ 且選取 $a = \text{Q1}$ 時核發 $+150$ 獎勵；當 $\text{VETO\_Pass} = \text{False}$ 且選取 $a = \text{Q4}$ 時核發 $+100$ 放行獎勵；若 $\text{VETO\_Pass} = \text{False}$ 卻選取 $a \in \{\text{Q1}, \text{Q2}, \text{Q3}\}$ 則給予 $-9999$ 之致命懲罰。
-3. Gymnasium RL 測試與運作協定 (Test Execution Protocol)
-所有 Gymnasium 測試案例之執行均參照 `main_orchestrator.ipynb` 進行驗證：
-環境建置驗證：確認狀態空間精確符合 $\mathbb{R}^{10}$ 高維向量，且當前診斷狀態 $S = [3.23, 13.50, 1.00, 0.15, 15.5, 67.5, 0.45, 0.92, 0.25, 1.00]$ 已對齊最新實測數據。
-獎懲與收斂性檢查：在 $\text{VETO\_Pass} = \text{False}$ 條件下，策略網路必定選擇 $a = 3$（Q4 全線封島），獲得 $+100$ 獎勵並徹底避開 $-9999$ 懲罰。
-智庫同步與殘差校正：當 UKF 狀態吻合率 ≥ 90%（實測達 99.2%）時，成熟策略自動同步至 `KB_20260904_ESE_OVERTOPPING` 智庫，發動 `QIMEN_DYNAMIC_OPERATOR` 實施無條件封島。
-六、 戰略方案與總裁綜合裁示機制 (Strategy & Executive Ruling)
-系統整合三方數據來源進行動態交叉比對，並結合 RL 策略網路輸出最終戰術裁決。
-1. 方案 A-C 定性定量比較分析與弱網超低延遲優化
-方案 A（官方經驗預報基準）：基於 CWA 公告。未考慮港池繞射消能（Kd=0.883），易引發 False Positive 過度停航，且無離線快取機制，弱網延遲高達 > 5,000ms。
-評估方法：以 CWA 氣象局預報與警特報公告為基準。
-定性缺陷：未考慮港池地理屏障 K_d（0.883），直接採納遠洋浮標，易導致 False Positive 過度停航。
-方案 B（現場監測基準）：基於 CCTV 與 AIS 數據。忽視 401 高地背風陰影（Kw=0.72~0.85），且受限於端點攝影機連線狀態，弱網下斷線機率高，平均響應延遲約 1,200ms。
-評估方法：以現場 CCTV 影像、港池感測器與 TDX AIS 航跡為依據。
-定性缺陷：未考慮 401 高地背風側 K_w（0.72 ~ 0.85）陰影區，易無視局域風場衰減特徵。
-方案 C（數位雙生與 RL 精算 - GEM-V210-PRO-FINAL 雙向耦合進階版）：整合 UKF 狀態同化、PINN 殘差修復與 Gymnasium RL 代理程式。透過將 KB_20260904_ESE_OVERTOPPING 智庫先驗知識（如 QIMEN_DYNAMIC_OPERATOR 算子與越浪參數）直接預編譯為 RL Policy Network 的端側硬性約束權重（Edge Masking Weight），實現本地零延遲推理。即使在弱網下，阻斷響應時間由原本的 30s 縮短至 < 50ms。
-評估方法：以 GEM-V210-PRO-FINAL 數值模型、UKF 濾波、PINN 殘差修復與 RL 最佳策略網路為核心。
-定量優勢：透過 UKF 融合精確扣合潮位與動態浪高，並精確觸發剛性防線（精算 $UKC=1.00\text{ m}$, $FB_{pier}=0.15\text{ m}$ 雙重 VETO）。定量結果作為後續自學習引擎微調 UKF 權重之 Ground Truth。
-2. 總裁綜合裁示邏輯矩陣
-🟢 Q1 放行/開放靠泊：方案 A、B、C 均通過 VETO 檢核。RL Agent 輸出 a=0，Q(s,a) 價值最佳化，放行獎勵 +150。弱網下透過邊緣權重驗證，響應時間 < 50ms。
-🟡 Q2 警戒/條件靠泊：方案 B 正常但方案 C 顯示邊界趨勢（吻合率 75%~89%）。RL Agent 輸出 a=1，觸發動態警戒並限制船型與航速。
-🟠 Q3 準備/限制開航：方案 A 或 C 觸發單項預警。RL Agent 輸出 a=2，系統自動鎖定調撥機制並啟動準備封島程序。
-🔴 Q4 強制/全線封島（KB-RL 雙向耦合硬阻斷）：任一方案觸發 VETO 剛性紅線，或智庫比對命中 `KB_20260904_ESE_OVERTOPPING` 越浪特徵。本地端 Edge RL 代理程式即刻施加 -9999 致命懲罰並強制輸出 a=3，無須等待雲端 RPC 握手，直接在 < 50ms 內觸發全線安全阻斷與 48 小時無條件封島（QIMEN_DYNAMIC_OPERATOR）。
-七、 UI/UX 響應式佈局與通訊架構 (UI/UX Architecture)
-1. 即時數據動態更新視覺反饋 (Real-time Visual Feedback)：
-即時狀態呼吸燈 (Live Heartbeat Indicator)：頂部狀態卡片必須常駐顯示「● Live」綠色閃爍呼吸燈，並動態計算「已更新：X 秒前」。每當 SSE（Server-Sent Events）推送新數據時，呼吸燈需同步進行一次快速的高亮縮放閃爍，讓使用者一目了然數據正即時對齊。
-數值變更脈衝特效 (Data Flash Pulse)：當特定關鍵數值（如風速、浪高）發生變更時，該數值與所屬卡片邊框需觸發 0.5 秒的「發光淡出（Fade-out Glow）」視覺脈衝。數值惡化或觸發預警時閃爍「警戒橘/警戒紅」，數值正常或好轉時閃爍「安全綠」，以即時動態吸引使用者注意，利於秒級決策。
-時效過期與斷線安全阻斷 (Stale Data Alert)：
-過期警示與阻斷：在行動端弱網（Weak Network）環境下，若超過 30 秒（約 3 次 SSE 輪詢週期）未接收到新封包，頂部「● Live」指示燈需立即轉為「🔴 數據過期 (OUT OF DATE)」，且全螢幕邊框進入低頻紅光閃爍，並強制彈出「警告：數據已逾期，請勿依此進行靠泊決策」的半透明警告 Banner，防範使用過期資訊做出錯誤指揮。
-2. 中央主控通訊機制 (Master-Slave RPC)
-全系統僅允許母視窗 (index.html) 發起 API 輪詢與主導 `google.script.run` API 輪詢，定時調用子視窗 `renderUI(data)` 並回傳 `confirmReceiptACK`，防範子視窗環境 RPC 隔離失效。
-子視窗 (desktop/mobile) 嚴禁主動請求數據，實現完全的前後端解耦與單一真實數據源 (SSOT)。
-八、 統一後端 API / SSE 資料傳輸 Schema 規範 (v36D.13.0 Level 5 Complete)
-前端 `window.onSSOTDataReceived(data)` 必須完整解析以下 JSON Schema 結構，嚴禁變更 Key 值：
+        /* 頂部一體化 Header 卡片 (CLS = 0) */
+        .dashboard-header-master { 
+            width: 100%; 
+            background: var(--card-bg); 
+            border-radius: 10px; 
+            padding: 14px 20px; 
+            border: 1px solid var(--card-border); 
+            border-left: 5px solid var(--status-pass); 
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            contain: content;
+        }
+        .header-title-box h1 { font-size: 18px; font-weight: 700; color: #f8fafc; display: flex; align-items: center; gap: 8px; }
+        .header-title-box p { font-size: 12px; color: var(--text-secondary); margin-top: 4px; line-height: 1.5; }
+        
+        .blue-pulse-dot { display: inline-block; width: 10px; height: 10px; background-color: var(--accent-blue); border-radius: 50%; box-shadow: 0 0 8px var(--accent-blue); animation: pulseBlue 2s infinite; }
+        @keyframes pulseBlue { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
+        
+        .hybrid-ratio-box { margin-top: 6px; width: 240px; }
+        .ratio-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-secondary); margin-bottom: 2px; }
+        .ratio-bar-bg { width: 100%; height: 6px; background: #334155; border-radius: 3px; overflow: hidden; display: flex; }
+        .ratio-bar-fill { height: 100%; background: var(--accent-blue); transition: width 0.3s; }
+        .ratio-bar-qimen { height: 100%; background: var(--accent-purple); transition: width 0.3s; }
 
-{
-  "version": "v36D.13.0 Level 5 Complete",
-  "timestamp": "2026-09-13 12:00:00 CST",
-  "decision": "🔴 封島/防颱",
-  "confidence_score": 100.0,
-  "hard_veto_alert": true,
-  "precision_metrics": {
-    "converged_sigma": 0.3125,
-    "precision_gain_pct": 58.4
-  },
-  "attention_gate": {
-    "micro_physics_weight": 65.0,
-    "macro_qimen_weight": 35.0
-  },
-  "physics_metrics": {
-    "hs_pier_m": 3.71,
-    "w_local_ms": 8.50,
-    "ukc_m": 5.84,
-    "fb_pier_m": 2.00,
-    "has_veto": true
-  },
-  "guerrilla_dispatch": {
-    "berthing_pier": "無 (雙岸失效，禁止靠泊)",
-    "evacuation_pier": "無 (雙岸失效，直航返航烏石港)",
-    "guerrilla_mode": "BOTH_PIERS_DISABLED",
-    "morning_tactic": "⚠️ 上午游擊調撥：北岸越浪，08:30 班次改至【南岸權宜碼頭】靠泊",
-    "afternoon_tactic": "🚨 下午游擊撤退：預測午後 ESE 巽宮風陣，11:20 止登，14:20 全員撤離",
-    "tactical_summary": "執行「下午游擊撤退【南岸碼頭撤離】」"
-  },
-  "level5_advanced_metrics": {
-    "vision_overtopping_rate_pmin": 1.31,
-    "vision_kd_bias": 0.0295,
-    "vessel_hydrodynamics": {
-      "vessel_name": "凱鯨號 (穿浪雙體船)",
-      "vessel_type": "CATAMARAN",
-      "dynamic_squat_m": 0.82,
-      "roll_deg": 3.3,
-      "pitch_deg": 4.4
-    },
-    "fno_forecast_mean_hs_m": 1.58,
-    "quantum_topology_coherence": 0.4682,
-    "swarm_dispatch_plan": [
-      { "agent_id": 1, "vessel_label": "凱鯨號 (Agent 1)", "assigned_pier": "無 (雙岸失效)", "tactical_action": "直航返航烏石港" }
-    ]
-  },
-  "qimen_macro_consensus": {
-    "consensus_rate_pct": 100.0,
-    "macro_advisory_enabled": true,
-    "qimen_status_prompt": "🔮 奇門氣場匹配率達 100.0% (>=70%)，已啟動宏觀參研決策與預警提示"
-  }
-}
-九、 系統架構、多模型協同與「判準一致性」統合規範 (System Architecture & SSOT Consistency Framework)
-本章節統合 GEM-V210-PRO-FINAL (v13.0) 全域系統架構、五階算子閉環、多模型協同運算與檔案強耦合稽核機制，作為系統判準一致性（SSOT Consensus Standard）之唯一權威基準。
-1. 「象、數、理、術」數值同化與五階運算閉環
-太乙宏觀先驗場與自適應歷史餘弦比對 (Taiyi Macro Prior & α_adaptive Comparison)：同化 18.6 年白道交角與 60 年甲子公度週期，預導氣旋氣壓場與暴潮升水先驗向量。當歷史餘弦相似度 $S_{cos} \ge 0.90$ 時，自動計算自適應權重 $\alpha_{adaptive}$ 並限縮 WRF/SWAN 搜尋空間 50%，使推理延遲縮短至 < 50ms。
-奇門立體三維場 (Qimen 3D Spectrum)：天盤九星映射 CWA 3D 波譜（$T_p > 12.0\text{s}$ 天蓬/天芮臨宮，覆寫 $K_d = 1.00$）；人盤八門映射 Q1–Q4 戰術通道；神盤八神（白虎/騰蛇）映射 $W_{local} \ge 10.80\text{ m/s}$ 突發陣風與湍流。
-納甲與爻辰微觀消長 (Najia Hydroodynamics)：子午流注與潮汐盈虧、船體 Squat（沈降）、Pitch/Heave 動態位移實時扣合，精算 $UKC$（動態裕深 $\ge 1.50\text{m}$）與 $FB_{pier}$（乾舷高度 $\ge 0.50\text{m}$）。
-節氣物候與分野同化 (Solar Terms & Fenye)：360 度周天公度年算子消除曆法相角偏差；節氣物候導出背風衰減 $K_w$ 遲滯矩陣（$\Delta\theta \ge 45^\circ$ 覆寫 $K_w = 1.00$）。二十八宿分野對齊 CWA 網格與 Sentinel-1 SAR 圖資。
-Gymnasium RL 代理程式 ($\mathbb{R}^{10}$ 空間)：狀態空間升級為 $\mathbb{R}^{10}$ 高維向量，違反 VETO 施加 -9999 致命懲罰，強制唯一收斂動作 $a = 3$ (Q4 封島)，獲得 +100 獎勵。實測吻合率 $\ge 90\%$（當前 99.2%）自動寫入先驗智庫 `KB_20260904_ESE_OVERTOPPING`。
-2. 全系統檔案職責與跨檔案強耦合稽核矩陣 (Consistency Matrix)
-# GEM-V36D (v36D.13.0 Level 5 Master Final) 全域 SSOT 代碼自我稽核與開發規範
+        /* Level 5 4項 mini 卡片橫向佈局 */
+        .level5-mini-grid { display: flex; gap: 10px; }
+        .level5-card { background: var(--bg-color); padding: 8px 12px; border-radius: 6px; border: 1px solid var(--card-border); text-align: center; min-width: 100px; }
+        .level5-card label { font-size: 10px; color: var(--text-secondary); display: block; }
+        .level5-card span { font-size: 14px; font-weight: 700; }
 
-本規範為 GEM-V36D 數位雙生海事戰術控制台（Desktop 端、Mobile 端與 Python 主控算子）之最高技術標準。全系統維運與程式碼變更必須 100% 恪守「版面幾何固定化 (CLS = 0)」與「數據單向更新化 (Data-Only SSOT)」雙柱原則。
+        /* 主雙欄佈局 (32% / 68%) */
+        .dashboard-main-layout { display: flex; gap: 16px; width: 100%; }
+        .layout-left-tactical { flex: 0 0 32%; max-width: 32%; display: flex; flex-direction: column; gap: 14px; contain: content; }
+        .layout-right-charts { flex: 0 0 68%; max-width: 68%; display: flex; flex-direction: column; gap: 14px; contain: content; }
 
----
+        .card { background: var(--card-bg); padding: 14px; border-radius: 10px; border: 1px solid var(--card-border); }
+        .card-header { font-size: 13px; font-weight: 700; color: var(--accent-blue); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border); padding-bottom: 6px; }
+        
+        /* 指標網格 */
+        .metric-grid-2x2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .metric-box { background: var(--bg-color); padding: 8px; border-radius: 6px; border: 1px solid var(--card-border); }
+        .metric-box label { font-size: 10px; color: var(--text-secondary); }
+        .metric-box .value { font-size: 15px; font-weight: 700; color: #f8fafc; margin-top: 2px; }
+        .metric-badge { font-size: 9px; font-weight: bold; padding: 2px 4px; border-radius: 3px; display: inline-block; margin-top: 2px; }
+        .badge-veto { background: rgba(239, 68, 68, 0.2); color: var(--status-danger); border: 1px solid var(--status-danger); }
+        .badge-pass { background: rgba(16, 185, 129, 0.2); color: var(--status-pass); border: 1px solid var(--status-pass); }
+        .badge-warn { background: rgba(245, 158, 11, 0.2); color: var(--status-warn); border: 1px solid var(--status-warn); }
 
-## 一、 系統哲學：版面固定化與數據更新化雙柱原則 (Core Pillars)
+        .highlight-value {
+            font-family: monospace;
+            font-weight: 600;
+            color: #f8fafc;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 1px 4px;
+            border-radius: 3px;
+        }
 
-### 1. 版面固定化原則 (Layout Lockdown Specification / CLS = 0)
-* **CSS Containment 座標鎖定**：全視角 HTML 元件（`desktop.html`、`mobile.html`、`index.html`）所有卡片與容器必須設定 `contain: strict` 或 `contain: content` 樣式屬性，徹底隔絕 DOM 幾何重排與重繪。
-* **Zero-Reflow 純文字節點寫入**：前端 JavaScript 在進行 5 秒定時數據更新時，**僅允許使用 `node.textContent` 替換純數據文字**與動態切換既有 Style 顏色（如綠/黃/紅燈號），**絕對禁止使用 `innerHTML` 重新拼接或動態增刪 DOM 節點**。
-* **永久零版面位移 (CLS = 0)**：卡片高度、寬度、Grid 網格與 Margin 間距於 CSS 中實體鎖定，數據長短變更不得引發任何元件尺寸伸縮或累積版面位移。
+        .time-window-list { font-size: 11px; line-height: 1.6; color: #cbd5e1; }
+        .dispatch-alert-box { background: rgba(245, 158, 11, 0.15); border: 1px solid var(--status-warn); color: #fef08a; padding: 8px 10px; border-radius: 6px; font-weight: 600; font-size: 11px; margin-top: 8px; line-height: 1.4; }
+        .dispatch-alert-box.veto-style { background: rgba(239, 68, 68, 0.15); border-color: var(--status-danger); color: #fca5a5; }
 
-### 2. 數據更新化原則 (Data-Only Updating & Single Source of Truth)
-* **後端純數據生產者**：後端 AI 算子（`main_orchestrator.py`）、Colab 訓練腳本與 GitHub Actions 定時工作流，純粹作為數據生產者，僅對接產出與 Commit 標準 SSOT 檔 `latest_decision.json`。
-* **後端絕不觸碰介面**：後端 Python 程式碼與自動化腳本**嚴禁覆蓋、重寫或生成任何 `.html` 前端檔案**。
-* **前端純數據渲染器**：前端頁面純粹透過 AJAX / Fetch 靜態輪詢 `latest_decision.json`，全站數據門檻、燈號與戰術決策徹底以該 JSON 數據為單一真實來源。
+        #vetoBanner { display: none; color: white; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 12px; margin-bottom: 12px; text-align: center; }
 
----
+        /* 水文表格 */
+        .table-wrapper { width: 100%; overflow-x: auto; margin-top: 6px; }
+        .hydro-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; border-radius: 6px; overflow: hidden; border: 1px solid var(--card-border); }
+        .hydro-table th, .hydro-table td { padding: 6px 8px; text-align: left; border-bottom: 1px solid var(--card-border); white-space: nowrap; }
+        .hydro-table th { background-color: var(--table-header-bg); color: #e2e8f0; font-weight: 600; }
 
-## 二、 全域 UI 視覺、色彩與 Hover 游標互動規範 (Global UI & Styling)
+        /* 右側圖表網格 2x2 */
+        .chart-grid-2x2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .chart-box { width: 100%; height: 180px; background: var(--bg-color); border-radius: 6px; border: 1px solid var(--card-border); padding: 6px; }
+        .chart-box-large { width: 100%; height: 200px; background: var(--bg-color); border-radius: 6px; border: 1px solid var(--card-border); padding: 6px; }
 
-採用暗色科技風 (Dark Tech) 佈局，色彩與圖表互動定義如下：
+        .comparison-table { width: 100%; border-collapse: collapse; font-size: 11px; text-align: left; margin-top: 6px; }
+        .comparison-table th, .comparison-table td { padding: 6px 8px; border-bottom: 1px solid var(--card-border); }
+        .comparison-table th { background: var(--bg-color); color: var(--text-secondary); }
+        .highlight-row { background: rgba(56, 189, 248, 0.1); font-weight: bold; color: var(--accent-blue); }
+    </style>
+</head>
+<body>
 
-* **背景主色 (`#0b1120`) / 卡片背景 (`#1e293b`) / 深色框線 (`#334155`)**：基底視覺。
-* **戰術藍 (`#38bdf8`)**：標題、邊框高亮與不確定性 σ 指標。
-* **警戒紅 (`#ef4444`)**：VETO 觸發、封島標籤與 Hs / UKC 警戒水平線。
-* **安全綠 (`#10b981`)**：放行狀態、PASS 徽章與 Level 5 算子外框。
-* **高光黃 (`#facc15`)**：戰術裁決總結、Ground Truth 方案 C 評估與 Hs 警戒線 (1.20m)。
-* **警戒橘 (`#f59e0b`)**：游擊調度卡片邊框、Wind 風速警戒線 (10.80m/s) 與時窗預警。
-* **紫光 (`#c084fc`)**：奇門卡片邊框、64D 量子拓撲相干性與 Tp 長浪週期警戒線 (12.0s)。
-* **ECharts 互動與游標規範**：
-  * 所有 ECharts 圖表 `splitLine` 統一設為 50% 透明度 (`rgba(51, 65, 85, 0.5)`)。
-  * 圖表統一配置 `axisPointer: { type: 'cross' }` 追蹤線，懸浮 Tooltip 精確顯示時間、數值、燈號與當下戰術狀態。
-  * 垂直時間判點虛線 (11:00 止登 / 14:00 撤離) **必須關閉端點箭頭 (`symbol: 'none'`)**。
-  * **警戒線統一採用虛線 (`type: 'dashed'`)**，並標註明確數值標籤（Hs 1.20m、Wind 10.80m/s、UKC 1.50m、Tp 12.0s）。
-  * 圖表需顯示 Legend 圖例，可點擊卡片與連結統一加入 `cursor: pointer` 樣式。
+    <div id="vetoBanner"></div>
 
----
+    <!-- 頂部一體化 Header -->
+    <div class="dashboard-header-master" id="headerMaster">
+        <div class="header-title-box">
+            <h1><span class="blue-pulse-dot"></span> GEM-V36D 龜山島雙層整合海事戰術控制台</h1>
+            <p>
+                即時：<span id="liveClock">2026/09/19 12:00:00 CST</span> | SSOT 同化：<span id="ssotTimestamp">--</span> | 心跳：<span id="heartbeatCount" style="color: var(--accent-blue);">205</span> 次<br>
+                狀態：<span id="ssotStatusBadge" style="color: var(--status-pass); font-weight: bold;">🟢 100.0% [完整同化 PASS]</span>
+            </p>
+            <div class="hybrid-ratio-box">
+                <div class="ratio-labels">
+                    <span>科學物理 <b id="txtPhysicsRatio">65%</b></span>
+                    <span>奇門氣場 <b id="txtQimenRatio">35%</b></span>
+                </div>
+                <div class="ratio-bar-bg">
+                    <div class="ratio-bar-fill" id="barPhysics" style="width: 65%;"></div>
+                    <div class="ratio-bar-qimen" id="barQimen" style="width: 35%;"></div>
+                </div>
+            </div>
+        </div>
 
-## 三、 桌面端 (`desktop.html`) 頂部一體化與 32% / 68% 剛性雙欄規範
+        <div class="level5-mini-grid">
+            <div class="level5-card"><label>CV 越浪率</label><span id="valCV" style="color: #facc15;">1.31 p/m</span></div>
+            <div class="level5-card"><label>MMSI 沉降</label><span id="valSquat" style="color: var(--accent-blue);">0.82 m</span></div>
+            <div class="level5-card"><label>FNO 預報</label><span id="valFNO" style="color: var(--status-danger);">1.58 m</span></div>
+            <div class="level5-card"><label>拓撲相干</label><span id="valTopo" style="color: var(--accent-purple);">0.47</span></div>
+        </div>
+    </div>
 
-### 1. 置頂一體化整合主卡片 (`header-master-card`)
-* **同一列頂部大整合**：橫向併入主標題（含 `● LIVE SSOT` 動態藍呼吸燈與連線計數）、**🚀 Level 5 邊緣視覺、水動力與賽局高維整合算子**區塊（含 Swarm 賽局排隊與相干性宣告）以及升格 AI 雙核指標區（AI 信心度 100.0%、σ 方差 0.3125、精確度提升 +58.4% 與微觀/宏觀雙色進度條）。
-* 下排平行設置 4 大算子子卡片：
-  1. CV 視覺越浪率 (p/min) `#facc15`
-  2. MMSI 客輪沉降 (Squat m) `#38bdf8`
-  3. FNO 100ms 預報波高 (m) `#ef4444`
-  4. 64D 量子拓撲相干性 `#c084fc`
+    <!-- 主內容區塊 (Desktop 32% / 68% 剛性雙欄) -->
+    <div class="dashboard-main-layout">
+        
+        <!-- 左欄 32% 戰術控制區 -->
+        <div class="layout-left-tactical">
+            
+            <!-- Card 1: PINN Engine 水文門檻 -->
+            <div class="card">
+                <div class="card-header">
+                    <span>1. PINN Engine 即時水文門檻</span>
+                    <span id="badgeDecision" style="background: var(--status-pass); color: white; padding: 2px 6px; border-radius: 8px; font-size: 10px;">🟢 放行靠泊</span>
+                </div>
+                <div class="metric-grid-2x2">
+                    <div class="metric-box">
+                        <label>碼頭波高 (Hs)</label>
+                        <div class="value" id="valHs">0.85 m</div>
+                        <div class="metric-badge badge-pass" id="badgeHs">PASS (≤1.20m)</div>
+                    </div>
+                    <div class="metric-box">
+                        <label>區域風速 (W)</label>
+                        <div class="value" id="valWLocal">6.20 m/s</div>
+                        <div class="metric-badge badge-pass" id="badgeWLocal">PASS (≤10.8m/s)</div>
+                    </div>
+                    <div class="metric-box">
+                        <label>富餘水深 (UKC)</label>
+                        <div class="value" id="valUKC">7.28 m</div>
+                        <div class="metric-badge badge-pass" id="badgeUKC">PASS (≥1.50m)</div>
+                    </div>
+                    <div class="metric-box">
+                        <label>預留乾舷 (FB)</label>
+                        <div class="value" id="valFB">2.00 m</div>
+                        <div class="metric-badge badge-pass" id="badgeFB">PASS (≥0.50m)</div>
+                    </div>
+                </div>
+                <p style="font-size: 10px; color: var(--text-secondary); margin-top: 6px;">潮位 Eta：<span id="valTide">1.20 m</span> | 自適應 Alpha：<span id="valAlpha">0.95</span></p>
+            </div>
 
-### 2. 左側戰術控制欄 (32% 欄寬) 共 4 張卡片
-1. **PINN Engine 即時水文門檻比對**：Hs Pier, W Local, UKC, FB Pier 與 PASS/VETO 徽章。
-2. **當日船班官模燈號、時窗與戰略方案總結整合卡片**：官方 vs GEM 燈號、08:30 首班/11:20 止登/14:20 強制撤離細節，並**直接嵌入高光黃【戰略方案總結】**。
-3. **⚓ 游擊式動態調度與時窗預判 (`#f59e0b` 邊框)**：靠泊/撤離實體碼頭與上下午時窗預警。
-4. **🌀 颱風、雙週長浪與奇門氣場預判專區 (`#a855f7` 邊框)**：中颱/955hPa 動態、250km 暴風半徑、2D 氣壓梯度 (1.10 hPa/km)、東北季風共振、Week 1/2 雙週長浪趨勢、&plusmn;15% 不確定性與奇門 100% 匹配提示。
+            <!-- Card 2: 當日預警時窗與戰略總結 -->
+            <div class="card">
+                <div class="card-header">2. 當日預警時窗與戰略總結</div>
+                <div class="time-window-list">
+                    <p>• <b>07:30 當日開島</b>：<span style="color: var(--status-pass); font-weight: bold;" id="txt0730Status">🟢 可開島</span></p>
+                    <p style="font-size: 10px; color: var(--text-secondary);">海象：Hs ≤ 1.20m | W ≤ 10.80m/s</p>
+                    <p>• <b>10:50 / 13:50</b>：預警演練簡訊通報</p>
+                    <p>• <b>11:20 止登</b>：軟性封島【南岸碼頭】</p>
+                    <p>• <b>14:20 撤離</b>：從【南岸】全船撤離【烏石港】</p>
+                    <p>• <b>16:30 明日開島預判</b>：<span style="color: var(--status-pass); font-weight: bold;" id="txt1630Status">🟢 預測開放</span></p>
+                </div>
+            </div>
 
-### 3. 右側動態圖表陣列 (68% 欄寬)
-* **2x2 時間線圖表**：Hs (黃虛線 1.20m)、Wind (橘虛線 10.80m/s)、UKC (紅虛線 1.50m)、Tp 週期 (紫虛線 12.0s)，注入 11:00 與 14:00 無箭頭判點虛線。
-* **未來七天雙軸趨勢圖**：Hs 與 Wind 雙 Y 軸曲線，懸浮 Tooltip **動態標示各天裁決燈號（🔴/🟡/🟢）與戰術結論**。
-* **戰略三方案評估 (Ground Truth Comparison)**：方案 A、B、C 據值對比（方案 C 採高光黃 `#facc15`）。
+            <!-- Card 3: 游擊調度 -->
+            <div class="card" style="border-color: var(--status-warn);">
+                <div class="card-header" style="color: var(--status-warn);">3. ⚓ 游擊式動態調度與時窗預判</div>
+                <p style="font-size: 11px;">• 靠泊碼頭：<b id="txtBerthing" style="color: var(--accent-blue);">【南岸權宜碼頭】</b></p>
+                <p style="font-size: 11px; margin-top: 2px;">• 撤離路線：<b id="txtEvac" style="color: #f8fafc;">【南岸】 -&gt; 返航【烏石港】</b></p>
+                
+                <div class="dispatch-alert-box" id="txtTacticalSummary">
+                    📌 游擊處置決策：海象安全在門檻內，預計 15:30 評估止登。
+                </div>
+            </div>
 
----
+            <!-- Card 4: 南北角水動力與奇門 30 天預測專區 -->
+            <div class="card" style="border-color: var(--accent-purple);">
+                <div class="card-header" style="color: var(--accent-purple);">
+                    <span>4. 🌀 颱風、季風與奇門 30 天預測專區</span>
+                </div>
+                <div class="table-wrapper">
+                    <table class="hydro-table">
+                        <thead>
+                            <tr><th>監測項目</th><th>北岸碼頭 (主)</th><th>南岸碼頭 (權宜)</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>風速 (風向)</td>
+                                <td><span class="highlight-value" id="valNorthW">6.63 m/s</span></td>
+                                <td><span class="highlight-value" id="valSouthW">5.20 m/s</span></td>
+                            </tr>
+                            <tr>
+                                <td>浪高 (Hs)</td>
+                                <td><span class="highlight-value" id="valNorthHs">3.71 m</span></td>
+                                <td><span class="highlight-value" id="valSouthHs">1.85 m</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-## 四、 手持端 (`mobile.html`) 輕量化 100% 垂直單欄流規範
+        </div>
 
-**嚴禁加載 ECharts DOM**，卡片依序為：
-1. 頂部連線狀態卡片 (`● LIVE SSOT`)。
-2. Watchdog 數據過期 Banner (`#staleAlertMob`)。
-3. Q-Mode 戰術裁決 Banner (`#vetoBannerMob`)。
-4. AI 雙核相對精確度與注意力閘卡片。
-5. PINN 物理水文邊界卡片 (2x2 網格)。
-6. **當日船班官模燈號、時窗與未來 3 天開/封島預測卡片**：包含 08:30/11:20/14:20 船班細節與 D+1 (🔴 封島), D+2 (🟡 限制靠泊), D+3 (🟢 全線開放) 預測模組。
-7. ⚓ 游擊式動態調度處置卡片 (`#f59e0b` 邊框)。
-8. 🌀 颱風與奇門氣場預判卡片 (`#a855f7` 邊框)。
-9. 🚀 Level 5 邊緣高維算子卡片 (`#10b981` 邊框，2x2 網格)。
-10. **戰略三方案評估與標籤檢核卡片 (Ground Truth)**：帶有浪高/風速數據據值、PASS/RESTR/VETO 檢核標籤與戰略總結。
-11. 裝置視角切換導覽列。
+        <!-- 右欄 68% 圖表區塊 -->
+        <div class="layout-right-charts">
+            
+            <!-- 2x2 時間線圖表矩陣 -->
+            <div class="card">
+                <div class="card-header">時間線預測矩陣 (即時趨勢)</div>
+                <div class="chart-grid-2x2">
+                    <div class="chart-box" id="chartHs"></div>
+                    <div class="chart-box" id="chartWind"></div>
+                    <div class="chart-box" id="chartUKC"></div>
+                    <div class="chart-box" id="chartTp"></div>
+                </div>
+            </div>
 
----
+            <!-- 未來 7 天雙軸趨勢圖 -->
+            <div class="card">
+                <div class="card-header">未來 7 天雙軸海象趨勢</div>
+                <div class="chart-box-large" id="chart7Days"></div>
+            </div>
 
-## 五、 SSOT JSON Schema 最高標準 (v36D.13.0 Complete)
+            <!-- 方案評估比對表格 -->
+            <div class="card">
+                <div class="card-header">Ground Truth 方案評估</div>
+                <div class="table-wrapper">
+                    <table class="comparison-table">
+                        <thead>
+                            <tr><th>方案</th><th>風速門檻</th><th>波高採樣</th><th>決策</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>方案 A</td><td>10.8 m/s</td><td>單點浮標</td><td>放行</td></tr>
+                            <tr><td>方案 B</td><td>10.8 m/s</td><td>網格預報</td><td>限制靠泊</td></tr>
+                            <tr class="highlight-row">
+                                <td>方案 C (GT)</td>
+                                <td>動態 Weff</td>
+                                <td>PINN 港池</td>
+                                <td id="tableSchemeCDecision" style="color: var(--status-danger);">🔴 Hard VETO</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-```json
-{
-  "version": "v36D.16.5 Zero-Crash Master Complete",
-  "timestamp": "2026-09-13 12:00:00 CST",
-  "confidence_label": "🟢 100.0% [完整同化 PASS]",
-  "decision": "🔴 封島/防颱",
-  "confidence_score": 100.0,
-  "hard_veto_alert": true,
-  "precision_metrics": {
-    "converged_sigma": 0.3125,
-    "precision_gain_pct": 58.4
-  },
-  "attention_gate": {
-    "micro_physics_weight": 65.0,
-    "macro_qimen_weight": 35.0
-  },
-  "physics_metrics": {
-    "hs_pier_m": 3.71,
-    "w_local_ms": 8.50,
-    "ukc_m": 5.84,
-    "fb_pier_m": 2.00,
-    "has_veto": true
-  },
-  "guerrilla_dispatch": {
-    "berthing_pier": "無 (雙岸失效，禁止靠泊)",
-    "evacuation_pier": "無 (雙岸失效，直航返航烏石港)",
-    "guerrilla_mode": "BOTH_PIERS_DISABLED",
-    "morning_tactic": "⚠️ 上午游擊調撥：北岸越浪，08:30 班次改至【南岸權宜碼頭】靠泊",
-    "afternoon_tactic": "🚨 下午游擊撤退：預測午後 ESE 巽宮風陣，11:20 止登，14:20 全員撤離",
-    "tactical_summary": "執行「下午游擊撤退【南岸碼頭撤離】」"
-  },
-  "level5_advanced_metrics": {
-    "vision_overtopping_rate_pmin": 1.31,
-    "vision_kd_bias": 0.0295,
-    "vessel_hydrodynamics": {
-      "vessel_name": "凱鯨號 (穿浪雙體船)",
-      "vessel_type": "CATAMARAN",
-      "dynamic_squat_m": 0.82,
-      "roll_deg": 3.3,
-      "pitch_deg": 4.4
-    },
-    "fno_forecast_mean_hs_m": 1.58,
-    "quantum_topology_coherence": 0.4682,
-    "swarm_dispatch_plan": [
-      { "agent_id": 1, "vessel_label": "凱鯨號 (Agent 1)", "assigned_pier": "無 (雙岸失效)", "tactical_action": "直航返航烏石港" }
-    ]
-  },
-  "qimen_macro_consensus": {
-    "consensus_rate_pct": 100.0,
-    "macro_advisory_enabled": true,
-    "qimen_status_prompt": "🔮 奇門氣場匹配率達 100.0% (>=70%)，已啟動宏觀參研決策與預警提示"
-  }
-}
-六、 系統判準一致性與 SSOT 整合報告
-比對 (Matching)：系統實時比對 CWA 波浪頻譜、WRF 區域氣候場與 TDX AIS 船班動態，確保數據輸入源品質與一致性。
-根據最新的 GEM-V36D (v36D.30.0 Three-Scheme &amp; Guerrilla Vector Master) 規範，本系統已完成全域比對、分析、修正、優化與統合：
-分析 (Analysis)：對比方案 A（官方經驗預報）、方案 B（現場監測）與方案 C（GEM-V210 雙向耦合進階版），評估各方案之定性缺陷與定量優勢。
-修正 (Correction)：透過 UKF 狀態同化與 PINN 殘差修復，於遲滯帶（11.5s < T_p <= 12.0s）與偏角（Δθ >= 45°）條件下動態修正 K_d 與 K_w 算子。
-優化 (Optimization)：將 KB_20260904_ESE_OVERTOPPING 智庫先驗知識預編譯為端側 Edge Masking 權重，使弱網環境下之阻斷響應時間縮短至 < 50ms。
-超低延遲與邊緣推理優化 (Edge Optimization)：將先驗智庫知識預編譯為端側硬性約束權重，使弱網環境下的安全阻斷響應時間由原本 30s 大幅縮短至 < 50ms。
-全域 SSOT 架構統合 (Single Source of Truth)：嚴格落實「版面幾何固定化 (CLS = 0)」與「數據單向更新化」雙柱原則。前端僅允許透過純文字節點更新數據，並完整對齊 JSON Schema 格式與預警時窗規範。
+        </div>
 
-戰略三方案評估與標籤檢核卡片 (Ground Truth)。
-七、 GEM_SPEC_MASTER.md (v36D.330.0 Three-Scheme & Guerrilla Vector Master 最高統合規範)
-本規範為 GEM-V36D 龜山島數位雙生海事戰術控制台（包含 Desktop 端、Mobile 端、Python 後端算子與 GitHub Actions 排程）之最高統合技術標準。全系統維運與程式碼變更必須 100% 恪守「版面幾何固定化 (CLS = 0)」與「數據單向更新化 (Data-Only SSOT)」雙柱原則。
-一、 核心哲學與雙柱原則 (Core Pillars)
-1. 版面固定化原則 (Layout Lockdown / CLS = 0)
-CSS Containment 座標鎖定：全視角 HTML 元件（desktop.html、mobile.html）所有卡片與容器實體設定 contain: strict 或 contain: content 屬性，徹底隔絕 DOM 幾何重排。
-Zero-Reflow 純文字節點寫入：前端更新時僅允許使用 node.textContent 替換純數據文字與 Style 燈號顏色（紅/黃/綠），嚴禁使用 innerHTML 重新拼接或增刪 DOM 節點。
-數字防震與幾何凍結：卡片寬高與 Grid 網格由 CSS 剛性鎖定，數字動態增減套用 font-variant-numeric: tabular-nums，杜絕版面伸縮微震。
-2. 數據單向更新化原則 (Data-Only SSOT)
-後端純數據生產者：後端 AI 算子（main_orchestrator.py）、Colab 訓練腳本與 GitHub Actions 定時工作流，純粹作為數據生產者，僅對接產出、Commit 並 Push 標準 SSOT 檔 latest_decision.json 至 marlinx-neyc/gem-engine 儲存庫。後端嚴禁覆蓋或生成任何 .html 檔案。
-前端純數據渲染器：前端頁面純粹透過 Fetch 靜態輪詢 latest_decision.json，強制追加時間戳記（latest_decision.json?_t=${Date.now()}）並設定 cache: 'no-store'，繞過手持端 PWA 與瀏覽器快取。
-二、 剛性四層/七重物理防線與水動力算子矩陣 (Hard VETO Matrix)
-本系統採納一票否決（Hard VETO）熔斷原則，任何單項算子觸發超標，總體裁決無條件硬阻斷為 🔴 封島/防颱（Q4）：
-$$\text{Hard\_Veto} = \text{Veto}_{Hs} \lor \text{Veto}_{W} \lor \text{Veto}_{UKC} \lor \text{Veto}_{FB} \lor \text{Veto}_{Swell} \lor \text{Veto}_{Slope} \lor \text{Veto}_{Official}$$
-三、 剛性物理與水動力防線規範 (PINN Physics Engine)
-GEM-V36D 龜山島海事戰術控制系統已正式完成 v36D.330.0 全規格升級。本版本整合了物理水動力防線、國際哥白尼遠洋氣象同化、奇門 70% 門控解鎖、二十年歷史氣候智庫與前端極速 Table-Based 響應架構。
-一、 剛性物理與水動力防線規範 (PINN Physics Engine)
-四層 Hard VETO 剛性門檻：
-碼頭波高：Hs,pier​≤1.20×αtune​ m（逾限即觸發一票否決）
-攻角有效風速：Weff​≤10.80×αtune​ m/s（含背風衰減 Kw​ 與背風偏角 Δθ 算數）
-富餘水深：UKC≥1.50 m（結合海圖水深、天文潮位 η、船隻吃水與蹲沉量 Ssquat​）
-碼頭乾舷：FBpier​≥0.50 m
-自適應門檻緊縮 (αtune​)：由 Sigmoid 神經網路與長浪/歷史風險動態調整，於極端海象下自動由 1.00 緊縮至 0.80∼0.65。
-二、 哥白尼多源同化與 20 年氣候智庫 (Copernicus & 20-Yr Climate Lake)
-遠洋長浪提前預警 (CMEMS / ERA5)：同化歐盟哥白尼外海波浪週期 Tp​，當 Tp​≥14.0 s 時提前 3 小時觸發 T-45 湧浪預警，消能繞射算子自動升階至 Kd​=1.00，消除港池共振盲區。
-物理加權餘弦匹配 (Weighted Cosine Similarity)：
-重點特徵賦予高權重（波高 Hs​:3.5、風速 W:3.0、週期 Tp​:3.5、偏角 Δθ:2.0）。
-與 175,200 個歷史小時 Cluster 進行比對，計算可靠度信心指標（Reliability Score），徹底消除相似度虛高溢位。
-三、 奇門 70% 門控解鎖與八門動態對齊 (Qimen Octagram Assimilation)
-奇門氣場狀態
-觸發條件與海象動向
-戰術導引動作
-αtune​ 係數
-開門 / 休門 (乾/坎宮)
-同化率 ≥70%，Δθ<35∘ 且海象平穩
-穩定靠泊【北岸碼頭】
-0.85∼1.00
-杜門 (巽宮)
-偏角 Δθ≥38∘ 側風或橫流 ≥1.8 kts
-T-30 移防【南岸權宜碼頭】
-0.80
-驚門 (兌宮)
-長浪週期 Tp​>12.0 s (港池共振)
-T-45 湧浪預警，Kd​→1.00
-0.75
-死門 (坤宮)
-觸發 Hard VETO 物理超標或低潮位底撞
-強制剛性熔斷，直航【烏石港】
-0.65
+    </div>
 
+    <!-- JavaScript 腳本 -->
+    <script>
+        let heartbeatCounter = 205;
+        function updateLiveClock() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('liveClock').textContent = `${year}/${month}/${day} ${hours}:${minutes}:${seconds} CST`;
+            
+            if (now.getSeconds() % 5 === 0) {
+                heartbeatCounter++;
+                document.getElementById('heartbeatCount').textContent = heartbeatCounter;
+            }
+        }
+        setInterval(updateLiveClock, 1000);
 
-70% 參考門檻：當奇門同化率 Qconsensus​≥70.0% 時，解鎖 64D 拓撲之 0.40 宏觀偏置（Macro Bias），未達 70% 則保持降階運作。
-四、 雙重遲滯與動態撤離游擊調度 (Guerrilla Dispatch)
-防 Ping-Pong 鎖定：採用 38∘/30∘ 風向偏角與流速遲滯鎖定（Lockout Window = 5 脈衝），防止強風臨界點引發碼頭頻繁誤切換。
-動態撤離時窗公式：Evac Minutes=⌈15Passenger Count​+max(0,(Ssquat​−0.50)×15)+15⌉，算定止登（Tstop​）與全島清空（Tevac​）時間軸。
-五、 手機極速 Table-Based 與雙時鐘規範 (Mobile UI Standard)
-零繪圖庫依賴：完全移除 ECharts 等 GPU 負擔腳本，全面採用 HTML 數據表格，解決窄螢幕跑版問題。
-雙軌時鐘與藍色脈衝心跳 (Blue Pulse Light)：
-設備秒針：原生 1000ms 跳動，維持即時時間。
-藍色心跳：與 10s 異步 SSOT 數據擷取強綁定，顯示更新次數。
-防休眠喚醒：掛載 visibilitychange 事件，手機螢幕解鎖切回時自動補刷數據。
-完整專區整合：包含 🏛️ 官方 vs 🤖 GEM 模型判斷比對卡片（具備預警分歧 Banner）、未來 3 天 (T+24h~T+72h) 趨勢預判，以及 🌀 颱風、長浪、南北角水動力與天文潮專區。
-GEM-V36D 龜山島海象氣-數值分析與智庫 統合規範檔 (v36D.330.0 Three-Scheme & Guerrilla Vector Master)
-本規範為 GEM-V36D 龜山島數位雙生海事戰術控制台（包含 Desktop 端、Mobile 端、Python 後端算子與 GitHub Actions 排程）之最高統合技術標準。全系統維運、數據處理與程式碼變更必須 100% 恪守「版面幾何固定化 (CLS=0)」與「數據單向更新化 (Data-Only SSOT)」雙柱原則。
-一、 系統定位、雙柱原則與智庫助理規範
-1. 系統定位與角色職責
-角色定位：擔任「龜山島海象氣-數值分析與智庫」專業系統助理暨首席海事戰術架構師，專門處理與分析龜山島周邊海域之水文、氣象實測及數值模擬資料。
-核心任務：協助使用者進行港口與碼頭安全評估，嚴格執行剛性標準門檻檢核與燈號狀態判定（🔴 VETO 否決 / 🟢 PASS 通過），並提供明確的戰術處置建議與狀態說明，確保航行與靠泊安全。
-2. 雙柱原則 (Core Pillars)
-版面幾何鎖定原則 (Layout Lockdown / CLS=0)：
-CSS Containment 鎖定：全視角 HTML 元件（desktop.html、mobile.html）所有卡片與容器實體設定 contain: strict 或 contain: content 屬性，徹底隔絕 DOM 幾何重排。
-Zero-Reflow 純文字寫入：前端更新僅允許使用 node.textContent 替換純數據文字與 Style 燈號顏色（紅/黃/綠/藍），嚴禁使用 innerHTML 重新拼接或動態增刪 DOM 節點。
-數字防震：卡片寬高與 Grid 網格由 CSS 剛性鎖定，數字動態增減套用 font-variant-numeric: tabular-nums，杜絕版面伸縮微震。
-數據單向更新化原則 (Data-Only SSOT)：
-後端純數據生產：後端 AI 算子（main_orchestrator.py）與自動化工作流作為數據生產者，僅 Commit 並 Push 標準 SSOT 檔 latest_decision.json。後端嚴禁覆蓋或生成任何 .html 檔案。
-前端純數據輪詢：前端頁面純粹透過 AJAX / Fetch 靜態輪詢 latest_decision.json（追加 ?_t=${Date.now()} 並設定 cache: 'no-store'），繞過手持端與瀏覽器快取。
-二、 四層 Hard VETO 剛性防线與物理算子矩陣
-本系統採納一票否決（Hard VETO）熔斷原則，任何單項算子觸發超標，總體裁決無條件硬阻斷為 🔴 封島/防颱（Q4）：
-Hard_Veto=VetoHs​∨VetoW​∨VetoUKC​∨VetoFB​∨VetoSwell​∨VetoSlope​∨VetoOfficial​
-防線維度
-剛性標準門檻
-物理算子精算公式
-剛性熔斷條件與檢核規範
-1. 碼頭波高 (Hs,pier​)
-≤1.20⋅αtune​ m
-Hs,pier​=Hs,CWA​⋅Kd​(Tp​)+PINNoffset​
-Hs,pier​>1.20⋅αtune​ m 觸發 [🔴 VETO]。長浪 Tp​>12.0 s 覆寫 Kd​=1.00 港池共振穿透。
-2. 攻角風速 (Weff​)
-≤10.80⋅αtune​ m/s
-Weff​=Wlocal​⋅∥cos(Δθ)∥⋅Kw​
-Weff​>10.80⋅αtune​ m/s 觸發 [🔴 VETO]。若背風角 Δθ≥45∘ 覆寫 Kw​=1.00。
-3. 富餘水深 (UKC)
-≥1.50 m
-UKC=(dchart​+ηtide​)−(ddraft​+Ssquat​)−Hs,pier​
-UKC<1.50 m 觸發 [🔴 VETO]。扣除雙體船蹲沉 Ssquat​=0.82 m 及波高位移。
-4. 預留乾舷 (FBpier​)
-≥0.50 m
-FBpier​=BASE_FREEBOARD−ηtide​
-FBpier​<0.50 m 觸發 [🔴 VETO]。若 Vision-PINN 偵測越浪覆寫 FBpier​=0.15 m。
+        // 初始化 ECharts
+        const initChart = (id, name, title, color, lineVal, chartData) => {
+            const chart = echarts.init(document.getElementById(id));
+            chart.setOption({
+                title: { text: title, textStyle: { color: '#94a3b8', fontSize: 11 } },
+                tooltip: { trigger: 'axis' },
+                grid: { top: 30, bottom: 25, left: 35, right: 15 },
+                xAxis: { type: 'category', data: ['08:00', '10:00', '11:20', '12:00', '14:20', '16:00'], axisLine: { lineStyle: { color: '#334155' } }, axisLabel: { fontSize: 9 } },
+                yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(51, 65, 85, 0.5)' } }, axisLabel: { color: '#94a3b8', fontSize: 9 } },
+                series: [{ 
+                    name: name, type: 'line', smooth: true, data: chartData, 
+                    lineStyle: { color: color }, itemStyle: { color: color },
+                    markLine: { symbol: 'none', data: [{ yAxis: lineVal, lineStyle: { type: 'dashed', color: color } }] }
+                }]
+            });
+            return chart;
+        };
 
-遲滯帶平滑修正算子 (Hysteresis Operators)
-長浪繞射遲滯算子 (Kd​)：
-Kd​=⎩⎨⎧​0.8830.883+(1.00−0.883)⋅0.5Tp​−11.5​1.00​Tp​<11.5 s11.5 s≤Tp​≤12.0 sTp​>12.0 s​
-背風遮蔽衰減算子 (Kw​)：
-Kw​=⎩⎨⎧​0.780.78+(1.00−0.78)⋅15.0Δθ−30.0​1.00​Δθ<30.0∘30.0∘≤Δθ<45.0∘Δθ≥45.0∘​
-三、 Level 5 高維邊緣算子與 Level 7 雙區水動力矩陣
-1. Level 5 高維邊緣算子組 (Level 5 Advanced Operators)
-Vision-PINN 邊緣視覺越浪算子 (VisionPINNEdgeNet)：解析 128x128 影像張量，即時估算越浪率（次/分）與 Kd​ 衰減偏差。若偵測越浪率 >0 p/min，硬性覆寫 FBpier​=0.15 m<0.50 m 觸發 VETO 阻斷。
-MMSI 專屬水動力算子 (VesselMMSIHydrodynamics)：依船隻 MMSI 識別船型（如凱鯨號穿浪雙體船），即時計算淺水動態沉降 Ssquat​=0.08⋅v2/9.81=0.82 m、Roll（3.3°）與 Pitch（4.4°）姿態位移，消除 UKC 盲區。
-FNO 100ms 超速頻譜算子 (FNO1dWaveSpectralForecaster)：採用 1D 傅立葉神經算子，於 100 ms 內超速推演未來 3 小時港池平均波高演化。
-64D 太乙奇門量子拓撲同化器 (QuantumTopology64DEngine)：將 36D 物理場擴充至 64D 高維時空拓撲，同化 18.6 年白道交角與 60 年甲子公度週期，計算量子相干性。
-Swarm 多船隊賽局調度器 (MultiAgentSwarmDispatcher)：基於強化學習多智慧體賽局，動態輸出多艘客輪之靠泊碼頭指派與戰術避浪路徑。
-2. Level 7 南北角雙區域水動力矩陣與潮汐動態扣減算子
-南北角雙區域水動力矩陣：北岸（Hs,north​=1.06⋅Hs,pier​）與南岸碼頭獨立解算，為「移防南岸權宜碼頭」提供物理依據。
-天文潮差動態扣減算子：精算大潮（滿潮 +1.35 m / 乾潮 −0.45 m），乾潮期自動自總水深扣減 0.45 m UKC 裕深；滿潮期直接自乾舷扣減潮位升水 η，精準防範越浪。
-四、 哥白尼遠洋同化、20年氣候智庫與奇門 70% 門控
-1. CMEMS / ERA5 遠洋長浪 T-45 提前預警
-同化歐盟哥白尼外海波浪週期 Tp​，當 Tp​≥14.0 s 時提前 3 小時觸發長浪預警，消能繞射算子自動升階至 Kd​=1.00，消除港池共振盲區。
-2. 物理加權餘弦匹配 (Scos​)
-對波高 Hs​（權重 3.5）、風速 W（3.0）、週期 Tp​（3.5）、偏角 Δθ（2.0）進行加權比對，同化 175,200 個歷史小時 Cluster 並導出客觀信心指標。
-3. 奇門 70% 氣場同化門控與八門戰術導引
-奇門氣場同化率 Qconsensus​≥70.0% 時，自動解鎖 64D 量子拓撲之 0.40 宏觀偏置（未達 70% 保持降階運作）：
-奇門門控
-海象與氣場條件
-戰術導引動作
-αtune​ 係數
-開門 / 休門 (乾/坎宮)
-Qconsensus​≥70%，Δθ<35∘ 海象平穩
-穩定靠泊【北岸碼頭】
-0.85∼1.00
-杜門 (巽宮)
-偏角 Δθ≥38∘ 側風或橫流 ≥1.8 kts
-T-30 移防【南岸權宜碼頭】
-0.80
-驚門 (兌宮)
-長浪週期 Tp​>12.0 s (港池共振)
-T-45 湧浪預警，Kd​→1.00
-0.75
-死門 (坤宮)
-觸發 Hard VETO 物理超標或低潮位底撞
-強制剛性熔斷，直航【烏石港】
-0.65
+        const chartHs = initChart('chartHs', 'Hs', 'Hs 碼頭波高 (m)', '#ef4444', 1.20, [0.65, 0.85, 1.05, 1.25, 1.10, 0.80]);
+        const chartWind = initChart('chartWind', 'Wind', 'Wind 風速 (m/s)', '#f59e0b', 10.80, [6.20, 7.50, 9.20, 11.20, 9.80, 7.10]);
+        const chartUKC = initChart('chartUKC', 'UKC', 'UKC 富餘水深 (m)', '#10b981', 1.50, [7.28, 6.80, 5.90, 5.20, 5.80, 6.90]);
+        const chartTp = initChart('chartTp', 'Tp', 'Tp 湧浪週期 (s)', '#c084fc', 12.0, [6.5, 8.0, 10.2, 12.5, 11.0, 8.2]);
 
-五、 Gymnasium R10 強化學習代理人與端側零延遲熔斷
-1. 狀態空間 (R10) 與動作集 (A)
-狀態向量：
-S=[Hs,pier​,Wlocal​,UKC,FBpier​,Tp​,Δθ,Swell_Ratio,Scos​,ηtide​,Kd​]∈R10
-動作集 (A)：A={0:Q1(放行),1:Q2(條件靠泊),2:Q3(限制開航),3:Q4(全線封島/VETO)}。
-2. 政策掩碼與零延遲硬熔斷 (<50ms)
-策略網路 GuerrillaRLPolicyNet 導入政策掩碼（Policy Masking）。當觸發 VETO 時，對 a∈{0,1,2} 施加 −9999 致命懲罰，強制無條件收斂至 a=3（Q4 剛性封島），獲得 +100 正向獎勵。
-先驗智庫知識預編譯為端側 Edge Masking 硬性權重，弱網環境下的安全阻斷響應時間縮短至 <50 ms。
-六、 游擊式動態調撥時窗、熱泉避險與橫向條圖
-1. 游擊時空調撥與撤離時間算定公式
-撤離時間軸算定公式：
-Evac Minutes=⌈15Passenger Count​+max(0,(Ssquat​−0.50)×15)+15⌉
-雙預警排程：10:50 與 13:50 提前半小時預發廣播；11:20 執行止登【南岸碼頭】；14:20 全員清島撤離返航【烏石港】避風。
-2. 熱泉水靜壓動態避險視窗
-依據潮汐 API 與水靜壓公式精算熱泉擴散峰值視窗：
-Tpeak​=THighTide​+3.5h
-峰值前後 1.5 小時（Tpeak​±1.5h）為強酸水團（pH 1.75~2.0）與高溫羽狀流擴散期，牛奶海水下活動與 SUP 全線暫停。
-3. 橫向時間區間表 (Horizontal Bar Chart)
-地盤時窗於 SSOT JSON 輸出全立體時間區間表：
-08:30 - 11:20：🟢 綠色可登區間（開放首班登島靠泊）。
-11:20 - 13:50：🟡 黃色止登區間（10:50 預警，11:20 上午止登）。
-11:30 - 14:30：⚠️ 熱泉避險視窗（牛奶海水下活動暫停）。
-13:50 - 14:20：🟠 橘色預警區間（13:50 預發清島廣播）。
-14:20 - 17:30：🔴 紅色撤離區間（14:20 強制清島撤退返航【烏石港】）。
-七、 全域單一真實數據源 (SSOT) JSON Schema 規範 (v36D.330.0)
-全系統傳輸與存取徹底對齊以下單一真實數據源（latest_decision.json）Schema 規範：
-JSON
-{
-  "version": "v36D.330.0 Three-Scheme & Guerrilla Vector Master Complete",
-  "timestamp": "2026-09-19 12:00:00 CST",
-  "decision": "🔴 封島/防颱",
-  "confidence_score": 100.0,
-  "confidence_label": "🟢 100.0% [完整同化 PASS]",
-  "hard_veto_alert": true,
-  "precision_metrics": {
-    "converged_sigma": 0.3125,
-    "precision_gain_pct": 58.4
-  },
-  "attention_gate": {
-    "micro_physics_weight": 65.0,
-    "macro_qimen_weight": 35.0
-  },
-  "physics_metrics": {
-    "hs_pier_m": 1.23,
-    "w_local_ms": 6.63,
-    "w_eff_ms": 6.40,
-    "alpha_adaptive": 0.9421,
-    "ukc_m": 6.06,
-    "fb_pier_m": 2.20,
-    "pass_hs": false,
-    "pass_w": true,
-    "pass_ukc": true,
-    "pass_fb": true,
-    "has_veto": true,
-    "kd": 0.883,
-    "kw": 0.78,
-    "north_pier_status": "[🔴 VETO]",
-    "south_pier_status": "[🔴 VETO]"
-  },
-  "hydrothermal_geothermal_gate": {
-    "high_tide_time": "09:30",
-    "peak_release_time": "13:00",
-    "risk_window_start": "11:30",
-    "risk_window_end": "14:30",
-    "warning": "強酸水團 (pH 1.75~2.0) 與高溫羽狀流擴散峰值期，牛奶海水下活動與 SUP 全線暫停"
-  },
-  "guerrilla_dispatch": {
-    "berthing_pier": "【南岸權宜碼頭】",
-    "evacuation_pier": "【南岸權宜碼頭】 → 返航【烏石港】",
-    "guerrilla_mode": "BOTH_PIERS_DISABLED",
-    "morning_tactic": "⚠️ 上午游擊調撥：北岸越浪，08:30 班次改至【南岸權宜碼頭】靠泊",
-    "afternoon_tactic": "🚨 下午游擊撤退：10:50/13:50 雙預警，11:20 止登，14:20 全員撤離至【烏石港】",
-    "tactical_summary": "執行「10:50/13:50 雙預警，11:20 止登【南岸碼頭】，14:20 全員撤離至【烏石港】」",
-    "horizontal_bar_chart": [
-      {
-        "time_range": "08:30 - 11:20",
-        "status_badge": "🟢 綠色可登區間",
-        "action": "開放首班登島靠泊",
-        "location": "【南岸權宜碼頭】",
-        "condition_note": "北岸越浪切換"
-      },
-      {
-        "time_range": "11:20 - 13:50",
-        "status_badge": "🟡 黃色止登區間",
-        "action": "上午止登 / 觀光管制",
-        "location": "【南岸權宜碼頭】",
-        "condition_note": "10:50 預警，11:20 止登"
-      },
-      {
-        "time_range": "11:30 - 14:30",
-        "status_badge": "⚠️ 熱泉避險視窗",
-        "action": "牛奶海 SUP/潛水全線暫停",
-        "location": "東側淺海熱泉區",
-        "condition_note": "Time_peak = 13:00 強酸擴散峰值"
-      },
-      {
-        "time_range": "13:50 - 14:20",
-        "status_badge": "🟠 橘色預警區間",
-        "action": "全島廣播撤離預警",
-        "location": "全島廣播系統",
-        "condition_note": "13:50 預發清島廣播"
-      },
-      {
-        "time_range": "14:20 - 17:30",
-        "status_badge": "🔴 紅色撤離區間",
-        "action": "強制清島撤退返航",
-        "location": "【南岸】 → 【烏石港】",
-        "condition_note": "14:20 強制撤離"
-      }
-    ]
-  },
-  "typhoon_longterm_forecast": {
-    "typhoon_status": "東南東 450 km 中颱，中心氣壓 955 hPa，暴風半徑 200 km",
-    "qimen_1month_monsoon_swell": "巽宮氣場低壓帶活躍，未來 30 天東北季風共振加劇，長浪 (Tp > 12.0s) 穿透頻率達 68%，宜加強靠泊防線",
-    "hydrothermal_1month_outlook": "月體大潮期海水靜水壓劇烈波動，滿潮後 3.5 小時強酸水團 (pH 1.75~2.0) 擴散範圍達最大值"
-  },
-  "level5_advanced_metrics": {
-    "vision_overtopping_rate_pmin": 1.31,
-    "vision_kd_bias": 0.0295,
-    "vessel_hydrodynamics": {
-      "vessel_name": "凱鯨號 (穿浪雙體船)",
-      "vessel_type": "CATAMARAN",
-      "dynamic_squat_m": 0.82,
-      "roll_deg": 3.3,
-      "pitch_deg": 4.4
-    },
-    "fno_forecast_mean_hs_m": 1.58,
-    "quantum_topology_coherence": 0.4682,
-    "swarm_dispatch_plan": [
-      {
-        "agent_id": 1,
-        "vessel_label": "凱鯨號 (Agent 1)",
-        "assigned_pier": "【南岸權宜碼頭】",
-        "tactical_action": "直航返航烏石港"
-      }
-    ]
-  },
-  "rl_agent_diagnostics": {
-    "state_vector_10d": [1.23, 6.63, 6.06, 2.20, 12.5, 15.0, 0.78125, 0.9421, 1.00, 0.883],
-    "action_selected": 3,
-    "reward_score": 100.0,
-    "latency_ms": 12.4
-  },
-  "qimen_macro_consensus": {
-    "consensus_rate_pct": 100.0,
-    "macro_advisory_enabled": true,
-    "octagram_gate_state": "死門 (坤宮 - 剛性熔斷)",
-    "qimen_status_prompt": "🔮 奇門氣場匹配率達 100.0% (>=70%)，已啟動宏觀參研決策與預警提示"
-  }
-}
-八、 UI/UX 控制台與 Watchdog 防護規範
-1. 桌面端 (desktop.html) 32% / 68% 剛性雙欄
-頂部一體化卡片 (header-master-card)：高度 120px，常駐顯示 ● LIVE SSOT 動態藍呼吸燈、連線次數、AI 雙核指標（信心度 100.0%、σ=0.3125）與平行 4 大 Level 5 微型算子卡片。
-左欄戰術控制區 (32% 欄寬)：包含 PINN 4 項水文門檻比對、預警時窗與戰略總結、⚓ 游擊式動態調度卡片（#f59e0b 邊框）、📍 南北岸即時水文實測表格 與 🌀 颱風/長浪/奇門專區卡片（#a855f7 邊框）。
-右欄圖表陣列 (68% 欄寬)：2x2 時間線 ECharts 圖表矩陣（含 11:20 止登 / 14:20 撤離無箭頭虛線）、未來 7 天雙軸趨勢圖 及底部 Ground Truth 三方案評估比對表格（方案 C 高光黃 #facc15 標註）。
-2. 手持端 (mobile.html) 100% 輕量化 Table-Based
-零繪圖庫跑版優化：完全移除手持端 ECharts 等 GPU 負擔腳本，全面採用 HTML 數據表格，純文字 textContent 定時更新，徹底消除跑版。
-雙軌時鐘與藍色心跳：原生 1000 ms 設備跳動時鐘配合 10 s 異步 SSOT 數據擷取藍色心跳燈，並掛載 visibilitychange 事件，解決螢幕休眠解鎖後的數據斷層。
-3. Stale Data 過期保護與防護 Banner
-當超過 30 秒（約 3 次輪詢週期）未接收到 SSOT 封包更新，頂部指示燈轉為 🔴 數據過期 (OUT OF DATE)，全螢幕邊框低頻紅光閃爍，並彈出半透明警告 Banner，防範使用過期資訊做出錯誤指揮。
+        const chart7Days = echarts.init(document.getElementById('chart7Days'));
+        chart7Days.setOption({
+            tooltip: { trigger: 'axis' },
+            grid: { top: 30, bottom: 25, left: 35, right: 35 },
+            xAxis: { type: 'category', data: ['D+1', 'D+2', 'D+3', 'D+4', 'D+5', 'D+6', 'D+7'], axisLine: { lineStyle: { color: '#334155' } } },
+            yAxis: [{ type: 'value', name: 'Hs' }, { type: 'value', name: 'Wind' }],
+            series: [
+                { name: 'Hs 浪高', type: 'line', smooth: true, data: [0.80, 0.85, 0.90, 1.25, 0.95, 0.75, 0.60], lineStyle: { color: '#ef4444' } },
+                { name: 'Wind 風速', type: 'line', yAxisIndex: 1, smooth: true, data: [6.50, 7.20, 8.50, 11.20, 8.10, 6.00, 5.50], lineStyle: { color: '#f59e0b' } }
+            ]
+        });
 
+        window.addEventListener('resize', () => {
+            chartHs.resize(); chartWind.resize(); chartUKC.resize(); chartTp.resize(); chart7Days.resize();
+        });
+
+        async function fetchSSOT() {
+            try {
+                const response = await fetch(`latest_decision.json?t=${Date.now()}`);
+                if (!response.ok) return;
+                const data = await response.json();
+
+                document.getElementById('ssotTimestamp').textContent = data.timestamp || '--';
+                const isVeto = data.hard_veto_alert || false;
+                
+                const statusBadge = document.getElementById('ssotStatusBadge');
+                if (isVeto) {
+                    statusBadge.textContent = '🔴 0.0% [物理 VETO 熔斷]';
+                    statusBadge.style.color = '#ef4444';
+                } else {
+                    statusBadge.textContent = data.confidence_label || '🟢 100.0% [完整 PASS]';
+                    statusBadge.style.color = '#10b981';
+                }
+
+                const physics = data.physics_metrics || {};
+                document.getElementById('valHs').textContent = `${Number(physics.hs_pier_m ?? 0.85).toFixed(2)} m`;
+                document.getElementById('valWLocal').textContent = `${Number(physics.w_local_ms ?? 6.20).toFixed(2)} m/s`;
+                document.getElementById('valUKC').textContent = `${Number(physics.ukc_m ?? 7.28).toFixed(2)} m`;
+                document.getElementById('valFB').textContent = `${Number(physics.fb_pier_m ?? 2.00).toFixed(2)} m`;
+
+            } catch (err) {
+                console.warn("SSOT 讀取異常:", err);
+            }
+        }
+        setInterval(fetchSSOT, 5000);
+        fetchSSOT();
+    </script>
+</body>
+</html>
