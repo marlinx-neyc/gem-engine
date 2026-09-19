@@ -1,6 +1,6 @@
 {
-  "version": "v36D.330.0 Three-Scheme & Guerrilla Vector Master Complete",
-  "timestamp": "2026-09-19 17:45:06 CST",
+  "version": "v36D.330.2 Three-Scheme & Guerrilla Vector Master Complete",
+  "timestamp": "2026-09-19 17:54:45 CST",
   "decision": "🔴 封島/防颱",
   "confidence_score": 100.0,
   "confidence_label": "🟢 100.0% [完整同化 PASS]",
@@ -16,15 +16,16 @@
   "physics_metrics": {
     "hs_pier_m": 1.39,
     "w_local_ms": 6.63,
-    "w_effective_ms": 6.4,
     "w_eff_ms": 6.4,
+    "tp_s": 12.5,
     "tide_eta_m": 1.0,
-    "s_quat_m": 0.82,
+    "alpha_adaptive": 0.9421,
+    "eff_hs_limit": 1.13,
+    "eff_weff_limit": 10.17,
+    "eff_ukc_limit": 1.5,
+    "eff_fb_limit": 0.5,
     "ukc_m": 6.09,
     "fb_pier_m": 2.2,
-    "slope_landslide_risk": 0.15,
-    "adaptive_alpha": 0.9421,
-    "historical_similarity": 0.9421,
     "pass_hs": false,
     "pass_w": true,
     "pass_ukc": true,
@@ -32,20 +33,6 @@
     "has_veto": true,
     "kd": 1.0,
     "kw": 0.78,
-    "north_pier": {
-      "w_ms": 6.63,
-      "wind_dir": "ENE 65°",
-      "hs_m": 3.71,
-      "current_kts": 1.4,
-      "berth_status_badge": "🔴 禁靠 (浪高/汐變越限)"
-    },
-    "south_pier": {
-      "w_ms": 5.18,
-      "wind_dir": "E 80°",
-      "hs_m": 1.85,
-      "current_kts": 0.9,
-      "berth_status_badge": "🔴 禁靠 (剛性熔斷)"
-    },
     "north_pier_status": "[🔴 VETO]",
     "south_pier_status": "[🔴 VETO]"
   },
@@ -57,106 +44,24 @@
     "warning": "強酸水團 (pH 1.75~2.0) 與高溫羽狀流擴散峰值期，牛奶海水下活動與 SUP 全線暫停"
   },
   "guerrilla_dispatch": {
-    "berthing_pier": "【防颱避風/禁止靠泊】",
-    "evacuation_pier": "【強制撤離】 -> 返航【烏石港】",
+    "berthing_pier": "【南岸權宜碼頭】",
+    "evacuation_pier": "【南岸權宜碼頭】 → 返航【烏石港】",
     "guerrilla_mode": "BOTH_PIERS_DISABLED",
-    "early_warning_vector": {
-      "t60_qimen_warning": "🟡 T-60 氣場預警：奇門同化匹配率 100.0% >= 70%，已解鎖 64D 拓撲 Macro Bias 0.40",
-      "t45_wave_steep_warning": "🟡 T-45 湧浪海象預警：長浪週期 Tp=12.5s (>10.0s Kd=1.00 港池共振) 趨勢預警",
-      "t30_pier_shift_warning": "🟡 T-30 移防預警：風向偏轉 (Δθ=15.0° >= 35° 側風) 且橫流 1.9kts，指引切換至【南岸權宜碼頭】"
-    },
     "morning_tactic": "⚠️ 上午游擊調撥：北岸越浪，08:30 班次改至【南岸權宜碼頭】靠泊",
     "afternoon_tactic": "🚨 下午游擊撤退：10:50/13:50 雙預警，11:20 止登，14:20 全員撤離至【烏石港】",
-    "tactical_summary": "⚠️ 三方案定性定量總結：方案A與方案B預判放行/限縮；方案C(GEM-V36D Ground Truth)精確比對全海象歷史智庫與奇門解盲(α=0.85)，判定【剛性熔斷】！游擊調度決策：官方公告預警封島。建議 11:20 止登，14:20 全員撤離至烏石港。",
-    "t_stop_window": "11:20",
-    "t_evac_window": "14:20",
-    "is_backup_mode": false,
-    "open_island_0730": "🔴 封島",
-    "open_island_1630_tomorrow": "🔴 預警封島",
-    "horizontal_bar_chart": [
-      {
-        "time_range": "08:30 - 11:20",
-        "status_badge": "🟢 綠色可登區間",
-        "action": "開放首班登島靠泊",
-        "location": "【南岸權宜碼頭】",
-        "condition_note": "北岸越浪切換"
-      },
-      {
-        "time_range": "11:20 - 13:50",
-        "status_badge": "🟡 黃色止登區間",
-        "action": "上午止登 / 觀光管制",
-        "location": "【南岸權宜碼頭】",
-        "condition_note": "10:50 預警，11:20 止登"
-      },
-      {
-        "time_range": "11:30 - 14:30",
-        "status_badge": "⚠️ 熱泉避險視窗",
-        "action": "牛奶海 SUP/潛水全線暫停",
-        "location": "東側淺海熱泉區",
-        "condition_note": "Time_peak = 13:00 強酸擴散峰值"
-      },
-      {
-        "time_range": "13:50 - 14:20",
-        "status_badge": "🟠 橘色預警區間",
-        "action": "全島廣播撤離預警",
-        "location": "全島廣播系統",
-        "condition_note": "13:50 預發清島廣播"
-      },
-      {
-        "time_range": "14:20 - 17:30",
-        "status_badge": "🔴 紅色撤離區間",
-        "action": "強制清島撤退返航",
-        "location": "【南岸】 → 【烏石港】",
-        "condition_note": "14:20 強制撤離"
-      }
-    ],
-    "tactical_timeline": [
-      {
-        "time_range": "08:30 - 11:20",
-        "status_badge": "🟢 綠色可登區間",
-        "action": "開放首班登島靠泊",
-        "location": "【南岸權宜碼頭】",
-        "condition_note": "北岸越浪切換"
-      },
-      {
-        "time_range": "11:20 - 13:50",
-        "status_badge": "🟡 黃色止登區間",
-        "action": "上午止登 / 觀光管制",
-        "location": "【南岸權宜碼頭】",
-        "condition_note": "10:50 預警，11:20 止登"
-      },
-      {
-        "time_range": "11:30 - 14:30",
-        "status_badge": "⚠️ 熱泉避險視窗",
-        "action": "牛奶海 SUP/潛水全線暫停",
-        "location": "東側淺海熱泉區",
-        "condition_note": "Time_peak = 13:00 強酸擴散峰值"
-      },
-      {
-        "time_range": "13:50 - 14:20",
-        "status_badge": "🟠 橘色預警區間",
-        "action": "全島廣播撤離預警",
-        "location": "全島廣播系統",
-        "condition_note": "13:50 預發清島廣播"
-      },
-      {
-        "time_range": "14:20 - 17:30",
-        "status_badge": "🔴 紅色撤離區間",
-        "action": "強制清島撤退返航",
-        "location": "【南岸】 → 【烏石港】",
-        "condition_note": "14:20 強制撤離"
-      }
-    ]
+    "tactical_summary": "執行「10:50/13:50 雙預警，11:20 止登【南岸碼頭】，14:20 全員撤離至【烏石港】」",
+    "horizontal_bar_chart": [],
+    "tactical_timeline": []
   },
   "typhoon_longterm_forecast": {
-    "typhoon_status": "東南東 450 km 中颱，中心氣壓 955 hPa，暴風半徑 200 km",
-    "qimen_1month_monsoon_swell": "巽宮氣場低壓帶活躍，未來 30 天東北季風共振加劇，長浪 (Tp > 12.0s) 穿透頻率達 68%，宜加強靠泊防線",
-    "hydrothermal_1month_outlook": "月體大潮期海水靜水壓劇烈波動，滿潮後 3.5 小時強酸水團 (pH 1.75~2.0) 擴散範圍達最大值"
+    "typhoon_status": "東南東 450 km 中颱，中心氣壓 955 hPa，暴风半徑 200 km",
+    "qimen_1month_monsoon_swell": "巽宮氣場低壓帶活躍，未來 30 天東北季風共振加劇，長浪 (Tp > 12.0s) 穿透頻率達 68%",
+    "hydrothermal_1month_outlook": "月體大潮期海水靜水壓劇烈波動，滿潮後 3.5 小時強酸水團擴散範圍達最大值"
   },
   "typhoon_qimen_prediction": {
-    "typhoon_status": "東南東 450 km 中颱，中心氣壓 955 hPa，暴風半徑 200 km",
-    "qimen_1month_monsoon_swell": "巽宮氣場低壓帶活躍，未來 30 天東北季風共振加劇，長浪 (Tp > 12.0s) 穿透頻率達 68%，宜加強靠泊防線",
-    "hydrothermal_1month_outlook": "月體大潮期海水靜水壓劇烈波動，滿潮後 3.5 小時強酸水團 (pH 1.75~2.0) 擴散範圍達最大值"
+    "typhoon_status": "東南東 450 km 中颱，中心氣壓 955 hPa，暴风半徑 200 km",
+    "qimen_1month_monsoon_swell": "巽宮氣場低壓帶活躍，未來 30 天東北季風共振加劇，長浪 (Tp > 12.0s) 穿透頻率達 68%",
+    "hydrothermal_1month_outlook": "月體大潮期海水靜水壓劇烈波動，滿潮後 3.5 小時強酸水團擴散範圍達最大值"
   },
   "level5_advanced_metrics": {
     "vision_overtopping_rate_pmin": 1.31,
@@ -200,12 +105,6 @@
     "consensus_rate_pct": 100.0,
     "macro_advisory_enabled": true,
     "octagram_gate_state": "死門 (坤宮 - 剛性熔斷)",
-    "qimen_status_prompt": "🔮 奇門氣場匹配率達 100.0% (>=70%)，已啟動宏觀參研決策與預警提示",
-    "macro_factors": {
-      "typhoon_status": "東南東 450 km 中颱，中心氣壓 955 hPa，暴風半徑 200 km",
-      "monsoon_low_pressure": "巽宮氣場活躍 (東北季風) / 無顯著低壓",
-      "swell_long_wave": "Tp = 12.5s / Kd=1.0 (穿透 68%)",
-      "wind_wave_current_tide": "Weff = 6.40 m/s / 海流轉 NW / 大潮極值即將抵達"
-    }
+    "qimen_status_prompt": "🔮 奇門氣場匹配率達 100.0% (>=70%)，已啟動宏觀參研決策與預警提示"
   }
 }
