@@ -2,14 +2,16 @@ name: GEM Engine Cron Pipeline
 
 on:
   schedule:
-    - cron: '0 3,8 * * *'
-  workflow_dispatch:
+    - cron: '0 3,8 * * *'  # 每日 03:00 與 08:00 UTC (11:00與16:00 CST) 定時執行
+  workflow_dispatch:       # 支援手動觸發
 
 jobs:
   run-engine:
     runs-on: ubuntu-latest
+    timeout-minutes: 10     # 剛性逾時保護，防止 API 或模型卡死
+
     permissions:
-      contents: write
+      contents: write       # 剛性授權：允許提交並寫入 SSOT 及模型權重
 
     steps:
       - name: Checkout Repository
@@ -21,6 +23,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
+          cache: 'pip'      # 啟用 pip 快取機制加速建置
 
       - name: Install Lightweight Dependencies
         run: |
@@ -39,7 +42,7 @@ jobs:
       - name: Commit & Push SSOT Outputs & Model Weights
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "auto: sync SSOT & update latest model weights [skip ci]"
+          commit_message: "auto(ssot): sync SSOT & update latest model weights [v36D.330.0]"
           file_pattern: "latest_decision.json *.pt KB_*.json"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
