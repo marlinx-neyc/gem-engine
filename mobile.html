@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <title>GEM-V36D 龜山島雙層整合海事戰術控制台 (Mobile Master)</title>
-    <!-- ECharts CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -91,7 +89,18 @@
         .dispatch-alert-box { background: rgba(245, 158, 11, 0.15); border: 1px solid var(--status-warn); color: #fef08a; padding: 8px 10px; border-radius: 6px; font-weight: 600; font-size: 11px; margin-top: 8px; line-height: 1.4; }
         .dispatch-alert-box.veto-style { background: rgba(239, 68, 68, 0.15); border-color: var(--status-danger); color: #fca5a5; }
 
-        #vetoBanner { display: none; color: white; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 11px; margin-bottom: 10px; text-align: center; }
+        /* 移除隱藏樣式，透過 JS 寫入內容與 Padding 控制顯示 */
+        #vetoBanner { 
+            color: white; 
+            border-radius: 6px; 
+            font-weight: bold; 
+            font-size: 11px; 
+            text-align: center; 
+            padding: 0;
+            margin-bottom: 0;
+            background: transparent;
+            transition: all 0.3s ease;
+        }
 
         /* 水文與氣象監測表格 - 手機優化 */
         .table-wrapper { width: 100%; overflow-x: auto; margin-top: 6px; }
@@ -105,7 +114,7 @@
         }
         .hydro-table th, .hydro-table td {
             padding: 6px 8px;
-            text-align: left;
+            text-align: center;
             border-bottom: 1px solid var(--card-border);
             white-space: nowrap;
         }
@@ -114,7 +123,7 @@
             color: #e2e8f0;
             font-weight: 600;
         }
-        .hydro-table td:first-child { font-weight: 600; color: var(--text-secondary); width: 30%; }
+        .hydro-table td:first-child { font-weight: 600; color: var(--text-secondary); text-align: left; width: 25%; }
 
         /* 預測數據塊 */
         .prediction-stats {
@@ -132,14 +141,10 @@
         .stat-value.risk { color: var(--status-pass); }
         .stat-value.match { color: var(--accent-purple); }
 
-        /* 圖表區塊 - 手機版高度縮減 */
-        .chart-container-stacked { display: flex; flex-direction: column; gap: 10px; }
-        .chart-box { width: 100%; height: 160px; background: var(--bg-color); border-radius: 6px; border: 1px solid var(--card-border); padding: 6px; }
-        .chart-box-large { width: 100%; height: 180px; background: var(--bg-color); border-radius: 6px; border: 1px solid var(--card-border); padding: 6px; }
-
-        .comparison-table { width: 100%; border-collapse: collapse; font-size: 10px; text-align: left; margin-top: 6px; }
+        .comparison-table { width: 100%; border-collapse: collapse; font-size: 10px; text-align: center; margin-top: 6px; }
         .comparison-table th, .comparison-table td { padding: 6px; border-bottom: 1px solid var(--card-border); }
         .comparison-table th { background: var(--bg-color); color: var(--text-secondary); }
+        .comparison-table td:first-child { text-align: left; }
         .highlight-row { background: rgba(56, 189, 248, 0.1); font-weight: bold; color: var(--accent-blue); }
     </style>
 </head>
@@ -242,25 +247,59 @@
             </div>
         </div>
 
-        <!-- Card 4: 颱風季風長浪與奇門 30 天長期預測專區 (包含完整南北岸水文表格) -->
+        <!-- Card 4: 颱風季風長浪與奇門 30 天長期預測專區 -->
         <div class="card" style="border-color: var(--accent-purple);">
             <div class="card-header" style="color: var(--accent-purple);">
-                <span>4. 🌀 颱風、季風與奇門 30 天預測專區</span>
+                <span>4. 🌀 奇門 30 天宏觀測資訊專區</span>
             </div>
             
             <div style="font-size: 11px; line-height: 1.4;">
-                <p style="color: #cbd5e1; font-weight: bold;">📍 目前颱風與實測數據：</p>
-                <p style="font-size: 10px; color: var(--text-secondary); margin-left: 4px; margin-top: 2px;">
-                    • 東南東 <span class="highlight-value">450 km</span> 中颱，氣壓 <span class="highlight-value">955 hPa</span>，暴風半徑 <span class="highlight-value">200 km</span>。<br>
-                    • W<sub>eff</sub> = <span class="highlight-value" id="valWeff">6.40 m/s</span> <span class="metric-badge badge-pass" id="badgeWeff">🟢 PASS</span> | T<sub>p</sub> = <span class="highlight-value" id="valTp">15.5 s</span> (K<sub>d</sub> = 1.00 穿透)
-                </p>
-
-                <p style="color: #cbd5e1; font-weight: bold; margin-top: 8px;">🌊 南北岸即時水文與氣象監測：</p>
+                <p style="color: #cbd5e1; font-weight: bold;">🔮 氣象與奇門宏觀動態 (門檻 α = <span id="valAlphaQimen">0.85</span>)：</p>
                 <div class="table-wrapper">
                     <table class="hydro-table">
                         <thead>
                             <tr>
-                                <th>監測項目</th>
+                                <th>環境因子</th>
+                                <th>實時數據與趨勢狀態</th>
+                                <th>燈號指示</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>颱風動態</td>
+                                <td>東南東 450 km (955 hPa / 半徑 200 km)</td>
+                                <td><span class="metric-badge badge-warn">🟡 警戒範圍</span></td>
+                            </tr>
+                            <tr>
+                                <td>季風與低氣壓</td>
+                                <td>巽宮活躍 (東北季風) / 無顯著低壓</td>
+                                <td><span class="metric-badge badge-warn">🟡 共振增強</span></td>
+                            </tr>
+                            <tr>
+                                <td>長浪 / 湧浪</td>
+                                <td>Tp = <span class="highlight-value" id="valTp">15.5 s</span> / Kd=1.0 (穿透 68%)</td>
+                                <td><span class="metric-badge badge-veto">🔴 越浪風險</span></td>
+                            </tr>
+                            <tr>
+                                <td>風速與海浪</td>
+                                <td>Weff = 6.40 m/s / 海流波動加劇</td>
+                                <td><span class="metric-badge badge-pass">🟢 尚在門檻</span></td>
+                            </tr>
+                            <tr>
+                                <td>流 / 汐變化</td>
+                                <td>橫流轉向 NW / 大潮極值即將抵達</td>
+                                <td><span class="metric-badge badge-warn">🟡 退潮警戒</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p style="color: #cbd5e1; font-weight: bold; margin-top: 12px;">🌊 南北岸即時水文與汐變靠泊評估：</p>
+                <div class="table-wrapper">
+                    <table class="hydro-table">
+                        <thead>
+                            <tr>
+                                <th>監測與評估項目</th>
                                 <th>北岸碼頭 (主)</th>
                                 <th>南岸碼頭 (權宜)</th>
                             </tr>
@@ -273,33 +312,22 @@
                             </tr>
                             <tr>
                                 <td>浪高 (Hs)</td>
-                                <td><span class="highlight-value" id="valNorthHs">3.71 m</span> <span class="metric-badge badge-veto" id="badgeNorthHs">🔴 越浪超標</span></td>
-                                <td><span class="highlight-value" id="valSouthHs">1.85 m</span> <span class="metric-badge badge-warn" id="badgeSouthHs">🟡 警戒中</span></td>
+                                <td><span class="highlight-value" id="valNorthHs">3.71 m</span> <span class="metric-badge badge-veto" id="badgeNorthHs">🔴 超標</span></td>
+                                <td><span class="highlight-value" id="valSouthHs">1.85 m</span> <span class="metric-badge badge-warn" id="badgeSouthHs">🟡 警戒</span></td>
                             </tr>
                             <tr>
-                                <td>流速 (轉向)</td>
-                                <td><span class="highlight-value">1.4 kts</span> (NW/11:20)</td>
-                                <td><span class="highlight-value">0.9 kts</span> (W/12:00)</td>
+                                <td>流速與潮汐</td>
+                                <td>1.4 kts / 17:10 退最低</td>
+                                <td>0.9 kts / 17:05 退最低</td>
                             </tr>
                             <tr>
-                                <td>潮汐變化 (漲/退)</td>
-                                <td>
-                                    10:45 漲最高 (+1.25m)<br>
-                                    <span style="color:var(--text-secondary)">17:10 退最低 (+0.15m)</span>
-                                </td>
-                                <td>
-                                    10:40 漲最高 (+1.22m)<br>
-                                    <span style="color:var(--text-secondary)">17:05 退最低 (+0.18m)</span>
-                                </td>
+                                <td>汐變靠泊評估</td>
+                                <td><span class="metric-badge badge-veto" id="badgeNorthBerth">🔴 禁靠 (共振超限)</span></td>
+                                <td><span class="metric-badge badge-pass" id="badgeSouthBerth">🟢 可靠泊 (潮位適中)</span></td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-
-                <p style="color: #cbd5e1; font-weight: bold; margin-top: 8px;">🔮 奇門宏觀預測 (未來 30 天)：</p>
-                <p style="font-size: 10px; color: var(--text-secondary); margin-left: 4px; margin-top: 2px;">
-                    • 巽宮氣場活躍，東北季風與長浪共振，長浪穿透率預估 <span class="highlight-value">68%</span>，門檻 α = <span class="highlight-value" id="valAlphaQimen">0.85</span>。
-                </p>
 
                 <div class="prediction-stats">
                     <div class="stat-item">
@@ -314,24 +342,108 @@
             </div>
         </div>
 
-        <!-- 時間線預測矩陣圖表 (Mobile Stacked) -->
+        <!-- 轉換為表格：時間線預測矩陣 -->
         <div class="card">
-            <div class="card-header">時間線預測矩陣 (即時趨勢)</div>
-            <div class="chart-container-stacked">
-                <div class="chart-box" id="chartHs"></div>
-                <div class="chart-box" id="chartWind"></div>
-                <div class="chart-box" id="chartUKC"></div>
-                <div class="chart-box" id="chartTp"></div>
+            <div class="card-header">時間線預測矩陣 (即時趨勢數據)</div>
+            <div class="table-wrapper">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>時間點</th>
+                            <th>08:00</th>
+                            <th>10:00</th>
+                            <th>11:20</th>
+                            <th>12:00</th>
+                            <th>14:20</th>
+                            <th>16:00</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>碼頭波高(Hs)</td>
+                            <td>0.65 🟢</td>
+                            <td>0.85 🟢</td>
+                            <td>1.05 🟢</td>
+                            <td>1.25 🔴</td>
+                            <td>1.10 🟢</td>
+                            <td>0.80 🟢</td>
+                        </tr>
+                        <tr>
+                            <td>風速(Wind)</td>
+                            <td>6.20 🟢</td>
+                            <td>7.50 🟢</td>
+                            <td>9.20 🟢</td>
+                            <td>11.20 🔴</td>
+                            <td>9.80 🟢</td>
+                            <td>7.10 🟢</td>
+                        </tr>
+                        <tr>
+                            <td>富餘水深(UKC)</td>
+                            <td>7.28 🟢</td>
+                            <td>6.80 🟢</td>
+                            <td>5.90 🟢</td>
+                            <td>5.20 🟢</td>
+                            <td>5.80 🟢</td>
+                            <td>6.90 🟢</td>
+                        </tr>
+                        <tr>
+                            <td>湧浪週期(Tp)</td>
+                            <td>6.5 🟢</td>
+                            <td>8.0 🟢</td>
+                            <td>10.2 🟢</td>
+                            <td>12.5 🔴</td>
+                            <td>11.0 🟢</td>
+                            <td>8.2 🟢</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <!-- 7天預報圖表 -->
+        <!-- 轉換為表格：7天預報 -->
         <div class="card">
-            <div class="card-header">未來 7 天雙軸海象趨勢</div>
-            <div class="chart-box-large" id="chart7Days"></div>
+            <div class="card-header">未來 7 天雙軸海象預報</div>
+            <div class="table-wrapper">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>預測日</th>
+                            <th>D+1</th>
+                            <th>D+2</th>
+                            <th>D+3</th>
+                            <th>D+4</th>
+                            <th>D+5</th>
+                            <th>D+6</th>
+                            <th>D+7</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>浪高 (Hs) m</td>
+                            <td>0.80</td>
+                            <td>0.85</td>
+                            <td>0.90</td>
+                            <td style="color:var(--status-danger); font-weight:bold;">1.25</td>
+                            <td>0.95</td>
+                            <td>0.75</td>
+                            <td>0.60</td>
+                        </tr>
+                        <tr>
+                            <td>風速 (W) m/s</td>
+                            <td>6.50</td>
+                            <td>7.20</td>
+                            <td>8.50</td>
+                            <td style="color:var(--status-danger); font-weight:bold;">11.20</td>
+                            <td>8.10</td>
+                            <td>6.00</td>
+                            <td>5.50</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-        <!-- 方案評估與總結 (包含無亂碼一句話總結) -->
+        <!-- 方案評估與總結 -->
         <div class="card">
             <div class="card-header">Ground Truth 方案評估</div>
             <div class="table-wrapper">
@@ -377,59 +489,6 @@
             }
         }
         setInterval(updateLiveClock, 1000);
-
-        // 初始化手機版 ECharts
-        const initChart = (id, name, title, color, lineVal, unit, vetoCheck, chartData) => {
-            const chart = echarts.init(document.getElementById(id));
-            chart.setOption({
-                title: { text: title, textStyle: { color: '#94a3b8', fontSize: 10 } },
-                tooltip: { trigger: 'axis' },
-                grid: { top: 25, bottom: 20, left: 35, right: 15 },
-                xAxis: { type: 'category', data: ['08:00', '10:00', '11:20', '12:00', '14:20', '16:00'], axisLine: { lineStyle: { color: '#334155' } }, axisLabel: { fontSize: 9 } },
-                yAxis: { type: 'value', splitLine: { lineStyle: { color: '#1e293b' } }, axisLabel: { color: '#94a3b8', fontSize: 9 } },
-                series: [{ 
-                    name: name,
-                    type: 'line', 
-                    smooth: true, 
-                    data: chartData, 
-                    lineStyle: { color: color },
-                    itemStyle: { color: color },
-                    markLine: {
-                        symbol: 'none',
-                        data: [
-                            { yAxis: lineVal, lineStyle: { type: 'dashed', color: color, width: 1 } }
-                        ]
-                    }
-                }]
-            });
-            return chart;
-        };
-
-        const chartHs = initChart('chartHs', 'Hs', 'Hs 碼頭波高 (m)', '#ef4444', 1.20, 'm', v => v > 1.20, [0.65, 0.85, 1.05, 1.25, 1.10, 0.80]);
-        const chartWind = initChart('chartWind', 'Wind', 'Wind 風速 (m/s)', '#f59e0b', 10.80, 'm/s', v => v >= 10.80, [6.20, 7.50, 9.20, 11.20, 9.80, 7.10]);
-        const chartUKC = initChart('chartUKC', 'UKC', 'UKC 富餘水深 (m)', '#10b981', 1.50, 'm', v => v < 1.50, [7.28, 6.80, 5.90, 5.20, 5.80, 6.90]);
-        const chartTp = initChart('chartTp', 'Tp', 'Tp 湧浪週期 (s)', '#c084fc', 12.0, 's', v => v > 12.0, [6.5, 8.0, 10.2, 12.5, 11.0, 8.2]);
-
-        // 未來 7 天趨勢圖
-        const chart7Days = echarts.init(document.getElementById('chart7Days'));
-        chart7Days.setOption({
-            tooltip: { trigger: 'axis' },
-            grid: { top: 25, bottom: 20, left: 35, right: 35 },
-            xAxis: { type: 'category', data: ['D+1', 'D+2', 'D+3', 'D+4', 'D+5', 'D+6', 'D+7'], axisLine: { lineStyle: { color: '#334155' } }, axisLabel: { fontSize: 9 } },
-            yAxis: [
-                { type: 'value', name: 'Hs', splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } }, axisLabel: { fontSize: 9 } },
-                { type: 'value', name: 'Wind', splitLine: { show: false }, axisLabel: { fontSize: 9 } }
-            ],
-            series: [
-                { name: 'Hs 浪高', type: 'line', smooth: true, data: [0.80, 0.85, 0.90, 1.25, 0.95, 0.75, 0.60], lineStyle: { color: '#ef4444' } },
-                { name: 'Wind 風速', type: 'line', yAxisIndex: 1, smooth: true, data: [6.50, 7.20, 8.50, 11.20, 8.10, 6.00, 5.50], lineStyle: { color: '#f59e0b' } }
-            ]
-        });
-
-        // 螢幕旋轉或尺寸改變時自適應調整圖表
-        window.addEventListener('resize', () => {
-            chartHs.resize(); chartWind.resize(); chartUKC.resize(); chartTp.resize(); chart7Days.resize();
-        });
 
         // SSOT 數據同化
         async function fetchSSOT() {
@@ -481,7 +540,7 @@
                 document.getElementById('valAlphaQimen').textContent = alphaVal;
                 document.getElementById('valSlope').textContent = safeFix(physics.slope_landslide_risk, 0.15);
 
-                // 南北岸動態數據更新
+                // 南北岸動態數據更新與汐變靠泊邏輯判定
                 const northHs = Number(physics.north_pier?.hs_m ?? 3.71);
                 const northW = Number(physics.north_pier?.w_ms ?? 6.63);
                 const southHs = Number(physics.south_pier?.hs_m ?? 1.85);
@@ -491,6 +550,26 @@
                 document.getElementById('valNorthHs').textContent = `${northHs.toFixed(2)} m`;
                 document.getElementById('valSouthW').textContent = `${southW.toFixed(2)} m/s`;
                 document.getElementById('valSouthHs').textContent = `${southHs.toFixed(2)} m`;
+
+                // 動態判定汐變靠泊燈號
+                const badgeNorthBerth = document.getElementById('badgeNorthBerth');
+                const badgeSouthBerth = document.getElementById('badgeSouthBerth');
+                
+                if (northHs > 1.20 * Number(alphaVal)) {
+                    badgeNorthBerth.className = "metric-badge badge-veto";
+                    badgeNorthBerth.textContent = "🔴 禁靠 (浪高/汐變越限)";
+                } else {
+                    badgeNorthBerth.className = "metric-badge badge-pass";
+                    badgeNorthBerth.textContent = "🟢 可靠泊 (潮位適中)";
+                }
+
+                if (southHs > 2.0) {
+                    badgeSouthBerth.className = "metric-badge badge-veto";
+                    badgeSouthBerth.textContent = "🔴 禁靠 (警戒水位)";
+                } else {
+                    badgeSouthBerth.className = "metric-badge badge-pass";
+                    badgeSouthBerth.textContent = "🟢 可靠泊 (潮位適中)";
+                }
 
                 const guerrilla = data.guerrilla_dispatch || {};
                 const txtSummary = document.getElementById('txtTacticalSummary');
@@ -510,13 +589,18 @@
                 const qimen = data.qimen_macro_consensus || {};
                 document.getElementById('valQimen').textContent = `${safeFix(qimen.consensus_rate_pct || 100.0)}%`;
 
+                // 取代 display: none，使用動態文字與 padding 寫入以符合可見性規範
                 const vetoBanner = document.getElementById('vetoBanner');
                 if (isVeto) {
-                    vetoBanner.style.display = 'block';
+                    vetoBanner.style.padding = '10px';
+                    vetoBanner.style.marginBottom = '10px';
                     vetoBanner.style.background = '#ef4444';
                     vetoBanner.textContent = '🚨 警示：觸發物理 VETO 熔斷，強制執行防颱封島管制！';
                 } else {
-                    vetoBanner.style.display = 'none';
+                    vetoBanner.style.padding = '0';
+                    vetoBanner.style.marginBottom = '0';
+                    vetoBanner.style.background = 'transparent';
+                    vetoBanner.textContent = '';
                 }
 
             } catch (err) {
