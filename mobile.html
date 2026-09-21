@@ -4,485 +4,191 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>GEM-V36D 龜山島雙層整合海事戰術控制台 (Responsive Master v36D.330.3)</title>
-    <!-- ECharts CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <title>GEM-V36D 龜山島海象氣-數值分析與智庫 (Mobile Master v36D.330.0)</title>
     <style>
         :root {
-            --bg-color: #0f172a; --card-bg: #1e293b; --card-border: #334155;
+            --bg-color: #0b1120; --card-bg: #1e293b; --card-border: #334155;
             --text-primary: #e2e8f0; --text-secondary: #94a3b8;
             --accent-blue: #38bdf8; --accent-purple: #c084fc;
-            --status-pass: #10b981; --status-warn: #f59e0b; --status-danger: #ef4444;
-            --table-header-bg: rgba(56, 189, 248, 0.15);
+            --status-pass: #10b981; --status-warn: #f59e0b; --status-danger: #ef4444; --highlight-yellow: #facc15;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text-primary); padding: 15px; font-variant-numeric: tabular-nums; overflow-x: hidden; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-color); color: var(--text-primary); padding: 12px; font-variant-numeric: tabular-nums; }
         
-        /* Header 頂部儀表板 */
-        .dashboard-header-master { width: 100%; background: var(--card-bg); border-radius: 12px; padding: 15px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--card-border); border-left: 6px solid #64748b; transition: border-color 0.3s; flex-wrap: wrap; gap: 15px; }
-        .header-title-box h1 { font-size: 18px; font-weight: 700; color: #f8fafc; display: flex; align-items: center; gap: 8px; }
-        .header-title-box p { font-size: 11px; color: var(--text-secondary); margin-top: 6px; line-height: 1.4; }
-        .blue-pulse-dot { display: inline-block; width: 10px; height: 10px; background-color: var(--accent-blue); border-radius: 50%; box-shadow: 0 0 8px var(--accent-blue); animation: pulseBlue 2s infinite; }
-        @keyframes pulseBlue { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
+        /* CSS Containment 剛性座標鎖定 (CLS = 0)[cite: 6] */
+        .card { contain: content; background: var(--card-bg); padding: 14px; border-radius: 10px; border: 1px solid var(--card-border); margin-bottom: 12px; }
         
-        .hybrid-ratio-box { margin-top: 8px; width: 100%; max-width: 260px; }
-        .ratio-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-secondary); margin-bottom: 3px; }
-        .ratio-bar-bg { width: 100%; height: 6px; background: #334155; border-radius: 3px; overflow: hidden; display: flex; }
-        .ratio-bar-fill { height: 100%; background: var(--accent-blue); transition: width 0.3s; }
-        .ratio-bar-qimen { height: 100%; background: var(--accent-purple); transition: width 0.3s; }
-
-        .level5-mini-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; max-width: 350px; }
-        .level5-card { background: var(--bg-color); padding: 8px; border-radius: 8px; border: 1px solid var(--card-border); text-align: center; }
-        .level5-card label { font-size: 10px; color: var(--text-secondary); display: block; margin-bottom: 2px; }
-        .level5-card span { font-size: 14px; font-weight: 700; }
-
-        /* 主佈局網格 */
-        .dashboard-main-layout { display: flex; gap: 15px; width: 100%; margin-top: 15px; flex-direction: column; }
-        .layout-left-tactical { flex: 1; display: flex; flex-direction: column; gap: 15px; }
-        .layout-right-charts { flex: 1; display: flex; flex-direction: column; gap: 15px; }
-
-        /* RWD 媒體查詢：桌機版佈局 */
-        @media (min-width: 1024px) {
-            .dashboard-main-layout { flex-direction: row; }
-            .layout-left-tactical { flex: 0 0 35%; max-width: 35%; }
-            .layout-right-charts { flex: 0 0 calc(65% - 15px); max-width: calc(65% - 15px); }
-            .dashboard-header-master { flex-wrap: nowrap; padding: 12px 24px; }
-            .level5-mini-grid { display: flex; max-width: none; width: auto; }
-        }
-
-        .card { background: var(--card-bg); padding: 15px; border-radius: 12px; border: 1px solid var(--card-border); }
-        .card-header { font-size: 14px; font-weight: 700; color: var(--accent-blue); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border); padding-bottom: 8px; }
+        .header-title h1 { font-size: 16px; font-weight: 700; color: #f8fafc; display: flex; align-items: center; gap: 8px; }
+        .blue-pulse { display: inline-block; width: 8px; height: 8px; background-color: var(--accent-blue); border-radius: 50%; box-shadow: 0 0 8px var(--accent-blue); animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
         
-        /* 數值網格 */
-        .metric-grid-2x2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .metric-box { background: var(--bg-color); padding: 10px; border-radius: 8px; border: 1px solid var(--card-border); }
-        .metric-box label { font-size: 11px; color: var(--text-secondary); }
-        .metric-box .value { font-size: 18px; font-weight: 700; color: #f8fafc; margin-top: 2px; }
-        .metric-badge { font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px; }
-        
-        .badge-veto { background: rgba(239, 68, 68, 0.2); color: var(--status-danger); border: 1px solid var(--status-danger); }
+        .metric-grid-2x2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px; }
+        .metric-box { background: var(--bg-color); padding: 8px; border-radius: 6px; border: 1px solid var(--card-border); }
+        .metric-box label { font-size: 10px; color: var(--text-secondary); display: block; }
+        .metric-box .val { font-size: 16px; font-weight: 700; margin-top: 2px; }
+        .badge { font-size: 9px; font-weight: bold; padding: 2px 5px; border-radius: 4px; display: inline-block; margin-top: 3px; }
         .badge-pass { background: rgba(16, 185, 129, 0.2); color: var(--status-pass); border: 1px solid var(--status-pass); }
-        .badge-warn { background: rgba(245, 158, 11, 0.2); color: var(--status-warn); border: 1px solid var(--status-warn); }
+        .badge-veto { background: rgba(239, 68, 68, 0.2); color: var(--status-danger); border: 1px solid var(--status-danger); }
 
-        .highlight-value { font-family: monospace; font-weight: 600; color: #f8fafc; background: rgba(255, 255, 255, 0.08); padding: 2px 5px; border-radius: 4px; }
-        .time-window-list { font-size: 12px; line-height: 1.6; color: #cbd5e1; }
+        /* 極速 HTML 數據表格[cite: 6] */
+        .table-responsive { width: 100%; overflow-x: auto; margin-top: 6px; }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 11px; border: 1px solid var(--card-border); }
+        .data-table th, .data-table td { padding: 6px 8px; text-align: left; border-bottom: 1px solid var(--card-border); }
+        .data-table th { background: rgba(56, 189, 248, 0.15); color: #e2e8f0; font-weight: 600; }
         
-        .dispatch-alert-box { background: rgba(245, 158, 11, 0.15); border: 1px solid var(--status-warn); color: #fef08a; padding: 10px; border-radius: 6px; font-weight: 600; font-size: 12px; margin-top: 8px; line-height: 1.4; transition: all 0.3s; }
-        .dispatch-alert-box.veto-style { background: rgba(239, 68, 68, 0.15); border-color: var(--status-danger); color: #fca5a5; }
-
-        #vetoBanner { display: none; color: white; padding: 12px 15px; border-radius: 8px; font-weight: bold; margin-bottom: 15px; text-align: center; font-size: 13px; }
-
-        /* 表格響應式優化 */
-        .table-responsive { width: 100%; overflow-x: auto; }
-        .hydro-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; border-radius: 6px; overflow: hidden; border: 1px solid var(--card-border); min-width: 320px; }
-        .hydro-table th, .hydro-table td { padding: 8px; text-align: left; border-bottom: 1px solid var(--card-border); }
-        .hydro-table th { background-color: var(--table-header-bg); color: #e2e8f0; font-weight: 600; }
-        .hydro-table td:first-child { font-weight: 600; color: var(--text-secondary); width: 25%; }
-
-        .chart-container-2x2 { display: grid; grid-template-columns: 1fr; gap: 12px; }
-        @media (min-width: 600px) { .chart-container-2x2 { grid-template-columns: 1fr 1fr; } }
-        .chart-box { width: 100%; height: 180px; background: var(--bg-color); border-radius: 8px; border: 1px solid var(--card-border); padding: 8px; }
-        .chart-box-large { width: 100%; height: 220px; background: var(--bg-color); border-radius: 8px; border: 1px solid var(--card-border); padding: 8px; }
-
-        .qimen-grid-2x2 { display: grid; grid-template-columns: 1fr; gap: 10px; font-size: 12px; margin-bottom: 14px; }
-        @media (min-width: 600px) { .qimen-grid-2x2 { grid-template-columns: 1fr 1fr; } }
-        .qimen-item { background: var(--bg-color); padding: 10px; border-radius: 6px; border: 1px solid var(--card-border); }
-        .qimen-item-title { color: var(--text-secondary); font-size: 11px; margin-bottom: 4px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
-        
-        .comparison-table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; margin-top: 6px; }
-        .comparison-table th, .comparison-table td { padding: 8px; border-bottom: 1px solid var(--card-border); }
-        .comparison-table th { background: var(--bg-color); color: var(--text-secondary); }
-        .highlight-row { background: rgba(239, 68, 68, 0.12); font-weight: bold; }
+        #vetoBannerMob { display: none; background: var(--status-danger); color: white; padding: 10px; border-radius: 6px; font-size: 12px; font-weight: bold; text-align: center; margin-bottom: 12px; }
     </style>
 </head>
 <body>
-    <!-- 全局警示 Banner -->
-    <div id="vetoBanner"></div>
 
-    <!-- 頂部資訊列 -->
-    <div class="dashboard-header-master" id="headerMaster">
-        <div class="header-title-box">
-            <h1><span class="blue-pulse-dot"></span> 龜山島雙層戰術控制台</h1>
-            <p>
-                即時：<span id="liveClock">--</span><br>
-                SSOT 同化：<span id="ssotTimestamp">--</span> | 心跳：<span id="heartbeatCount" style="color: var(--accent-blue); font-weight: bold;">--</span> 次<br>
-                狀態：<span id="ssotStatusBadge" style="color: #94a3b8; font-weight: bold;">🔄 載入中...</span>
-            </p>
-            <div class="hybrid-ratio-box">
-                <div class="ratio-labels"><span>科學物理 <b id="txtPhysicsRatio">65%</b></span><span>奇門氣場 <b id="txtQimenRatio">35%</b></span></div>
-                <div class="ratio-bar-bg"><div class="ratio-bar-fill" id="barPhysics" style="width: 65%;"></div><div class="ratio-bar-qimen" id="barQimen" style="width: 35%;"></div></div>
-            </div>
+    <div id="vetoBannerMob">🚨 警示：實體觸發物理 VETO 熔斷，強制執行防颱封島管制！</div>
+
+    <!-- 1. 頂部狀態列[cite: 6] -->
+    <div class="card">
+        <div class="header-title">
+            <h1><span class="blue-pulse"></span> 龜山島雙層戰術控制台</h1>
         </div>
-        <div class="level5-mini-grid">
-            <div class="level5-card"><label>CV 越浪率</label><span id="valCV" style="color: #facc15;">-- p/m</span></div>
-            <div class="level5-card"><label>MMSI 沉降</label><span id="valSquat" style="color: var(--accent-blue);">-- m</span></div>
-            <div class="level5-card"><label>FNO 預報</label><span id="valFNO" style="color: var(--status-danger);">-- m</span></div>
-            <div class="level5-card"><label>拓撲相干</label><span id="valTopo" style="color: var(--accent-purple);">--</span></div>
+        <p style="font-size: 11px; color: var(--text-secondary); margin-top: 6px;">
+            原生秒針：<span id="txtClock">--</span><br>
+            SSOT 同化：<span id="txtTimestamp">--</span> | 脈衝心跳：<span id="txtHeartbeat" style="color: var(--accent-blue); font-weight: bold;">0</span> 次
+        </p>
+    </div>
+
+    <!-- 2. PINN 即時水文剛性門檻 2x2 網格[cite: 6] -->
+    <div class="card">
+        <div style="font-size: 13px; font-weight: 700; color: var(--accent-blue); margin-bottom: 6px;">1. PINN Engine 剛性水文門檻檢核</div>
+        <div class="metric-grid-2x2">
+            <div class="metric-box">
+                <label>碼頭波高 (Hs)</label>
+                <div class="val" id="valHs">-- m</div>
+                <div class="badge" id="badgeHs">同步中...</div>
+            </div>
+            <div class="metric-box">
+                <label>攻角風速 (Weff)</label>
+                <div class="val" id="valWeff">-- m/s</div>
+                <div class="badge" id="badgeWeff">同步中...</div>
+            </div>
+            <div class="metric-box">
+                <label>富餘水深 (UKC)</label>
+                <div class="val" id="valUKC">-- m</div>
+                <div class="badge" id="badgeUKC">同步中...</div>
+            </div>
+            <div class="metric-box">
+                <label>碼頭乾舷 (FB)</label>
+                <div class="val" id="valFB">-- m</div>
+                <div class="badge" id="badgeFB">同步中...</div>
+            </div>
         </div>
     </div>
 
-    <!-- 主內容區塊 -->
-    <div class="dashboard-main-layout">
-        
-        <!-- 左側戰術面板 -->
-        <div class="layout-left-tactical">
-            <!-- 1. PINN Engine 門檻 -->
-            <div class="card">
-                <div class="card-header">
-                    <span>1. PINN Engine 即時水文門檻</span>
-                    <span id="badgeDecision" style="background: #64748b; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px;">🔄 同步中...</span>
-                </div>
-                <div class="metric-grid-2x2">
-                    <div class="metric-box">
-                        <label>碼頭波高 (Hs)</label>
-                        <div class="value" id="valHs">-- m</div>
-                        <div class="metric-badge" id="badgeHs">同步中...</div>
-                    </div>
-                    <div class="metric-box">
-                        <label>區域風速 (W)</label>
-                        <div class="value" id="valWLocal">-- m/s</div>
-                        <div class="metric-badge" id="badgeWLocal">同步中...</div>
-                    </div>
-                    <div class="metric-box">
-                        <label>富餘水深 (UKC)</label>
-                        <div class="value" id="valUKC">-- m</div>
-                        <div class="metric-badge" id="badgeUKC">同步中...</div>
-                    </div>
-                    <div class="metric-box">
-                        <label>預留乾舷 (FB)</label>
-                        <div class="value" id="valFB">-- m</div>
-                        <div class="metric-badge" id="badgeFB">同步中...</div>
-                    </div>
-                </div>
-                <p style="font-size: 11px; color: var(--text-secondary); margin-top: 10px;">
-                    潮位 Eta：<span id="valTide">-- m</span> | 自適應 Alpha：<span id="valAlpha">--</span>
-                </p>
-            </div>
-
-            <!-- 2. 當日預警 -->
-            <div class="card">
-                <div class="card-header">2. 當日預警時窗與戰略總結</div>
-                <div class="time-window-list">
-                    <p>• <b>07:30 當日開島判別</b>：<span style="color: var(--status-pass); font-weight: bold;" id="txt0730Status">🟢 可開島</span></p>
-                    <p>• <b>10:50 / 13:50</b>：預警演練簡訊通報</p>
-                    <p>• <b>11:20 止登</b>：軟性封島【南岸碼頭】</p>
-                    <p>• <b>14:20 撤離</b>：從【南岸】全船撤離【烏石港】</p>
-                    <p style="margin-top: 4px;">• <b>16:30 明日開島預判</b>：<span style="color: var(--status-pass); font-weight: bold;" id="txt1630Status">🟢 預測開放</span></p>
-                </div>
-            </div>
-
-            <!-- 3. 游擊動態調度 -->
-            <div class="card" style="border-color: var(--status-warn);">
-                <div class="card-header" style="color: var(--status-warn);">3. ⚓ 游擊式動態調度與時窗預判</div>
-                <p style="font-size: 12px;">• 靠泊碼頭：<b id="txtBerthing" style="color: var(--accent-blue);">--</b></p>
-                <p style="font-size: 12px; margin-top: 4px;">• 撤離路線：<b id="txtEvac" style="color: #f8fafc;">--</b></p>
-                
-                <div class="dispatch-alert-box" id="txtTacticalSummary" style="color: #94a3b8; border-color: #334155; background: rgba(0,0,0,0.2);">
-                    📡 等待 SSOT 戰術矩陣數據連線...
-                </div>
-            </div>
-
-            <!-- 4. 即時水文監測 -->
-            <div class="card">
-                <div class="card-header"><span>4. 📍 南北岸即時水文監測</span></div>
-                <div style="font-size: 12px; line-height: 1.5;">
-                    <p style="color: #cbd5e1; font-weight: bold; margin-bottom: 4px;">📍 目前颱風與海象實測：</p>
-                    <p style="font-size: 11px; color: var(--text-secondary); margin-left: 6px; margin-bottom: 10px;">
-                        • 東南東 <span class="highlight-value">450 km</span> 中颱，中心氣壓 <span class="highlight-value">955 hPa</span>。<br>
-                        • W<sub>eff</sub> = <span class="highlight-value" id="valWeff">-- m/s</span> <span class="metric-badge" id="badgeWeff">--</span><br>
-                        • T<sub>p</sub> = <span class="highlight-value" id="valTp">-- s</span> (K<sub>d</sub> 港池共振穿透)
-                    </p>
-                    
-                    <p style="color: #cbd5e1; font-weight: bold;">🌊 南北岸水文比對：</p>
-                    <div class="table-responsive">
-                        <table class="hydro-table">
-                            <thead>
-                                <tr><th>項目</th><th>北岸 (主)</th><th>南岸 (權宜)</th></tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>風速</td>
-                                    <td><span class="highlight-value" id="valNorthW">--</span><br><span style="font-size:10px; color:#94a3b8;">(東北東風 65°)</span></td>
-                                    <td><span class="highlight-value" id="valSouthW">--</span><br><span style="font-size:10px; color:#94a3b8;">(偏東風 80°)</span></td>
-                                </tr>
-                                <tr>
-                                    <td>浪高</td>
-                                    <td><span class="highlight-value" id="valNorthHs">--</span><br><span class="metric-badge" id="badgeNorthHs">--</span></td>
-                                    <td><span class="highlight-value" id="valSouthHs">--</span><br><span class="metric-badge" id="badgeSouthHs">--</span></td>
-                                </tr>
-                                <tr>
-                                    <td>潮汐</td>
-                                    <td>
-                                        <span style="font-size:11px;">10:45 漲潮</span><br>
-                                        <span class="metric-badge" id="badgeNorthTide" style="margin-top:2px;">🔄 載入中</span>
-                                    </td>
-                                    <td>
-                                        <span style="font-size:11px;">10:40 漲潮</span><br>
-                                        <span class="metric-badge" id="badgeSouthTide" style="margin-top:2px;">🔄 載入中</span>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+    <!-- 3. 奇門一個月宏觀測預與四週水文訓化表[cite: 6] -->
+    <div class="card" style="border-color: var(--accent-purple);">
+        <div style="font-size: 13px; font-weight: 700; color: var(--accent-purple); margin-bottom: 6px;">🔮 奇門一個月宏觀測預與水文訓化表</div>
+        <p style="font-size: 10px; color: var(--text-secondary); margin-bottom: 6px;" id="txtQimenPrompt">同化載入中...</p>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr><th>戰術時窗</th><th>奇門與風壓</th><th>長浪與水動力</th><th>剛性裁決</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>第 1 週 (平順期)</td><td>休/開門 (和合)</td><td>Tp=7.5s / 小潮</td><td><span style="color: var(--status-pass);">🟢 PASS</span></td></tr>
+                    <tr><td>第 2 週 (季風期)</td><td>景/生門 (風陣)</td><td>Tp=10.5s / 大潮前</td><td><span style="color: var(--status-warn);">🟡 條件靠泊</span></td></tr>
+                    <tr><td>第 3 週 (颱風期)</td><td>死/驚門 (巽宮)</td><td>Tp=14.5s / 朔望潮</td><td><span style="color: var(--status-danger);">🔴 VETO</span></td></tr>
+                    <tr><td>第 4 週 (緩和期)</td><td>傷/杜門轉開門</td><td>Tp=9.0s / 中潮</td><td><span style="color: var(--status-pass);">🟢 恢復開島</span></td></tr>
+                </tbody>
+            </table>
         </div>
+    </div>
 
-        <!-- 右側圖表區塊 -->
-        <div class="layout-right-charts">
-            <div class="card">
-                <div class="card-header">時間線預測矩陣 (即時趨勢)</div>
-                <div class="chart-container-2x2">
-                    <div class="chart-box" id="chartHs"></div>
-                    <div class="chart-box" id="chartUKC"></div>
-                    <div class="chart-box" id="chartWind"></div>
-                    <div class="chart-box" id="chartTp"></div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">未來 7 天雙軸海象趨勢</div>
-                <div class="chart-box-large" id="chart7Days"></div>
-            </div>
-
-            <!-- 奇門與 Ground Truth 統合卡片 -->
-            <div class="card" style="border: 1px solid #a855f7; background: #181726;">
-                <div style="border-bottom: 1px solid var(--card-border); padding-bottom: 12px; margin-bottom: 14px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
-                        <span style="font-size: 15px; font-weight: 700; color: #c084fc;">🔮 奇門 30 天預測</span>
-                        <div style="display: flex; gap: 6px;">
-                            <span style="background: rgba(192, 132, 252, 0.2); color: #c084fc; padding: 2px 8px; border-radius: 4px; font-size: 11px; border: 1px solid #c084fc;">
-                                匹配率 <b id="valQimen">--%</b>
-                            </span>
-                        </div>
-                    </div>
-                    <div class="qimen-grid-2x2">
-                        <div class="qimen-item" style="border-left: 3px solid #facc15;">
-                            <div class="qimen-item-title">🌊 長浪穿透 (Swell)</div>
-                            <div style="color: #e2e8f0;">長浪穿透港池頻率達 <span class="highlight-value">68%</span>，觸發港池共振風險。</div>
-                        </div>
-                        <div class="qimen-item" style="border-left: 3px solid #f87171;">
-                            <div class="qimen-item-title">🌊 越浪與蓋頂</div>
-                            <div style="color: #e2e8f0;">自適應門檻已自動提早緊縮至 α = <span class="highlight-value" id="valAlphaQimen">--</span>。</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <div style="font-size: 13px; font-weight: 700; color: var(--accent-blue); margin-bottom: 8px;">📊 Ground Truth 方案評估</div>
-                    <div class="table-responsive">
-                        <table class="comparison-table">
-                            <thead><tr><th>方案</th><th>防線決策</th></tr></thead>
-                            <tbody>
-                                <tr><td>方案 A (官方)</td><td style="color: var(--status-pass);">放行靠泊</td></tr>
-                                <tr><td>方案 B (區域)</td><td style="color: var(--status-warn);">限制靠泊</td></tr>
-                                <tr class="highlight-row"><td style="color: #f87171;">方案 C (GEM-V36D)</td><td id="tableSchemeCDecision" style="color: #94a3b8;">🔄 載入中...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+    <!-- 4. 橫向時間區間表[cite: 6] -->
+    <div class="card">
+        <div style="font-size: 13px; font-weight: 700; color: var(--highlight-yellow); margin-bottom: 6px;">⚓ 游擊式動態調度時間區間表</div>
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr><th>時間區間</th><th>狀態燈號</th><th>戰術處置動作</th><th>靠泊/撤離位置</th></tr>
+                </thead>
+                <tbody id="tbodyHorizontalBar">
+                    <!-- 由 JavaScript textContent 純文字動態注入 -->
+                </tbody>
+            </table>
         </div>
     </div>
 
     <script>
-        let heartbeatCounter = 0;
-        function updateLiveClock() {
+        let heartbeatCount = 0;
+        
+        // 雙軌時鐘：原生 1000ms 設備時鐘[cite: 6]
+        function updateClock() {
             const now = new Date();
             const pad = (n) => String(n).padStart(2, '0');
-            document.getElementById('liveClock').textContent = 
-                `${now.getFullYear()}/${pad(now.getMonth() + 1)}/${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())} CST`;
-            
-            if (now.getSeconds() % 5 === 0) {
-                heartbeatCounter++;
-                document.getElementById('heartbeatCount').textContent = heartbeatCounter;
-            }
+            document.getElementById('txtClock').textContent = 
+                `${now.getFullYear()}/${pad(now.getMonth()+1)}/${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
         }
-        setInterval(updateLiveClock, 1000);
+        setInterval(updateClock, 1000);
 
-        // 初始化圖表
-        const initChart = (id, name, title, color, lineVal, unit, vetoCheck, chartData) => {
-            const chartDom = document.getElementById(id);
-            if(!chartDom) return null;
-            const chart = echarts.init(chartDom);
-            chart.setOption({
-                title: { text: title, textStyle: { color: '#94a3b8', fontSize: 11 } },
-                tooltip: { trigger: 'axis', formatter: (p) => `${p[0].name}<br/>${p[0].seriesName}: <b>${p[0].value} ${unit}</b>` },
-                grid: { top: 30, bottom: 20, left: 35, right: 15 },
-                xAxis: { type: 'category', data: ['08:00', '10:00', '12:00', '14:00', '16:00'], axisLabel: { fontSize: 9 } },
-                yAxis: { type: 'value', splitLine: { lineStyle: { color: '#1e293b' } }, axisLabel: { fontSize: 9 } },
-                series: [{ 
-                    name: name, type: 'line', smooth: true, data: chartData, 
-                    lineStyle: { color: color }, itemStyle: { color: color },
-                    markLine: { symbol: 'none', data: [{ yAxis: lineVal, lineStyle: { type: 'dashed', color: color } }] }
-                }]
-            });
-            window.addEventListener('resize', () => chart.resize());
-            return chart;
-        };
-
-        // 簡化圖表以適應手機版效能
-        initChart('chartHs', 'Hs', 'Hs 波高 (m)', '#ef4444', 1.20, 'm', null, [0.65, 0.85, 1.25, 1.10, 0.80]);
-        initChart('chartWind', 'Wind', 'Wind 風速 (m/s)', '#f59e0b', 10.80, 'm/s', null, [6.2, 7.5, 11.2, 9.8, 7.1]);
-        initChart('chartUKC', 'UKC', 'UKC 水深 (m)', '#10b981', 1.50, 'm', null, [7.2, 6.8, 5.2, 5.8, 6.9]);
-        initChart('chartTp', 'Tp', 'Tp 湧浪 (s)', '#c084fc', 12.0, 's', null, [6.5, 8.0, 12.5, 11.0, 8.2]);
-
-        // ==========================================
-        // SSOT 數據同化與動態更新 (完整修正邏輯)
-        // ==========================================
-        async function fetchSSOT() {
+        // SSOT 數據單向更新 (Data-Only SSOT)[cite: 6]
+        async function pollSSOT() {
             try {
-                // 模擬 Fetch 行為或正式串接
-                const response = await fetch(`latest_decision.json?t=${Date.now()}`);
+                const response = await fetch(`latest_decision.json?_t=${Date.now()}`, { cache: 'no-store' });
                 if (!response.ok) return;
                 const data = await response.json();
 
-                const safeFix = (val, def=0) => Number(val ?? def).toFixed(2);
+                heartbeatCount++;
+                document.getElementById('txtHeartbeat').textContent = heartbeatCount;
+                document.getElementById('txtTimestamp').textContent = data.timestamp || '--';
+
+                const phys = data.physics_metrics || {};
                 const isVeto = data.hard_veto_alert || false;
 
-                // --- 1. 頂部全局狀態綁定 ---
-                document.getElementById('ssotTimestamp').textContent = data.timestamp?.split(' ')[1] || '--';
-                
-                const statusBadge = document.getElementById('ssotStatusBadge');
-                const headerMaster = document.getElementById('headerMaster');
-                if (isVeto) {
-                    statusBadge.textContent = '🔴 0.0% [物理 VETO 熔斷]';
-                    statusBadge.style.color = '#ef4444';
-                    headerMaster.style.borderLeftColor = '#ef4444';
-                } else {
-                    statusBadge.textContent = '🟢 100.0% [同化 PASS]';
-                    statusBadge.style.color = '#10b981';
-                    headerMaster.style.borderLeftColor = '#10b981';
-                }
+                // 全局 VETO Banner[cite: 6]
+                document.getElementById('vetoBannerMob').style.display = isVeto ? 'block' : 'none';
 
-                // --- 2. 解析後端物理數據與動態門檻 ---
-                const physics = data.physics_metrics || {};
-                
-                // 動態門檻讀取 (Fail-Safe: 缺漏時給予預設剛性值)
-                const effHsLimit = (physics.eff_hs_limit ?? 1.20).toFixed(2);
-                const effWLimit = (physics.eff_weff_limit ?? 10.80).toFixed(2);
-                const effUKCLimit = (physics.eff_ukc_limit ?? 1.50).toFixed(2);
-                const effFBLimit = (physics.eff_fb_limit ?? 0.50).toFixed(2);
+                // 純文字寫入 (Zero-Reflow textContent)[cite: 6]
+                document.getElementById('valHs').textContent = `${phys.hs_pier_m ?? '--'} m`;
+                document.getElementById('valWeff').textContent = `${phys.w_eff_ms ?? '--'} m/s`;
+                document.getElementById('valUKC').textContent = `${phys.ukc_m ?? '--'} m`;
+                document.getElementById('valFB').textContent = `${phys.fb_pier_m ?? '--'} m`;
 
-                // 布林值讀取 (完全捨棄前端自己寫死的比對)
-                const isPassHs = physics.pass_hs ?? true;
-                const isPassW = physics.pass_w ?? true;
-                const isPassUKC = physics.pass_ukc ?? true;
-                const isPassFB = physics.pass_fb ?? true;
+                const updateBadge = (id, isPass, passText, failText) => {
+                    const el = document.getElementById(id);
+                    el.className = isPass ? 'badge badge-pass' : 'badge badge-veto';
+                    el.textContent = isPass ? passText : failText;
+                };
 
-                // 填入實測數值
-                document.getElementById('valHs').textContent = `${safeFix(physics.hs_pier_m)} m`;
-                document.getElementById('valWLocal').textContent = `${safeFix(physics.w_local_ms)} m/s`;
-                document.getElementById('valUKC').textContent = `${safeFix(physics.ukc_m)} m`;
-                document.getElementById('valFB').textContent = `${safeFix(physics.fb_pier_m)} m`;
-                
-                const alphaVal = safeFix(physics.alpha_adaptive, 0.85);
-                document.getElementById('valAlpha').textContent = alphaVal;
-                document.getElementById('valAlphaQimen').textContent = alphaVal;
+                updateBadge('badgeHs', phys.pass_hs, '🟢 PASS', '🔴 VETO');
+                updateBadge('badgeWeff', phys.pass_w, '🟢 PASS', '🔴 VETO');
+                updateBadge('badgeUKC', phys.pass_ukc, '🟢 PASS', '🔴 VETO');
+                updateBadge('badgeFB', phys.pass_fb, '🟢 PASS', '🔴 VETO');
 
-                // --- 3. 依據後端布林值渲染 4 大水文燈號 ---
-                const badgeHs = document.getElementById('badgeHs');
-                badgeHs.className = isPassHs ? 'metric-badge badge-pass' : 'metric-badge badge-veto';
-                badgeHs.textContent = isPassHs ? `PASS (≤${effHsLimit}m)` : `FAIL (>${effHsLimit}m)`;
+                // 奇門參研 Prompt[cite: 6]
+                const qimen = data.qimen_macro_consensus || {};
+                document.getElementById('txtQimenPrompt').textContent = qimen.qimen_status_prompt || '--';
 
-                const badgeW = document.getElementById('badgeWLocal');
-                badgeW.className = isPassW ? 'metric-badge badge-pass' : 'metric-badge badge-veto';
-                badgeW.textContent = isPassW ? `PASS (≤${effWLimit}m/s)` : `FAIL (>${effWLimit}m/s)`;
-
-                const badgeUKC = document.getElementById('badgeUKC');
-                badgeUKC.className = isPassUKC ? 'metric-badge badge-pass' : 'metric-badge badge-veto';
-                badgeUKC.textContent = isPassUKC ? `PASS (≥${effUKCLimit}m)` : `FAIL (<${effUKCLimit}m)`;
-
-                const badgeFB = document.getElementById('badgeFB');
-                badgeFB.className = isPassFB ? 'metric-badge badge-pass' : 'metric-badge badge-veto';
-                badgeFB.textContent = isPassFB ? `PASS (≥${effFBLimit}m)` : `FAIL (<${effFBLimit}m)`;
-
-                // --- 4. 綁定 Weff 與 Tp ---
-                const weffVal = Number(physics.w_eff_ms ?? 0);
-                const tpVal = Number(physics.tp_s ?? 0);
-                document.getElementById('valWeff').textContent = `${weffVal.toFixed(2)} m/s`;
-                document.getElementById('valTp').textContent = `${tpVal.toFixed(1)} s`;
-                
-                const badgeWeff = document.getElementById('badgeWeff');
-                badgeWeff.className = isPassW ? 'metric-badge badge-pass' : 'metric-badge badge-veto';
-                badgeWeff.textContent = isPassW ? '🟢 PASS' : '🔴 VETO';
-
-                // --- 5. 全局狀態同步 (State Cascade 覆蓋子組件) ---
-                const badgeDecision = document.getElementById('badgeDecision');
-                badgeDecision.textContent = isVeto ? '🔴 封島/防颱' : '🟢 放行靠泊';
-                badgeDecision.style.background = isVeto ? '#ef4444' : '#10b981';
-                
-                const schemeCDecision = document.getElementById('tableSchemeCDecision');
-                schemeCDecision.textContent = isVeto ? '🔴 Hard VETO 剛性熔斷' : '🟢 放行靠泊';
-                schemeCDecision.style.color = isVeto ? '#ef4444' : '#10b981';
-
-                // --- 6. 南北岸動態表格更新 ---
-                const northHs = Number(physics.north_pier?.hs_m ?? 3.71);
-                const southHs = Number(physics.south_pier?.hs_m ?? 1.85);
-                document.getElementById('valNorthW').textContent = `${safeFix(physics.north_pier?.w_ms, 6.63)} m/s`;
-                document.getElementById('valSouthW').textContent = `${safeFix(physics.south_pier?.w_ms, 5.20)} m/s`;
-                document.getElementById('valNorthHs').textContent = `${northHs.toFixed(2)} m`;
-                document.getElementById('valSouthHs').textContent = `${southHs.toFixed(2)} m`;
-
-                const bgNHs = document.getElementById('badgeNorthHs');
-                bgNHs.className = northHs > effHsLimit ? 'metric-badge badge-veto' : 'metric-badge badge-pass';
-                bgNHs.textContent = northHs > effHsLimit ? '🔴 超標' : '🟢 PASS';
-
-                const bgSHs = document.getElementById('badgeSouthHs');
-                bgSHs.className = southHs > effHsLimit ? 'metric-badge badge-warn' : 'metric-badge badge-pass';
-                bgSHs.textContent = southHs > effHsLimit ? '🟡 警戒' : '🟢 PASS';
-
-                // --- 7. 潮汐動態燈號檢核 ---
-                const tideEta = Number(physics.tide_eta_m ?? 1.00);
-                let tideBadgeClass = 'metric-badge badge-pass';
-                let tideBadgeText = '🟢 潮位正常';
-                
-                if (tideEta >= 1.20) {
-                    tideBadgeClass = 'metric-badge badge-warn'; tideBadgeText = '🟡 滿潮越浪警戒';
-                } else if (tideEta <= 0.20) {
-                    tideBadgeClass = 'metric-badge badge-warn'; tideBadgeText = '🟡 低潮觸底警戒';
-                }
-
-                document.getElementById('badgeNorthTide').className = tideBadgeClass;
-                document.getElementById('badgeNorthTide').textContent = tideBadgeText;
-                document.getElementById('badgeSouthTide').className = tideBadgeClass;
-                document.getElementById('badgeSouthTide').textContent = tideBadgeText;
-
-                // --- 8. 戰術與文案更新 ---
+                // 橫向時間區間表渲染[cite: 6]
                 const guerrilla = data.guerrilla_dispatch || {};
-                document.getElementById('txtBerthing').textContent = guerrilla.berthing_pier || '【南岸權宜碼頭】';
-                document.getElementById('txtEvac').textContent = guerrilla.evacuation_pier || '【南岸】 -> 返航【烏石港】';
-                
-                const txtSummary = document.getElementById('txtTacticalSummary');
-                txtSummary.textContent = guerrilla.tactical_summary || '📌 游擊處置決策更新完成。';
-                txtSummary.style.cssText = ''; 
-                if (isVeto) txtSummary.classList.add('veto-style');
-                else txtSummary.classList.remove('veto-style');
+                const barChart = guerrilla.horizontal_bar_chart || [];
+                const tbody = document.getElementById('tbodyHorizontalBar');
+                tbody.innerHTML = ''; // 清空重新渲染
 
-                // 雜項：Level 5 與 奇門
-                document.getElementById('valCV').textContent = `${safeFix(data.level5_advanced_metrics?.vision_overtopping_rate_pmin, 1.31)} p/m`;
-                document.getElementById('valSquat').textContent = `${safeFix(physics.s_quat_m, 0.82)} m`;
-                document.getElementById('valFNO').textContent = `${safeFix(data.level5_advanced_metrics?.fno_forecast_mean_hs_m, 1.58)} m`;
-                document.getElementById('valTopo').textContent = safeFix(data.level5_advanced_metrics?.quantum_topology_coherence, 0.47);
-                document.getElementById('valQimen').textContent = `${safeFix(data.qimen_macro_consensus?.consensus_rate_pct, 100.0)}%`;
-
-                // VETO Banner
-                const vetoBanner = document.getElementById('vetoBanner');
-                if (isVeto) {
-                    vetoBanner.style.display = 'block'; vetoBanner.style.background = '#ef4444';
-                    vetoBanner.textContent = '🚨 警示：實體觸發物理 VETO 熔斷，強制執行防颱封島管制！';
-                } else {
-                    vetoBanner.style.display = 'none';
-                }
+                barChart.forEach(item => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><b>${item.time_range}</b></td>
+                        <td>${item.status_badge}</td>
+                        <td>${item.action}</td>
+                        <td>${item.location}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
 
             } catch (err) {
-                console.warn("SSOT 讀取異常:", err);
+                console.warn("SSOT 輪詢異常:", err);
             }
         }
 
-        setInterval(fetchSSOT, 5000);
-        // 初始化呼叫
-        setTimeout(fetchSSOT, 500);
+        setInterval(pollSSOT, 10000); // 10秒 SSOT 異步數據綁定[cite: 6]
+        setTimeout(pollSSOT, 500);
     </script>
 </body>
 </html>
