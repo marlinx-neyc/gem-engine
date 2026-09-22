@@ -4,12 +4,6 @@
 ================================================================================
 GEM-V36D 龜山島海象氣-數值分析、周易易數同化與 SSOT 最高統合系統 (v36D.330.0 Master Complete)
 ================================================================================
-核心特徵：
-1. 第一位階 100% 硬阻斷權：四層 Hard VETO 剛性物理防線 (Hs_pier, Weff, UKC, FB_pier)。
-2. 第二位階 最大 35% 偏置：周易象數與奇門 70% 門控同化 (Q_consensus >= 70.0% 时 alpha_tune 降至 0.65)。
-3. 内建 SSOT 哨兵自愈檢核 (Built-in Active Auto-Healing Guard)，確保產出的 latest_decision.json 零矛盾。
-4. Gymnasium 10D 狀態向量強化學習代理人 (RL Policy Net) 零延遲硬掩碼熔斷。
-================================================================================
 """
 
 import math
@@ -27,12 +21,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
-
-# ==============================================================================
-# 1. 安全數值解析算子
-# ==============================================================================
 def safe_float(val: Any, default: float) -> float:
-    """防範外部 API 或遙測數據回傳 null, None, '-' 或異常字串引發系統崩潰"""
     if val is None:
         return default
     try:
@@ -41,10 +30,6 @@ def safe_float(val: Any, default: float) -> float:
     except (ValueError, TypeError):
         return default
 
-
-# ==============================================================================
-# 2. 海事安全遙測與視訊 AI 資料結構
-# ==============================================================================
 @dataclass
 class MarineSafetyData:
     hs_cwa: float              # 官方 CWA 外海有效波高 (m)
@@ -90,12 +75,7 @@ class MarineSafetyData:
             official_closure_status=safe_float(raw_data.get("official_closure_status"), 0.0)
         )
 
-
-# ==============================================================================
-# 3. 水靜壓避險與撤離時間精算算子
-# ==============================================================================
 def calculate_hydrothermal_risk_window(high_tide_str: str) -> Dict[str, Any]:
-    """精算東側牛奶海高溫強酸羽狀流避險視窗 T_peak = T_HighTide + 3.5h"""
     try:
         high_tide_dt = datetime.datetime.strptime(high_tide_str, "%Y-%m-%d %H:%M:%S")
         peak_dt = high_tide_dt + datetime.timedelta(hours=3.5)
@@ -118,18 +98,12 @@ def calculate_hydrothermal_risk_window(high_tide_str: str) -> Dict[str, Any]:
             "warning": "潮汐預設同化視窗：強酸水團擴散峰值期 (10:30 - 13:30) 避險，保持 500m 安全距離"
         }
 
-
 def calculate_evacuation_time(passenger_count: int, s_squat_m: float) -> int:
-    """撤離時間軸算定公式 Evac = ceil(Passenger_Count / 15 + max(0, (S_squat - 0.50) * 15) + 15) 分鐘"""
     term1 = passenger_count / 15.0
     term2 = max(0.0, (s_squat_m - 0.50) * 15.0)
     term3 = 15.0
     return math.ceil(term1 + term2 + term3)
 
-
-# ==============================================================================
-# 4. 四層 Hard VETO 剛性水文門檻與 Level 7 水動力矩陣引擎
-# ==============================================================================
 class PhysicsEngine:
     HARD_HS_MAX = 1.20       # m
     HARD_WEFF_MAX = 10.80    # m/s
@@ -202,10 +176,6 @@ class PhysicsEngine:
             "south_pier_status": "[🔴 VETO]" if south_pier_hs > eff_hs_limit else "[🟢 PASS]"
         }
 
-
-# ==============================================================================
-# 5. 奇門 70% 門控同化算子
-# ==============================================================================
 class QimenAssimilationEngine:
     QIMEN_THRESHOLD = 70.0
 
@@ -239,128 +209,9 @@ class QimenAssimilationEngine:
             "prompt": prompt
         }
 
-
-# ==============================================================================
-# 6. Level 5 高維邊緣算子
-# ==============================================================================
-class Level5AdvancedOperators:
-    @staticmethod
-    def compute_all(data: MarineSafetyData, hs_pier: float) -> Dict[str, Any]:
-        vision_overtopping = round(max(data.video_overtopping_rate, 1.20 + (hs_pier * 0.03) if hs_pier > 1.20 else 0.0), 2)
-        fno_hs_mean = round(data.hs_cwa, 2)
-        coherence = round(0.35 + (data.qimen_consensus_pct / 100.0) * 0.1182, 4)
-
-        vessel_info = {
-            "vessel_name": "凱鯨號 (穿浪雙體船)",
-            "vessel_type": "CATAMARAN",
-            "dynamic_squat_m": data.s_quat_m,
-            "roll_deg": 3.3,
-            "pitch_deg": 4.4
-        }
-
-        swarm_plan = [
-            {
-                "agent_id": 1,
-                "vessel_label": "凱鯨號 (Agent 1)",
-                "assigned_pier": "無 (雙岸失效)" if hs_pier > 1.20 else "【北岸碼頭】",
-                "tactical_action": "直航返航烏石港" if hs_pier > 1.20 else "正常靠泊"
-            }
-        ]
-
-        return {
-            "vision_overtopping_rate_pmin": vision_overtopping,
-            "vision_kd_bias": data.video_kd_bias,
-            "vessel_hydrodynamics": vessel_info,
-            "fno_forecast_mean_hs_m": fno_hs_mean,
-            "quantum_topology_coherence": coherence,
-            "swarm_dispatch_plan": swarm_plan
-        }
-
-
-# ==============================================================================
-# 7. Gymnasium 10D 強化學習代理人
-# ==============================================================================
-class GymnasiumGuerrillaEnv:
-    def __init__(self):
-        self.state_dim = 10
-        self.action_dim = 4
-
-    def build_state_vector(self, data: MarineSafetyData, physics: Dict[str, Any]) -> np.ndarray:
-        swell_ratio = min(1.0, data.tp_s / 16.0)
-        return np.array([
-            physics["hs_pier_m"],
-            physics["w_local_ms"],
-            physics["ukc_m"],
-            physics["fb_pier_m"],
-            data.tp_s,
-            data.delta_theta_deg,
-            swell_ratio,
-            data.s_cos_sim,
-            data.tide_eta_m,
-            physics["kd"]
-        ], dtype=np.float32)
-
-
-class GuerrillaRLPolicyNet(nn.Module):
-    def __init__(self, state_dim: int = 10, action_dim: int = 4):
-        super().__init__()
-        self.fc = nn.Sequential(
-            nn.Linear(state_dim, 64),
-            nn.SiLU(),
-            nn.Linear(64, 32),
-            nn.SiLU(),
-            nn.Linear(32, action_dim)
-        )
-
-    def select_action_with_mask(self, state_vec: np.ndarray, has_veto: bool) -> Tuple[int, float]:
-        state_t = torch.tensor(state_vec, dtype=torch.float32).unsqueeze(0)
-        logits = self.fc(state_t)
-
-        if has_veto:
-            mask = torch.tensor([[-9999.0, -9999.0, -9999.0, 100.0]], dtype=torch.float32)
-            logits = logits + mask
-
-        probs = F.softmax(logits, dim=-1)
-        action = int(torch.argmax(probs, dim=-1).item())
-        reward = 100.0 if (has_veto and action == 3) else (150.0 if not has_veto and action == 0 else -9999.0)
-        return action, reward
-
-
-def train_rl_agent(policy_net: GuerrillaRLPolicyNet, episodes: int = 30):
-    optimizer = optim.Adam(policy_net.parameters(), lr=0.001)
-    env = GymnasiumGuerrillaEnv()
-
-    for _ in range(episodes):
-        sim_hs = np.random.uniform(0.5, 4.5)
-        sim_w = np.random.uniform(3.0, 15.0)
-        sim_data = MarineSafetyData(
-            hs_cwa=sim_hs, w_cwa=sim_w, tp_s=np.random.uniform(8.0, 16.0),
-            delta_theta_deg=np.random.uniform(0, 90), tide_eta_m=1.0, d_draft_m=1.2,
-            s_quat_m=0.82, chart_depth_m=8.5, current_speed_kts=1.5, qimen_consensus_pct=100.0,
-            s_cos_sim=0.9421, high_tide_time_str="2026-09-23 12:00:00"
-        )
-        physics = PhysicsEngine.evaluate_veto(sim_data)
-        state_vec = env.build_state_vector(sim_data, physics)
-
-        action, reward = policy_net.select_action_with_mask(state_vec, physics["has_veto"])
-
-        state_t = torch.tensor(state_vec, dtype=torch.float32).unsqueeze(0)
-        logits = policy_net.fc(state_t)
-        target = torch.tensor([action], dtype=torch.long)
-        loss = F.cross_entropy(logits, target) * (-reward / 100.0)
-
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-
-# ==============================================================================
-# 8. 內建哨兵自愈與巡檢模組
-# ==============================================================================
 class SSOTAuditGuard:
     @staticmethod
     def inspect_and_heal(payload: dict) -> Tuple[dict, bool]:
-        """強行檢查並修復 Payload 中的文字與狀態矛盾，確保全域 SSOT 100% 一致"""
         healed = False
         physics = payload.get("physics_metrics", {})
         dispatch = payload.get("guerrilla_dispatch", {})
@@ -401,16 +252,7 @@ class SSOTAuditGuard:
         payload["guerrilla_dispatch"] = dispatch
         return payload, healed
 
-
-# ==============================================================================
-# 9. TG 游擊戰術最高統合執行調度器
-# ==============================================================================
 class TGGuerrillaMasterEngine:
-    def __init__(self):
-        self.rl_env = GymnasiumGuerrillaEnv()
-        self.rl_policy = GuerrillaRLPolicyNet()
-        train_rl_agent(self.rl_policy, episodes=30)
-
     def execute(self, telemetry_input: dict) -> dict:
         telemetry = MarineSafetyData.from_api_json(telemetry_input)
         cst_tz = timezone(timedelta(hours=8))
@@ -426,10 +268,6 @@ class TGGuerrillaMasterEngine:
             telemetry.qimen_consensus_pct, telemetry.tp_s, telemetry.delta_theta_deg, physics_res["has_veto"]
         )
 
-        state_vec = self.rl_env.build_state_vector(telemetry, physics_res)
-        action, rl_reward = self.rl_policy.select_action_with_mask(state_vec, physics_res["has_veto"])
-
-        level5_res = Level5AdvancedOperators.compute_all(telemetry, physics_res["hs_pier_m"])
         hydrothermal_info = calculate_hydrothermal_risk_window(telemetry.high_tide_time_str)
         evac_minutes = calculate_evacuation_time(telemetry.passenger_count, telemetry.s_quat_m)
 
@@ -501,13 +339,6 @@ class TGGuerrillaMasterEngine:
             },
             "three_schemes_comparison": three_schemes,
             "trend_forecast_3d": trend_forecast_3d,
-            "level5_advanced_metrics": level5_res,
-            "rl_agent_diagnostics": {
-                "state_vector_10d": state_vec.tolist(),
-                "action_selected": action,
-                "reward_score": rl_reward,
-                "latency_ms": 12.4
-            },
             "qimen_macro_consensus": {
                 "consensus_rate_pct": telemetry.qimen_consensus_pct,
                 "macro_advisory_enabled": qimen_res["enabled"],
@@ -516,28 +347,18 @@ class TGGuerrillaMasterEngine:
             }
         }
 
-        healed_payload, was_repaired = SSOTAuditGuard.inspect_and_heal(payload)
-        if was_repaired:
-            print("🛠️ [哨兵自愈] 偵測到邏輯不一致，已於生成過程中自動對齊修復。")
-
+        healed_payload, _ = SSOTAuditGuard.inspect_and_heal(payload)
         return healed_payload
 
     def export_ssot_json(self, payload: dict, filepath: str = "latest_decision.json"):
         with open(filepath, "w", encoding="utf-8") as f:
             json.dump(payload, f, ensure_ascii=False, indent=2)
-        print(f"✅ [SSOT 導出成功] 已寫入無矛盾 SSOT Payload -> {filepath}")
-
 
 if __name__ == "__main__":
     sample_telemetry = {
-        "hs_cwa": 3.71,
-        "w_cwa": 8.50,
-        "tp_s": 15.5,
-        "delta_theta_deg": 50.0,
-        "qimen_consensus_pct": 100.0,
-        "high_tide_time_str": "2026-09-23 12:00:00"
+        "hs_cwa": 3.71, "w_cwa": 8.50, "tp_s": 15.5, "delta_theta_deg": 50.0,
+        "qimen_consensus_pct": 100.0, "high_tide_time_str": "2026-09-23 12:00:00"
     }
-
     engine = TGGuerrillaMasterEngine()
-    decision_result = engine.execute(sample_telemetry)
-    engine.export_ssot_json(decision_result, "latest_decision.json")
+    result = engine.execute(sample_telemetry)
+    engine.export_ssot_json(result, "latest_decision.json")
