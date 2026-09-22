@@ -18,7 +18,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: -apple-system, sans-serif; background-color: var(--bg-color); color: var(--text-primary); padding: 20px; font-variant-numeric: tabular-nums; overflow-x: hidden; }
         
-        .dashboard-header-master { width: 100%; height: 120px; background: var(--card-bg); border-radius: 12px; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--card-border); border-left: 6px solid #64748b; transition: border-color 0.3s; }
+        .dashboard-header-master { width: 100%; height: 120px; background: var(--card-bg); border-radius: 12px; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--card-border); border-left: 6px solid #64748b; transition: border-color 0.3s; contain: content; }
         .header-title-box h1 { font-size: 20px; font-weight: 700; color: #f8fafc; display: flex; align-items: center; gap: 10px; }
         .header-title-box p { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
         .blue-pulse-dot { display: inline-block; width: 10px; height: 10px; background-color: var(--accent-blue); border-radius: 50%; box-shadow: 0 0 8px var(--accent-blue); animation: pulseBlue 2s infinite; }
@@ -39,7 +39,7 @@
         .layout-left-tactical { flex: 0 0 35%; max-width: 35%; display: flex; flex-direction: column; gap: 15px; }
         .layout-right-charts { flex: 0 0 65%; max-width: 65%; display: flex; flex-direction: column; gap: 15px; }
 
-        .card { background: var(--card-bg); padding: 18px; border-radius: 12px; border: 1px solid var(--card-border); }
+        .card { background: var(--card-bg); padding: 18px; border-radius: 12px; border: 1px solid var(--card-border); contain: content; }
         .card-header { font-size: 14px; font-weight: 700; color: var(--accent-blue); margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border); padding-bottom: 8px; }
         
         .metric-grid-2x2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -102,6 +102,7 @@
     </div>
 
     <div class="dashboard-main-layout">
+        <!-- 左側戰術控制面板 (35%) -->
         <div class="layout-left-tactical">
             <div class="card">
                 <div class="card-header">
@@ -206,6 +207,7 @@
             </div>
         </div>
 
+        <!-- 右側圖表與奇門矩陣面板 (65%) -->
         <div class="layout-right-charts">
             <div class="card">
                 <div class="card-header">2x2 時間線預測矩陣 (ECharts 圖例 + 全警戒線 + Hover 燈號)</div>
@@ -333,16 +335,16 @@
         });
 
         // ==========================================
-        // SSOT 數據同化與動態更新 (完整修復版本)
+        // SSOT 數據同化與動態更新 (規格合規高可靠版)
         // ==========================================
         async function fetchSSOT() {
             try {
-                const response = await fetch(`latest_decision.json?t=${Date.now()}`);
+                const response = await fetch(`latest_decision.json?_t=${Date.now()}`, { cache: 'no-store' });
                 if (!response.ok) return;
                 const data = await response.json();
 
                 const safeFix = (val, def=0.0) => Number(val ?? def).toFixed(2);
-                const isVeto = data.hard_veto_alert || false;
+                const isVeto = data.hard_veto_alert || (data.physics_metrics && data.physics_metrics.has_veto) || false;
 
                 let ssotTime = data.timestamp ? new Date(data.timestamp.replace(' CST', '')).getTime() : 0;
                 let timeDiffSec = ssotTime > 0 ? Math.abs(Date.now() - ssotTime) / 1000 : 0;
@@ -373,11 +375,11 @@
                 const ukcVal = Number(physics.ukc_m ?? 7.28);
                 const fbVal = Number(physics.fb_pier_m ?? 2.00);
 
-                // --- 強制讀取後端布林值與動態門檻 ---
-                const isPassHs = physics.pass_hs ?? true;
-                const isPassW = physics.pass_w ?? true;
-                const isPassUKC = physics.pass_ukc ?? true;
-                const isPassFB = physics.pass_fb ?? true;
+                // 強制讀取後端布林值與動態門檻
+                const isPassHs = physics.pass_hs ?? (hsVal <= 1.20);
+                const isPassW = physics.pass_w ?? (wVal <= 10.80);
+                const isPassUKC = physics.pass_ukc ?? (ukcVal >= 1.50);
+                const isPassFB = physics.pass_fb ?? (fbVal >= 0.50);
 
                 const effHsLimit = (physics.eff_hs_limit ?? 1.20).toFixed(2);
                 const effWLimit = (physics.eff_weff_limit ?? 10.80).toFixed(2);
@@ -411,7 +413,7 @@
                 badgeFB.className = isPassFB ? 'metric-badge badge-pass' : 'metric-badge badge-veto';
                 badgeFB.textContent = isPassFB ? `PASS (≥${effFBLimit}m)` : `FAIL (<${effFBLimit}m)`;
 
-                // --- 綁定 Weff 與 Tp 實測數據 ---
+                // 繫結 Weff 與 Tp 實測數據
                 const weffVal = Number(physics.w_eff_ms ?? 0);
                 const tpVal = Number(physics.tp_s ?? 0);
                 document.getElementById('valWeff').textContent = `${weffVal.toFixed(2)} m/s`;
@@ -423,7 +425,7 @@
                     badgeWeff.textContent = isPassW ? '🟢 PASS' : '🔴 VETO';
                 }
 
-                // --- 全局狀態同步 (State Cascade) ---
+                // 全局狀態同步 (State Cascade)
                 const badgeDecision = document.getElementById('badgeDecision');
                 badgeDecision.textContent = isVeto ? '🔴 熔斷禁止靠泊' : (data.decision || '🟢 放行靠泊');
                 badgeDecision.style.background = isVeto ? '#ef4444' : '#10b981';
@@ -450,7 +452,7 @@
                 bgSHs.className = southHs > effHsLimit ? (southHs > 2.5 ? 'metric-badge badge-veto' : 'metric-badge badge-warn') : 'metric-badge badge-pass';
                 bgSHs.textContent = southHs > effHsLimit ? '🟡 警戒中' : '🟢 PASS';
 
-                // --- 潮汐變化動態燈號檢核 ---
+                // 潮汐變化動態燈號檢核
                 const tideEta = Number(physics.tide_eta_m ?? 1.00);
                 let tideBadgeClass = 'metric-badge badge-pass';
                 let tideBadgeText = '🟢 潮位正常';
