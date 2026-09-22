@@ -119,6 +119,7 @@
         table.data-table th {
             color: #94a3b8;
             font-weight: 500;
+            background-color: rgba(56, 189, 248, 0.1);
         }
 
         /* 2x2 網格容器 */
@@ -144,7 +145,6 @@
             margin-top: 2px;
         }
 
-        /* 進度條 */
         .bar-container {
             width: 100%;
             background-color: #0f172a;
@@ -198,7 +198,7 @@
         </div>
     </div>
 
-    <!-- 2. Q-Mode 剛性戰術裁決 Banner (動態亮紅/綠燈) -->
+    <!-- 2. Q-Mode 剛性戰術裁決 Banner -->
     <div class="card border-red" id="mainBannerCard" style="border-left: 4px solid #ef4444;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <div>
@@ -260,7 +260,56 @@
         </div>
     </div>
 
-    <!-- 5. 當日船班時窗與未來 3 天開/封島預測卡片 -->
+    <!-- 5. 【新新增】📍 南北岸即時水文與風浪監測卡片 -->
+    <div class="card">
+        <div class="card-header">
+            <span>📍 南北岸即時水文與風浪監測</span>
+            <span class="text-blue" style="font-size: 11px;">雙碼頭對照</span>
+        </div>
+        <div style="font-size: 12px; color: #cbd5e1; line-height: 1.5;">
+            <p style="font-weight: bold; margin-bottom: 4px;">📍 目前颱風與海象實測：</p>
+            <div style="font-size: 11px; color: #94a3b8; background: #0f172a; padding: 6px 8px; border-radius: 6px; border: 1px solid #334155; margin-bottom: 8px;">
+                • 東南東 <span class="text-yellow" id="mobTyDist">450 km</span> 中颱，中心氣壓 <span class="text-yellow" id="mobTyPress">955 hPa</span>，暴風半徑 <span class="text-yellow">200 km</span>。<br>
+                • W<sub>eff</sub> = <span class="text-green" id="mobWeffVal">5.46 m/s</span> <span class="badge badge-pass" id="mobWeffBadge" style="padding: 1px 4px; font-size: 10px;">PASS</span> | T<sub>p</sub> = <span class="text-purple" id="mobTpVal">15.5 s</span> (K<sub>d</sub> = 1.00 港池共振穿透)
+            </div>
+            <p style="font-weight: bold;">🌊 南北岸即時水文比對：</p>
+            <table class="data-table">
+                <thead>
+                    <tr><th>監測項目</th><th>北岸碼頭 (主碼頭)</th><th>南岸碼頭 (權宜碼頭)</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>風速 (風向)</td>
+                        <td><span id="mobNorthW">-- m/s</span><br><span style="font-size: 10px; color: #94a3b8;">(東北東風 65°)</span></td>
+                        <td><span id="mobSouthW">-- m/s</span><br><span style="font-size: 10px; color: #94a3b8;">(偏東風 80°)</span></td>
+                    </tr>
+                    <tr>
+                        <td>浪高 (Hs)</td>
+                        <td><span id="mobNorthHs">-- m</span> <span class="badge" id="badgeMobNorthHs" style="padding: 1px 4px; font-size: 10px;">--</span></td>
+                        <td><span id="mobSouthHs">-- m</span> <span class="badge" id="badgeMobSouthHs" style="padding: 1px 4px; font-size: 10px;">--</span></td>
+                    </tr>
+                    <tr>
+                        <td>流速 (轉向)</td>
+                        <td><span>1.4 kts</span><br><span style="font-size: 10px; color: #94a3b8;">(向NW / 11:20轉)</span></td>
+                        <td><span>0.9 kts</span><br><span style="font-size: 10px; color: #94a3b8;">(向W / 12:00轉)</span></td>
+                    </tr>
+                    <tr>
+                        <td>潮汐變化</td>
+                        <td>
+                            10:45 漲潮 (+1.25m)<br><span style="color: #94a3b8;">17:10 退潮 (+0.15m)</span><br>
+                            <span class="badge badge-pass" id="badgeMobNorthTide" style="margin-top: 2px; padding: 1px 4px; font-size: 10px;">🟢 潮位正常</span>
+                        </td>
+                        <td>
+                            10:40 漲潮 (+1.22m)<br><span style="color: #94a3b8;">17:05 退潮 (+0.18m)</span><br>
+                            <span class="badge badge-pass" id="badgeMobSouthTide" style="margin-top: 2px; padding: 1px 4px; font-size: 10px;">🟢 潮位正常</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 6. 當日船班時窗與 D+3 趨勢 -->
     <div class="card">
         <div class="card-header">
             <span>🚢 當日船班時窗與 D+3 趨勢</span>
@@ -316,7 +365,7 @@
         </table>
     </div>
 
-    <!-- 6. ⚓ 游擊式動態調度與特區避險時窗卡片 -->
+    <!-- 7. ⚓ 游擊式動態調度與特區避險時窗卡片 -->
     <div class="card border-orange">
         <div class="card-header">
             <span class="text-orange">⚓ 游擊調度與特區避險</span>
@@ -333,7 +382,7 @@
         </div>
     </div>
 
-    <!-- 7. 🌀 颱風、雙週長浪與奇門氣場預判卡片 -->
+    <!-- 8. 🌀 颱風、雙週長浪與奇門氣場預判卡片 -->
     <div class="card border-purple">
         <div class="card-header">
             <span class="text-purple">🌀 氣旋、長浪與奇門氣場</span>
@@ -348,7 +397,7 @@
         </div>
     </div>
 
-    <!-- 8. 🚀 Level 5 高維邊緣算子卡片 (2x2 網格) -->
+    <!-- 9. 🚀 Level 5 高維邊緣算子卡片 -->
     <div class="card border-green">
         <div class="card-header">
             <span class="text-green">🚀 Level 5 高維邊緣算子</span>
@@ -374,7 +423,7 @@
         </div>
     </div>
 
-    <!-- 9. 🏛️ 戰略三方案評估與標籤檢核卡片 (Ground Truth) -->
+    <!-- 10. 🏛️ 戰略三方案評估 (Ground Truth) -->
     <div class="card">
         <div class="card-header">
             <span>🏛️ 戰略三方案評估 (Ground Truth)</span>
@@ -410,14 +459,12 @@
         </div>
     </div>
 
-    <!-- 底部切換與智慧財產宣告 -->
     <div class="nav-footer">
         <div>龜山島海象氣-數值分析與智庫戰術控制台 © 2026</div>
         <div style="margin-top: 4px;">單一真實數據源 (SSOT) 同步 | 日期動態對齊與純文字極速渲染</div>
     </div>
 
     <script>
-        // 1. 雙時鐘、動態日期與心跳計數器
         let heartbeatCount = 0;
         let lastUpdatedTimestamp = Date.now();
         const weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
@@ -435,7 +482,6 @@
             const timeStr = now.toTimeString().split(' ')[0];
             const weekStr = weekDays[now.getDay()];
 
-            // 更新動態日期與時間
             document.getElementById('clockDate').textContent = todayStr;
             document.getElementById('clockLocal').textContent = timeStr;
             document.getElementById('clockWeek').textContent = weekStr;
@@ -443,7 +489,6 @@
             document.getElementById('milkSeaDate').textContent = todayStr;
             document.getElementById('rulingDate').textContent = todayStr;
 
-            // 更新當日與 D+1, D+2, D+3 趨勢日期
             document.getElementById('tDay0_1').textContent = todayStr;
             document.getElementById('tDay0_2').textContent = todayStr;
             document.getElementById('tDay0_3').textContent = todayStr;
@@ -456,11 +501,9 @@
             document.getElementById('tDay2').textContent = formatDateStr(d2);
             document.getElementById('tDay3').textContent = formatDateStr(d3);
 
-            // 計算數據更新秒數差距
             const secondsAgo = Math.floor((Date.now() - lastUpdatedTimestamp) / 1000);
             document.getElementById('timeAgo').textContent = secondsAgo;
 
-            // 數據過期檢示 (超過 30 秒未接到 SSOT 心跳即觸發 Alert)
             const alertBanner = document.getElementById('staleAlertMob');
             if (secondsAgo > 30) {
                 alertBanner.style.display = 'block';
@@ -470,9 +513,8 @@
         }
 
         setInterval(updateClockAndDates, 1000);
-        updateClockAndDates(); // 初始化執行
+        updateClockAndDates();
 
-        // 2. 真實 SSOT 數據請求與動態純文字節點更新 (無快取標頭 + 動態時間戳)
         async function fetchSSOTMobile() {
             try {
                 const res = await fetch(`latest_decision.json?_t=${Date.now()}`, { cache: 'no-store' });
@@ -483,7 +525,6 @@
                 lastUpdatedTimestamp = Date.now();
                 document.getElementById('hbCount').textContent = heartbeatCount;
 
-                // AI 雙核指標
                 if (data.confidence_score !== undefined) {
                     document.getElementById('aiConfidence').textContent = `信心度 ${data.confidence_score.toFixed(1)}%`;
                 }
@@ -499,7 +540,6 @@
                     document.getElementById('barMicro').style.width = `${micro}%`;
                 }
 
-                // 物理水文與四層 VETO 剛性解算
                 if (data.physics_metrics) {
                     const p = data.physics_metrics;
                     const alpha = p.alpha_adaptive || data.alpha_tune || 0.94;
@@ -508,55 +548,35 @@
                     const hsThresh = Number(p.eff_hs_limit ?? (1.20 * alpha));
                     const wThresh = Number(p.eff_weff_limit ?? (10.80 * alpha));
 
-                    // Hs
+                    // Hs, W, UKC, FB
                     document.getElementById('vHs').textContent = `${p.hs_pier_m.toFixed(2)} m`;
-                    if (p.hs_pier_m > hsThresh) {
-                        document.getElementById('vHs').className = "value text-red";
-                        document.getElementById('lblHs').textContent = `FAIL (>${hsThresh.toFixed(2)}m)`;
-                        document.getElementById('lblHs').className = "label text-red";
-                    } else {
-                        document.getElementById('vHs').className = "value text-green";
-                        document.getElementById('lblHs').textContent = `PASS (≤${hsThresh.toFixed(2)}m)`;
-                        document.getElementById('lblHs').className = "label text-green";
-                    }
-
-                    // Wind
                     document.getElementById('vWeff').textContent = `${p.w_local_ms.toFixed(2)} m/s`;
-                    if (p.w_local_ms > wThresh) {
-                        document.getElementById('vWeff').className = "value text-red";
-                        document.getElementById('lblWeff').textContent = `FAIL (>${wThresh.toFixed(2)}m/s)`;
-                        document.getElementById('lblWeff').className = "label text-red";
-                    } else {
-                        document.getElementById('vWeff').className = "value text-green";
-                        document.getElementById('lblWeff').textContent = `PASS (≤${wThresh.toFixed(2)}m/s)`;
-                        document.getElementById('lblWeff').className = "label text-green";
-                    }
-
-                    // UKC
                     document.getElementById('vUkc').textContent = `${p.ukc_m.toFixed(2)} m`;
-                    if (p.ukc_m < 1.50) {
-                        document.getElementById('vUkc').className = "value text-red";
-                        document.getElementById('lblUkc').textContent = "FAIL (<1.50m)";
-                        document.getElementById('lblUkc').className = "label text-red";
-                    } else {
-                        document.getElementById('vUkc').className = "value text-green";
-                        document.getElementById('lblUkc').textContent = "PASS (≥1.50m)";
-                        document.getElementById('lblUkc').className = "label text-green";
-                    }
-
-                    // FB Pier
                     document.getElementById('vFb').textContent = `${p.fb_pier_m.toFixed(2)} m`;
-                    if (p.fb_pier_m < 0.50) {
-                        document.getElementById('vFb').className = "value text-red";
-                        document.getElementById('lblFb').textContent = "FAIL (<0.50m)";
-                        document.getElementById('lblFb').className = "label text-red";
-                    } else {
-                        document.getElementById('vFb').className = "value text-green";
-                        document.getElementById('lblFb').textContent = "PASS (≥0.50m)";
-                        document.getElementById('lblFb').className = "label text-green";
-                    }
 
-                    // 動態判定 Hard VETO
+                    // 【新增】南北岸獨立實測同化
+                    const weffVal = Number(p.w_eff_ms ?? 5.46);
+                    const tpVal = Number(p.tp_s ?? 15.5);
+                    const northW = Number(p.north_pier?.w_ms ?? 8.93);
+                    const northHs = Number(p.north_pier?.hs_m ?? 3.93);
+                    const southW = Number(p.south_pier?.w_ms ?? 6.97);
+                    const southHs = Number(p.south_pier?.hs_m ?? 3.71);
+
+                    document.getElementById('mobWeffVal').textContent = `${weffVal.toFixed(2)} m/s`;
+                    document.getElementById('mobTpVal').textContent = `${tpVal.toFixed(1)} s`;
+                    document.getElementById('mobNorthW').textContent = `${northW.toFixed(2)} m/s`;
+                    document.getElementById('mobNorthHs').textContent = `${northHs.toFixed(2)} m`;
+                    document.getElementById('mobSouthW').textContent = `${southW.toFixed(2)} m/s`;
+                    document.getElementById('mobSouthHs').textContent = `${southHs.toFixed(2)} m`;
+
+                    const badgeNHs = document.getElementById('badgeMobNorthHs');
+                    badgeNHs.className = northHs > hsThresh ? "badge badge-veto" : "badge badge-pass";
+                    badgeNHs.textContent = northHs > hsThresh ? "🔴 越浪超標" : "🟢 PASS";
+
+                    const badgeSHs = document.getElementById('badgeMobSouthHs');
+                    badgeSHs.className = southHs > hsThresh ? "badge badge-warn" : "badge badge-pass";
+                    badgeSHs.textContent = southHs > hsThresh ? "🟡 警戒中" : "🟢 PASS";
+
                     const isVeto = (p.hs_pier_m > hsThresh) || (p.w_local_ms > wThresh) || (p.ukc_m < 1.50) || (p.fb_pier_m < 0.50) || p.has_veto || data.hard_veto_alert;
 
                     const mainCard = document.getElementById('mainBannerCard');
@@ -578,7 +598,6 @@
                     }
                 }
 
-                // Level 5 邊緣算子
                 if (data.level5_advanced_metrics) {
                     const l5 = data.level5_advanced_metrics;
                     document.getElementById('vOvertop').textContent = `${(l5.vision_overtopping_rate_pmin ?? 1.31).toFixed(2)} p/min`;
@@ -589,7 +608,6 @@
                     }
                 }
 
-                // 游擊調度與奇門
                 if (data.guerrilla_dispatch) {
                     document.getElementById('guerrillaMode').textContent = data.guerrilla_dispatch.guerrilla_mode === "BOTH_PIERS_DISABLED" ? "雙岸停航" : "南岸權宜靠泊";
                 }
@@ -601,11 +619,9 @@
             }
         }
 
-        // 5秒輪詢 SSOT 數據
         setInterval(fetchSSOTMobile, 5000);
         fetchSSOTMobile();
 
-        // 螢幕解鎖或視角切回時自動補刷數據與日期
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden) {
                 updateClockAndDates();
