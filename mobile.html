@@ -134,6 +134,7 @@
             padding: 8px;
             border-radius: 6px;
             border: 1px solid #334155;
+            transition: border-color 0.3s ease;
         }
         .grid-item .label {
             font-size: 11px;
@@ -240,27 +241,27 @@
             <div class="grid-item" id="boxHs">
                 <div class="label">碼頭波高 (Hs,pier)</div>
                 <div class="value" id="vHs">-- m</div>
-                <div class="label" id="lblHs">同步中...</div>
+                <div class="label" id="lblHs"><span class="text-yellow">同步中... (規範 ≤1.20m)</span></div>
             </div>
             <div class="grid-item" id="boxWeff">
                 <div class="label">區域風速 (W Local)</div>
                 <div class="value" id="vWeff">-- m/s</div>
-                <div class="label" id="lblWeff">同步中...</div>
+                <div class="label" id="lblWeff"><span class="text-yellow">同步中... (規範 ≤10.8m/s)</span></div>
             </div>
             <div class="grid-item" id="boxUkc">
                 <div class="label">動態裕深 (UKC)</div>
                 <div class="value" id="vUkc">-- m</div>
-                <div class="label" id="lblUkc">同步中...</div>
+                <div class="label" id="lblUkc"><span class="text-yellow">同步中... (規範 ≥1.50m)</span></div>
             </div>
             <div class="grid-item" id="boxFb">
                 <div class="label">預留乾舷 (FB Pier)</div>
                 <div class="value" id="vFb">-- m</div>
-                <div class="label" id="lblFb">同步中...</div>
+                <div class="label" id="lblFb"><span class="text-yellow">同步中... (規範 ≥0.50m)</span></div>
             </div>
         </div>
     </div>
 
-    <!-- 5. 【新新增】📍 南北岸即時水文與風浪監測卡片 -->
+    <!-- 5. 📍 南北岸即時水文與風浪監測卡片 -->
     <div class="card">
         <div class="card-header">
             <span>📍 南北岸即時水文與風浪監測</span>
@@ -547,14 +548,49 @@
 
                     const hsThresh = Number(p.eff_hs_limit ?? (1.20 * alpha));
                     const wThresh = Number(p.eff_weff_limit ?? (10.80 * alpha));
+                    const ukcThresh = Number(p.eff_ukc_limit ?? 1.50);
+                    const fbThresh = Number(p.eff_fb_limit ?? 0.50);
 
-                    // Hs, W, UKC, FB
+                    // Hs, W, UKC, FB 數值寫入
                     document.getElementById('vHs').textContent = `${p.hs_pier_m.toFixed(2)} m`;
                     document.getElementById('vWeff').textContent = `${p.w_local_ms.toFixed(2)} m/s`;
                     document.getElementById('vUkc').textContent = `${p.ukc_m.toFixed(2)} m`;
                     document.getElementById('vFb').textContent = `${p.fb_pier_m.toFixed(2)} m`;
 
-                    // 【新增】南北岸獨立實測同化
+                    // 【修復補齊】四層 VETO 門檻規範值與狀態燈號動態更新
+                    const isHsVeto = p.hs_pier_m > hsThresh;
+                    const lblHsEl = document.getElementById('lblHs');
+                    if (lblHsEl) {
+                        lblHsEl.innerHTML = `<span class="${isHsVeto ? 'text-red' : 'text-green'}">${isHsVeto ? '🔴 越浪超標' : '🟢 正常'} (門檻 ≤${hsThresh.toFixed(2)}m)</span>`;
+                    }
+                    const boxHsEl = document.getElementById('boxHs');
+                    if (boxHsEl) boxHsEl.style.borderColor = isHsVeto ? '#ef4444' : '#334155';
+
+                    const isWVeto = p.w_local_ms > wThresh;
+                    const lblWEl = document.getElementById('lblWeff');
+                    if (lblWEl) {
+                        lblWEl.innerHTML = `<span class="${isWVeto ? 'text-red' : 'text-green'}">${isWVeto ? '🔴 風速超標' : '🟢 正常'} (門檻 ≤${wThresh.toFixed(2)}m/s)</span>`;
+                    }
+                    const boxWEl = document.getElementById('boxWeff');
+                    if (boxWEl) boxWEl.style.borderColor = isWVeto ? '#ef4444' : '#334155';
+
+                    const isUkcVeto = p.ukc_m < ukcThresh;
+                    const lblUkcEl = document.getElementById('lblUkc');
+                    if (lblUkcEl) {
+                        lblUkcEl.innerHTML = `<span class="${isUkcVeto ? 'text-red' : 'text-green'}">${isUkcVeto ? '🔴 裕深不足' : '🟢 安全'} (門檻 ≥${ukcThresh.toFixed(2)}m)</span>`;
+                    }
+                    const boxUkcEl = document.getElementById('boxUkc');
+                    if (boxUkcEl) boxUkcEl.style.borderColor = isUkcVeto ? '#ef4444' : '#334155';
+
+                    const isFbVeto = p.fb_pier_m < fbThresh;
+                    const lblFbEl = document.getElementById('lblFb');
+                    if (lblFbEl) {
+                        lblFbEl.innerHTML = `<span class="${isFbVeto ? 'text-red' : 'text-green'}">${isFbVeto ? '🔴 乾舷過低' : '🟢 安全'} (門檻 ≥${fbThresh.toFixed(2)}m)</span>`;
+                    }
+                    const boxFbEl = document.getElementById('boxFb');
+                    if (boxFbEl) boxFbEl.style.borderColor = isFbVeto ? '#ef4444' : '#334155';
+
+                    // 南北岸獨立實測同化
                     const weffVal = Number(p.w_eff_ms ?? 5.46);
                     const tpVal = Number(p.tp_s ?? 15.5);
                     const northW = Number(p.north_pier?.w_ms ?? 8.93);
@@ -569,15 +605,25 @@
                     document.getElementById('mobSouthW').textContent = `${southW.toFixed(2)} m/s`;
                     document.getElementById('mobSouthHs').textContent = `${southHs.toFixed(2)} m`;
 
+                    const mobWeffBadge = document.getElementById('mobWeffBadge');
+                    if (mobWeffBadge) {
+                        mobWeffBadge.className = weffVal > wThresh ? "badge badge-veto" : "badge badge-pass";
+                        mobWeffBadge.textContent = weffVal > wThresh ? "🔴 超標" : "🟢 PASS";
+                    }
+
                     const badgeNHs = document.getElementById('badgeMobNorthHs');
-                    badgeNHs.className = northHs > hsThresh ? "badge badge-veto" : "badge badge-pass";
-                    badgeNHs.textContent = northHs > hsThresh ? "🔴 越浪超標" : "🟢 PASS";
+                    if (badgeNHs) {
+                        badgeNHs.className = northHs > hsThresh ? "badge badge-veto" : "badge badge-pass";
+                        badgeNHs.textContent = northHs > hsThresh ? "🔴 越浪超標" : "🟢 PASS";
+                    }
 
                     const badgeSHs = document.getElementById('badgeMobSouthHs');
-                    badgeSHs.className = southHs > hsThresh ? "badge badge-warn" : "badge badge-pass";
-                    badgeSHs.textContent = southHs > hsThresh ? "🟡 警戒中" : "🟢 PASS";
+                    if (badgeSHs) {
+                        badgeSHs.className = southHs > hsThresh ? "badge badge-warn" : "badge badge-pass";
+                        badgeSHs.textContent = southHs > hsThresh ? "🟡 警戒中" : "🟢 PASS";
+                    }
 
-                    const isVeto = (p.hs_pier_m > hsThresh) || (p.w_local_ms > wThresh) || (p.ukc_m < 1.50) || (p.fb_pier_m < 0.50) || p.has_veto || data.hard_veto_alert;
+                    const isVeto = isHsVeto || isWVeto || isUkcVeto || isFbVeto || p.has_veto || data.hard_veto_alert;
 
                     const mainCard = document.getElementById('mainBannerCard');
                     const decisionTxt = document.getElementById('decisionText');
