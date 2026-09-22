@@ -38,8 +38,6 @@ $$\text{若 } \text{Hard\_Veto} = \text{True} \implies Q_{final} = \text{Q4 (0.0
 | **動態富餘水深** | $UKC$ | $UKC = [(d_{chart\_base} + d_{chart\_offset}) + \eta_{tide}] - (d_{draft} + S_{squat}) - H_{s,pier}$<br>含雙體船蹲沉量 $S_{squat} = 0.82\text{ m}$ | $UKC \ge 1.50\text{ m}$ | 坤宮/死門（低潮位底撞 VETO） |
 | **預留乾舷高度** | $FB_{pier}$ | $FB_{pier} = BASE\_FREEBOARD - \eta_{tide}$<br>若 Vision-PINN 偵測越浪率 $> 0\text{ p/min} \implies FB_{pier} = 0.15\text{ m}$ | $FB_{pier} \ge 0.50\text{ m}$ | 乾/坎宮（滿潮越浪扣減） |
 
-*註：$\alpha_{tune}$ 為 Sigmoid 神經網路自適應門檻緊縮係數（$0.65 \le \alpha_{tune} \le 1.00$）。周天 360 度公度年算子每季 90°、每節 45°、每氣 15°、每候 5° 精確扣合氣象場。
-
 ---
 
 ## 3. 奇門 70% 門控與高維水動力算子 (Qimen 70% Gate & Level 5/7)
@@ -59,9 +57,6 @@ $$\text{若 } \text{Hard\_Veto} = \text{True} \implies Q_{final} = \text{Q4 (0.0
   3. `FNO1dWaveSpectralForecaster`：100ms 傅立葉神經算子推演未來 3 小時波高演化 `fno_forecast_mean_hs_m`。
   4. `QuantumTopology64DEngine`：64D 拓撲同化，輸出量子相干性 `quantum_topology_coherence`。
   5. `MultiAgentSwarmDispatcher`：強化學習賽局，輸出多船靠泊指派 `swarm_dispatch_plan`。
-- **Level 7 雙碼頭與潮汐算子**：
-  - **南北角雙碼頭水動力矩陣**：獨立解算北岸與南岸之波高與風速，背風角 $\Delta\theta < 45^\circ$ 時授權游擊切換至南岸權宜碼頭。
-  - **天文潮差動態扣減算子**：大潮（潮差 1.80m，滿潮 +1.35m / 乾潮 -0.45m），乾潮扣減 0.45m $UKC$，滿潮扣減 1.35m $FB_{pier}$。
 
 ---
 
@@ -107,7 +102,12 @@ $$\text{若 } \text{Hard\_Veto} = \text{True} \implies Q_{final} = \text{Q4 (0.0
 ### 6.2 雙時鐘與脈衝心跳規範
 1. **設備秒針**：原生 1000ms 跳動。
 2. **藍色心跳脈衝 (`#38bdf8`)**：與 10s 異步 SSE 數據擷取強綁定，顯示更新計數。
-3. **Watchdog 數據過期阻斷**：若超過 30 秒（3 個輪詢週期）未接收到新 JSON，頂部燈號立即切換為「🔴 數據過期 (OUT OF DATE)」，並彈出警告 Banner。
+3. **Watchdog 數據過期阻斷**：若超過 30 秒（3 個輪詢週期）未接收到新 JSON，頂部燈號屬性切換為「🔴 數據過期 (OUT OF DATE)」，並彈出警告 Banner。
+
+### 6.3 前端風速雙軌渲染與門檻校驗約束 (Wind Dual-Track Spec)
+1. 前端 UI 控制台（`desktop.html` 與 `mobile.html`）之「風速」卡片主數值，必須**無條件顯示攻角有效風速 $W_{eff}$**。
+2. 嚴禁將未經角度與背風折減之外海區域風速 $W_{local}$ 直接對齊緊縮門檻 $10.80 \cdot \alpha_{tune}$，避免產生視覺標籤自相矛盾。
+3. 卡片副標與 Badge 必須顯式標註 $W_{local}$ 原始數值與實際對齊門檻，維護數據單一真實數據源 (SSOT) 的透明度與一致性。
 
 ---
 
@@ -115,10 +115,10 @@ $$\text{若 } \text{Hard\_Veto} = \text{True} \implies Q_{final} = \text{Q4 (0.0
 
 ```json
 {
-  "version": "v36D.16.5 Zero-Crash Master Complete",
-  "timestamp": "2026-09-21 12:00:00 CST",
+  "version": "v36D.330.0 Three-Scheme & Guerrilla Vector Master Complete",
+  "timestamp": "2026-09-22 08:33:04 CST",
   "confidence_label": "🟢 100.0% [完整同化 PASS]",
-  "decision": "🔴 封島/防颱",
+  "decision": "🔴 0.0% 物理 VETO 熔斷 / 全線封島",
   "confidence_score": 100.0,
   "hard_veto_alert": true,
   "precision_metrics": {
@@ -132,17 +132,22 @@ $$\text{若 } \text{Hard\_Veto} = \text{True} \implies Q_{final} = \text{Q4 (0.0
   "physics_metrics": {
     "hs_pier_m": 3.71,
     "w_local_ms": 8.50,
-    "ukc_m": 5.84,
-    "fb_pier_m": 2.00,
+    "w_eff_ms": 5.98,
+    "ukc_m": 0.27,
+    "fb_pier_m": 0.15,
+    "pass_hs": false,
+    "pass_w": true,
+    "pass_ukc": false,
+    "pass_fb": false,
     "has_veto": true
   },
   "guerrilla_dispatch": {
     "berthing_pier": "無 (雙岸失效，禁止靠泊)",
     "evacuation_pier": "無 (雙岸失效，直航返航烏石港)",
     "guerrilla_mode": "BOTH_PIERS_DISABLED",
-    "morning_tactic": "⚠️ 上午游擊調撥：北岸越浪，08:30 班次改至【南岸權宜碼頭】靠泊",
-    "afternoon_tactic": "🚨 下午游擊撤退：預測午後 ESE 巽宮風陣，11:20 止登，14:20 全員撤離",
-    "tactical_summary": "執行「下午游擊撤退【南岸碼頭撤離】」"
+    "morning_tactic": "🚨 全線熔斷：港池波高 3.71m 超標，雙岸碼頭失效禁止靠泊",
+    "afternoon_tactic": "🚨 撤離執行：雙岸越浪嚴重，11:20 止登，14:20 全員撤離至【烏石港】",
+    "tactical_summary": "🔴 第一位階 Hard VETO 剛性熔斷（Hs=3.71m）。全天禁止登島與靠泊，預計撤離耗時 20 分鐘。"
   },
   "level5_advanced_metrics": {
     "vision_overtopping_rate_pmin": 1.31,
@@ -155,14 +160,12 @@ $$\text{若 } \text{Hard\_Veto} = \text{True} \implies Q_{final} = \text{Q4 (0.0
       "pitch_deg": 4.4
     },
     "fno_forecast_mean_hs_m": 1.58,
-    "quantum_topology_coherence": 0.4682,
-    "swarm_dispatch_plan": [
-      { "agent_id": 1, "vessel_label": "凱鯨號 (Agent 1)", "assigned_pier": "無 (雙岸失效)", "tactical_action": "直航返航烏石港" }
-    ]
+    "quantum_topology_coherence": 0.4682
   },
   "qimen_macro_consensus": {
     "consensus_rate_pct": 100.0,
     "macro_advisory_enabled": true,
-    "qimen_status_prompt": "🔮 奇門氣場匹配率達 100.0% (>=70%)，已啟動宏觀參研決策與預警提示"
+    "octagram_gate_state": "死門 (坤宮 - 剛性熔斷直航烏石港)",
+    "qimen_status_prompt": "🔮 奇門氣場匹配率達 100.0% (>=70%)，已啟動 35% 宏觀參研偏置與【死門 (坤宮)】戰術導引"
   }
 }
