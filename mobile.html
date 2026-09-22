@@ -241,22 +241,22 @@
             <div class="grid-item" id="boxHs">
                 <div class="label">碼頭波高 (Hs,pier)</div>
                 <div class="value" id="vHs">-- m</div>
-                <div class="label" id="lblHs"><span class="text-yellow">同步中... (規範 ≤1.20m)</span></div>
+                <div class="label" id="lblHs"><span class="text-yellow">同步中...</span></div>
             </div>
             <div class="grid-item" id="boxWeff">
-                <div class="label">區域風速 (W Local)</div>
+                <div class="label">攻角風速 (W Eff)</div>
                 <div class="value" id="vWeff">-- m/s</div>
-                <div class="label" id="lblWeff"><span class="text-yellow">同步中... (規範 ≤10.8m/s)</span></div>
+                <div class="label" id="lblWeff"><span class="text-yellow">同步中...</span></div>
             </div>
             <div class="grid-item" id="boxUkc">
                 <div class="label">動態裕深 (UKC)</div>
                 <div class="value" id="vUkc">-- m</div>
-                <div class="label" id="lblUkc"><span class="text-yellow">同步中... (規範 ≥1.50m)</span></div>
+                <div class="label" id="lblUkc"><span class="text-yellow">同步中...</span></div>
             </div>
             <div class="grid-item" id="boxFb">
                 <div class="label">預留乾舷 (FB Pier)</div>
                 <div class="value" id="vFb">-- m</div>
-                <div class="label" id="lblFb"><span class="text-yellow">同步中... (規範 ≥0.50m)</span></div>
+                <div class="label" id="lblFb"><span class="text-yellow">同步中...</span></div>
             </div>
         </div>
     </div>
@@ -271,7 +271,7 @@
             <p style="font-weight: bold; margin-bottom: 4px;">📍 目前颱風與海象實測：</p>
             <div style="font-size: 11px; color: #94a3b8; background: #0f172a; padding: 6px 8px; border-radius: 6px; border: 1px solid #334155; margin-bottom: 8px;">
                 • 東南東 <span class="text-yellow" id="mobTyDist">450 km</span> 中颱，中心氣壓 <span class="text-yellow" id="mobTyPress">955 hPa</span>，暴風半徑 <span class="text-yellow">200 km</span>。<br>
-                • W<sub>eff</sub> = <span class="text-green" id="mobWeffVal">5.46 m/s</span> <span class="badge badge-pass" id="mobWeffBadge" style="padding: 1px 4px; font-size: 10px;">PASS</span> | T<sub>p</sub> = <span class="text-purple" id="mobTpVal">15.5 s</span> (K<sub>d</sub> = 1.00 港池共振穿透)
+                • W<sub>eff</sub> = <span class="text-green" id="mobWeffVal">-- m/s</span> <span class="badge badge-pass" id="mobWeffBadge" style="padding: 1px 4px; font-size: 10px;">--</span> | T<sub>p</sub> = <span class="text-purple" id="mobTpVal">-- s</span> (K<sub>d</sub> = 1.00 港池共振穿透)
             </div>
             <p style="font-weight: bold;">🌊 南北岸即時水文比對：</p>
             <table class="data-table">
@@ -347,20 +347,20 @@
                 <tr>
                     <td><b>D+1</b> (<span id="tDay1">--</span>)</td>
                     <td>1.0–1.5m</td>
-                    <td>Hs 0.95m</td>
-                    <td><span class="badge badge-pass">🟢 全線開放</span></td>
+                    <td>Hs 3.71m</td>
+                    <td><span class="badge badge-veto" id="bStepD1">🔴 0.0% 封島</span></td>
                 </tr>
                 <tr>
                     <td><b>D+2</b> (<span id="tDay2">--</span>)</td>
                     <td>1.2–1.8m</td>
-                    <td>Δθ 39.0°</td>
-                    <td><span class="badge badge-cond">🟡 權宜靠泊</span></td>
+                    <td>Hs 1.45m</td>
+                    <td><span class="badge badge-cond" id="bStepD2">🟡 權宜靠泊</span></td>
                 </tr>
                 <tr>
                     <td><b>D+3</b> (<span id="tDay3">--</span>)</td>
                     <td>0.9–1.2m</td>
                     <td>Hs 0.85m</td>
-                    <td><span class="badge badge-pass">🟢 全線開放</span></td>
+                    <td><span class="badge badge-pass" id="bStepD3">🟢 全線開放</span></td>
                 </tr>
             </tbody>
         </table>
@@ -450,7 +450,7 @@
                 </tr>
                 <tr style="background-color: rgba(239, 68, 68, 0.15);">
                     <td><b>方案 C (GEM-V36D)</b></td>
-                    <td><b>Hs 1.39m / 6.63m/s</b></td>
+                    <td><b>Hs 3.71m / 5.98m/s</b></td>
                     <td><span class="badge badge-veto" id="badgeSchemeC">🌟 Ground Truth VETO 熔斷</span></td>
                 </tr>
             </tbody>
@@ -551,54 +551,60 @@
                     const ukcThresh = Number(p.eff_ukc_limit ?? 1.50);
                     const fbThresh = Number(p.eff_fb_limit ?? 0.50);
 
-                    // Hs, W, UKC, FB 數值寫入
+                    // 剛性風速雙軌修正：主數值顯示 W_eff (攻角有效風速)，副標註明 W_local (區域風速)
+                    const wEffVal = Number(p.w_eff_ms ?? (p.w_local_ms * Math.cos((p.delta_theta_deg || 0) * Math.PI / 180)));
+                    const wLocalVal = Number(p.w_local_ms ?? 0);
+
                     document.getElementById('vHs').textContent = `${p.hs_pier_m.toFixed(2)} m`;
-                    document.getElementById('vWeff').textContent = `${p.w_local_ms.toFixed(2)} m/s`;
+                    document.getElementById('vWeff').textContent = `${wEffVal.toFixed(2)} m/s`; // 修正：填入 W_eff 避免自相矛盾
                     document.getElementById('vUkc').textContent = `${p.ukc_m.toFixed(2)} m`;
                     document.getElementById('vFb').textContent = `${p.fb_pier_m.toFixed(2)} m`;
 
-                    // 【修復補齊】四層 VETO 門檻規範值與狀態燈號動態更新
-                    const isHsVeto = p.hs_pier_m > hsThresh;
+                    // 四層 VETO 動態標記與門檻比對
+                    const isHsVeto = !(p.pass_hs ?? (p.hs_pier_m <= hsThresh));
                     const lblHsEl = document.getElementById('lblHs');
                     if (lblHsEl) {
-                        lblHsEl.innerHTML = `<span class="${isHsVeto ? 'text-red' : 'text-green'}">${isHsVeto ? '🔴 越浪超標' : '🟢 正常'} (門檻 ≤${hsThresh.toFixed(2)}m)</span>`;
+                        lblHsEl.textContent = `${isHsVeto ? '🔴 越浪超標' : '🟢 正常'} (門檻 ≤${hsThresh.toFixed(2)}m)`;
+                        lblHsEl.className = `label ${isHsVeto ? 'text-red' : 'text-green'}`;
                     }
                     const boxHsEl = document.getElementById('boxHs');
                     if (boxHsEl) boxHsEl.style.borderColor = isHsVeto ? '#ef4444' : '#334155';
 
-                    const isWVeto = p.w_local_ms > wThresh;
+                    const isWVeto = !(p.pass_w ?? (wEffVal <= wThresh));
                     const lblWEl = document.getElementById('lblWeff');
                     if (lblWEl) {
-                        lblWEl.innerHTML = `<span class="${isWVeto ? 'text-red' : 'text-green'}">${isWVeto ? '🔴 風速超標' : '🟢 正常'} (門檻 ≤${wThresh.toFixed(2)}m/s)</span>`;
+                        lblWEl.textContent = `${isWVeto ? '🔴 攻角風速超標' : '🟢 PASS'} (W_eff ≤${wThresh.toFixed(2)}m/s | 區域: ${wLocalVal.toFixed(2)}m/s)`;
+                        lblWEl.className = `label ${isWVeto ? 'text-red' : 'text-green'}`;
                     }
                     const boxWEl = document.getElementById('boxWeff');
                     if (boxWEl) boxWEl.style.borderColor = isWVeto ? '#ef4444' : '#334155';
 
-                    const isUkcVeto = p.ukc_m < ukcThresh;
+                    const isUkcVeto = !(p.pass_ukc ?? (p.ukc_m >= ukcThresh));
                     const lblUkcEl = document.getElementById('lblUkc');
                     if (lblUkcEl) {
-                        lblUkcEl.innerHTML = `<span class="${isUkcVeto ? 'text-red' : 'text-green'}">${isUkcVeto ? '🔴 裕深不足' : '🟢 安全'} (門檻 ≥${ukcThresh.toFixed(2)}m)</span>`;
+                        lblUkcEl.textContent = `${isUkcVeto ? '🔴 裕深不足' : '🟢 安全'} (門檻 ≥${ukcThresh.toFixed(2)}m)`;
+                        lblUkcEl.className = `label ${isUkcVeto ? 'text-red' : 'text-green'}`;
                     }
                     const boxUkcEl = document.getElementById('boxUkc');
                     if (boxUkcEl) boxUkcEl.style.borderColor = isUkcVeto ? '#ef4444' : '#334155';
 
-                    const isFbVeto = p.fb_pier_m < fbThresh;
+                    const isFbVeto = !(p.pass_fb ?? (p.fb_pier_m >= fbThresh));
                     const lblFbEl = document.getElementById('lblFb');
                     if (lblFbEl) {
-                        lblFbEl.innerHTML = `<span class="${isFbVeto ? 'text-red' : 'text-green'}">${isFbVeto ? '🔴 乾舷過低' : '🟢 安全'} (門檻 ≥${fbThresh.toFixed(2)}m)</span>`;
+                        lblFbEl.textContent = `${isFbVeto ? '🔴 乾舷過低' : '🟢 安全'} (門檻 ≥${fbThresh.toFixed(2)}m)`;
+                        lblFbEl.className = `label ${isFbVeto ? 'text-red' : 'text-green'}`;
                     }
                     const boxFbEl = document.getElementById('boxFb');
                     if (boxFbEl) boxFbEl.style.borderColor = isFbVeto ? '#ef4444' : '#334155';
 
                     // 南北岸獨立實測同化
-                    const weffVal = Number(p.w_eff_ms ?? 5.46);
                     const tpVal = Number(p.tp_s ?? 15.5);
                     const northW = Number(p.north_pier?.w_ms ?? 8.93);
                     const northHs = Number(p.north_pier?.hs_m ?? 3.93);
                     const southW = Number(p.south_pier?.w_ms ?? 6.97);
                     const southHs = Number(p.south_pier?.hs_m ?? 3.71);
 
-                    document.getElementById('mobWeffVal').textContent = `${weffVal.toFixed(2)} m/s`;
+                    document.getElementById('mobWeffVal').textContent = `${wEffVal.toFixed(2)} m/s`;
                     document.getElementById('mobTpVal').textContent = `${tpVal.toFixed(1)} s`;
                     document.getElementById('mobNorthW').textContent = `${northW.toFixed(2)} m/s`;
                     document.getElementById('mobNorthHs').textContent = `${northHs.toFixed(2)} m`;
@@ -607,8 +613,8 @@
 
                     const mobWeffBadge = document.getElementById('mobWeffBadge');
                     if (mobWeffBadge) {
-                        mobWeffBadge.className = weffVal > wThresh ? "badge badge-veto" : "badge badge-pass";
-                        mobWeffBadge.textContent = weffVal > wThresh ? "🔴 超標" : "🟢 PASS";
+                        mobWeffBadge.className = isWVeto ? "badge badge-veto" : "badge badge-pass";
+                        mobWeffBadge.textContent = isWVeto ? "🔴 超標" : "🟢 PASS";
                     }
 
                     const badgeNHs = document.getElementById('badgeMobNorthHs');
@@ -655,10 +661,16 @@
                 }
 
                 if (data.guerrilla_dispatch) {
-                    document.getElementById('guerrillaMode').textContent = data.guerrilla_dispatch.guerrilla_mode === "BOTH_PIERS_DISABLED" ? "雙岸停航" : "南岸權宜靠泊";
+                    const g = data.guerrilla_dispatch;
+                    document.getElementById('guerrillaMode').textContent = g.guerrilla_mode === "BOTH_PIERS_DISABLED" ? "雙岸停航" : "南岸權宜靠泊";
+                    if (g.morning_tactic) document.getElementById('morningTactic').innerHTML = `<b>登島靠泊碼頭</b>：${g.berthing_pier || '【南岸權宜碼頭】'}`;
+                    if (g.afternoon_tactic) document.getElementById('afternoonTactic').innerHTML = `<b>應急撤離碼頭</b>：${g.evacuation_pier || '【南岸碼頭】→ 返航【烏石港】'}`;
                 }
                 if (data.qimen_macro_consensus) {
                     document.getElementById('qimenRate').textContent = `${(data.qimen_macro_consensus.consensus_rate_pct ?? 100.0).toFixed(1)}%`;
+                    if (data.qimen_macro_consensus.qimen_status_prompt) {
+                        document.getElementById('qimenPrompt').textContent = data.qimen_macro_consensus.qimen_status_prompt;
+                    }
                 }
             } catch (err) {
                 console.warn("Mobile SSOT 同化異常:", err);
