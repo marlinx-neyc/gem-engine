@@ -29,13 +29,11 @@ def auto_repair_and_align_ssot(file_path: str = "latest_decision.json") -> bool:
     hs_thresh = physics.get("hs_threshold_m", 0.78)
     has_veto = (hs_pier > hs_thresh) or physics.get("has_veto", False)
 
-    # 1. 自動修正 VETO 標籤與門檻
     if has_veto and not physics.get("has_veto"):
         physics["has_veto"] = True
         is_repaired = True
         print("🛠️ [掃兵對齊] 自動修正: physics_metrics.has_veto -> True")
 
-    # 2. 自動對齊奇門死門與 alpha_tune 緊縮
     if qimen.get("consensus_rate_pct", 0.0) >= 70.0 and qimen.get("octagram_gate_state", qimen.get("qimen_gate")) in ["死門", "死門 (坤宮 - 剛性熔斷)"]:
         if physics.get("alpha_tune") != 0.65:
             physics["alpha_tune"] = 0.65
@@ -43,7 +41,6 @@ def auto_repair_and_align_ssot(file_path: str = "latest_decision.json") -> bool:
             is_repaired = True
             print("🛠️ [掃兵對齊] 自動修正: alpha_tune -> 0.65, hs_threshold_m -> 0.78m")
 
-    # 3. 核心裁決與游擊調度三大區塊全域強制一致性對齊
     if has_veto:
         if "🔴" not in data.get("decision", "") or "封島" not in data.get("decision", ""):
             data["decision"] = "🔴 0.0% 物理 VETO 熔斷 / 全線封島"
