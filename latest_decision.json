@@ -1,6 +1,6 @@
 {
   "version": "v36D.330.0 Three-Scheme & Guerrilla Vector Master Complete",
-  "timestamp": "2026-09-22 08:36:43 CST",
+  "timestamp": "2026-09-22 09:29:58 CST",
   "decision": "🔴 0.0% 物理 VETO 熔斷 / 全線封島",
   "confidence_score": 100.0,
   "confidence_label": "🟢 100.0% [完整同化 PASS]",
@@ -17,9 +17,13 @@
     "hs_pier_m": 3.71,
     "w_local_ms": 8.5,
     "w_eff_ms": 5.46,
+    "tp_s": 15.5,
+    "tide_eta_m": 1.0,
     "alpha_adaptive": 0.65,
-    "hs_threshold_m": 0.78,
+    "eff_hs_limit": 0.78,
     "eff_weff_limit": 7.02,
+    "eff_ukc_limit": 1.5,
+    "eff_fb_limit": 0.5,
     "ukc_m": 3.77,
     "fb_pier_m": 2.2,
     "pass_hs": false,
@@ -29,25 +33,37 @@
     "has_veto": true,
     "kd": 1.0,
     "kw": 1.0,
+    "s_quat_m": 0.82,
+    "north_pier": {
+      "hs_m": 3.93,
+      "w_ms": 8.93,
+      "status": "[🔴 VETO]"
+    },
+    "south_pier": {
+      "hs_m": 3.71,
+      "w_ms": 6.97,
+      "status": "[🔴 VETO]"
+    },
     "north_pier_status": "[🔴 VETO]",
     "south_pier_status": "[🔴 VETO]",
-    "alpha_tune": 0.65
+    "alpha_tune": 0.65,
+    "hs_threshold_m": 0.78
   },
   "hydrothermal_geothermal_gate": {
-    "high_tide_time": "12:00",
-    "peak_release_time": "15:30",
-    "risk_window_start": "14:00",
-    "risk_window_end": "17:00",
-    "warning": "強酸水團 (pH 1.75~2.0) 與高溫羽狀流擴散峰值期 (14:00 - 17:00)，牛奶海水下活動與 SUP 全線暫停，保持 500m 安全避險距離"
+    "high_tide_time": "09:12",
+    "peak_release_time": "12:42",
+    "risk_window_start": "11:12",
+    "risk_window_end": "14:12",
+    "warning": "強酸水團 (pH 1.75~2.0) 與高溫羽狀流擴散峰值期 (11:12 - 14:12)，牛奶海水下活動與 SUP 全線暫停，保持 200m 安全避險距離"
   },
   "guerrilla_dispatch": {
     "berthing_pier": "無 (雙岸失效，禁止靠泊)",
     "evacuation_pier": "無 (雙岸失效，直航返航烏石港)",
     "guerrilla_mode": "BOTH_PIERS_DISABLED",
-    "morning_tactic": "🚨 全線熔斷：港池波高 3.71m 超標，禁止靠泊",
+    "morning_tactic": "🚨 全線熔斷：港池波高 3.71m 超標，雙岸碼頭失效禁止靠泊",
     "afternoon_tactic": "🚨 撤離執行：雙岸越浪嚴重，11:20 止登，14:20 全員撤離至【烏石港】",
     "tactical_summary": "🔴 第一位階 Hard VETO 剛性熔斷，全天禁止登島與靠泊",
-    "evacuation_time_minutes": 30
+    "evacuation_time_minutes": 20
   },
   "three_schemes_comparison": {
     "scheme_a_cwa": {
@@ -89,6 +105,11 @@
       "desc": "海象恢復平穩，Q1 正常開放【北岸碼頭】靠泊。"
     }
   },
+  "typhoon_longterm_forecast": {
+    "typhoon_status": "東南東 250 km 中颱，中心氣壓 955 hPa，暴風半徑 200 km，2D 氣壓梯度 1.10 hPa/km",
+    "qimen_1month_monsoon_swell": "巽宮/驚門氣場活躍，東北季風共振加劇，長浪 (Tp > 12.0s) 穿透頻率達 68%",
+    "hydrothermal_1month_outlook": "月體大潮期海水靜水壓劇烈波動，滿潮 09:12 後 3.5 小時強酸水團擴散範圍達最大值 (11:12 - 14:12)"
+  },
   "level5_advanced_metrics": {
     "vision_overtopping_rate_pmin": 1.31,
     "vision_kd_bias": 0.0295,
@@ -99,7 +120,7 @@
       "roll_deg": 3.3,
       "pitch_deg": 4.4
     },
-    "fno_forecast_mean_hs_m": 3.71,
+    "fno_forecast_mean_hs_m": 1.58,
     "quantum_topology_coherence": 0.4682,
     "swarm_dispatch_plan": [
       {
@@ -130,7 +151,7 @@
   "qimen_macro_consensus": {
     "consensus_rate_pct": 100.0,
     "macro_advisory_enabled": true,
-    "octagram_gate_state": "死門 (坤宮 - 剛性熔斷)",
-    "qimen_status_prompt": "🔮 奇門氣場匹配率達 100.0% (>=70%)，已啟動死門動態門檻緊縮 (alpha=0.65)"
+    "octagram_gate_state": "死門 (坤宮 - 剛性熔斷直航烏石港)",
+    "qimen_status_prompt": "🔮 奇門氣場匹配率達 100.0% (>=70%)，已啟動 35% 宏觀參研偏置與【死門 (坤宮 - 剛性熔斷直航烏石港)】戰術導引"
   }
 }
