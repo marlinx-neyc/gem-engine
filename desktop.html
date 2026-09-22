@@ -116,7 +116,7 @@
                         <div class="metric-badge" id="badgeHs">同步中...</div>
                     </div>
                     <div class="metric-box">
-                        <label>區域風速 (W Local)</label>
+                        <label>攻角風速 (W Eff)</label>
                         <div class="value" id="valWLocal">-- m/s</div>
                         <div class="metric-badge" id="badgeWLocal">同步中...</div>
                     </div>
@@ -137,13 +137,13 @@
             <div class="card">
                 <div class="card-header">2. 當日預警時窗與戰略總結</div>
                 <div class="time-window-list">
-                    <p>• <b>07:30 當日開島判別</b>：官方放行 | GEM 觀測 <span style="color: var(--status-pass); font-weight: bold;" id="txt0730Status">🟢 可開島</span></p>
+                    <p>• <b>07:30 當日開島判別</b>：官方放行 | GEM 觀測 <span style="color: var(--status-danger); font-weight: bold;" id="txt0730Status">🔴 剛性熔斷</span></p>
                     <p style="font-size: 11px; color: var(--text-secondary);">• 海象標準：Hs ≤ 1.20m | W ≤ 10.80m/s | Δθ &lt; 45°</p>
                     <p>• <b>10:50 預警簡訊</b>：預警演練（提早 0.5h 準備止登）</p>
-                    <p>• <b>11:20 止登時窗</b>：軟性封島【南岸權宜碼頭】</p>
+                    <p>• <b>11:20 止登時窗</b>：雙岸封島【直航返航烏石港】</p>
                     <p>• <b>13:50 預警簡訊</b>：預警演練（提早 0.5h 準備清島）</p>
-                    <p>• <b>14:20 強制撤離</b>：從【南岸權宜碼頭】全船撤離【烏石港】</p>
-                    <p style="margin-top: 2px;">• <b>16:30 明日開島預判</b>：官方暫定 | GEM 預測 <span style="color: var(--status-pass); font-weight: bold;" id="txt1630Status">🟢 預測開放</span></p>
+                    <p>• <b>14:20 強制撤離</b>：全船撤離【烏石港】</p>
+                    <p style="margin-top: 2px;">• <b>16:30 明日開島預判</b>：官方暫定 | GEM 預測 <span style="color: var(--status-danger); font-weight: bold;" id="txt1630Status">🔴 0.0% 封島</span></p>
                 </div>
             </div>
 
@@ -152,9 +152,9 @@
                 <p style="font-size: 12px;">• 登島靠泊碼頭：<b id="txtBerthing" style="color: var(--accent-blue);">--</b></p>
                 <p style="font-size: 12px; margin-top: 4px;">• 應急撤離碼頭：<b id="txtEvac" style="color: #f8fafc;">--</b></p>
                 <div style="font-size: 11px; color: #fcd34d; margin-top: 6px;">
-                    <div id="warnT60">🟢 T-60 氣場正常</div>
-                    <div id="warnT45">🟢 T-45 海象正常</div>
-                    <div id="warnT30">🟢 T-30 移防正常</div>
+                    <div id="warnT60">🟢 T-60 氣場對齊正常</div>
+                    <div id="warnT45">🟢 T-45 海象監測正常</div>
+                    <div id="warnT30">🟢 T-30 移防準備正常</div>
                 </div>
                 <div class="dispatch-alert-box" id="txtTacticalSummary" style="color: #94a3b8; border-color: #334155; background: rgba(0,0,0,0.2);">
                     📡 等待 SSOT 戰術矩陣數據連線...
@@ -304,10 +304,10 @@
             return chart;
         };
 
-        initChart('chartHs', 'Hs 浪高', 'Hs 碼頭波高 (m)', '#ef4444', 1.20, 'm', v => v > 1.20, [0.65, 0.85, 1.05, 1.25, 1.10, 0.80]);
-        initChart('chartWind', 'Wind 風速', 'Wind 攻角風速 (m/s)', '#f59e0b', 10.80, 'm/s', v => v >= 10.80, [6.20, 7.50, 9.20, 11.20, 9.80, 7.10]);
-        initChart('chartUKC', 'UKC 水深', 'UKC 富餘水深 (m)', '#10b981', 1.50, 'm', v => v < 1.50, [7.28, 6.80, 5.90, 5.20, 5.80, 6.90]);
-        initChart('chartTp', 'Tp 湧浪', 'Tp 湧浪週期 (s)', '#c084fc', 12.0, 's', v => v > 12.0, [6.5, 8.0, 10.2, 12.5, 11.0, 8.2]);
+        initChart('chartHs', 'Hs 浪高', 'Hs 碼頭波高 (m)', '#ef4444', 1.20, 'm', v => v > 1.20, [3.71, 3.85, 3.90, 4.05, 3.80, 3.50]);
+        initChart('chartWind', 'Wind 風速', 'Wind 攻角風速 (m/s)', '#f59e0b', 10.80, 'm/s', v => v >= 10.80, [5.98, 6.50, 7.20, 8.10, 7.50, 6.80]);
+        initChart('chartUKC', 'UKC 水深', 'UKC 富餘水深 (m)', '#10b981', 1.50, 'm', v => v < 1.50, [0.27, 0.35, 0.40, 0.25, 0.30, 0.45]);
+        initChart('chartTp', 'Tp 湧浪', 'Tp 湧浪週期 (s)', '#c084fc', 12.0, 's', v => v > 12.0, [15.5, 15.0, 14.8, 14.2, 13.8, 13.0]);
 
         const chart7Days = echarts.init(document.getElementById('chart7Days'));
         chart7Days.setOption({
@@ -329,8 +329,8 @@
                 { type: 'value', name: 'Wind (m/s)', splitLine: { show: false }, axisLabel: { color: '#94a3b8', fontSize: 10 } }
             ],
             series: [
-                { name: 'Hs 波高', type: 'line', smooth: true, data: [0.80, 0.85, 0.90, 1.25, 0.95, 0.75, 0.60], lineStyle: { color: '#ef4444' }, itemStyle: { color: '#ef4444' }, markLine: { symbol: 'none', data: [{ yAxis: 1.20, lineStyle: { type: 'dashed', color: '#ef4444', width: 1.5 }, label: { formatter: 'Hs 1.20m', color: '#ef4444', position: 'start', fontSize: 10 } }] } },
-                { name: 'Wind 風速', type: 'line', yAxisIndex: 1, smooth: true, data: [6.50, 7.20, 8.50, 11.20, 8.10, 6.00, 5.50], lineStyle: { color: '#f59e0b' }, itemStyle: { color: '#f59e0b' }, markLine: { symbol: 'none', data: [{ yAxis: 10.80, lineStyle: { type: 'dashed', color: '#f59e0b', width: 1.5 }, label: { formatter: 'Wind 10.80m/s', color: '#f59e0b', position: 'end', fontSize: 10 } }] } }
+                { name: 'Hs 波高', type: 'line', smooth: true, data: [3.71, 1.45, 0.85, 0.90, 1.25, 0.95, 0.75], lineStyle: { color: '#ef4444' }, itemStyle: { color: '#ef4444' }, markLine: { symbol: 'none', data: [{ yAxis: 1.20, lineStyle: { type: 'dashed', color: '#ef4444', width: 1.5 }, label: { formatter: 'Hs 1.20m', color: '#ef4444', position: 'start', fontSize: 10 } }] } },
+                { name: 'Wind 風速', type: 'line', yAxisIndex: 1, smooth: true, data: [5.98, 7.20, 6.50, 7.10, 8.50, 6.00, 5.50], lineStyle: { color: '#f59e0b' }, itemStyle: { color: '#f59e0b' }, markLine: { symbol: 'none', data: [{ yAxis: 10.80, lineStyle: { type: 'dashed', color: '#f59e0b', width: 1.5 }, label: { formatter: 'Wind 10.80m/s', color: '#f59e0b', position: 'end', fontSize: 10 } }] } }
             ]
         });
 
@@ -370,29 +370,29 @@
                 }
 
                 const physics = data.physics_metrics || {};
-                const hsVal = Number(physics.hs_pier_m ?? 0.85);
-                const wVal = Number(physics.w_local_ms ?? 6.20);
-                const ukcVal = Number(physics.ukc_m ?? 7.28);
-                const fbVal = Number(physics.fb_pier_m ?? 2.00);
+                const hsVal = Number(physics.hs_pier_m ?? 3.71);
+                const wLocalVal = Number(physics.w_local_ms ?? 8.50);
+                const wEffVal = Number(physics.w_eff_ms ?? (wLocalVal * Math.cos((physics.delta_theta_deg || 0) * Math.PI / 180)));
+                const ukcVal = Number(physics.ukc_m ?? 0.27);
+                const fbVal = Number(physics.fb_pier_m ?? 0.15);
 
-                // 強制讀取後端布林值與動態門檻
-                const isPassHs = physics.pass_hs ?? (hsVal <= 1.20);
-                const isPassW = physics.pass_w ?? (wVal <= 10.80);
-                const isPassUKC = physics.pass_ukc ?? (ukcVal >= 1.50);
-                const isPassFB = physics.pass_fb ?? (fbVal >= 0.50);
+                const effHsLimit = Number(physics.eff_hs_limit ?? 1.20).toFixed(2);
+                const effWLimit = Number(physics.eff_weff_limit ?? 10.80).toFixed(2);
+                const effUKCLimit = Number(physics.eff_ukc_limit ?? 1.50).toFixed(2);
+                const effFBLimit = Number(physics.eff_fb_limit ?? 0.50).toFixed(2);
 
-                const effHsLimit = (physics.eff_hs_limit ?? 1.20).toFixed(2);
-                const effWLimit = (physics.eff_weff_limit ?? 10.80).toFixed(2);
-                const effUKCLimit = (physics.eff_ukc_limit ?? 1.50).toFixed(2);
-                const effFBLimit = (physics.eff_fb_limit ?? 0.50).toFixed(2);
+                const isPassHs = physics.pass_hs ?? (hsVal <= Number(effHsLimit));
+                const isPassW = physics.pass_w ?? (wEffVal <= Number(effWLimit));
+                const isPassUKC = physics.pass_ukc ?? (ukcVal >= Number(effUKCLimit));
+                const isPassFB = physics.pass_fb ?? (fbVal >= Number(effFBLimit));
 
                 document.getElementById('valHs').textContent = `${hsVal.toFixed(2)} m`;
-                document.getElementById('valWLocal').textContent = `${wVal.toFixed(2)} m/s`;
+                document.getElementById('valWLocal').textContent = `${wEffVal.toFixed(2)} m/s`; // 修正：主欄位顯示 W_eff 消除悖論
                 document.getElementById('valUKC').textContent = `${ukcVal.toFixed(2)} m`;
                 document.getElementById('valFB').textContent = `${fbVal.toFixed(2)} m`;
-                document.getElementById('valTide').textContent = `${safeFix(physics.tide_eta_m, 1.20)} m`;
+                document.getElementById('valTide').textContent = `${safeFix(physics.tide_eta_m, 1.00)} m`;
                 
-                const alphaVal = safeFix(physics.alpha_adaptive, 0.85);
+                const alphaVal = safeFix(physics.alpha_adaptive, 0.65);
                 document.getElementById('valAlpha').textContent = alphaVal;
                 document.getElementById('valAlphaQimen').textContent = alphaVal;
                 document.getElementById('valSlope').textContent = safeFix(physics.slope_landslide_risk, 0.15);
@@ -403,7 +403,9 @@
 
                 const badgeW = document.getElementById('badgeWLocal');
                 badgeW.className = isPassW ? 'metric-badge badge-pass' : 'metric-badge badge-veto';
-                badgeW.textContent = isPassW ? `PASS (≤${effWLimit}m/s)` : `FAIL (>${effWLimit}m/s)`;
+                badgeW.textContent = isPassW 
+                    ? `PASS (W_eff ≤${effWLimit}m/s | 區域: ${wLocalVal.toFixed(2)}m/s)` 
+                    : `FAIL (W_eff >${effWLimit}m/s | 區域: ${wLocalVal.toFixed(2)}m/s)`;
 
                 const badgeUKC = document.getElementById('badgeUKC');
                 badgeUKC.className = isPassUKC ? 'metric-badge badge-pass' : 'metric-badge badge-veto';
@@ -414,9 +416,8 @@
                 badgeFB.textContent = isPassFB ? `PASS (≥${effFBLimit}m)` : `FAIL (<${effFBLimit}m)`;
 
                 // 繫結 Weff 與 Tp 實測數據
-                const weffVal = Number(physics.w_eff_ms ?? 0);
-                const tpVal = Number(physics.tp_s ?? 0);
-                document.getElementById('valWeff').textContent = `${weffVal.toFixed(2)} m/s`;
+                const tpVal = Number(physics.tp_s ?? 15.5);
+                document.getElementById('valWeff').textContent = `${wEffVal.toFixed(2)} m/s`;
                 document.getElementById('valTp').textContent = `${tpVal.toFixed(1)} s`;
                 
                 const badgeWeff = document.getElementById('badgeWeff');
@@ -434,10 +435,10 @@
                 schemeCDecision.textContent = isVeto ? '🔴 Hard VETO 剛性熔斷' : (data.decision || '🟢 放行靠泊');
                 schemeCDecision.style.color = isVeto ? '#ef4444' : '#10b981';
 
-                const northHs = Number(physics.north_pier?.hs_m ?? 3.71);
-                const northW = Number(physics.north_pier?.w_ms ?? 6.63);
-                const southHs = Number(physics.south_pier?.hs_m ?? 1.85);
-                const southW = Number(physics.south_pier?.w_ms ?? 5.20);
+                const northHs = Number(physics.north_pier?.hs_m ?? 3.93);
+                const northW = Number(physics.north_pier?.w_ms ?? 8.93);
+                const southHs = Number(physics.south_pier?.hs_m ?? 3.71);
+                const southW = Number(physics.south_pier?.w_ms ?? 6.97);
 
                 document.getElementById('valNorthW').textContent = `${northW.toFixed(2)} m/s`;
                 document.getElementById('valNorthHs').textContent = `${northHs.toFixed(2)} m`;
@@ -445,12 +446,12 @@
                 document.getElementById('valSouthHs').textContent = `${southHs.toFixed(2)} m`;
 
                 const bgNHs = document.getElementById('badgeNorthHs');
-                bgNHs.className = northHs > effHsLimit ? 'metric-badge badge-veto' : 'metric-badge badge-pass';
-                bgNHs.textContent = northHs > effHsLimit ? '🔴 越浪超標' : '🟢 PASS';
+                bgNHs.className = northHs > Number(effHsLimit) ? 'metric-badge badge-veto' : 'metric-badge badge-pass';
+                bgNHs.textContent = northHs > Number(effHsLimit) ? '🔴 越浪超標' : '🟢 PASS';
 
                 const bgSHs = document.getElementById('badgeSouthHs');
-                bgSHs.className = southHs > effHsLimit ? (southHs > 2.5 ? 'metric-badge badge-veto' : 'metric-badge badge-warn') : 'metric-badge badge-pass';
-                bgSHs.textContent = southHs > effHsLimit ? '🟡 警戒中' : '🟢 PASS';
+                bgSHs.className = southHs > Number(effHsLimit) ? 'metric-badge badge-veto' : 'metric-badge badge-pass';
+                bgSHs.textContent = southHs > Number(effHsLimit) ? '🔴 越浪超標' : '🟢 PASS';
 
                 // 潮汐變化動態燈號檢核
                 const tideEta = Number(physics.tide_eta_m ?? 1.00);
@@ -471,8 +472,8 @@
                 if (badgeSouthTide) { badgeSouthTide.className = tideBadgeClass; badgeSouthTide.textContent = tideBadgeText; }
 
                 const guerrilla = data.guerrilla_dispatch || {};
-                document.getElementById('txtBerthing').textContent = guerrilla.berthing_pier || '【南岸權宜碼頭】';
-                document.getElementById('txtEvac').textContent = guerrilla.evacuation_pier || '【南岸權宜碼頭】 -> 返航【烏石港】';
+                document.getElementById('txtBerthing').textContent = guerrilla.berthing_pier || '無 (雙岸失效，禁止靠泊)';
+                document.getElementById('txtEvac').textContent = guerrilla.evacuation_pier || '無 (雙岸失效，直航返航烏石港)';
                 
                 const txtSummary = document.getElementById('txtTacticalSummary');
                 txtSummary.textContent = guerrilla.tactical_summary || '📌 游擊處置決策：傳統方案誤判放行，方案 C 啟動動態風速與 PINN 越浪監測發動 Hard VETO！';
