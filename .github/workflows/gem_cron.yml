@@ -39,6 +39,10 @@ jobs:
         run: |
           python main_orchestrator.py
 
+      - name: Run SSOT Active Audit Guard
+        run: |
+          python ssot_audit_guard.py
+
       - name: Commit & Push SSOT Outputs & Model Weights
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
