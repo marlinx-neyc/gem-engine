@@ -1,6 +1,6 @@
 {
   "version": "v36D.330.0 Three-Scheme & Guerrilla Vector Master Complete",
-  "timestamp": "2026-09-22 16:26:27 CST",
+  "timestamp": "2026-09-22 17:19:22 CST",
   "decision": "🔴 0.0% 物理 VETO 熔斷 / 全線封島",
   "confidence_score": 100.0,
   "confidence_label": "🟢 100.0% [完整同化 PASS]",
@@ -17,6 +17,7 @@
     "hs_pier_m": 3.71,
     "w_local_ms": 8.5,
     "w_eff_ms": 5.46,
+    "delta_theta_deg": 50.0,
     "tp_s": 15.5,
     "tide_eta_m": 1.0,
     "alpha_adaptive": 0.65,
@@ -34,6 +35,7 @@
     "kd": 1.0,
     "kw": 1.0,
     "s_quat_m": 0.82,
+    "slope_landslide_risk": 0.15,
     "north_pier": {
       "hs_m": 3.93,
       "w_ms": 8.93,
