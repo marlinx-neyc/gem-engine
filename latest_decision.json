@@ -1,10 +1,11 @@
 {
   "version": "v36D.330.0 Three-Scheme & Guerrilla Vector Master Complete",
-  "timestamp": "2026-10-03 16:46:56 CST",
+  "timestamp": "2026-10-04 12:57:19 CST",
   "decision": "🔴 0.0% 物理 VETO 熔斷 / 全線封島",
   "confidence_score": 100.0,
   "confidence_label": "🟢 100.0% [完整同化 PASS]",
   "hard_veto_alert": true,
+  "reliability_score_pct": 77.4,
   "precision_metrics": {
     "converged_sigma": 0.3125,
     "precision_gain_pct": 58.4
@@ -62,9 +63,11 @@
     "berthing_pier": "無 (雙岸失效，禁止靠泊)",
     "evacuation_pier": "無 (雙岸失效，直航返航烏石港)",
     "guerrilla_mode": "BOTH_PIERS_DISABLED",
-    "morning_tactic": "🚨 全線熔斷：港池波高 3.71m 超標，雙岸碼頭失效禁止靠泊",
+    "hysteresis_status": "🔀 切換至【南岸權宜碼頭】",
+    "morning_tactic": "🚨 全線熔斷：港池波高超標，雙岸碼頭失效禁止靠泊",
     "afternoon_tactic": "🚨 撤離執行：雙岸越浪嚴重，11:20 止登，14:20 全員撤離至【烏石港】",
-    "tactical_summary": "🔴 第一位階 Hard VETO 剛性熔斷，全天禁止登島與靠泊",
+    "tactical_summary": "🔴 第一位階 Hard VETO 剛性熔斷（Hs=3.71m）。全天禁止登島與靠泊，預計撤離耗時 20 分鐘。",
+    "tactical_timeline": [],
     "evacuation_time_minutes": 20
   },
   "three_schemes_comparison": {
@@ -89,28 +92,23 @@
   },
   "trend_forecast_3d": {
     "d_plus_1": {
-      "date": "2026-09-23",
+      "date": "2026-10-05",
       "status": "🔴 0.0% 全線封島",
       "hs_m": 3.71,
       "desc": "長浪穿透雙岸失效，直航烏石港避險。"
     },
     "d_plus_2": {
-      "date": "2026-09-24",
+      "date": "2026-10-06",
       "status": "🟠 預警限制 / 🟡 條件靠泊",
       "hs_m": 1.45,
       "desc": "波高顯著消退，實施游擊式調撥至【南岸權宜碼頭】。"
     },
     "d_plus_3": {
-      "date": "2026-09-25",
+      "date": "2026-10-07",
       "status": "🟢 100.0% 全線開放",
       "hs_m": 0.85,
       "desc": "海象恢復平穩，Q1 正常開放【北岸碼頭】靠泊。"
     }
-  },
-  "typhoon_longterm_forecast": {
-    "typhoon_status": "東南東 250 km 中颱，中心氣壓 955 hPa，暴風半徑 200 km，2D 氣壓梯度 1.10 hPa/km",
-    "qimen_1month_monsoon_swell": "巽宮/驚門氣場活躍，東北季風共振加劇，長浪 (Tp > 12.0s) 穿透頻率達 68%",
-    "hydrothermal_1month_outlook": "月體大潮期海水靜水壓劇烈波動，滿潮 09:12 後 3.5 小時強酸水團擴散範圍達最大值 (11:12 - 14:12)"
   },
   "level5_advanced_metrics": {
     "vision_overtopping_rate_pmin": 1.31,
