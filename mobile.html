@@ -176,7 +176,7 @@
             <span>| 心跳：<b id="heartbeatCounter" class="text-[#38bdf8] text-[10.5px]">12</b></span>
             <span>| 裁決：<b id="ssotDecisionBadge" class="text-[#ef4444] font-bold text-[10.5px]">0.0% 熔斷</b></span>
         </div>
-        <!-- 頂部即時奇門物理權重與南北岸直觀燈號 (已修正手機端防擠壓佈局) -->
+        <!-- 頂部即時奇門物理權重與南北岸直觀燈號 -->
         <div class="mt-2 pt-1.5 border-t border-[#334155]/80 flex flex-col gap-2">
             <!-- 權重進度條區域 -->
             <div class="w-full">
@@ -250,7 +250,7 @@
 
     <!-- 主內容區塊 -->
     <main class="flex flex-col gap-2.5 w-full">
-        <!-- 1. 【優化第1張】：參數分成各欄與標準值進行檢核，直觀識別 -->
+        <!-- 1. 【第1張】：參數分成各欄與標準值進行檢核，直觀識別 -->
         <div class="card border-[#38bdf8]/80">
             <div class="card-header">
                 <span>1. ⚖️ PINN 剛性水文指標分欄檢核表 (CLS=0)</span>
@@ -300,93 +300,93 @@
             </div>
         </div>
 
-        <!-- 2. 【優化第2張】：今日、明日、後日轉置為「欄 (Columns)」而非列，橫向快速對齊 -->
+        <!-- 2. 【重構第2張：極簡文字與符號版】：去除繁雜長句，改為精煉圖標＋數據＋燈號矩陣 -->
         <div class="card border-[#38bdf8]">
             <div class="card-header !text-[#38bdf8]">
                 <span>2. 📅 未來三日官方 vs 模型雙軌檢核方案</span>
-                <span class="badge badge-yellow text-[9px]">日期分欄對齊</span>
+                <span class="badge badge-yellow text-[9px]">極簡符號版</span>
             </div>
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th class="w-[22%] bg-slate-900 text-[#38bdf8]">檢核體系 / 方案</th>
+                        <th class="w-[22%] bg-slate-900 text-[#38bdf8] text-center">體系 / 方案</th>
                         <th class="w-[26%] text-center bg-blue-950/70 text-emerald-300 font-extrabold" id="thD0Day">
-                            今日 10/06<br><span class="text-[8.5px] font-normal text-slate-300">外圍長浪環流</span>
+                            今日 10/06<br><span class="text-[8.5px] font-normal text-slate-300">🌀 外圍長浪</span>
                         </th>
                         <th class="w-[26%] text-center bg-indigo-950/70 text-amber-300 font-extrabold" id="thD1Day">
-                            明日 10/07<br><span class="text-[8.5px] font-normal text-slate-300">颱風遠離浪退</span>
+                            明日 10/07<br><span class="text-[8.5px] font-normal text-slate-300">☁️ 浪退減弱</span>
                         </th>
                         <th class="w-[26%] text-center bg-slate-900 text-sky-300 font-extrabold" id="thD2Day">
-                            後日 10/08<br><span class="text-[8.5px] font-normal text-slate-300">高壓籠罩平穩</span>
+                            後日 10/08<br><span class="text-[8.5px] font-normal text-slate-300">☀️ 高壓平穩</span>
                         </th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td class="font-bold text-amber-300 text-[10px]">🏛️ 官方標準檢核<br><span class="text-[8.5px] text-slate-400">(觀光署法規)</span></td>
-                        <td class="text-[9px] leading-tight">
-                            • 平均風 6~7級 (<b class="text-red-400">≥6級超標</b>)<br>
-                            • 大浪 3.5~4.0m (<b class="text-red-400">超標</b>)<br>
-                            • 長浪 Tp 15.5s (<b class="text-red-400">警報</b>)
+                        <td class="font-bold text-amber-300 text-[10px] text-center">🏛️ 官方標準<br><span class="text-[8.5px] text-slate-400">實監數據</span></td>
+                        <td class="text-[9.5px] font-mono leading-snug text-center">
+                            💨 13.8m <span class="text-red-400 font-bold">6~7級</span><br>
+                            🌊 3.7m <span class="text-red-400 font-bold">大浪</span><br>
+                            ⏱️ 15.5s <span class="text-red-400 font-bold">長浪</span>
                         </td>
-                        <td class="text-[9px] leading-tight">
-                            • 東北風 5~6級 (陣風7級)<br>
-                            • 中至大浪 1.8~2.5m<br>
-                            • 長浪減弱 Tp 11.2s
+                        <td class="text-[9.5px] font-mono leading-snug text-center">
+                            💨 9.5m <span class="text-slate-300">5~6級</span><br>
+                            🌊 2.0m <span class="text-slate-300">中浪</span><br>
+                            ⏱️ 11.2s <span class="text-amber-300">減弱</span>
                         </td>
-                        <td class="text-[9px] leading-tight">
-                            • 偏東風 4級 (<b class="text-emerald-400">≤5級合格</b>)<br>
-                            • 小至中浪 0.8~1.2m<br>
-                            • 解除長浪 Tp 8.2s
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="font-bold text-amber-300 text-[10px]">🏛️ 官方判定燈號</td>
-                        <td class="text-center"><span class="badge badge-veto text-[9px]">🔴 官方預報封島</span></td>
-                        <td class="text-center"><span class="badge badge-yellow text-[9px]">🟡 官方待定戒備</span></td>
-                        <td class="text-center"><span class="badge badge-pass text-[9px]">🟢 官方正常開島</span></td>
-                    </tr>
-                    <tr>
-                        <td class="font-bold text-[#38bdf8] text-[10px]">🤖 GEM-V36D<br><span class="text-[8.5px] text-slate-400">(物理模型算子)</span></td>
-                        <td class="text-[9px] leading-tight">
-                            • Hs: 3.71m (<b class="text-red-400">FAIL</b>)<br>
-                            • FB: 0.15m (<b class="text-red-400">越浪</b>)<br>
-                            • Weff: 5.46m/s | UKC: 3.77m
-                        </td>
-                        <td class="text-[9px] leading-tight">
-                            • 北岸 Hs: 1.28m (<b class="text-red-400">越浪</b>)<br>
-                            • 南岸 Hs: 1.05m (<b class="text-emerald-400">PASS</b>)<br>
-                            • Δθ 38° 背風屏障有效
-                        </td>
-                        <td class="text-[9px] leading-tight">
-                            • Hs: 0.75m ≤ 1.13m<br>
-                            • Weff: 4.2m/s ≤ 10.17<br>
-                            • UKC: 4.30m (全數合格)
+                        <td class="text-[9.5px] font-mono leading-snug text-center">
+                            💨 4.8m <span class="text-emerald-400 font-bold">4級🟢</span><br>
+                            🌊 0.9m <span class="text-emerald-400 font-bold">小浪🟢</span><br>
+                            ⏱️ 8.2s <span class="text-emerald-400 font-bold">平穩🟢</span>
                         </td>
                     </tr>
                     <tr>
-                        <td class="font-bold text-[#38bdf8] text-[10px]">🤖 GEM 智庫裁決</td>
-                        <td class="text-center"><span class="badge badge-veto text-[9px]">🔴 0.0% 剛性熔斷</span></td>
-                        <td class="text-center"><span class="badge badge-warn text-[9px]">🟡 條件靠泊南岸</span></td>
-                        <td class="text-center"><span class="badge badge-pass text-[9px]">🟢 100% 全線開放</span></td>
+                        <td class="font-bold text-amber-300 text-[10px] text-center">🏛️ 官方燈號</td>
+                        <td class="text-center"><span class="badge badge-veto text-[9px]">🔴 預報封島</span></td>
+                        <td class="text-center"><span class="badge badge-yellow text-[9px]">🟡 待定戒備</span></td>
+                        <td class="text-center"><span class="badge badge-pass text-[9px]">🟢 正常開島</span></td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-[#38bdf8] text-[10px] text-center">🤖 GEM 模型<br><span class="text-[8.5px] text-slate-400">物理算子</span></td>
+                        <td class="text-[9.5px] font-mono leading-snug text-center">
+                            🌊 Hs 3.71m <span class="text-red-400 font-bold">🔴</span><br>
+                            🚢 FB 0.15m <span class="text-red-400 font-bold">🔴</span><br>
+                            💨 Weff 5.5m <span class="text-emerald-400 font-bold">🟢</span>
+                        </td>
+                        <td class="text-[9.5px] font-mono leading-snug text-center">
+                            北岸 1.28m <span class="text-red-400 font-bold">🔴</span><br>
+                            南岸 1.05m <span class="text-emerald-400 font-bold">🟢</span><br>
+                            Δθ 38° <span class="text-emerald-400">屏障有效</span>
+                        </td>
+                        <td class="text-[9.5px] font-mono leading-snug text-center">
+                            🌊 Hs 0.75m <span class="text-emerald-400 font-bold">🟢</span><br>
+                            💨 Weff 4.2m <span class="text-emerald-400 font-bold">🟢</span><br>
+                            ⚓ UKC 4.3m <span class="text-emerald-400 font-bold">🟢</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="font-bold text-[#38bdf8] text-[10px] text-center">🤖 GEM 裁決</td>
+                        <td class="text-center"><span class="badge badge-veto text-[9px]">🔴 0% 熔斷</span></td>
+                        <td class="text-center"><span class="badge badge-warn text-[9px]">🟡 條件靠泊</span></td>
+                        <td class="text-center"><span class="badge badge-pass text-[9px]">🟢 100% 放行</span></td>
                     </tr>
                     <tr class="bg-blue-950/40">
-                        <td class="font-bold text-red-300 text-[10px]">🎯 最終游擊調度方案</td>
-                        <td class="text-[9px] text-red-300 font-bold leading-tight">
-                            🚨 全線封島管制<br><span class="text-red-400 text-[8.5px]">(雙岸失效直航返烏)</span>
+                        <td class="font-bold text-red-300 text-[10px] text-center">🎯 游擊調度</td>
+                        <td class="text-[9.5px] text-red-300 font-extrabold text-center leading-snug">
+                            🚨 雙岸禁靠<br><span class="text-[8px] text-slate-300 font-normal">直航返烏石</span>
                         </td>
-                        <td class="text-[9px] text-amber-300 font-bold leading-tight">
-                            🔀 10:00 延滯登【南岸】<br><span class="text-amber-400 text-[8.5px]">(14:20 強制清島撤離)</span>
+                        <td class="text-[9.5px] text-amber-300 font-extrabold text-center leading-snug">
+                            🔀 10:00 延登<br><span class="text-[8px] text-slate-300 font-normal">限南岸 / 14:20撤</span>
                         </td>
-                        <td class="text-[9px] text-emerald-300 font-bold leading-tight">
-                            ✅ 正常靠泊【北岸主碼頭】<br><span class="text-emerald-400 text-[8.5px]">(雙岸全日通航放行)</span>
+                        <td class="text-[9.5px] text-emerald-300 font-extrabold text-center leading-snug">
+                            ✅ 正常通航<br><span class="text-[8px] text-slate-300 font-normal">北岸主泊全日開</span>
                         </td>
                     </tr>
                 </tbody>
             </table>
         </div>
 
-        <!-- 3. 沿岸主要氣象測站即時資訊監測 (前4列為純官方測站，模型獨立置於最後一列) -->
+        <!-- 3. 沿岸主要氣象測站即時資訊監測 -->
         <div class="card border-slate-700">
             <div class="card-header">
                 <span class="flex items-center gap-1.5">
@@ -423,7 +423,6 @@
                         <td>ENE 6級 (11.5m/s) 陣風8級<br>波高 3.30m (迎風長浪)</td>
                         <td class="text-center"><span class="badge badge-veto">🔴 官方封島</span></td>
                     </tr>
-                    <!-- 模型跨欄獨立列 -->
                     <tr class="bg-[#111f38] border-t-2 border-[#38bdf8]">
                         <td><b class="text-[#38bdf8]">🤖 GEM-V36D</b><br><span class="text-[8.5px] text-[#38bdf8] font-mono" id="txtStnModelFresh">即時 0.8s前</span></td>
                         <td>
@@ -461,18 +460,17 @@
                 </tbody>
             </table>
             <div class="box-alert-danger text-[10.5px]">
-                <b>🎯 關鍵調度執行：</b><span class="text-[#facc15] font-extrabold"><span id="txtStopBoardTime">10/06 11:20</span> 止登截止</span>（雙岸越浪超標，禁止散客登島）；<span class="text-[#facc15] font-extrabold"><span id="txtEvacuateTime">10/06 14:20</span> 強制清島撤離</span>（全員撤退直航返航烏石港，避難耗時精算 21 分鐘）。
+                <b>🎯 關鍵調度執行：</b><span class="text-[#facc15] font-extrabold"><span id="txtStopBoardTime">10/06 11:20</span> 止登截止</span>（雙岸越浪超標，禁止散客登島）；<span class="text-[#facc15] font-extrabold"><span id="txtEvacuateTime">10/06 14:20</span> 強制清島撤離</span>（全員撤退直航返航烏石港，避難耗時精算 20 分鐘）。
             </div>
         </div>
 
-        <!-- 5. 【優化第3點】：刪除上列/下列文字，以不同外框顏色區隔官方與模型，底端裁定外框閃爍 -->
+        <!-- 5. 龜山島南、北岸碼頭即時水文矩陣與雙軌判準 -->
         <div class="card border-slate-700">
             <div class="card-header">
                 <span>5. 📍 龜山島南、北岸碼頭即時水文矩陣與雙軌判準</span>
                 <span class="text-[10px] text-[#38bdf8] font-bold">Level 7 雙碼頭矩陣</span>
             </div>
             
-            <!-- 區塊 A：官方實體測站觀測值 (青藍色外框區塊，已移除「上列」文字) -->
             <div class="border-2 border-[#38bdf8] bg-[#0b1b36]/60 rounded-xl p-2 mb-2 shadow">
                 <div class="text-[10.5px] font-extrabold text-[#38bdf8] mb-1 flex items-center justify-between">
                     <span>🏛️ 官方實體測站觀測值 vs 東北角風管處法規標準</span>
@@ -506,7 +504,6 @@
                 </table>
             </div>
 
-            <!-- 區塊 B：GEM-V36D 物理數值預測模型微觀算子 (紫羅蘭外框區塊，已移除「下列」文字) -->
             <div class="border-2 border-[#c084fc] bg-[#1a1438]/60 rounded-xl p-2 mb-2 shadow">
                 <div class="text-[10.5px] font-extrabold text-[#c084fc] mb-1 flex items-center justify-between">
                     <span>🤖 GEM-V36D 物理數值預測模型微觀算子 vs 剛性防線 (α=0.94)</span>
@@ -545,7 +542,6 @@
                 </table>
             </div>
 
-            <!-- 區塊 C：雙軌判定與最終游擊方案 (閃爍警示外框區塊，直觀聚焦) -->
             <div class="border-2 border-flashing-alert bg-red-950/40 rounded-xl p-2.5">
                 <div class="text-[11px] font-extrabold text-amber-300 mb-1.5 flex items-center justify-between border-b border-red-500/30 pb-1">
                     <span class="flex items-center gap-1">⚡ 雙軌燈號檢核與最終游擊調度裁決 (即時閉環)</span>
@@ -570,14 +566,13 @@
             </div>
         </div>
 
-        <!-- 6. 【優化第4點】：突發海象聚焦顯示，預設僅展示真正具備突發狀況的警戒時段 -->
+        <!-- 6. 關鍵海象突發狀況調度矩陣與態勢雷達圖 -->
         <div class="card border-[#38bdf8]">
             <div class="card-header !text-[#38bdf8]">
                 <span>6. 🎯 關鍵海象突發狀況調度矩陣與態勢雷達圖</span>
                 <span class="badge badge-yellow text-[9.5px]" id="badgeMobRadarStatus">實時雙軌聯動</span>
             </div>
 
-            <!-- 突發狀況過濾工具列 -->
             <div class="flex justify-between items-center bg-[#0f172a] p-1.5 rounded-lg border border-[#334155] mb-2">
                 <span class="text-[10px] font-bold text-amber-300 flex items-center gap-1">
                     ⚠️ 突發海象節點：
@@ -592,23 +587,15 @@
                 </div>
             </div>
 
-            <!-- 時段切換按鈕 -->
             <div class="flex gap-1 overflow-x-auto pb-1 mb-2" id="toolbarTimeButtons">
-                <!-- 08:00 (可選) -->
                 <button class="flex-1 min-w-[46px] bg-[#0f172a] border border-[#334155] text-[#94a3b8] py-1 rounded text-[10px] font-bold transition-all routine-node hidden" id="btnMobT0800" onclick="selectTimeNode('08:00')">08:00</button>
-                <!-- 10:00 (突發：滿潮越浪) -->
                 <button class="flex-1 min-w-[50px] bg-red-950/60 border border-red-500 text-red-300 py-1 rounded text-[10px] font-extrabold transition-all emergency-node" id="btnMobT1000" onclick="selectTimeNode('10:00')">10:00 滿潮</button>
-                <!-- 11:20 (突發：酸泉/止登) -->
                 <button class="flex-1 min-w-[62px] bg-yellow-500/25 border border-[#facc15] text-[#facc15] py-1 rounded text-[10px] font-extrabold transition-all shadow-md emergency-node" id="btnMobT1120" onclick="selectTimeNode('11:20')">11:20 止登</button>
-                <!-- 12:00 (突發：風轉ESE崩潰) -->
                 <button class="flex-1 min-w-[50px] bg-red-950/60 border border-red-500 text-red-300 py-1 rounded text-[10px] font-extrabold transition-all emergency-node" id="btnMobT1200" onclick="selectTimeNode('12:00')">12:00 風變</button>
-                <!-- 14:20 (突發：強制撤離) -->
                 <button class="flex-1 min-w-[62px] bg-yellow-500/25 border border-[#facc15] text-[#facc15] py-1 rounded text-[10px] font-extrabold transition-all shadow-md emergency-node" id="btnMobT1420" onclick="selectTimeNode('14:20')">14:20 撤離</button>
-                <!-- 16:00 (可選) -->
                 <button class="flex-1 min-w-[46px] bg-[#0f172a] border border-[#334155] text-[#94a3b8] py-1 rounded text-[10px] font-bold transition-all routine-node hidden" id="btnMobT1600" onclick="selectTimeNode('16:00')">16:00</button>
             </div>
 
-            <!-- 時間點游擊調度推演表 (僅顯示真正具備突發狀況的時段，或切換全時段) -->
             <table class="data-table mb-2.5">
                 <thead>
                     <tr>
@@ -619,42 +606,36 @@
                     </tr>
                 </thead>
                 <tbody id="tbodyGuerrillaTimeMatrix">
-                    <!-- 08:00 平常晨間例行 (預設在僅突發模式下隱藏) -->
                     <tr id="rowMob_0800" class="cursor-pointer transition-colors hover:bg-slate-800/60 routine-node hidden" onclick="selectTimeNode('08:00')">
                         <td class="font-bold text-white">08:00</td>
                         <td class="font-mono text-slate-300">Hs 3.5m / 湧浪</td>
                         <td class="text-amber-300 font-semibold">越堤共振 / 取消首班</td>
                         <td class="text-center"><span class="badge badge-veto">🔴 熔斷</span></td>
                     </tr>
-                    <!-- 10:00 突發：滿潮升水疊加長浪越浪 -->
                     <tr id="rowMob_1000" class="cursor-pointer transition-colors bg-red-950/30 border-l-2 border-l-red-500 hover:bg-red-900/40 emergency-node" onclick="selectTimeNode('10:00')">
                         <td class="font-bold text-red-300">10:00</td>
                         <td class="font-mono text-slate-200">Hs 3.6m / 滿潮升水</td>
                         <td class="text-red-300 font-extrabold">乾舷 0.15m / 拒絕靠泊</td>
                         <td class="text-center"><span class="badge badge-veto">🔴 越浪</span></td>
                     </tr>
-                    <!-- 11:20 突發：酸泉擴散最高危 + 剛性止登截止 -->
                     <tr id="rowMob_1120" class="cursor-pointer transition-colors bg-yellow-500/15 border-l-2 border-l-[#facc15] hover:bg-yellow-500/25 emergency-node" onclick="selectTimeNode('11:20')">
                         <td class="font-extrabold text-[#facc15]">11:20</td>
                         <td class="font-mono text-amber-200">Hs 3.7m / 酸泉擴散</td>
                         <td class="text-[#facc15] font-extrabold">關閉引橋 / 剛性止登</td>
                         <td class="text-center"><span class="badge badge-veto">🔴 止登</span></td>
                     </tr>
-                    <!-- 12:00 突發：風向突轉 ESE 110° 背風屏障徹底崩潰 -->
                     <tr id="rowMob_1200" class="cursor-pointer transition-colors bg-red-950/30 border-l-2 border-l-red-500 hover:bg-red-900/40 emergency-node" onclick="selectTimeNode('12:00')">
                         <td class="font-bold text-red-300">12:00</td>
                         <td class="font-mono text-slate-200">風轉 ESE / 屏障崩潰</td>
                         <td class="text-red-300 font-extrabold">雙岸迎浪 / 全島備撤</td>
                         <td class="text-center"><span class="badge badge-veto">🔴 突變</span></td>
                     </tr>
-                    <!-- 14:20 突發：全員強制撤離截止點 -->
                     <tr id="rowMob_1420" class="cursor-pointer transition-colors bg-yellow-500/15 border-l-2 border-l-[#facc15] hover:bg-yellow-500/25 emergency-node" onclick="selectTimeNode('14:20')">
                         <td class="font-extrabold text-[#facc15]">14:20</td>
-                        <td class="font-mono text-amber-200">耗時 21分 / 蹲沉 0.82m</td>
+                        <td class="font-mono text-amber-200">耗時 20分 / 蹲沉 0.82m</td>
                         <td class="text-[#facc15] font-extrabold">清島完畢 / 直航返烏</td>
                         <td class="text-center"><span class="badge badge-veto">🔴 撤離</span></td>
                     </tr>
-                    <!-- 16:00 傍晚例行關閉 (預設在僅突發模式下隱藏) -->
                     <tr id="rowMob_1600" class="cursor-pointer transition-colors hover:bg-slate-800/60 routine-node hidden" onclick="selectTimeNode('16:00')">
                         <td class="font-bold text-white">16:00</td>
                         <td class="font-mono text-slate-300">乾潮 -0.3m / 礁石出水</td>
@@ -664,7 +645,6 @@
                 </tbody>
             </table>
 
-            <!-- 原生 Canvas 六角態勢安全雷達圖 -->
             <div class="text-[10px] text-slate-300 font-bold mb-1 flex justify-between items-center">
                 <span>📊 當前態勢雷達圖 (<span id="txtRadarActiveTime" class="text-amber-400 font-mono">11:20</span>)：</span>
                 <span class="text-[9px] text-slate-400">端點：實測 / 限值 [判準]</span>
@@ -710,7 +690,6 @@
         let stationFreshSec = [1, 2, 1, 3];
         let showEmergencyOnly = true;
 
-        // 【核心日期推移守護】07:30 CST 自動滾動
         function getComputedOperationalDate() {
             const now = new Date();
             const h = now.getHours();
@@ -745,7 +724,6 @@
             const dateFmt = formatDisplayDate(opDate);
             document.getElementById('liveDate').textContent = dateFmt.full;
 
-            // D+0, D+1, D+2 日期滾動
             const d0 = new Date(opDate);
             const d1 = new Date(opDate); d1.setDate(d1.getDate() + 1);
             const d2 = new Date(opDate); d2.setDate(d2.getDate() + 2);
@@ -754,16 +732,15 @@
             const f1 = formatDisplayDate(d1);
             const f2 = formatDisplayDate(d2);
 
-            if (document.getElementById('thD0Day')) document.getElementById('thD0Day').innerHTML = `今日 ${f0.short}<br><span class="text-[8.5px] font-normal text-slate-300">外圍長浪環流</span>`;
-            if (document.getElementById('thD1Day')) document.getElementById('thD1Day').innerHTML = `明日 ${f1.short}<br><span class="text-[8.5px] font-normal text-slate-300">颱風遠離浪退</span>`;
-            if (document.getElementById('thD2Day')) document.getElementById('thD2Day').innerHTML = `後日 ${f2.short}<br><span class="text-[8.5px] font-normal text-slate-300">高壓籠罩平穩</span>`;
+            if (document.getElementById('thD0Day')) document.getElementById('thD0Day').innerHTML = `今日 ${f0.short}<br><span class="text-[8.5px] font-normal text-slate-300">🌀 外圍長浪</span>`;
+            if (document.getElementById('thD1Day')) document.getElementById('thD1Day').innerHTML = `明日 ${f1.short}<br><span class="text-[8.5px] font-normal text-slate-300">☁️ 浪退減弱</span>`;
+            if (document.getElementById('thD2Day')) document.getElementById('thD2Day').innerHTML = `後日 ${f2.short}<br><span class="text-[8.5px] font-normal text-slate-300">☀️️ 高壓平穩</span>`;
 
             if (document.getElementById('txtD0RuleTime')) document.getElementById('txtD0RuleTime').textContent = `${f0.short} 07:30`;
             if (document.getElementById('txtD1RuleTime')) document.getElementById('txtD1RuleTime').textContent = `${f0.short} 16:30`;
             if (document.getElementById('txtStopBoardTime')) document.getElementById('txtStopBoardTime').textContent = `${f0.short} 11:20`;
             if (document.getElementById('txtEvacuateTime')) document.getElementById('txtEvacuateTime').textContent = `${f0.short} 14:20`;
 
-            // 心跳次數
             stationFreshSec = stationFreshSec.map(s => (s >= 5 ? 1 : s + 1));
             const stn1 = document.getElementById('txtStn1Fresh');
             const stn2 = document.getElementById('txtStn2Fresh');
@@ -857,7 +834,6 @@
                 badgeMobDecision.className = 'badge badge-pass text-[10.5px] px-2 py-0.5';
             }
 
-            // 更新第一張表格數值
             document.getElementById('valMobHs').textContent = `${res.hs_pier.toFixed(2)} m`;
             document.getElementById('valMobWeff').textContent = `${res.w_eff.toFixed(2)} m/s`;
             document.getElementById('valMobUKC').textContent = `${res.ukc.toFixed(2)} m`;
@@ -869,7 +845,6 @@
             document.getElementById('valMobWLocal').textContent = `${res.w_local.toFixed(2)}m/s`;
             document.getElementById('valMobTp').textContent = `${currentTelemetry.tp_s.toFixed(1)}s`;
 
-            // 更新分欄燈號
             const bHs = document.getElementById('colMobBadgeHs');
             bHs.innerHTML = res.pass_hs ? '<span class="badge badge-pass">🟢 PASS</span>' : '<span class="badge badge-veto">🔴 FAIL</span>';
 
@@ -885,7 +860,6 @@
             renderMobileTableNode(res);
         }
 
-        // 突發海象節點過濾控制
         function toggleEmergencyFilter(emergencyOnly) {
             showEmergencyOnly = emergencyOnly;
             const btnEmerg = document.getElementById('btnFilterEmergency');
@@ -979,7 +953,6 @@
             drawNativeRadarWithNode(res, { valHs, valW, valUKC, valTp, valFB, valCV }, dispatchSummary);
         }
 
-        // 原生 Canvas 六角雷達圖繪製
         function drawNativeRadarWithNode(res, nodeVals, dispatchSummary) {
             const canvas = document.getElementById('nativeRadarCanvas');
             if (!canvas) return;
@@ -1051,7 +1024,6 @@
                 ctx.stroke();
             });
 
-            // 100% 黃色警戒線圈
             ctx.save();
             ctx.beginPath();
             ctx.setLineDash([5, 4]);
