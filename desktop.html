@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>GEM-V36D 龜山島雙層整合海事戰術互動控制台 (Desktop Master Final)</title>
+    <title>GEM-V36D 龜山島雙層海事戰術控制台 (全功能修復版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -71,7 +71,7 @@
             animation: borderFlashingAlert 1.5s infinite ease-in-out;
         }
         .nav-tab-btn {
-            padding: 7px 15px;
+            padding: 7px 14px;
             border-radius: 8px;
             font-size: 11.5px;
             font-weight: 700;
@@ -113,12 +113,12 @@
             padding-bottom: 6px;
         }
         .badge {
-            font-size: 10.5px;
+            font-size: 10px;
             font-weight: 700;
             padding: 2px 6px;
             border-radius: 4px;
             display: inline-block;
-            min-width: 52px;
+            min-width: 48px;
             text-align: center;
         }
         .badge-veto { background: rgba(239, 68, 68, 0.2); color: var(--status-danger); border: 1px solid var(--status-danger); }
@@ -191,16 +191,18 @@
         .chart-tooltip {
             position: absolute;
             display: none;
-            background: rgba(15, 23, 42, 0.95);
+            background: rgba(15, 23, 42, 0.96);
             border: 1px solid #38bdf8;
             border-radius: 6px;
-            padding: 5px 8px;
+            padding: 6px 10px;
             font-size: 11px;
             color: #f8fafc;
             pointer-events: none;
-            z-index: 50;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            z-index: 100;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.7);
             white-space: nowrap;
+            backdrop-filter: blur(4px);
+            transition: opacity 0.15s ease;
         }
     </style>
 </head>
@@ -212,7 +214,7 @@
         <div class="flex flex-wrap justify-between items-center gap-2.5">
             <div>
                 <h1 class="text-[16px] font-extrabold text-white flex items-center gap-1.5">
-                    <span class="pulse-dot-blue"></span> 龜山島海事戰術智庫與自主學習執行中樞 (GEM-V36D Desktop Master)
+                    <span class="pulse-dot-blue"></span> 龜山島海事戰術智庫與自主學習執行中樞 (GEM-V36D Master)
                 </h1>
                 <div class="text-[11px] text-[#94a3b8] mt-1 flex flex-wrap items-center gap-2">
                     <span>時鐘：<b id="liveClock" class="font-mono text-white bg-slate-800 px-1.5 py-0.5 rounded">14:08:00 CST</b></span>
@@ -225,7 +227,7 @@
             <!-- 四大分頁切換按鈕 -->
             <div class="flex flex-wrap gap-1.5">
                 <button class="nav-tab-btn active-tab" id="tabBtnDesktop" onclick="switchMainTab('desktop')">🖥 桌面戰術主控</button>
-                <button class="nav-tab-btn" id="tabBtnBathymetry" onclick="switchMainTab('bathymetry')">📐 南北雙岸 CD 工程斷面圖</button>
+                <button class="nav-tab-btn" id="tabBtnBathymetry" onclick="switchMainTab('bathymetry')">📐 南北雙岸色塊防碰撞剖面圖</button>
                 <button class="nav-tab-btn" id="tabBtnLongterm" onclick="switchMainTab('longterm')">🔮 30 天月度宏觀推估</button>
                 <button class="nav-tab-btn" id="tabBtnSoftOcean" onclick="switchMainTab('softocean')">🌊 Soft Ocean 實體海圖與動態流場</button>
                 <button class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-2.5 py-1 rounded-lg text-[11px] transition shadow" onclick="downloadCurrentPage()">💾 下載此網頁 (desktop.html)</button>
@@ -318,6 +320,7 @@
         </div>
     </section>
 
+    <!-- 主分頁 1: 桌面戰術主控 -->
     <main id="tabDesktopView" class="flex flex-col lg:flex-row gap-3 w-full">
         <!-- 左側戰術控制面板 (35%) -->
         <div class="w-full lg:w-[35%] flex flex-col gap-2.5">
@@ -392,121 +395,133 @@
                 </div>
             </div>
 
-            <!-- 4. 低氣壓、東北季風與颱風全參數態勢與南北岸監測 -->
+            <!-- 4. 低氣壓、東北季風與颱風全參數態勢（直觀燈號收盒抽屜版） -->
             <div class="card border-slate-700">
-                <div class="card-header">
-                    <span>4. 📍 低氣壓、東北季風與颱風全域態勢</span>
-                    <span class="text-[10px] text-[#38bdf8]">Level 7 雙碼頭矩陣</span>
-                </div>
-                <div class="bg-[#0b1120] border border-[#334155] rounded-lg p-2.5 mb-2.5 space-y-2 text-[10.5px]">
-                    <div class="flex items-center justify-between border-b border-[#334155]/60 pb-1.5">
-                        <span class="text-[11.5px] font-bold text-amber-400 flex items-center gap-1">
-                            🌀 颱風路徑、低氣壓與東北季風共伴分析
+                <div class="card-header accordion-header flex justify-between items-center !border-b-0 cursor-pointer select-none py-1" onclick="togglePierMonitorAccordion()">
+                    <div class="flex items-center gap-2">
+                        <span class="text-[12.5px] font-bold text-[#38bdf8] flex items-center gap-1.5">
+                            📍 雙岸水文監測維度與標準值檢核
                         </span>
-                        <span class="badge badge-veto text-[9.5px]">中度颱風 955 hPa</span>
+                        <span class="badge badge-veto" id="drawerSummaryBadge">🔴 雙岸全面熔斷</span>
                     </div>
-                    <div class="grid grid-cols-2 gap-1.5">
-                        <div class="bg-[#1e293b]/70 border border-[#334155] p-1.5 rounded">
-                            <span class="text-[#94a3b8] block text-[9px]">颱風中心氣壓與強度</span>
-                            <b class="text-white text-[11px]">中心 955 hPa / 40 m/s</b>
-                            <div class="text-[#cbd5e1] text-[9.5px]">7級風暴風半徑 200 km</div>
-                        </div>
-                        <div class="bg-[#1e293b]/70 border border-[#334155] p-1.5 rounded">
-                            <span class="text-[#94a3b8] block text-[9px]">位置、移向移速與路徑</span>
-                            <b class="text-amber-300 text-[11px]">東南東 450 km (向西北西)</b>
-                            <div class="text-[#cbd5e1] text-[9.5px]">時速 18 km/h (WNW 295°)</div>
-                        </div>
-                        <div class="bg-[#1e293b]/70 border border-[#334155] p-1.5 rounded">
-                            <span class="text-[#94a3b8] block text-[9px]">東北季風共伴與低壓梯度</span>
-                            <b class="text-[#38bdf8] text-[11px]">壓差 1.15 hPa/km (共伴)</b>
-                            <div class="text-[#cbd5e1] text-[9.5px]">ENE 65° 局域強陣風 8~9 級</div>
-                        </div>
-                        <div class="bg-[#1e293b]/70 border border-[#334155] p-1.5 rounded">
-                            <span class="text-[#c084fc] text-[11px]">預估持續影響 3~4 日</span>
-                            <div class="text-[#cbd5e1] text-[9.5px]">D+0~D+1 峰值侵襲，D+2 減弱</div>
-                        </div>
+                    <div class="text-[11px] text-[#38bdf8] flex items-center gap-1 font-mono">
+                        <span id="txtPierAccordionStatus">▼ 點擊展開南北岸檢核表</span>
                     </div>
                 </div>
 
-                <div class="overflow-x-auto">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 22%;">監測維度</th>
-                                <th style="width: 24%;">剛性標準值</th>
-                                <th style="width: 27%;">北岸碼頭 (+3.2m CD)</th>
-                                <th style="width: 27%;">南岸碼頭 (-5.5m CD)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><b>碼頭標高 / 設計水深</b></td>
-                                <td class="text-slate-400">工程基準線</td>
-                                <td>+3.20m CD / -3.20m CD</td>
-                                <td>+2.50m CD / -5.50m CD</td>
-                            </tr>
-                            <tr>
-                                <td><b>平均風速 (風向)</b></td>
-                                <td class="text-emerald-400">&le; 10.8 m/s (6級)</td>
-                                <td><b class="text-white">10.20 m/s</b> (ESE 110°)</td>
-                                <td><b class="text-white">9.50 m/s</b> (ESE 110°)</td>
-                            </tr>
-                            <tr>
-                                <td><b>背風角 / 遮蔽 ($K_w$)</b></td>
-                                <td class="text-emerald-400">&Delta;&theta;&lt;45°, $K_w$&le;0.78</td>
-                                <td>58° / <b class="text-red-400">1.00 (迎風直擊)</b></td>
-                                <td>58° / <b class="text-red-400">1.00 (屏障崩潰)</b></td>
-                            </tr>
-                            <tr>
-                                <td><b>攻角有效風 ($W_{eff}$)</b></td>
-                                <td class="text-emerald-400">&le; 10.17 m/s</td>
-                                <td><b class="text-red-400">10.20 m/s</b> <span class="badge badge-veto">🔴超標</span></td>
-                                <td><b class="text-emerald-300">9.50 m/s</b> <span class="badge badge-pass">🟢合格</span></td>
-                            </tr>
-                            <tr>
-                                <td><b>港池波高 ($H_s$)</b></td>
-                                <td class="text-emerald-400">&le; 1.13 m (&alpha;=0.94)</td>
-                                <td><b class="text-red-400">3.93 m</b> <span class="badge badge-veto">🔴越浪</span></td>
-                                <td><b class="text-red-400">3.71 m</b> <span class="badge badge-veto">🔴擊穿</span></td>
-                            </tr>
-                            <tr>
-                                <td><b>湧浪週期 ($T_p$) / $K_d$</b></td>
-                                <td class="text-emerald-400">&le;12.0s, $K_d$&le;0.883</td>
-                                <td><b class="text-purple-300">15.5s</b> / <b class="text-red-400">1.00 共振</b></td>
-                                <td><b class="text-purple-300">15.5s</b> / <b class="text-red-400">1.00 穿透</b></td>
-                            </tr>
-                            <tr>
-                                <td><b>預留乾舷 ($FB$)</b></td>
-                                <td class="text-emerald-400">&ge; 0.50 m (防漫頂)</td>
-                                <td><b class="text-red-400">0.15 m</b> <span class="badge badge-veto">🔴覆寫</span></td>
-                                <td><b class="text-red-400">0.15 m</b> <span class="badge badge-veto">🔴漫頂</span></td>
-                            </tr>
-                            <tr>
-                                <td><b>動態富餘水深 ($UKC$)</b></td>
-                                <td class="text-emerald-400">&ge; 1.50 m (防觸底)</td>
-                                <td><b class="text-red-400">-1.30 m</b> <span class="badge badge-veto">🔴坐灘</span></td>
-                                <td><b class="text-red-400">0.42 m</b> <span class="badge badge-veto">🔴觸底</span></td>
-                            </tr>
-                            <tr>
-                                <td><b>表面潮流 (向量)</b></td>
-                                <td class="text-emerald-400">&le; 1.0 kts (靠泊限值)</td>
-                                <td><b class="text-[#38bdf8]">1.4 kts</b> ↖ NW 315°</td>
-                                <td><b class="text-[#38bdf8]">0.9 kts</b> ⬅ W 270°</td>
-                            </tr>
-                            <tr>
-                                <td><b>CV 越浪率</b></td>
-                                <td class="text-emerald-400">= 0.00 p/min</td>
-                                <td><b class="text-yellow-400">1.31 p/min</b> (超標)</td>
-                                <td><b class="text-yellow-400">0.85 p/min</b> (超標)</td>
-                            </tr>
-                            <tr>
-                                <td><b>碼頭裁決狀態</b></td>
-                                <td class="text-emerald-400">雙岸放行靠泊</td>
-                                <td><span class="badge badge-veto">🔴 漫頂觸底雙熔斷</span></td>
-                                <td><span class="badge badge-veto">🔴 長浪穿透觸底熔斷</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <!-- 頂部南北岸收盒常駐燈號總結條 (不用點開也能秒看結果) -->
+                <div class="grid grid-cols-2 gap-2 mt-1 pt-1.5 border-t border-[#334155]/60 text-center font-mono">
+                    <div class="bg-[#0b1120] p-1.5 rounded border border-red-500/50 flex flex-col items-center justify-between">
+                        <div class="text-[10px] text-slate-300 font-bold flex items-center gap-1">
+                            ⚓ 北岸 (+3.2m CD)
+                        </div>
+                        <div class="mt-0.5">
+                            <span class="badge badge-veto text-[10px] px-2 py-0.5" id="boxNorthStatusBadge">🔴 越浪漫頂 (FB: 0.15m)</span>
+                        </div>
+                        <div class="text-[9px] text-red-300/80 mt-0.5">波高 3.93m / 裕深 -1.30m 坐灘</div>
+                    </div>
+                    <div class="bg-[#0b1120] p-1.5 rounded border border-red-500/50 flex flex-col items-center justify-between">
+                        <div class="text-[10px] text-slate-300 font-bold flex items-center gap-1">
+                            ⚓ 南岸 (-5.5m CD)
+                        </div>
+                        <div class="mt-0.5">
+                            <span class="badge badge-veto text-[10px] px-2 py-0.5" id="boxSouthStatusBadge">🔴 淺水觸底 (UKC: 0.42m)</span>
+                        </div>
+                        <div class="text-[9px] text-red-300/80 mt-0.5">波高 3.71m / 攻角 58° 屏障失守</div>
+                    </div>
+                </div>
+
+                <!-- 點擊展開的詳細監測維度與剛性標準比對表格 (無 LaTeX 未解析字元) -->
+                <div class="accordion-content collapsed border-t border-[#334155]/60 pt-2.5 mt-2" id="pierMonitorAccordionContent">
+                    <div class="bg-[#0b1120] border border-[#334155] rounded-lg p-2 mb-2 space-y-1.5 text-[10px]">
+                        <div class="flex items-center justify-between border-b border-[#334155]/60 pb-1">
+                            <span class="font-bold text-amber-400 flex items-center gap-1">
+                                🌀 颱風路徑與東北季風共伴全參數
+                            </span>
+                            <span class="badge badge-veto text-[9px]">中颱 955 hPa</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-1.5 text-slate-300 font-mono">
+                            <div>中心強度: <b class="text-white">955 hPa / 40m/s</b></div>
+                            <div>移向移速: <b class="text-amber-300">WNW 295° / 18 km/h</b></div>
+                            <div>共伴壓差: <b class="text-sky-400">1.15 hPa/km (ENE 65°)</b></div>
+                            <div>侵襲峰值: <b class="text-purple-300">D+0~D+1 巨浪直擊</b></div>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="data-table text-[10px]">
+                            <thead>
+                                <tr>
+                                    <th style="width: 25%;">監測維度</th>
+                                    <th style="width: 27%;">剛性標準值</th>
+                                    <th style="width: 24%;">北岸 (+3.2m CD)</th>
+                                    <th style="width: 24%;">南岸 (-5.5m CD)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><b>工程基準高程</b></td>
+                                    <td class="text-slate-400">水深/標高基線</td>
+                                    <td><b class="text-white">+3.2m / -3.2m</b></td>
+                                    <td><b class="text-white">+2.5m / -5.5m</b></td>
+                                </tr>
+                                <tr>
+                                    <td><b>局域風速 (風向)</b></td>
+                                    <td class="text-emerald-400">≤ 10.8 m/s (6級)</td>
+                                    <td>10.2 m/s <span class="badge badge-pass !min-w-[34px] !text-[9px]">🟢合格</span></td>
+                                    <td>9.5 m/s <span class="badge badge-pass !min-w-[34px] !text-[9px]">🟢合格</span></td>
+                                </tr>
+                                <tr>
+                                    <td><b>背風遮蔽 (Kw)</b></td>
+                                    <td class="text-emerald-400">Δθ &lt; 45°, Kw ≤ 0.78</td>
+                                    <td>58° / <b class="text-red-400">1.00</b> <span class="badge badge-veto !min-w-[34px] !text-[9px]">🔴迎風</span></td>
+                                    <td>58° / <b class="text-red-400">1.00</b> <span class="badge badge-veto !min-w-[34px] !text-[9px]">🔴崩潰</span></td>
+                                </tr>
+                                <tr>
+                                    <td><b>攻角有效風 (Weff)</b></td>
+                                    <td class="text-emerald-400">≤ 10.17 m/s</td>
+                                    <td><b class="text-red-400">10.20 m/s</b> <span class="badge badge-veto !min-w-[34px] !text-[9px]">🔴超標</span></td>
+                                    <td><b class="text-emerald-300">9.50 m/s</b> <span class="badge badge-pass !min-w-[34px] !text-[9px]">🟢合格</span></td>
+                                </tr>
+                                <tr>
+                                    <td><b>港池波高 (Hs)</b></td>
+                                    <td class="text-emerald-400">≤ 1.13 m (α=0.94)</td>
+                                    <td><b class="text-red-400">3.93 m</b> <span class="badge badge-veto !min-w-[34px] !text-[9px]">🔴越浪</span></td>
+                                    <td><b class="text-red-400">3.71 m</b> <span class="badge badge-veto !min-w-[34px] !text-[9px]">🔴擊穿</span></td>
+                                </tr>
+                                <tr>
+                                    <td><b>湧浪週期 (Tp/Kd)</b></td>
+                                    <td class="text-emerald-400">≤ 12.0s, Kd ≤ 0.883</td>
+                                    <td>15.5s / <b class="text-red-400">1.00</b> <span class="badge badge-veto !min-w-[34px] !text-[9px]">🔴共振</span></td>
+                                    <td>15.5s / <b class="text-red-400">1.00</b> <span class="badge badge-veto !min-w-[34px] !text-[9px]">🔴穿透</span></td>
+                                </tr>
+                                <tr>
+                                    <td><b>預留乾舷 (FB)</b></td>
+                                    <td class="text-emerald-400">≥ 0.50 m (防漫頂)</td>
+                                    <td><b class="text-red-400">0.15 m</b> <span class="badge badge-veto !min-w-[34px] !text-[9px]">🔴覆寫</span></td>
+                                    <td><b class="text-red-400">0.15 m</b> <span class="badge badge-veto !min-w-[34px] !text-[9px]">🔴漫頂</span></td>
+                                </tr>
+                                <tr>
+                                    <td><b>動態裕深 (UKC)</b></td>
+                                    <td class="text-emerald-400">≥ 1.50 m (防觸底)</td>
+                                    <td><b class="text-red-400">-1.30 m</b> <span class="badge badge-veto !min-w-[34px] !text-[9px]">🔴坐灘</span></td>
+                                    <td><b class="text-red-400">0.42 m</b> <span class="badge badge-veto !min-w-[34px] !text-[9px]">🔴觸底</span></td>
+                                </tr>
+                                <tr>
+                                    <td><b>CV 越浪率</b></td>
+                                    <td class="text-emerald-400">= 0.00 p/min</td>
+                                    <td>1.31 p/min <span class="badge badge-veto !min-w-[34px] !text-[9px]">🔴超標</span></td>
+                                    <td>0.85 p/min <span class="badge badge-veto !min-w-[34px] !text-[9px]">🔴超標</span></td>
+                                </tr>
+                                <tr>
+                                    <td><b>綜合裁決狀態</b></td>
+                                    <td class="text-emerald-400">雙岸放行靠泊</td>
+                                    <td><span class="badge badge-veto !min-w-[48px] !text-[9.5px]">🔴漫頂坐灘</span></td>
+                                    <td><span class="badge badge-veto !min-w-[48px] !text-[9.5px]">🔴觸底熔斷</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -551,38 +566,8 @@
                 </div>
             </div>
 
-            <!-- 奇門 30 天宏觀氣象/長浪/風場趨勢專屬卡片 -->
-            <div class="card border-[#c084fc] bg-[#161726]">
-                <div class="flex justify-between items-center border-b border-[#334155] pb-2 mb-2">
-                    <span class="text-[13px] font-bold text-[#c084fc]">🔮 奇門 30 天宏觀氣象/長浪/風場趨勢</span>
-                    <div class="flex gap-1.5">
-                        <span class="badge bg-[#c084fc]/20 text-[#c084fc] border border-[#c084fc]">奇門匹配率 <b id="valQimenRate">100.00%</b></span>
-                        <span class="badge badge-pass">邊坡崩塌風險 <b>0.15</b></span>
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px]">
-                    <div class="bg-[#0b1120] p-2.5 rounded border-l-2 border-indigo-400">
-                        <div class="text-[#94a3b8] font-bold mb-1">🌀 颱風與低氣壓系統趨勢</div>
-                        <div class="text-[#e2e8f0]">巽宮氣場活躍，副高邊緣低壓槽擺盪，預測未來 30 天有 1~2 個外圍環流逼近，氣壓壓差維持偏低。</div>
-                    </div>
-                    <div class="bg-[#0b1120] p-2.5 rounded border-l-2 border-[#38bdf8]">
-                        <div class="text-[#94a3b8] font-bold mb-1">💨 風力風速及向量變動 (ENE/ESE)</div>
-                        <div class="text-[#e2e8f0]">東北季風效應加劇，主導偏東至東北東風，局域陣風機率 45%，風向攻角 Δθ 於 35°~55° 間擺盪。</div>
-                    </div>
-                    <div class="bg-[#0b1120] p-2.5 rounded border-l-2 border-[#facc15]">
-                        <div class="text-[#94a3b8] font-bold mb-1">🌊 遠洋長浪及湧浪穿透 (Swell)</div>
-                        <div class="text-[#e2e8f0]">長浪（Tp &gt; 12.0s）穿透港池頻率達 <b class="text-[#facc15]">68%</b>，觸發港池共振與越浪風險。</div>
-                    </div>
-                    <div class="bg-[#0b1120] p-2.5 rounded border-l-2 border-[#ef4444]">
-                        <div class="text-[#94a3b8] font-bold mb-1">🌊 潮位波動與越浪蓋頂</div>
-                        <div class="text-[#e2e8f0]">天文大潮疊加風暴潮升水，門檻已動態緊縮至 α = <b class="text-[#facc15]">0.94</b>。</div>
-                    </div>
-                </div>
-            </div>
-
             <!-- 實監值與法定標準值全維度結構化橫向比對 -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-                <!-- 左框：官方標準體系 (CWA / 東北角) -->
                 <div class="border-2 border-[#38bdf8] bg-slate-900/95 rounded-xl p-3 shadow-md flex flex-col justify-between">
                     <div>
                         <div class="flex justify-between items-center border-b border-[#38bdf8]/40 pb-1.5 mb-2">
@@ -590,9 +575,6 @@
                                 🏛️ 官方標準體系 (CWA / 東北角)
                             </span>
                             <span class="badge badge-veto">🔴 官方封島</span>
-                        </div>
-                        <div class="text-[10px] text-slate-300 mb-1.5 leading-snug">
-                            依據觀光署東北角管理處法定標準，實監與法定門檻嚴格對照：
                         </div>
                         <div class="overflow-x-auto">
                             <table class="data-table !text-[10px]">
@@ -607,38 +589,28 @@
                                 <tbody>
                                     <tr>
                                         <td><b>平均風 (陣風)</b></td>
-                                        <td class="text-emerald-400">&le; 5級 (&le;10.8m/s)</td>
-                                        <td><b class="text-red-400">13.8m/s (6~7級)</b><br><span class="text-[9px] text-slate-400">陣風 9 級超標</span></td>
+                                        <td class="text-emerald-400">≤ 5級 (≤10.8m/s)</td>
+                                        <td><b class="text-red-400">13.8m/s (6~7級)</b></td>
                                         <td><span class="badge badge-veto !min-w-[42px] !text-[9.5px]">🔴 封島</span></td>
                                     </tr>
                                     <tr>
                                         <td><b>近岸浪高 (海況)</b></td>
                                         <td class="text-emerald-400">&lt; 2.0m (中浪以下)</td>
-                                        <td><b class="text-red-400">3.5~4.0m 大浪</b><br><span class="text-[9px] text-slate-400">外海浮標 3.71m</span></td>
+                                        <td><b class="text-red-400">3.5~4.0m 大浪</b></td>
                                         <td><span class="badge badge-veto !min-w-[42px] !text-[9.5px]">🔴 停航</span></td>
                                     </tr>
                                     <tr>
                                         <td><b>長浪警報 (Tp)</b></td>
                                         <td class="text-emerald-400">Tp &lt; 8.0s (無長浪)</td>
-                                        <td><b class="text-purple-300">15.5s (&ge;8s警戒)</b><br><span class="text-[9px] text-slate-400">浪潮頻頻翻過碼頭</span></td>
+                                        <td><b class="text-purple-300">15.5s (≥8s警戒)</b></td>
                                         <td><span class="badge badge-veto !min-w-[42px] !text-[9.5px]">🔴 警報</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td><b>颱風警報 (動態)</b></td>
-                                        <td class="text-emerald-400">無海陸警發布</td>
-                                        <td><b class="text-amber-300">中颱 955 hPa</b><br><span class="text-[9px] text-slate-400">暴風半徑 200km逼近</span></td>
-                                        <td><span class="badge badge-veto !min-w-[42px] !text-[9.5px]">🔴 封島</span></td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                    <div class="mt-2 pt-1 border-t border-slate-700/60 text-[9.5px] text-slate-400 font-mono">
-                        法定評估：未計入 Kd 港池消能折減，偏向巨觀經驗預警
-                    </div>
                 </div>
 
-                <!-- 右框：GEM 模型微觀算子 (GT 基準) -->
                 <div class="border-2 border-[#c084fc] bg-slate-900/95 rounded-xl p-3 shadow-md flex flex-col justify-between">
                     <div>
                         <div class="flex justify-between items-center border-b border-[#c084fc]/40 pb-1.5 mb-2">
@@ -646,9 +618,6 @@
                                 🤖 GEM 模型微觀算子 (GT 基準)
                             </span>
                             <span class="badge badge-veto">🔴 0.0% 熔斷</span>
-                        </div>
-                        <div class="text-[10px] text-slate-300 mb-1.5 leading-snug">
-                            依據自適應神經網路算子（α=0.94），微觀物理防線嚴格對照：
                         </div>
                         <div class="overflow-x-auto">
                             <table class="data-table !text-[10px]">
@@ -663,127 +632,89 @@
                                 <tbody>
                                     <tr>
                                         <td><b>港池波高 (Hs)</b></td>
-                                        <td class="text-emerald-400">&le; 1.13m (&alpha;=0.94)</td>
-                                        <td><b class="text-red-400">3.71 m</b><br><span class="text-[9px] text-slate-400">Kd=1.00 長浪穿透</span></td>
+                                        <td class="text-emerald-400">≤ 1.13m (α=0.94)</td>
+                                        <td><b class="text-red-400">3.71 m</b></td>
                                         <td><span class="badge badge-veto !min-w-[42px] !text-[9.5px]">🔴 熔斷</span></td>
                                     </tr>
                                     <tr>
-                                        <td><b>攻角有效風 (Weff)</b></td>
-                                        <td class="text-emerald-400">&le; 10.17 m/s</td>
-                                        <td><b class="text-emerald-300">9.50 m/s</b><br><span class="text-[9px] text-slate-400">&Delta;&theta;=58&deg; 屏障崩潰</span></td>
-                                        <td><span class="badge badge-pass !min-w-[42px] !text-[9.5px]">🟢 合格</span></td>
-                                    </tr>
-                                    <tr>
                                         <td><b>動態裕深 (UKC)</b></td>
-                                        <td class="text-emerald-400">&ge; 1.50m (防觸底)</td>
-                                        <td><b class="text-red-400">0.42 m</b><br><span class="text-[9px] text-slate-400">南岸 -5.5m CD 基點</span></td>
+                                        <td class="text-emerald-400">≥ 1.50m (防觸底)</td>
+                                        <td><b class="text-red-400">0.42 m</b></td>
                                         <td><span class="badge badge-veto !min-w-[42px] !text-[9.5px]">🔴 觸底</span></td>
                                     </tr>
                                     <tr>
                                         <td><b>預留乾舷 (FB)</b></td>
-                                        <td class="text-emerald-400">&ge; 0.50m (防漫頂)</td>
-                                        <td><b class="text-red-400">0.15 m</b><br><span class="text-[9px] text-slate-400">Vision 越浪 1.31 p/m</span></td>
+                                        <td class="text-emerald-400">≥ 0.50m (防漫頂)</td>
+                                        <td><b class="text-red-400">0.15 m</b></td>
                                         <td><span class="badge badge-veto !min-w-[42px] !text-[9.5px]">🔴 漫頂</span></td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                    <div class="mt-2 pt-1 border-t border-slate-700/60 text-[9.5px] text-purple-300 font-mono">
-                        GEM Ground Truth：Hs、UKC、FB 三重剛性一票否決
-                    </div>
                 </div>
             </div>
 
-            <!-- 底端總裁示區塊 (紅黃交替呼吸閃爍外框) -->
-            <div class="border-2 border-flashing-alert bg-slate-950/95 rounded-xl p-3.5 shadow-2xl">
-                <div class="flex justify-between items-center border-b border-red-500/50 pb-1.5 mb-2">
-                    <span class="text-[13px] font-extrabold text-white flex items-center gap-2">
-                        <span class="inline-block w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
-                        ⚖ 龜山島雙層海事戰術控制台・總裁綜合裁示 (Executive Ruling)
-                    </span>
-                    <span class="bg-red-600 text-white font-mono font-bold text-[11px] px-2.5 py-0.5 rounded shadow">Q4 絕對物理熔斷</span>
-                </div>
-                <div class="text-[11.5px] leading-relaxed text-slate-200">
-                    <b class="text-red-400">【裁決指令】全線封島管制，嚴禁靠泊北岸與南岸碼頭！</b>
-                    今日受 955 hPa 颱風外圍長浪直擊，港池湧浪週期 <b>Tp=15.5 s &gt; 12.0 s</b> 穿透消能屏障 (Kd=1.00)，港池有效波高 <b>Hs,pier=3.71 m</b> 嚴重超標；南岸碼頭泊位水深基點 -5.50m CD，扣除客輪吃水 1.20m、蹲沉 0.82m 與穿透長浪後，船底動態裕深僅剩 <b>UKC=0.42 m &lt; 1.50 m</b> 觸發觸底危險；北岸碼頭標高 +3.20m CD 遭朔望大潮滿潮 (+1.35m) 與湧浪漫頂，Vision-PINN 偵測越浪率 1.31 p/min，預留乾舷強制覆寫為 <b>FB=0.15 m &lt; 0.50 m</b>。雙岸泊位全面失效，客輪一律直航返航避風母港【烏石港】。
-                </div>
-                <div class="mt-2.5 pt-2 border-t border-slate-800 flex flex-wrap justify-between items-center text-[10.5px] text-slate-400 gap-1">
-                    <span>游擊指令：<b>11:20 止登截止</b> ➔ <b>14:20 強制清島全員撤退</b> (撤離耗時精算: <b class="text-yellow-400">20 分鐘</b>)</span>
-                    <span class="text-emerald-400 font-mono">SSOT ACK: 100.0% 合約同化完成</span>
-                </div>
-            </div>
-
-            <!-- 公告收盒版（折疊抽屜式）官方說帖與模型科學說島 -->
-            <div class="card border-[#38bdf8]/60 bg-[#0f172a] mt-1 shadow-lg">
-                <div class="card-header accordion-header flex justify-between items-center !border-b-0 cursor-pointer select-none py-1" onclick="toggleOfficialNoticeAccordion()">
+            <!-- 底端總裁示區塊（收盒抽屜折疊版） -->
+            <div class="border-2 border-flashing-alert bg-slate-950/95 rounded-xl p-3 shadow-2xl">
+                <!-- 抽屜標題列：點擊展開/收合 -->
+                <div class="accordion-header flex justify-between items-center cursor-pointer select-none py-0.5" onclick="toggleExecutiveRulingAccordion()">
                     <div class="flex items-center gap-2">
-                        <span class="text-[12.5px] font-bold text-sky-400 flex items-center gap-1.5">
-                            📜 官方發布常用公告版本說帖 vs GEM-V36D 物理模型科學說島
+                        <span class="inline-block w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
+                        <span class="text-[12.5px] font-extrabold text-white flex items-center gap-1.5">
+                            ⚖ 龜山島雙層海事戰術控制台・總裁綜合裁示 (Executive Ruling)
                         </span>
-                        <span class="badge badge-veto text-[9px]">雙軌說帖收盒版</span>
+                        <span class="bg-red-600 text-white font-mono font-bold text-[10px] px-2 py-0.5 rounded shadow">Q4 絕對物理熔斷</span>
                     </div>
-                    <div class="text-[11px] text-[#38bdf8] flex items-center gap-1 font-mono">
-                        <span id="txtNoticeAccordionStatus">▼ 點擊展開官方公告與模型說帖</span>
+                    <div class="text-[10.5px] text-[#38bdf8] flex items-center gap-1 font-mono">
+                        <span id="txtExecAccordionStatus">▼ 點擊展開詳細裁示說帖</span>
                     </div>
                 </div>
-                <div class="accordion-content collapsed border-t border-[#334155]/60 pt-2.5 mt-1" id="noticeAccordionContent">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-                        <div class="bg-slate-900 border border-sky-600/70 rounded-xl p-3 text-[11px] text-slate-300 space-y-2 shadow-md">
-                            <div class="flex items-center justify-between border-b border-sky-600/50 pb-1.5">
-                                <span class="font-bold text-sky-400 flex items-center gap-1.5">
-                                    🏛️ 交通部觀光署東北角風管處・官方正式公告封島說帖
-                                </span>
-                                <span class="badge badge-veto text-[9px]">法定公告</span>
-                            </div>
-                            <div class="p-2 bg-slate-950/80 rounded border border-slate-700/70 text-[10.5px] leading-relaxed text-slate-200">
-                                <b class="text-sky-300 block mb-1">【交通部觀光署東北角及宜蘭海岸國家風景區管理處 處辦公告】</b>
-                                受東北季風及中度颱風外圍環流影響，依據交通部中央氣象署近海漁業氣象預報資訊，臺灣東北部及宜蘭蘇澳沿海平均風力達 <b>6 級以上（陣風達 8～9 級）</b>，且沿海浪高達 <b>2～3 米以上之中至大浪</b>。今早經本處派員透過視訊監控與現場實地勘查，龜山島碼頭周邊海象極為惡劣，現場不時有長浪浪潮翻過碼頭漫頂。<br>
-                                基於離島臨時碼頭靠泊安全、船舶航行海域及旅客上下船人身安全等考量，<b>宜蘭龜山島自即日起實施預警性封島管制，暫停開放遊客登島，以策安全。</b>頭城烏石港賞鯨船配合停止載客登島。造成不便，敬請見諒。
-                            </div>
-                            <div class="flex justify-between items-center text-[9.5px] text-slate-400 pt-0.5">
-                                <span>法規依據：發展觀光條例第 64 條 / 災害防救法</span>
-                                <span class="text-emerald-400 font-mono">文號：觀東管字第 115002026 號</span>
-                            </div>
-                        </div>
 
-                        <div class="bg-slate-900 border border-[#c084fc]/70 rounded-xl p-3 text-[11px] text-slate-300 space-y-2 shadow-md">
-                            <div class="flex items-center justify-between border-b border-[#c084fc]/50 pb-1.5">
-                                <span class="font-bold text-[#c084fc] flex items-center gap-1.5">
-                                    🤖 GEM-V36D 龜山島海事戰術智庫・微觀水動力科學說島
-                                </span>
-                                <span class="badge bg-[#c084fc]/20 text-[#c084fc] border border-[#c084fc] text-[9px]">科學裁決</span>
-                            </div>
-                            <div class="p-2 bg-slate-950/80 rounded border border-purple-900/50 text-[10.5px] leading-relaxed text-slate-200">
-                                <b class="text-purple-300 block mb-1">【GEM-V36D 龜山島雙層海事戰術智庫 官方科學裁決說帖】</b>
-                                經 GEM-V36D 物理驅動神經網路（PINN）與微觀港池水動力矩陣實時解算（SSOT 結算 14:08 CST），今日受 955 hPa 中度颱風外圍長浪直擊，外海湧浪週期 <b>Tp=15.5s &gt; 12.0s</b> 擊穿港池消能屏障（Kd=1.00），港池波高 <b>Hs,pier=3.71m</b> 遠超剛性限值 1.13m（α=0.94）；<br>
-                                北岸主碼頭（+3.20m CD）遭滿潮與長浪漫頂，Vision-PINN 越浪率 1.31 p/min 覆寫預留乾舷 <b>FB=0.15m &lt; 0.50m</b>，且水深 -3.20m 遭吃水蹲沉 2.02m 與波高擊穿致 <b>UKC=-1.30m 嚴重坐灘</b>；南岸權宜碼頭（-5.50m CD）午後因 ESE 110° 攻角致 401 高地背風屏障崩潰（Kw=1.00），動態裕深僅剩 <b>UKC=0.42m &lt; 1.50m 觸發觸底硬熔斷</b>。<br>
-                                南北雙岸泊位全面失效，裁定 <b>Q4 絕對物理熔斷（0.0% 封島）</b>，客輪全速避難烏石港，11:20 止登已過，14:20 強制清島全員撤離！
-                            </div>
-                            <div class="flex justify-between items-center text-[9.5px] text-purple-400 pt-0.5 font-mono">
-                                <span>裁決代號：GEM-V36D-DEC-20261006-Q4</span>
-                                <span class="text-emerald-400">PINN Convergence: 99.2%</span>
-                            </div>
-                        </div>
+                <!-- 頂部常駐摘要卡片：收起時亦能秒級掌握裁定結果 -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2 pt-2 border-t border-slate-800 text-[10.5px]">
+                    <div class="bg-[#0b1120] p-1.5 rounded border border-red-500/40 flex items-center justify-between">
+                        <span class="text-slate-400">總體裁定：</span>
+                        <b class="text-red-400 font-bold">全線封島管制 (禁靠雙岸)</b>
+                    </div>
+                    <div class="bg-[#0b1120] p-1.5 rounded border border-amber-500/40 flex items-center justify-between">
+                        <span class="text-slate-400">時程指令：</span>
+                        <b class="text-yellow-400 font-bold">11:20 止登 ➔ 14:20 撤離</b>
+                    </div>
+                    <div class="bg-[#0b1120] p-1.5 rounded border border-emerald-500/40 flex items-center justify-between">
+                        <span class="text-slate-400">避難航向：</span>
+                        <b class="text-emerald-400 font-bold">直航烏石港 (精算 20 分鐘)</b>
+                    </div>
+                </div>
+
+                <!-- 點擊展開的詳細微觀水動力裁決全文與 SSOT 結算條 -->
+                <div class="accordion-content collapsed border-t border-[#334155]/60 pt-2.5 mt-2" id="execRulingAccordionContent">
+                    <div class="text-[11px] leading-relaxed text-slate-200 bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
+                        <b class="text-red-400 block mb-1">【裁決指令】全線封島管制，嚴禁靠泊北岸與南岸碼頭！</b>
+                        今日受 955 hPa 颱風外圍長浪直擊，港池湧浪週期 <b>Tp=15.5 s &gt; 12.0 s</b> 穿透消能屏障 (Kd=1.00)，港池有效波高 <b>Hs,pier=3.71 m</b> 嚴重超標；南岸碼頭泊位水深基點 -5.50m CD，扣除客輪吃水 1.20m、蹲沉 0.82m 與穿透長浪後，船底動態裕深僅剩 <b>UKC=0.42 m &lt; 1.50 m</b> 觸發觸底危險；北岸碼頭標高 +3.20m CD 遭朔望大潮滿潮 (+1.35m) 與湧浪漫頂，Vision-PINN 偵測越浪率 1.31 p/min，預留乾舷強制覆寫為 <b>FB=0.15 m &lt; 0.50 m</b>。雙岸泊位全面失效，客輪一律直航返航避風母港【烏石港】。
+                    </div>
+                    <div class="mt-2 pt-1.5 border-t border-slate-800/80 flex flex-wrap justify-between items-center text-[10px] text-slate-400 gap-1">
+                        <span>游擊指令：<b>11:20 止登截止</b> ➔ <b>14:20 強制清島全員撤退</b> (撤離耗時精算: <b class="text-yellow-400">20 分鐘</b>)</span>
+                        <span class="text-emerald-400 font-mono">SSOT ACK: 100.0% 合約同化完成</span>
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- 分頁 2: 南北雙岸 CD 水深海陸工程斷面圖 -->
+    <!-- 分頁 2: 南北雙岸色塊防碰撞剖面圖 -->
     <main id="tabBathymetryView" class="hidden flex-col gap-3 w-full">
-        <div class="card border-sky-500">
-            <div class="card-header">
-                <span>📐 龜山島南、北岸碼頭 CD 水深海陸工程雙斷面圖 (交通部觀光局鼎興顧問 92-021 & 97-05 竣工細設藍圖校準)</span>
-                <span class="text-[11px] text-sky-400">高程基準：最低潮位 CD 0.00m (Chart Datum)</span>
+        <div class="card border-[#38bdf8]">
+            <div class="card-header !text-[#38bdf8]">
+                <span>📐 龜山島南、北岸碼頭 CD 水深海陸工程色塊防碰撞雙斷面圖 (鼎興 92-021 & 97-05 竣工細設藍圖校準)</span>
+                <span class="text-[11px] text-[#38bdf8]">高程基準：最低潮位 CD ±0.00m (Chart Datum)</span>
             </div>
             <div class="p-3 bg-slate-950 rounded-xl border border-slate-700 text-[11px] text-slate-300 space-y-3">
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-center font-mono">
                     <div class="p-2 bg-slate-900 border border-slate-800 rounded-lg">
                         <span class="text-slate-400 block text-[9.5px]">北岸主碼頭標高 / 設計水深</span>
                         <b class="text-white text-[12.5px]">+3.20m CD / -3.20m CD</b>
-                        <div class="text-[9.5px] text-red-400 mt-0.5">漫頂 FB 0.15m / 裕深 -1.30m (坐灘)</div>
+                        <div class="text-[9.5px] text-red-400 mt-0.5">越浪 FB 0.15m / 裕深 -1.30m (坐灘)</div>
                     </div>
                     <div class="p-2 bg-slate-900 border border-slate-800 rounded-lg">
                         <span class="text-slate-400 block text-[9.5px]">南岸權宜碼頭標高 / 設計水深</span>
@@ -802,21 +733,22 @@
                     </div>
                 </div>
 
-                <!-- 雙斷面動態 Canvas 渲染畫布 (高度加高至 480px，標示零重疊，船身透明度 50%，深藍文字，含完整圖例) -->
-                <div class="w-full h-[480px] bg-slate-900 border border-slate-700 rounded-xl relative overflow-hidden">
+                <!-- 雙斷面動態 Canvas 渲染畫布 (色塊分區防碰撞、游標懸停即時提示) -->
+                <div class="w-full h-[480px] bg-slate-900 border border-slate-700 rounded-xl relative overflow-hidden chart-canvas-wrap">
                     <canvas id="canvasDualPierProfile" class="w-full h-full block"></canvas>
+                    <div id="tipDualPierProfile" class="chart-tooltip"></div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-[11px] leading-relaxed">
                     <div class="p-2.5 bg-red-500/10 border border-red-500/30 rounded-lg text-red-200">
                         <b class="text-red-300 block mb-1">⚓ 北岸主碼頭（鼎興 92-021 竣工圖）：</b>
-                        • 碼頭面標高 +3.20m CD（引道頂 +3.60m，沉箱頂面 +2.70m），原海床拋石水深僅 <b>-3.20m CD</b>。<br>
-                        • 今日滿潮 +1.35m CD，預留乾舷被壓縮至 <b>1.85m</b>，遭外海 <b>3.93m</b> 巨浪直擊撲頂，Vision 偵測越浪率 1.31 p/min 覆寫 <b>FB=0.15m</b>！且總水深 3.85m 扣除吃水蹲沉 2.02m 與波高 3.93m，裕深 <b>UKC = -2.10m 嚴重坐灘</b>，吃水虛線直接砸入海床拋石，嚴禁任何船隻靠近。
+                        • 碼頭面標高 +3.20m CD（引道頂 +3.60m），原海床拋石水深僅 <b>-3.20m CD</b>。<br>
+                        • 朔望滿潮 +1.35m 遭外海 <b>3.93m</b> 巨浪直擊撲頂，Vision 偵測越浪率 1.31 p/min 覆寫 <b>FB=0.15m</b>！總水深 3.85m 扣除吃水蹲沉 2.02m 與波高 3.93m，裕深 <b>UKC = -1.30m 嚴重坐灘</b>，龍骨砸入拋石，全日禁止停泊。
                     </div>
                     <div class="p-2.5 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-200">
                         <b class="text-amber-300 block mb-1">⚓ 南岸權宜碼頭（鼎興 97-05 細設圖）：</b>
-                        • 沉箱碼頭面標高僅 <b>+2.50m CD</b>，浚挖設計水深為 <b>-5.50m CD</b>（回填拋石面 -4.5m）。<br>
-                        • 14:08 CST 當前退潮位 +0.65m，總水深 6.15m，扣除客輪吃水 1.20m 與雙體船高速蹲沉 0.82m（佔用 2.02m）後，遭穿透波高 <b>3.71m</b> 直擊，動態裕深僅剩 <b>UKC = 0.42m &lt; 1.50m</b>，吃水虛線與波谷直接落入<b>【橘色觸底危險區間】</b>！15:42 乾潮（-0.45m）更將跌至 <b>-0.68m 坐灘破底</b>，雙岸泊位全面失效。
+                        • 沉箱碼頭面標高 <b>+2.50m CD</b>，浚挖設計水深為 <b>-5.50m CD</b>（回填拋石面 -4.5m）。<br>
+                        • 退潮位 +0.65m，總水深 6.15m，扣除客輪吃水 1.20m 與蹲沉 0.82m（佔用 2.02m）後遭穿透波高 <b>3.71m</b> 直擊，動態裕深僅剩 <b>UKC = 0.42m &lt; 1.50m</b>，龍骨直接陷入<b>【紅色觸底危險區】</b>！雙岸泊位全面失效，直航返航烏石港。
                     </div>
                 </div>
             </div>
@@ -865,7 +797,6 @@
             </div>
         </div>
 
-        <!-- 30 天各日海事水文戰術推估日曆 -->
         <div class="card">
             <div class="card-header">
                 <span>📅 30 天各日海事水文戰術推估與南北岸監測日曆 (圖示直觀化版)</span>
@@ -884,67 +815,9 @@
                 </table>
             </div>
         </div>
-
-        <!-- 沿岸相關測站即時資訊與模型推算差異分析折疊盒 -->
-        <div class="card border-[#38bdf8]/60 bg-[#0f172a]">
-            <div class="card-header accordion-header flex justify-between items-center !border-b-0" onclick="toggleStationAccordion()">
-                <div class="flex items-center gap-2">
-                    <span class="text-[14px]">📡 沿岸主要氣象測站即時資訊 vs GEM-V36D 物理模型測算差異分析</span>
-                    <span class="badge badge-pass text-[9.5px]">實時比對收盒版</span>
-                </div>
-                <div class="text-[11px] text-[#38bdf8] flex items-center gap-1 font-mono">
-                    <span id="txtAccordionStatus">▼ 點擊展開詳細測站差異比對 (時間點: 2026-10-06 14:08:00 CST)</span>
-                </div>
-            </div>
-            <div class="accordion-content collapsed border-t border-[#334155]/60 pt-2.5 mt-1" id="stationAccordionContent">
-                <div class="text-[11.5px] text-[#cbd5e1] mb-2 p-2 bg-[#1e293b] rounded border border-slate-700">
-                    <b>官方開封島檢核標準 (交通部觀光署東北角管理處)：</b><br>
-                    • <b>風力門檻</b>：平均風力達 6 級 (≥10.8 m/s) 或陣風達 8~9 級即刻封島。<br>
-                    • <b>浪高門檻</b>：近岸浪高達 2~3 米中至大浪即刻封島；GEM 碼頭剛性限值為 1.20m (緊縮後 1.13m)。<br>
-                    • <b>長浪門檻</b>：週期 Tp ≥ 8s 且浪高 ≥ 1.5m 為官方長浪警戒；GEM 判定 Tp &gt; 12.0s 港池消能失效直接封閉。<br>
-                    • <b>颱風警報</b>：發布海上或陸上颱風警報，暴風圈逼近東北海域，全線預警封閉。
-                </div>
-                <table class="data-table text-left mb-2.5">
-                    <thead>
-                        <tr>
-                            <th class="w-[14%]">沿岸觀測站</th><th class="w-[18%]">官方播報格式 (CWA)</th><th class="w-[12%]">換算精確值</th><th class="w-[14%]">GEM 算子值</th><th class="w-[14%]">標準檢核</th><th class="w-[16%]">差異原因與研判</th><th class="w-[12%]">判定燈號</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="font-bold text-white">龜山島外海浮標站<br><span class="text-[10px] text-slate-400">(14:08 CST)</span></td>
-                            <td>東北東風 6至7級 陣風9級<br>大浪 3.5至4.0米</td>
-                            <td>風速 13.8 m/s<br>波高 3.71 m</td>
-                            <td><b class="text-[#f59e0b]">W_local: 9.5 m/s</b><br><b class="text-[#ef4444]">Hs: 3.71 m</b></td>
-                            <td class="text-red-400 font-bold">風力超標 (≥6級)<br>浪高超標 (&gt;1.5m)</td>
-                            <td class="text-[10px] leading-relaxed text-[#cbd5e1]">Tp=15.5s 長浪穿透港池 Kd=1.00，印證第一位階 Hard VETO 熔斷。</td>
-                            <td><span class="badge badge-veto">🔴 官方封島</span></td>
-                        </tr>
-                        <tr>
-                            <td class="font-bold text-white">蘇澳港外海浮標站<br><span class="text-[10px] text-slate-400">(14:08 CST)</span></td>
-                            <td>偏東風 6級 陣風8級<br>中浪轉大浪 2.8至3.5米</td>
-                            <td>風速 12.0 m/s<br>波高 3.10 m</td>
-                            <td><b class="text-[#f59e0b]">南岸 W: 9.50 m/s</b><br><b class="text-[#ef4444]">南岸 Hs: 3.71 m</b></td>
-                            <td class="text-red-400 font-bold">風力超標 (6級)<br>大浪超標 (&gt;2m)</td>
-                            <td class="text-[10px] leading-relaxed text-[#cbd5e1]">長浪折射繞射效應致使南岸港池仍被 3.71m 長浪擊穿，泊位水深僅 0.42m 觸底。</td>
-                            <td><span class="badge badge-veto">🔴 官方封島</span></td>
-                        </tr>
-                        <tr>
-                            <td class="font-bold text-white">頭城/烏石港測站<br><span class="text-[10px] text-slate-400">(14:08 CST)</span></td>
-                            <td>東北東風 5至6級 陣風7級<br>中浪 1.8至2.2米</td>
-                            <td>風速 9.8 m/s<br>波高 2.05 m</td>
-                            <td><b class="text-[#10b981]">航線退潮: 1.4 kts</b><br><b class="text-white">烏石港水域安全</b></td>
-                            <td class="text-emerald-400 font-bold">母港背風屏障<br>泊位安全</td>
-                            <td class="text-[10px] leading-relaxed text-[#cbd5e1]">受雪山山脈背風屏蔽，風浪衰減，符合「直航返航烏石港」原則。</td>
-                            <td><span class="badge badge-pass">🟢 避風母港</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
     </main>
 
-    <!-- 分頁 4: Soft Ocean 龜山島周邊海域地圖 (NLSC 圖資 + 邊界約束動態流場) -->
+    <!-- 分頁 4: Soft Ocean 龜山島周邊海域地圖 -->
     <main id="tabSoftOceanView" class="hidden flex-col gap-3 w-full">
         <div class="card border-[#38bdf8] bg-[#0c1628]">
             <div class="card-header !text-[#38bdf8]">
@@ -1130,17 +1003,15 @@
             const rad = telemetry.delta_theta_deg * (Math.PI / 180);
             const w_eff = Number((w_local * Math.abs(Math.cos(rad))).toFixed(2));
             
-            // 南岸動態富餘水深精算 (自強顧問 9104 CD 系統校準：設計水深 5.50m CD)
             const south_total_depth = CONSTANTS.SOUTH_DEPTH_CD + telemetry.tide_eta_m;
             const vessel_occupancy = CONSTANTS.D_DRAFT + CONSTANTS.S_SQUAT;
             const ukc_south = Number((south_total_depth - vessel_occupancy - hs_pier).toFixed(2));
 
-            // 北岸動態水深精算 (鼎興 92-021 竣工圖：底床水深僅 3.20m CD)
             const north_total_depth = CONSTANTS.NORTH_DEPTH_CD + telemetry.tide_eta_m;
             const ukc_north = Number((north_total_depth - vessel_occupancy - (hs_pier * 1.06)).toFixed(2));
 
             let fb_pier = Number((CONSTANTS.NORTH_DECK_CD - telemetry.tide_eta_m).toFixed(2));
-            if (telemetry.video_overtopping_rate > 0.0) fb_pier = 0.15; // 越浪漫頂覆寫
+            if (telemetry.video_overtopping_rate > 0.0) fb_pier = 0.15;
 
             let alpha_tune = 0.94;
             if (telemetry.hs_cwa > 2.0 || telemetry.tp_s > 12.0) alpha_tune = 0.94;
@@ -1163,29 +1034,39 @@
         function switchMainTab(tab) {
             currentTab = tab;
             document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('active-tab'));
-            document.getElementById('tabDesktopView').classList.add('hidden');
-            document.getElementById('tabBathymetryView').classList.add('hidden');
-            document.getElementById('tabLongtermView').classList.add('hidden');
-            document.getElementById('tabSoftOceanView').classList.add('hidden');
+            
+            const tabs = ['tabDesktopView', 'tabBathymetryView', 'tabLongtermView', 'tabSoftOceanView'];
+            tabs.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.classList.add('hidden');
+                    el.classList.remove('flex');
+                }
+            });
 
             if (tab === 'desktop') {
-                document.getElementById('tabBtnDesktop').classList.add('active-tab');
-                document.getElementById('tabDesktopView').classList.remove('hidden');
+                const btn = document.getElementById('tabBtnDesktop');
+                const view = document.getElementById('tabDesktopView');
+                if (btn) btn.classList.add('active-tab');
+                if (view) { view.classList.remove('hidden'); view.classList.add('flex'); }
                 setTimeout(redrawAllDesktopCanvas, 30);
             } else if (tab === 'bathymetry') {
-                document.getElementById('tabBtnBathymetry').classList.add('active-tab');
-                document.getElementById('tabBathymetryView').classList.remove('hidden');
-                document.getElementById('tabBathymetryView').classList.add('flex');
-                setTimeout(drawDualPierProfileCanvas, 30);
+                const btn = document.getElementById('tabBtnBathymetry');
+                const view = document.getElementById('tabBathymetryView');
+                if (btn) btn.classList.add('active-tab');
+                if (view) { view.classList.remove('hidden'); view.classList.add('flex'); }
+                setTimeout(initDualPierProfileCanvas, 30);
             } else if (tab === 'longterm') {
-                document.getElementById('tabBtnLongterm').classList.add('active-tab');
-                document.getElementById('tabLongtermView').classList.remove('hidden');
-                document.getElementById('tabLongtermView').classList.add('flex');
+                const btn = document.getElementById('tabBtnLongterm');
+                const view = document.getElementById('tabLongtermView');
+                if (btn) btn.classList.add('active-tab');
+                if (view) { view.classList.remove('hidden'); view.classList.add('flex'); }
                 setTimeout(draw30DaysCanvas, 30);
             } else if (tab === 'softocean') {
-                document.getElementById('tabBtnSoftOcean').classList.add('active-tab');
-                document.getElementById('tabSoftOceanView').classList.remove('hidden');
-                document.getElementById('tabSoftOceanView').classList.add('flex');
+                const btn = document.getElementById('tabBtnSoftOcean');
+                const view = document.getElementById('tabSoftOceanView');
+                if (btn) btn.classList.add('active-tab');
+                if (view) { view.classList.remove('hidden'); view.classList.add('flex'); }
                 setTimeout(() => {
                     initLeafletMap();
                     if (leafletMap) leafletMap.invalidateSize();
@@ -1195,35 +1076,52 @@
             }
         }
 
-        function toggleStationAccordion() {
-            const content = document.getElementById('stationAccordionContent');
-            const status = document.getElementById('txtAccordionStatus');
+        function togglePierMonitorAccordion() {
+            const content = document.getElementById('pierMonitorAccordionContent');
+            const status = document.getElementById('txtPierAccordionStatus');
+            if (!content) return;
             if (content.classList.contains('collapsed')) {
                 content.classList.remove('collapsed');
                 content.classList.add('expanded');
-                status.textContent = '▲ 點擊收起詳細測站比對 (時間點: 2026-10-06 14:08:00 CST)';
+                if (status) status.textContent = '▲ 點擊收起南北岸檢核表';
             } else {
                 content.classList.remove('expanded');
                 content.classList.add('collapsed');
-                status.textContent = '▼ 點擊展開詳細測站差異比對 (時間點: 2026-10-06 14:08:00 CST)';
+                if (status) status.textContent = '▼ 點擊展開南北岸檢核表';
             }
         }
 
         function toggleOfficialNoticeAccordion() {
             const content = document.getElementById('noticeAccordionContent');
             const status = document.getElementById('txtNoticeAccordionStatus');
+            if (!content) return;
             if (content.classList.contains('collapsed')) {
                 content.classList.remove('collapsed');
                 content.classList.add('expanded');
-                status.textContent = '▲ 點擊收起官方公告與模型說帖';
+                if (status) status.textContent = '▲ 點擊收起官方公告與模型說帖';
             } else {
                 content.classList.remove('expanded');
                 content.classList.add('collapsed');
-                status.textContent = '▼ 點擊展開官方公告與模型說帖';
+                if (status) status.textContent = '▼ 點擊展開官方公告與模型說帖';
             }
         }
 
-        /* 繪製 Canvas 2x2 與單線圖表 */
+        /* 總裁綜合裁示折疊收盒切換函數 */
+        function toggleExecutiveRulingAccordion() {
+            const content = document.getElementById('execRulingAccordionContent');
+            const status = document.getElementById('txtExecAccordionStatus');
+            if (!content) return;
+            if (content.classList.contains('collapsed')) {
+                content.classList.remove('collapsed');
+                content.classList.add('expanded');
+                if (status) status.textContent = '▲ 點擊收起詳細裁示說帖';
+            } else {
+                content.classList.remove('expanded');
+                content.classList.add('collapsed');
+                if (status) status.textContent = '▼ 點擊展開詳細裁示說帖';
+            }
+        }
+
         function drawLineChartCanvas(canvasId, tipId, cfg) {
             const canvas = document.getElementById(canvasId);
             const tooltip = document.getElementById(tipId);
@@ -1365,7 +1263,6 @@
             }
         }
 
-        /* 繪製 7 天雙軸 Canvas */
         function draw7DaysDualCanvas() {
             const canvas = document.getElementById('canvasChart7Days');
             const tooltip = document.getElementById('tipChart7Days');
@@ -1493,7 +1390,53 @@
             }
         }
 
-        /* 繪製南北雙岸 CD 斷面圖 (防重疊版、凱鯨號50%透明度、深藍色文字、完整圖例呈現) */
+        let dualPierHitZones = [];
+
+        function initDualPierProfileCanvas() {
+            const canvas = document.getElementById('canvasDualPierProfile');
+            const tooltip = document.getElementById('tipDualPierProfile');
+            if (!canvas) return;
+
+            drawDualPierProfileCanvas();
+
+            canvas.onmousemove = function(e) {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+
+                let hit = null;
+                for (let i = dualPierHitZones.length - 1; i >= 0; i--) {
+                    const zone = dualPierHitZones[i];
+                    if (mouseX >= zone.x && mouseX <= zone.x + zone.w &&
+                        mouseY >= zone.y && mouseY <= zone.y + zone.h) {
+                        hit = zone;
+                        break;
+                    }
+                }
+
+                if (hit && tooltip) {
+                    tooltip.style.display = 'block';
+                    let left = mouseX + 16;
+                    let top = mouseY - 25;
+                    const tipWidth = 270;
+                    if (left + tipWidth > rect.width) {
+                        left = mouseX - tipWidth - 16;
+                    }
+                    if (top < 10) top = 10;
+
+                    tooltip.style.left = left + 'px';
+                    tooltip.style.top = top + 'px';
+                    tooltip.innerHTML = hit.tooltipHtml;
+                } else if (tooltip) {
+                    tooltip.style.display = 'none';
+                }
+            };
+
+            canvas.onmouseleave = function() {
+                if (tooltip) tooltip.style.display = 'none';
+            };
+        }
+
         function drawDualPierProfileCanvas() {
             const canvas = document.getElementById('canvasDualPierProfile');
             if (!canvas) return;
@@ -1508,292 +1451,282 @@
             ctx.scale(dpr, dpr);
             ctx.clearRect(0, 0, w, h);
 
-            // 底色
-            ctx.fillStyle = '#090d16';
+            dualPierHitZones = [];
+
+            ctx.fillStyle = '#060911';
             ctx.fillRect(0, 0, w, h);
 
             const midX = w * 0.50;
-            const pxPerM = 27; // 垂直比例尺：1m = 27px
-            const yCD0 = h * 0.46; // CD ±0.00m 基準高程線
+            const pxPerM = 28;
+            const yCD0 = h * 0.44;
+            const curTide = currentTelemetry.tide_eta_m ?? 0.65;
+            const yCurrentTide = yCD0 - (curTide * pxPerM);
+            const yHighTide = yCD0 - (1.35 * pxPerM);
+            const yLowTide = yCD0 - (-0.45 * pxPerM);
 
-            // 中央分界虛線
+            const vesselOccupancyM = CONSTANTS.D_DRAFT + CONSTANTS.S_SQUAT;
+            const vesselOccupancyPx = vesselOccupancyM * pxPerM;
+            const sKeelY = yCurrentTide + vesselOccupancyPx;
+
             ctx.save();
             ctx.setLineDash([5, 5]);
             ctx.strokeStyle = '#334155';
             ctx.lineWidth = 1.5;
             ctx.beginPath();
             ctx.moveTo(midX, 42);
-            ctx.lineTo(midX, h - 10);
+            ctx.lineTo(midX, h - 8);
             ctx.stroke();
             ctx.restore();
 
-            // 水位計算
-            const yHighTide = yCD0 - (1.35 * pxPerM);
-            const currentTide = currentTelemetry.tide_eta_m ?? 0.65;
-            const yCurrentTide = yCD0 - (currentTide * pxPerM);
-            const yLowTide = yCD0 - (-0.45 * pxPerM);
-
-            const vesselOccupancyM = CONSTANTS.D_DRAFT + CONSTANTS.S_SQUAT; // 吃水 1.2m + 蹲沉 0.82m = 2.02m
-            const vesselOccupancyPx = vesselOccupancyM * pxPerM;
-            const sKeelY = yCurrentTide + vesselOccupancyPx;
-
-            // ================= 頂部工程圖例條 (Legend) =================
+            // 頂部圖例條
             ctx.save();
-            ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
-            ctx.fillRect(10, 8, w - 20, 28);
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.94)';
+            ctx.fillRect(8, 8, w - 16, 28);
             ctx.strokeStyle = '#334155';
             ctx.lineWidth = 1;
-            ctx.strokeRect(10, 8, w - 20, 28);
+            ctx.strokeRect(8, 8, w - 16, 28);
 
-            ctx.font = 'bold 10px sans-serif';
+            ctx.font = 'bold 10px -apple-system, sans-serif';
             ctx.textAlign = 'left';
 
-            // 圖例 1: 安全水深區
-            ctx.fillStyle = 'rgba(16, 185, 129, 0.4)';
-            ctx.fillRect(18, 15, 14, 14);
-            ctx.strokeStyle = '#10b981'; ctx.strokeRect(18, 15, 14, 14);
+            ctx.fillStyle = 'rgba(16, 185, 129, 0.35)';
+            ctx.fillRect(16, 15, 13, 13);
+            ctx.strokeStyle = '#10b981'; ctx.strokeRect(16, 15, 13, 13);
             ctx.fillStyle = '#10b981';
-            ctx.fillText('🟢 安全區(UKC≥1.5m/FB≥0.5m)', 36, 26);
+            ctx.fillText('🟢 安全通航區 (UKC≥1.5m / FB≥0.5m)', 34, 25);
 
-            // 圖例 2: 觸底危險區
-            ctx.fillStyle = 'rgba(249, 115, 22, 0.45)';
-            ctx.fillRect(195, 15, 14, 14);
-            ctx.strokeStyle = '#f97316'; ctx.strokeRect(195, 15, 14, 14);
-            ctx.fillStyle = '#f97316';
-            ctx.fillText('🟠 觸底/越浪危險區(UKC<1.5m)', 213, 26);
+            ctx.fillStyle = 'rgba(245, 158, 11, 0.40)';
+            ctx.fillRect(232, 15, 13, 13);
+            ctx.strokeStyle = '#f59e0b'; ctx.strokeRect(232, 15, 13, 13);
+            ctx.fillStyle = '#f59e0b';
+            ctx.fillText('🟠 低裕深警戒區 (0.5m≤UKC<1.5m)', 250, 25);
 
-            // 圖例 3: 凱鯨號
-            ctx.fillStyle = 'rgba(250, 204, 21, 0.5)';
-            ctx.fillRect(380, 15, 14, 14);
-            ctx.strokeStyle = '#facc15'; ctx.strokeRect(380, 15, 14, 14);
-            ctx.fillStyle = '#facc15';
-            ctx.fillText('🟡 凱鯨號(50%透明/佔2.02m)', 398, 26);
-
-            // 圖例 4: 穿透長浪
-            ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 2.2;
-            ctx.beginPath(); ctx.moveTo(560, 22); ctx.lineTo(580, 22); ctx.stroke();
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.50)';
+            ctx.fillRect(445, 15, 13, 13);
+            ctx.strokeStyle = '#ef4444'; ctx.strokeRect(445, 15, 13, 13);
             ctx.fillStyle = '#ef4444';
-            ctx.fillText('🔴 穿透長浪(3.71m/3.93m)', 585, 26);
+            ctx.fillText('🔴 觸底/越浪危險區 (UKC<0.5m)', 463, 25);
 
-            // 圖例 5: 潮位線色標說明
-            ctx.fillStyle = '#cbd5e1';
-            ctx.fillText('潮位: 🟣滿潮(+1.35) 🔵現潮(+0.65) ⚪CD(±0) 🟠乾潮(-0.45)', w - 300 > 680 ? w - 300 : 680, 26);
+            ctx.fillStyle = 'rgba(250, 204, 21, 0.50)';
+            ctx.fillRect(645, 15, 13, 13);
+            ctx.strokeStyle = '#facc15'; ctx.strokeRect(645, 15, 13, 13);
+            ctx.fillStyle = '#facc15';
+            ctx.fillText('🟡 凱鯨號 (吃水+蹲沉2.02m)', 663, 25);
             ctx.restore();
 
-            // ================= 左側：南岸權宜碼頭 =================
-            const sPierX = midX * 0.65;
+            // 左側：南岸權宜碼頭
+            const sPierX = midX * 0.68;
             const sBedY = yCD0 + (5.50 * pxPerM);
             const sRubbleY = yCD0 + (4.50 * pxPerM);
             const sDeckY = yCD0 - (2.50 * pxPerM);
-            const sSafeMinUKCY = sBedY - (1.50 * pxPerM);
+            const sWarningTopY = sBedY - (1.50 * pxPerM);
+            const sDangerTopY = sBedY - (0.50 * pxPerM);
 
-            // 南岸浚挖海床
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(15, sBedY, sPierX - 15, h - sBedY);
             ctx.fillStyle = '#1e293b';
-            ctx.fillRect(15, sBedY, sPierX - 15, h - sBedY - 10);
-            // 拋石護坡
-            ctx.fillStyle = '#263449';
             ctx.fillRect(sPierX - 45, sRubbleY, 45, sBedY - sRubbleY);
 
-            // 南岸水體
-            ctx.fillStyle = 'rgba(14, 165, 233, 0.08)';
-            ctx.fillRect(15, yCurrentTide, sPierX - 15, sBedY - yCurrentTide);
-
-            // 🟢 安全水深區 (綠色半透明)
-            if (sSafeMinUKCY > yCurrentTide) {
-                ctx.fillStyle = 'rgba(16, 185, 129, 0.16)';
-                ctx.fillRect(15, yCurrentTide, sPierX - 15, sSafeMinUKCY - yCurrentTide);
-                ctx.strokeStyle = 'rgba(16, 185, 129, 0.45)'; ctx.setLineDash([3, 3]);
-                ctx.strokeRect(15, yCurrentTide, sPierX - 15, sSafeMinUKCY - yCurrentTide);
+            if (sWarningTopY > yCurrentTide) {
+                ctx.fillStyle = 'rgba(16, 185, 129, 0.20)';
+                ctx.fillRect(15, yCurrentTide, sPierX - 15, sWarningTopY - yCurrentTide);
+                dualPierHitZones.push({
+                    x: 15, y: yCurrentTide, w: sPierX - 15, h: sWarningTopY - yCurrentTide,
+                    tooltipHtml: `<div class="font-bold text-emerald-400">🟢 南岸水體：安全通航區</div>
+                                  <div>當前退潮水位：<b>+0.65m CD</b></div>
+                                  <div>裕深裕度：<b>UKC ≥ 1.50m</b></div>
+                                  <div>狀態：<span class="badge badge-pass">🟢 PASS 充足安全裕深</span></div>`
+                });
             }
 
-            // 🟠 淺水觸底危險區 (橘色半透明，UKC < 1.50m 警示)
-            ctx.fillStyle = 'rgba(249, 115, 22, 0.28)';
-            ctx.fillRect(15, sSafeMinUKCY, sPierX - 15, sBedY - sSafeMinUKCY);
-            ctx.strokeStyle = 'rgba(249, 115, 22, 0.65)'; ctx.setLineDash([3, 3]);
-            ctx.strokeRect(15, sSafeMinUKCY, sPierX - 15, sBedY - sSafeMinUKCY);
-            ctx.setLineDash([]);
+            ctx.fillStyle = 'rgba(245, 158, 11, 0.30)';
+            ctx.fillRect(15, sWarningTopY, sPierX - 15, sDangerTopY - sWarningTopY);
+            dualPierHitZones.push({
+                x: 15, y: sWarningTopY, w: sPierX - 15, h: sDangerTopY - sWarningTopY,
+                tooltipHtml: `<div class="font-bold text-amber-400">🟠 南岸水體：低裕深警戒區間</div>
+                              <div>裕深範圍：<b>0.50m ≤ UKC < 1.50m</b></div>
+                              <div>戰術指令：嚴防波谷下陷，限制航速 ≤ 3 節</div>
+                              <div>狀態：<span class="badge badge-warn">🟠 預警限制</span></div>`
+            });
 
-            // 標示色塊文字 (獨立區域，不與吃水線重疊)
-            ctx.font = 'bold 9.5px sans-serif';
-            ctx.fillStyle = '#10b981';
-            ctx.fillText('🟢 安全水深區 (UKC ≥ 1.50m)', 22, yCurrentTide + 18);
-            ctx.fillStyle = '#f97316';
-            ctx.fillText('🟠 淺水觸底危險區 (UKC < 1.50m 警示)', 22, sSafeMinUKCY + 18);
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.45)';
+            ctx.fillRect(15, sDangerTopY, sPierX - 15, sBedY - sDangerTopY);
+            dualPierHitZones.push({
+                x: 15, y: sDangerTopY, w: sPierX - 15, h: sBedY - sDangerTopY,
+                tooltipHtml: `<div class="font-bold text-red-400">🔴 南岸底床：淺水觸底危險區！</div>
+                              <div>海床基線：<b>-5.50m CD</b> (拋石面 -4.50m)</div>
+                              <div>當前裕深：<b>UKC = 0.42m < 1.50m</b> (觸底熔斷)</div>
+                              <div>狀態：<span class="badge badge-veto">🔴 VETO 坐灘硬熔斷</span></div>`
+            });
 
-            // 南岸碼頭沉箱結構
-            ctx.fillStyle = '#334155';
-            ctx.fillRect(sPierX, sDeckY, midX - sPierX - 15, sBedY - sDeckY + 25);
-            ctx.strokeStyle = '#64748b'; ctx.lineWidth = 1;
-            ctx.strokeRect(sPierX, sDeckY, midX - sPierX - 15, sBedY - sDeckY + 25);
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(sPierX, sDeckY, midX - sPierX - 12, sBedY - sDeckY + 25);
+            ctx.strokeStyle = '#475569'; ctx.lineWidth = 1.2;
+            ctx.strokeRect(sPierX, sDeckY, midX - sPierX - 12, sBedY - sDeckY + 25);
+            dualPierHitZones.push({
+                x: sPierX, y: sDeckY, w: midX - sPierX - 12, h: sBedY - sDeckY + 25,
+                tooltipHtml: `<div class="font-bold text-sky-400">⚓ 南岸權宜碼頭結構 (鼎興 97-05)</div>
+                              <div>沉箱頂面標高：<b>+2.50m CD</b></div>
+                              <div>浚挖底床水深：<b>-5.50m CD</b></div>
+                              <div>迎風攻角：<b>ESE 58° (背風屏障崩潰)</b></div>`
+            });
 
-            ctx.font = 'bold 9.5px monospace'; ctx.fillStyle = '#f8fafc';
-            ctx.fillText('沉箱頂面 +2.50m CD', sPierX + 8, sDeckY - 8);
-            // 拋石面標籤：明確標在沉箱內壁右側，完全不與水體內的紅框重疊！
-            ctx.fillStyle = '#94a3b8';
-            ctx.fillText('拋石面 -4.50m CD', sPierX + 8, sRubbleY + 14);
-            ctx.fillText('浚挖底床 -5.50m CD', 22, sBedY + 18);
-
-            // 長浪波形 (赤紅線)
-            ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 2.4;
+            const sWaveHeightPx = 3.71 * pxPerM * 0.45;
+            ctx.save();
             ctx.beginPath();
-            ctx.moveTo(15, yCurrentTide - (3.71 * pxPerM * 0.45));
-            ctx.bezierCurveTo(sPierX * 0.35, yCurrentTide + (3.71 * pxPerM * 0.5), sPierX * 0.7, yCurrentTide - (3.71 * pxPerM * 0.55), sPierX, sDeckY + 4);
+            ctx.moveTo(15, yCurrentTide - sWaveHeightPx);
+            ctx.bezierCurveTo(sPierX * 0.35, yCurrentTide + sWaveHeightPx, sPierX * 0.70, yCurrentTide - sWaveHeightPx, sPierX, sDeckY + 6);
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2.4;
             ctx.stroke();
 
-            // 🚢 凱鯨號船體：【透明度 50%：rgba(250, 204, 21, 0.5)】
-            const boatW = 110;
-            const boatX = sPierX - 145;
-            ctx.fillStyle = 'rgba(250, 204, 21, 0.5)';
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.12)';
+            ctx.lineTo(sPierX, yCurrentTide);
+            ctx.lineTo(15, yCurrentTide);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+
+            dualPierHitZones.push({
+                x: 15, y: yCurrentTide - sWaveHeightPx - 8, w: sPierX - 15, h: sWaveHeightPx * 2 + 10,
+                tooltipHtml: `<div class="font-bold text-red-400">🌊 南岸港池：穿透湧浪包絡帶</div>
+                              <div>碼頭有效波高：<b>Hs = 3.71m</b> (限值 1.13m)</div>
+                              <div>湧浪週期：<b>Tp = 15.5s > 12.0s</b> (Kd=1.00 共振擊穿)</div>
+                              <div>狀態：<span class="badge badge-veto">🔴 波高擊穿 VETO</span></div>`
+            });
+
+            // 凱鯨號
+            const boatW = 120;
+            const boatX = sPierX - 155;
+            ctx.fillStyle = 'rgba(250, 204, 21, 0.50)';
             ctx.fillRect(boatX, yCurrentTide - 10, boatW, vesselOccupancyPx + 10);
-            ctx.strokeStyle = '#facc15'; ctx.lineWidth = 1.5;
+            ctx.strokeStyle = '#facc15'; ctx.lineWidth = 1.8;
             ctx.strokeRect(boatX, yCurrentTide - 10, boatW, vesselOccupancyPx + 10);
 
-            // 凱鯨號相關文字：【深藍色 #0a2540 / #0f172a】
-            ctx.font = 'bold 9.5px sans-serif';
-            ctx.fillStyle = '#0a2540';
-            ctx.fillText('🚢 凱鯨號 (CATAMARAN)', boatX + 6, yCurrentTide + 10);
-            ctx.font = 'bold 8.5px sans-serif';
-            ctx.fillText('吃水+蹲沉 2.02m (50%透明)', boatX + 8, yCurrentTide + 26);
-
-            // 船底吃水虛線 (黃色虛線)
             ctx.save();
             ctx.strokeStyle = '#facc15'; ctx.setLineDash([4, 4]); ctx.lineWidth = 1.6;
             ctx.beginPath(); ctx.moveTo(15, sKeelY); ctx.lineTo(sPierX, sKeelY); ctx.stroke();
             ctx.restore();
 
-            // 吃水線標註 (移至左側單獨高度，不與安全水深文字重疊)
-            ctx.font = 'bold 9px monospace';
-            ctx.fillStyle = '#facc15';
-            ctx.fillText('🚢 當日吃水深線 -1.37m CD (佔用 2.02m)', 22, sKeelY - 5);
+            ctx.font = 'bold 9.5px -apple-system, sans-serif';
+            ctx.fillStyle = '#0f172a';
+            ctx.fillText('🚢 凱鯨號 (CATAMARAN)', boatX + 6, yCurrentTide + 12);
+            ctx.font = 'bold 8.5px -apple-system, sans-serif';
+            ctx.fillText('吃水+蹲沉 2.02m (50%透明)', boatX + 6, yCurrentTide + 26);
 
-            // 動態 UKC 測量垂直箭頭線 (位於 x = sPierX - 18)
-            const ukcVal = currentEvaluation.ukc ?? 0.42;
-            const ukcLineX = sPierX - 18;
-            ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 2.2;
-            ctx.beginPath(); ctx.moveTo(ukcLineX, sKeelY); ctx.lineTo(ukcLineX, sBedY); ctx.stroke();
+            dualPierHitZones.push({
+                x: boatX, y: yCurrentTide - 10, w: boatW, h: vesselOccupancyPx + 10,
+                tooltipHtml: `<div class="font-bold text-amber-400">🚢 凱鯨號穿浪雙體客輪</div>
+                              <div>基本吃水：<b>1.20m</b> | 高速蹲沉：<b>0.82m</b></div>
+                              <div>水體佔用包絡：<b>2.02m</b> (龍骨深 -1.37m CD)</div>
+                              <div class="text-red-300">船底沉降已吃入【紅色觸底危險色塊】！</div>
+                              <div>動態裕深：<b class="text-red-400">UKC = 0.42m < 1.50m</b></div>
+                              <div>狀態：<span class="badge badge-veto">🔴 觸底硬熔斷</span></div>`
+            });
 
-            // 🚨 動態 UKC 警示框：【重構位置：置於吃水線正下方、海床上方的安全水體中，縱向與海床保持充足距離，絕不遮擋拋石文字！】
-            const alertBoxX = boatX - 10;
-            const alertBoxY = sKeelY + 20;
-            ctx.fillStyle = '#ef4444';
-            ctx.fillRect(alertBoxX, alertBoxY, 155, 22);
-            ctx.font = 'bold 9px sans-serif'; ctx.fillStyle = '#ffffff';
-            ctx.fillText(`🚨 動態 UKC: ${ukcVal}m (落入橘色危險區!)`, alertBoxX + 6, alertBoxY + 15);
-
-            // 南岸工程標題
-            ctx.font = 'bold 11px sans-serif'; ctx.fillStyle = '#38bdf8';
+            ctx.font = 'bold 11px -apple-system, sans-serif'; ctx.fillStyle = '#38bdf8';
             ctx.fillText('⚓ 南岸權宜碼頭 (鼎興 97-05 細設)', 20, 52);
-            ctx.font = '9.5px sans-serif'; ctx.fillStyle = '#cbd5e1';
-            ctx.fillText('碼頭面: +2.50m CD | 浚挖底床: -5.50m CD | 攻角 ESE 58° (屏障崩潰)', 20, 66);
+            ctx.font = '9.5px -apple-system, sans-serif'; ctx.fillStyle = '#94a3b8';
+            ctx.fillText('沉箱頂面 +2.50m CD | 浚挖底床 -5.50m CD | 攻角 ESE 58°', 20, 66);
 
-            // ================= 右側：北岸主碼頭 =================
-            const nPierX = midX + (w - midX) * 0.65;
+            // 右側：北岸主碼頭
+            const nPierX = midX + (w - midX) * 0.66;
             const nBedY = yCD0 + (3.20 * pxPerM);
             const nDeckY = yCD0 - (3.20 * pxPerM);
             const nApproachY = yCD0 - (3.60 * pxPerM);
-            const nSafeFBY = yCurrentTide - (0.50 * pxPerM);
 
-            // 北岸海床拋石
-            ctx.fillStyle = '#1e293b';
-            ctx.fillRect(midX + 15, nBedY, nPierX - midX - 15, h - nBedY - 10);
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(midX + 15, nBedY, nPierX - midX - 15, h - nBedY);
 
-            // 北岸水體
-            ctx.fillStyle = 'rgba(14, 165, 233, 0.08)';
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.45)';
             ctx.fillRect(midX + 15, yCurrentTide, nPierX - midX - 15, nBedY - yCurrentTide);
+            dualPierHitZones.push({
+                x: midX + 15, y: yCurrentTide, w: nPierX - midX - 15, h: nBedY - yCurrentTide,
+                tooltipHtml: `<div class="font-bold text-red-400">🔴 北岸水體：嚴重坐灘危險區！</div>
+                              <div>拋石水深：<b>-3.20m CD</b> (基底淺狹)</div>
+                              <div>吃水佔用 2.02m + 浪高 3.93m ＝ <b>5.95m</b></div>
+                              <div>動態裕深：<b class="text-red-400">UKC = -1.30m (龍骨砸入拋石)</b></div>
+                              <div>狀態：<span class="badge badge-veto">🔴 嚴重坐灘破底 VETO</span></div>`
+            });
 
-            // 🟢 預留乾舷安全區 (FB ≥ 0.50m)
-            ctx.fillStyle = 'rgba(16, 185, 129, 0.16)';
-            ctx.fillRect(nPierX - 120, nSafeFBY, 110, yCurrentTide - nSafeFBY);
-            ctx.strokeStyle = 'rgba(16, 185, 129, 0.45)'; ctx.setLineDash([3, 3]);
-            ctx.strokeRect(nPierX - 120, nSafeFBY, 110, yCurrentTide - nSafeFBY);
-
-            // 🟠 越浪撲頂危險區 (橘紅色波浪包絡)
-            const waveHeightPx = 3.93 * pxPerM * 0.45;
-            ctx.fillStyle = 'rgba(249, 115, 22, 0.28)';
-            ctx.beginPath();
-            ctx.moveTo(midX + 15, yCurrentTide - waveHeightPx);
-            ctx.bezierCurveTo(midX + 70, yCurrentTide + waveHeightPx, nPierX - 20, nDeckY - 22, nPierX + 60, nDeckY - 12);
-            ctx.lineTo(nPierX + 60, nDeckY + 20);
-            ctx.lineTo(midX + 15, nBedY);
-            ctx.closePath();
-            ctx.fill();
-            ctx.setLineDash([]);
-
-            // 北岸碼頭沉箱與引道結構
-            ctx.fillStyle = '#334155';
+            ctx.fillStyle = '#1e293b';
             ctx.fillRect(nPierX, nDeckY, w - nPierX - 15, nBedY - nDeckY + 25);
-            ctx.fillRect(nPierX + 60, nApproachY, w - nPierX - 75, nDeckY - nApproachY);
-            ctx.strokeStyle = '#64748b'; ctx.lineWidth = 1;
+            ctx.fillRect(nPierX + 55, nApproachY, w - nPierX - 70, nDeckY - nApproachY);
+            ctx.strokeStyle = '#475569'; ctx.lineWidth = 1.2;
             ctx.strokeRect(nPierX, nDeckY, w - nPierX - 15, nBedY - nDeckY + 25);
+            dualPierHitZones.push({
+                x: nPierX, y: nDeckY, w: w - nPierX - 15, h: nBedY - nDeckY + 25,
+                tooltipHtml: `<div class="font-bold text-sky-400">⚓ 北岸主碼頭結構 (鼎興 92-021)</div>
+                              <div>碼頭面標高：<b>+3.20m CD</b> (引道頂 +3.60m)</div>
+                              <div>原海床拋石：<b>-3.20m CD</b></div>
+                              <div>攻角態勢：<b>ESE 58° (迎風面直擊)</b></div>`
+            });
 
-            ctx.font = 'bold 9.5px monospace'; ctx.fillStyle = '#f8fafc';
-            ctx.fillText('碼頭面 +3.20m CD', nPierX + 6, nDeckY - 6);
-            ctx.fillText('引道頂 +3.60m', nPierX + 65, nApproachY - 6);
-            ctx.fillStyle = '#94a3b8';
-            ctx.fillText('拋石水深 -3.20m CD', nPierX + 8, nBedY + 18);
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.55)';
+            ctx.fillRect(nPierX - 10, nDeckY - 14, 65, 14);
+            dualPierHitZones.push({
+                x: nPierX - 10, y: nDeckY - 14, w: 65, h: 14,
+                tooltipHtml: `<div class="font-bold text-red-400">🚨 碼頭面越浪浸頂區！</div>
+                              <div>Vision-PINN 偵測越浪率：<b>1.31 p/min</b></div>
+                              <div>預留乾舷：<b class="text-red-400">FB = 0.15m < 0.50m (強制覆寫)</b></div>
+                              <div>狀態：<span class="badge badge-veto">🔴 越浪漫頂 VETO</span></div>`
+            });
 
-            // 北岸巨浪撲頂曲線
-            ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 2.4;
+            const nWaveHeightPx = 3.93 * pxPerM * 0.45;
+            ctx.save();
             ctx.beginPath();
-            ctx.moveTo(midX + 15, yCurrentTide - waveHeightPx);
-            ctx.bezierCurveTo(midX + 70, yCurrentTide + waveHeightPx, nPierX - 20, nDeckY - 22, nPierX + 60, nDeckY - 12);
+            ctx.moveTo(midX + 15, yCurrentTide - nWaveHeightPx);
+            ctx.bezierCurveTo(midX + 70, yCurrentTide + nWaveHeightPx, nPierX - 15, nDeckY - 24, nPierX + 60, nDeckY - 10);
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2.4;
             ctx.stroke();
 
-            // 北岸吃水深線
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.14)';
+            ctx.lineTo(nPierX + 60, yCurrentTide);
+            ctx.lineTo(midX + 15, yCurrentTide);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+
+            dualPierHitZones.push({
+                x: midX + 15, y: yCurrentTide - nWaveHeightPx - 8, w: nPierX - midX + 45, h: nWaveHeightPx * 2 + 10,
+                tooltipHtml: `<div class="font-bold text-red-400">🌊 北岸迎風：巨浪衝刷撲頂帶</div>
+                              <div>港池波高：<b>Hs = 3.93m</b> (限值 1.13m)</div>
+                              <div>迎風直擊，巨浪翻過防波堤與碼頭面</div>
+                              <div>狀態：<span class="badge badge-veto">🔴 巨浪漫頂 VETO</span></div>`
+            });
+
             ctx.save();
             ctx.strokeStyle = '#facc15'; ctx.setLineDash([4, 4]); ctx.lineWidth = 1.6;
             ctx.beginPath(); ctx.moveTo(midX + 15, sKeelY); ctx.lineTo(nPierX - 10, sKeelY); ctx.stroke();
-            ctx.font = 'bold 9px monospace'; ctx.fillStyle = '#facc15';
-            ctx.fillText('🚢 吃水深線 -1.37m (佔用 2.02m)', midX + 20, sKeelY - 5);
             ctx.restore();
 
-            // 越浪覆寫警示框 (獨立高度，無重疊)
-            const fbVal = currentEvaluation.fb_pier ?? 0.15;
-            ctx.fillStyle = '#ef4444';
-            ctx.fillRect(midX + 25, 78, 165, 20);
-            ctx.font = 'bold 9px sans-serif'; ctx.fillStyle = '#ffffff';
-            ctx.fillText(`🚨 浪高 3.93m 越浪漫頂 (FB: ${fbVal}m)`, midX + 29, 92);
-
-            ctx.font = 'bold 9px sans-serif'; ctx.fillStyle = '#f97316';
-            ctx.fillText('🟠 坐灘危險：水深3.85m | 吃水2.02m+波高3.93m | UKC = -1.30m (砸底)', midX + 20, nBedY - 8);
-
-            // 北岸工程標題
-            ctx.font = 'bold 11px sans-serif'; ctx.fillStyle = '#38bdf8';
+            ctx.font = 'bold 11px -apple-system, sans-serif'; ctx.fillStyle = '#38bdf8';
             ctx.fillText('⚓ 北岸主碼頭 (鼎興 92-021 竣工)', midX + 20, 52);
-            ctx.font = '9.5px sans-serif'; ctx.fillStyle = '#cbd5e1';
-            ctx.fillText('碼頭面: +3.20m CD | 拋石水深: -3.20m CD | 攻角 ESE 58° (迎風直擊)', midX + 20, 66);
+            ctx.font = '9.5px -apple-system, sans-serif'; ctx.fillStyle = '#94a3b8';
+            ctx.fillText('碼頭面: +3.20m CD | 拋石水深: -3.20m CD | 迎風直擊', midX + 20, 66);
 
-            // ================= 全域基準線 (置於頂層，避開文字重疊) =================
+            // 基準刻度線
             ctx.save();
-            // CD ±0.00m 基準線
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
-            ctx.setLineDash([4, 4]);
-            ctx.lineWidth = 1.2;
-            ctx.beginPath(); ctx.moveTo(10, yCD0); ctx.lineTo(w - 10, yCD0); ctx.stroke();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)'; ctx.setLineDash([4, 4]); ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(8, yCD0); ctx.lineTo(w - 8, yCD0); ctx.stroke();
             ctx.font = 'bold 9px monospace'; ctx.fillStyle = '#94a3b8';
-            ctx.fillText('高程基準 CD ±0.00m (最低潮位 Chart Datum)', 22, yCD0 - 4);
+            ctx.fillText('高程基準 CD ±0.00m', 20, yCD0 - 4);
 
-            // 滿潮線 +1.35m
-            ctx.strokeStyle = 'rgba(192, 132, 252, 0.65)';
-            ctx.setLineDash([3, 3]);
-            ctx.beginPath(); ctx.moveTo(10, yHighTide); ctx.lineTo(w - 10, yHighTide); ctx.stroke();
-            ctx.font = 'bold 9px sans-serif'; ctx.fillStyle = '#c084fc';
-            ctx.fillText('朔望滿潮 +1.35m CD (09:12 CST)', midX + 15, yHighTide - 4);
+            ctx.strokeStyle = 'rgba(192, 132, 252, 0.55)'; ctx.setLineDash([3, 3]);
+            ctx.beginPath(); ctx.moveTo(8, yHighTide); ctx.lineTo(w - 8, yHighTide); ctx.stroke();
+            ctx.font = 'bold 9px -apple-system, sans-serif'; ctx.fillStyle = '#c084fc';
+            ctx.fillText('朔望滿潮 +1.35m CD (09:12)', midX + 15, yHighTide - 4);
 
-            // 當前退潮線 +0.65m
-            ctx.strokeStyle = '#38bdf8';
-            ctx.setLineDash([]);
-            ctx.lineWidth = 1.5;
-            ctx.beginPath(); ctx.moveTo(10, yCurrentTide); ctx.lineTo(w - 10, yCurrentTide); ctx.stroke();
-            ctx.font = 'bold 9.5px sans-serif'; ctx.fillStyle = '#38bdf8';
-            ctx.fillText('當前退潮水位 +0.65m CD (14:08 CST)', midX + 15, yCurrentTide - 5);
+            ctx.strokeStyle = '#38bdf8'; ctx.setLineDash([]); ctx.lineWidth = 1.4;
+            ctx.beginPath(); ctx.moveTo(8, yCurrentTide); ctx.lineTo(w - 8, yCurrentTide); ctx.stroke();
+            ctx.font = 'bold 9.5px -apple-system, sans-serif'; ctx.fillStyle = '#38bdf8';
+            ctx.fillText('當前退潮水位 +0.65m CD (14:08)', midX + 15, yCurrentTide - 5);
 
-            // 乾潮線 -0.45m (標籤完整移至中央分界線右側下方，徹底避免被南岸沉箱遮蔽重疊)
-            ctx.strokeStyle = 'rgba(251, 146, 60, 0.65)';
-            ctx.setLineDash([3, 3]);
-            ctx.beginPath(); ctx.moveTo(10, yLowTide); ctx.lineTo(w - 10, yLowTide); ctx.stroke();
-            ctx.font = 'bold 9px sans-serif'; ctx.fillStyle = '#fb923c';
-            ctx.fillText('乾潮低谷 -0.45m CD (15:42 CST)', midX + 15, yLowTide + 12);
+            ctx.strokeStyle = 'rgba(251, 146, 60, 0.55)'; ctx.setLineDash([3, 3]);
+            ctx.beginPath(); ctx.moveTo(8, yLowTide); ctx.lineTo(w - 8, yLowTide); ctx.stroke();
+            ctx.font = 'bold 9px -apple-system, sans-serif'; ctx.fillStyle = '#fb923c';
+            ctx.fillText('乾潮低谷 -0.45m CD (15:42)', midX + 15, yLowTide + 12);
             ctx.restore();
         }
 
@@ -1983,28 +1916,18 @@
             }
 
             if (currentTab === 'desktop') redrawAllDesktopCanvas();
-            else if (currentTab === 'bathymetry') drawDualPierProfileCanvas();
+            else if (currentTab === 'bathymetry') initDualPierProfileCanvas();
             else if (currentTab === 'longterm') draw30DaysCanvas();
         }
 
-        // 龜山島本島陸地精確邊界多邊形 (以防海流/風場粒子登島)
         const KUEISHAN_LAND_POLYGON = [
-            [24.8488, 121.9330], // 龜尾尖端
-            [24.8505, 121.9385], // 龜尾湖北側岸
-            [24.8512, 121.9430], // 北岸碼頭陸側
-            [24.8518, 121.9490], // 龜背北坡
-            [24.8490, 121.9580], // 龜頸部
-            [24.8450, 121.9640], // 龜首東部海岬
-            [24.8415, 121.9655], // 龜首最東緣
-            [24.8380, 121.9620], // 龜首南側
-            [24.8360, 121.9540], // 龜背南側
-            [24.8375, 121.9465], // 南坡
-            [24.8420, 121.9425], // 南岸碼頭陸緣
-            [24.8445, 121.9370], // 龜尾湖南側岸
-            [24.8475, 121.9332]  // 回到龜尾
+            [24.8488, 121.9330], [24.8505, 121.9385], [24.8512, 121.9430],
+            [24.8518, 121.9490], [24.8490, 121.9580], [24.8450, 121.9640],
+            [24.8415, 121.9655], [24.8380, 121.9620], [24.8360, 121.9540],
+            [24.8375, 121.9465], [24.8420, 121.9425], [24.8445, 121.9370],
+            [24.8475, 121.9332]
         ];
 
-        // 點在多邊形內演算法 (Ray-casting Algorithm)
         function isPointInPolygon(point, vs) {
             const x = point[0], y = point[1];
             let inside = false;
@@ -2017,13 +1940,9 @@
             return inside;
         }
 
-        // 判斷座標是否位於陸域 (臺灣本島陸域 OR 龜山島陸地)
         function isCoordOnLand(lat, lng) {
-            // 1. 臺灣本島陸域遮罩 (頭城/宜蘭海岸線約在 lng <= 121.838)
             if (lng <= 121.838 && lat <= 24.90) return true;
-            if (lng <= 121.848 && lat > 24.90) return true; // 北端岬角陸域
-
-            // 2. 龜山島本島陸地遮罩
+            if (lng <= 121.848 && lat > 24.90) return true;
             if (lat >= 24.835 && lat <= 24.853 && lng >= 121.932 && lng <= 121.966) {
                 return isPointInPolygon([lat, lng], KUEISHAN_LAND_POLYGON);
             }
@@ -2047,32 +1966,22 @@
                 attribution: '&copy; 內政部國土測繪中心 NLSC | Soft Ocean'
             }).addTo(leafletMap);
 
-            // 401 高地地標 (標高 398m)
             L.circleMarker([24.8428, 121.9535], { radius: 7, fillColor: '#f59e0b', color: '#ffffff', weight: 2, fillOpacity: 0.95 })
                 .addTo(leafletMap)
                 .bindPopup("<b>⛰ 401 高地 (標高 398m)</b><br>401高地迎風屏障監測點");
 
-            // 北岸碼頭【校準工程實體座標：龜尾湖北岸碼頭引橋 24.8486, 121.9432】
             L.circleMarker([24.8486, 121.9432], { radius: 6.5, fillColor: '#ef4444', color: '#ffffff', weight: 2, fillOpacity: 0.95 })
                 .addTo(leafletMap)
                 .bindPopup("<b>⚓ 北岸主碼頭 (+3.20m CD) [校準位置]</b><br>• 鼎興 92-021 竣工圖細設位置<br>• 狀態：🔴 越浪漫頂覆寫 (FB=0.15m) / 坐灘 (-1.30m)");
 
-            // 南岸碼頭【校準工程實體座標：龜尾湖南岸碼頭沉箱 24.8438, 121.9416】
             L.circleMarker([24.8438, 121.9416], { radius: 6.5, fillColor: '#ef4444', color: '#ffffff', weight: 2, fillOpacity: 0.95 })
                 .addTo(leafletMap)
                 .bindPopup("<b>⚓ 南岸權宜碼頭 (-5.50m CD) [校準位置]</b><br>• 鼎興 97-05 沉箱碼頭細設位置<br>• 狀態：🔴 淺水觸底熔斷 (UKC=0.42m < 1.50m)");
 
-            // 龜山島遊客服務中心
-            L.circleMarker([24.8475, 121.9436], { radius: 5, fillColor: '#38bdf8', color: '#ffffff', weight: 1.5, fillOpacity: 0.95 })
-                .addTo(leafletMap)
-                .bindPopup("<b>ℹ️ 龜山島遊客服務中心</b><br>管理處駐島辦公室與觀測站");
-
-            // 頭城烏石港
             L.circleMarker(wushiPort, { radius: 7, fillColor: '#10b981', color: '#ffffff', weight: 2, fillOpacity: 0.95 })
                 .addTo(leafletMap)
                 .bindPopup("<b>🚢 頭城烏石港 (避風母港安全)</b><br>避風塢泊位安全");
 
-            // 避難直航航線 (245° WSW 10.8浬)
             L.polyline([[24.8462, 121.9424], wushiPort], { color: '#facc15', weight: 2.5, dashArray: '6, 6', opacity: 0.9 })
                 .addTo(leafletMap)
                 .bindPopup("<b>🚢 避難直航航線 (245° WSW / 10.8浬)</b>");
@@ -2143,7 +2052,6 @@
             const ch = canvas.height;
             ctx.clearRect(0, 0, cw, ch);
 
-            // A. 表面潮流 (315° NW, 青綠色) - 嚴格約束於海域，絕對不登陸！
             if (isDeskFlowActive && cw > 10 && ch > 10 && leafletMap) {
                 const currentAngleRad = (315 - 90) * (Math.PI / 180);
                 const cdx = Math.cos(currentAngleRad);
@@ -2159,7 +2067,6 @@
                     p.y += cdy * p.speed;
                     p.age++;
 
-                    // 檢查粒子在地理座標系下是否落在陸地
                     let onLand = false;
                     try {
                         const latLng = leafletMap.containerPointToLatLng([p.x, p.y]);
@@ -2168,9 +2075,7 @@
                         onLand = (p.x < cw * 0.22);
                     }
 
-                    // 若粒子超出地圖或流上陸地，立即重新在海面生成
                     if (onLand || p.y < -30 || p.x > cw + 30 || p.y > ch + 30 || p.age > p.maxAge) {
-                        // 在東側海面隨機再生
                         p.x = cw * 0.35 + Math.random() * (cw * 0.65);
                         p.y = ch * 0.10 + Math.random() * (ch * 0.90);
                         p.age = 0;
@@ -2201,7 +2106,6 @@
                 ctx.restore();
             }
 
-            // B. 風浪湧浪 (110° ESE 吹向 290° WNW, 金橙色) - 同步約束於海面
             if (isDeskWindActive && cw > 10 && ch > 10 && leafletMap) {
                 const windAngleRad = (245 - 90) * (Math.PI / 180);
                 const wdx = Math.cos(windAngleRad);
@@ -2425,14 +2329,14 @@
             URL.revokeObjectURL(url);
         }
 
-        // 立即初始化與自動掛載，防止 iframe/異步載入時腳本未觸發
         function initApp() {
             updateUI();
+            redrawAllDesktopCanvas();
             fetchSSOTFile();
             setInterval(fetchSSOTFile, 3000);
             window.addEventListener('resize', () => {
                 if (currentTab === 'desktop') redrawAllDesktopCanvas();
-                else if (currentTab === 'bathymetry') drawDualPierProfileCanvas();
+                else if (currentTab === 'bathymetry') initDualPierProfileCanvas();
                 else if (currentTab === 'longterm') draw30DaysCanvas();
                 else if (currentTab === 'softocean') resizeDesktopFlowCanvas();
             });
