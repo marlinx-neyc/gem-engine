@@ -2,6 +2,7 @@ name: GEM Engine Cron Pipeline
 
 on:
   schedule:
+    - cron: '30 23 * * *' # 每日 23:30 UTC (07:30 CST 當日開島裁決門閥)
     - cron: '0 3,8 * * *'  # 每日 03:00 與 08:00 UTC (11:00與16:00 CST) 定時執行
   workflow_dispatch:       # 支援手動觸發
 
@@ -34,6 +35,8 @@ jobs:
         env:
           CWA_API_KEY: ${{ secrets.CWA_API_KEY }}
           BIGGIS_API_KEY: ${{ secrets.BIGGIS_API_KEY }}
+          TDX_CLIENT_ID: ${{ secrets.TDX_CLIENT_ID }}
+          TDX_CLIENT_SECRET: ${{ secrets.TDX_CLIENT_SECRET }}
           ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
