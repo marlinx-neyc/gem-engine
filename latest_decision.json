@@ -1,11 +1,11 @@
 {
   "version": "v36D.330.0 Three-Scheme & Guerrilla Vector Master Complete",
-  "timestamp": "2026-10-07 12:40:20 CST",
+  "timestamp": "2026-10-07 23:24:33 CST",
   "decision": "🔴 0.0% 物理 VETO 熔斷 / 全線封島",
   "confidence_score": 100.0,
   "confidence_label": "🟢 100.0% [完整同化 PASS]",
   "hard_veto_alert": true,
-  "reliability_score_pct": 77.27,
+  "reliability_score_pct": 77.61,
   "precision_metrics": {
     "converged_sigma": 0.3125,
     "precision_gain_pct": 58.4
