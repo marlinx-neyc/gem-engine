@@ -1,819 +1,2546 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 <head>
-    
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
-    
-            <meta name="viewport" content="width=device-width,
-                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-            <style>
-                #map_7fd60a5ee42bd3d68d505604e267ef55 {
-                    position: relative;
-                    width: 100.0%;
-                    height: 100.0%;
-                    left: 0.0%;
-                    top: 0.0%;
-                }
-                .leaflet-container { font-size: 1rem; }
-            </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>🌊 GEM-V36D 龜山島雙層海事戰術控制台 (NCDR行政防災與氣象署路徑增強版)</title>
 
-            <style>html, body {
-                width: 100%;
-                height: 100%;
-                margin: 0;
-                padding: 0;
-            }
-            </style>
+    <!-- Tailwind CSS 官方 CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
-            <style>#map {
-                position:absolute;
-                top:0;
-                bottom:0;
-                right:0;
-                left:0;
-                }
-            </style>
-
-            <script>
-                L_NO_TOUCH = false;
-                L_DISABLE_3D = false;
-            </script>
-
-        
-</head>
-<body>
-    
-    
-            <div class="folium-map" id="map_7fd60a5ee42bd3d68d505604e267ef55" ></div>
-        
+    <!-- Leaflet.js 高可用地圖套件 -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <style>
-      @keyframes pulse-ring {
-        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.7); }
-        70% { transform: scale(1.05); box-shadow: 0 0 0 6px rgba(168, 85, 247, 0); }
-        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(168, 85, 247, 0); }
-      }
-      .purple-dot {
-        display: inline-block; width: 8px; height: 8px; background-color: #a855f7;
-        border-radius: 50%; margin-right: 6px; animation: pulse-ring 1.5s infinite; vertical-align: middle;
-      }
+        :root {
+            --bg-color: #0b1120;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-blue: #38bdf8;
+            --accent-purple: #c084fc;
+            --status-pass: #10b981;
+            --status-warn: #f59e0b;
+            --status-danger: #ef4444;
+            --status-yellow: #facc15;
+            --table-header-bg: rgba(56, 189, 248, 0.12);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            padding: 12px;
+            font-variant-numeric: tabular-nums;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+        @keyframes pulseDot {
+            0%, 100% { transform: scale(0.9); opacity: 0.6; }
+            50% { transform: scale(1.2); opacity: 1; }
+        }
+        .pulse-dot-blue {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--accent-blue);
+            box-shadow: 0 0 10px var(--accent-blue);
+            animation: pulseDot 1.8s infinite;
+        }
+        @keyframes pulseAlert {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(0.995); }
+        }
+        #vetoBanner {
+            display: block;
+            background: var(--status-danger);
+            color: #ffffff;
+            padding: 9px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 13px;
+            margin-bottom: 12px;
+            text-align: center;
+            box-shadow: 0 0 16px rgba(239, 68, 68, 0.45);
+            animation: pulseAlert 2s infinite;
+        }
+        @keyframes borderFlashingAlert {
+            0%, 100% { border-color: #ef4444; box-shadow: 0 0 18px rgba(239, 68, 68, 0.65); }
+            50% { border-color: #facc15; box-shadow: 0 0 24px rgba(250, 204, 21, 0.85); }
+        }
+        .border-flashing-alert {
+            animation: borderFlashingAlert 1.5s infinite ease-in-out;
+        }
+        .nav-tab-btn {
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #94a3b8;
+            background: #111d33;
+            border: 1px solid #334155;
+            transition: all 0.25s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .nav-tab-btn:hover { color: #ffffff; border-color: var(--accent-blue); }
+        .nav-tab-btn.active-tab {
+            background: rgba(56, 189, 248, 0.18);
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+        }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 12px;
+            contain: content;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            margin-bottom: 10px;
+        }
+        .card-header {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--accent-blue);
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 6px;
+        }
+        .badge {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-block;
+            min-width: 48px;
+            text-align: center;
+        }
+        .badge-veto { background: rgba(239, 68, 68, 0.2); color: var(--status-danger); border: 1px solid var(--status-danger); }
+        .badge-pass { background: rgba(16, 185, 129, 0.2); color: var(--status-pass); border: 1px solid var(--status-pass); }
+        .badge-warn { background: rgba(245, 158, 11, 0.2); color: var(--status-warn); border: 1px solid var(--status-warn); }
+        .badge-yellow { background: rgba(250, 204, 21, 0.2); color: var(--status-yellow); border: 1px solid var(--status-yellow); }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            table-layout: fixed;
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .data-table th, .data-table td {
+            padding: 5.5px 6.5px;
+            text-align: left;
+            border-bottom: 1px solid var(--card-border);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .data-table th { background: var(--table-header-bg); color: #cbd5e1; font-weight: 600; font-size: 10.5px; }
+        .box-alert-danger {
+            background: rgba(239, 68, 68, 0.15);
+            border-left: 3px solid var(--status-danger);
+            color: #fca5a5;
+            padding: 7px 9px;
+            font-size: 11px;
+            border-radius: 0 4px 4px 0;
+            line-height: 1.45;
+        }
+        .slider-item { display: flex; flex-direction: column; gap: 2px; }
+        .slider-header { display: flex; justify-content: space-between; font-size: 10.5px; color: #cbd5e1; }
+        .slider-header span.val { font-family: monospace; font-weight: 700; color: var(--accent-blue); }
+        .slider-item input[type="range"] {
+            width: 100%;
+            height: 5px;
+            background: #334155;
+            border-radius: 3px;
+            outline: none;
+            accent-color: var(--accent-blue);
+            cursor: pointer;
+        }
+        .accordion-header { cursor: pointer; user-select: none; transition: background 0.2s ease; }
+        .accordion-header:hover { background: rgba(56, 189, 248, 0.08); }
+        .accordion-content { transition: max-height 0.35s cubic-bezier(0, 1, 0, 1); overflow: hidden; }
+        .accordion-content.collapsed { max-height: 0; padding-top: 0; padding-bottom: 0; }
+        .accordion-content.expanded { max-height: 1400px; transition: max-height 0.45s ease-in-out; }
+        #osmMapContainer {
+            width: 100%;
+            height: 540px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            overflow: hidden;
+            background: #0b1120;
+            z-index: 10;
+        }
+        .chart-canvas-wrap {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .chart-canvas {
+            width: 100% !important;
+            height: 100% !important;
+            display: block;
+        }
+        .chart-tooltip {
+            position: absolute;
+            display: none;
+            background: rgba(15, 23, 42, 0.96);
+            border: 1px solid #38bdf8;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 11px;
+            color: #f8fafc;
+            pointer-events: none;
+            z-index: 100;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.7);
+            white-space: nowrap;
+            backdrop-filter: blur(4px);
+            transition: opacity 0.15s ease;
+        }
     </style>
+</head>
+<body>
+    <!-- 頂部剛性熔斷警告橫幅 -->
+    <div id="vetoBanner">🚨 剛性警告：實體觸發 4 層物理 VETO 熔斷（Hs=3.71m / UKC=0.42m / FB=0.15m 越浪覆寫），11:20 止登已過，全員備撤中！</div>
 
-    <div id="mobile-dashboard" style="
-        position: fixed; top: 10px; left: 10px; max-width: 320px; z-index: 9999;
-        background: rgba(15, 23, 42, 0.92); color: white; padding: 12px 14px;
-        border-radius: 12px; font-family: -apple-system, sans-serif;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.4); backdrop-filter: blur(8px);
-        border: 1px solid rgba(255,255,255,0.12); font-size: 12px; line-height: 1.5;
-    ">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-        <div style="font-weight: bold; font-size: 14px; color: #f8fafc;">
-          <span class="purple-dot"></span>🦬 水牛向量與未來地點預判
+    <!-- 主主控台 Header -->
+    <header class="bg-[#1e293b] border border-[#334155] border-l-[6px] border-l-[#ef4444] rounded-xl p-3.5 mb-3 shadow-lg" id="headerMaster">
+        <div class="flex flex-wrap justify-between items-center gap-2.5">
+            <div>
+                <h1 class="text-[16px] font-extrabold text-white flex items-center gap-1.5">
+                    <span class="pulse-dot-blue"></span> 龜山島海事戰術智庫與自主學習執行中樞 (GEM-V36D Master)
+                </h1>
+                <div class="text-[11px] text-[#94a3b8] mt-1 flex flex-wrap items-center gap-2">
+                    <span>時鐘：<b id="liveClock" class="font-mono text-white bg-slate-800 px-1.5 py-0.5 rounded">14:08:00 CST</b></span>
+                    <span>基準日：<b class="font-mono text-emerald-400 bg-slate-800 px-1.5 py-0.5 rounded">2026-10-06 (二)</b></span>
+                    <span>| SSOT 結算：<b id="ssotTimestamp" class="font-mono text-white bg-slate-800 px-1.5 py-0.5 rounded">2026-10-06 14:08:00 CST</b></span>
+                    <span>| 心跳：<b id="heartbeatCounter" class="text-[#38bdf8]">29</b> 次</span>
+                    <span>| 總裁決：<b id="ssotDecisionBadge" class="text-[#ef4444] font-bold">🔴 0.0% 物理 VETO 熔斷</b></span>
+                </div>
+            </div>
+            <!-- 四大分頁切換按鈕 -->
+            <div class="flex flex-wrap gap-1.5">
+                <button class="nav-tab-btn active-tab" id="tabBtnDesktop" onclick="switchMainTab('desktop')">🖥 桌面戰術主控</button>
+                <button class="nav-tab-btn" id="tabBtnBathymetry" onclick="switchMainTab('bathymetry')">📐 南北雙岸色塊防碰撞剖面圖</button>
+                <button class="nav-tab-btn" id="tabBtnLongterm" onclick="switchMainTab('longterm')">🔮 30 天月度宏觀推估</button>
+                <button class="nav-tab-btn" id="tabBtnSoftOcean" onclick="switchMainTab('softocean')">🌊 Soft Ocean 實體海圖與動態流場</button>
+                <button class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-2.5 py-1 rounded-lg text-[11px] transition shadow" onclick="downloadCurrentPage()">💾 下載此網頁 (desktop.html)</button>
+            </div>
         </div>
-        <div style="font-size: 10px; color: #94a3b8; background: rgba(255,255,255,0.1); padding: 1px 6px; border-radius: 10px;">
-          <span id="update-time">--:--:--</span> (<span id="refresh-count">#1</span>)
-        </div>
-      </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: rgba(255,255,255,0.05); padding: 6px; border-radius: 8px; margin-bottom: 6px;">
-        <div>
-          <div style="color: #94a3b8; font-size: 10px;">🦬 水牛數量</div>
-          <div style="font-weight: bold; font-size: 15px; color: #f87171;">7 <span style="font-size: 10px;">頭</span></div>
-        </div>
-        <div>
-          <div style="color: #94a3b8; font-size: 10px;">📊 模式相似度</div>
-          <div style="font-weight: bold; font-size: 15px; color: #c084fc;">91.5%</div>
-        </div>
-      </div>
+        <div class="flex flex-wrap justify-between items-center mt-2.5 pt-2 border-t border-[#334155]/60 gap-2.5">
+            <div class="flex items-center gap-3">
+                <div class="w-56">
+                    <div class="flex justify-between text-[9.5px] text-[#94a3b8] mb-0.5">
+                        <span>微觀物理 <b id="lblPhysRatio" class="text-[#38bdf8]">65%</b></span>
+                        <span>周易奇門 <b id="lblQimenRatio" class="text-[#c084fc]">35%</b></span>
+                    </div>
+                    <div class="w-full h-1.5 bg-[#334155] rounded-full overflow-hidden flex">
+                        <div class="h-full bg-[#38bdf8] transition-all duration-300" id="barPhys" style="width: 65%;"></div>
+                        <div class="h-full bg-[#c084fc] transition-all duration-300" id="barQimen" style="width: 35%;"></div>
+                    </div>
+                </div>
+                <!-- 頂部南北岸直觀燈號列 -->
+                <div class="flex items-center gap-1.5 border-l border-slate-700 pl-3">
+                    <span class="text-[10px] text-slate-400 font-bold">碼頭即時燈號:</span>
+                    <span class="badge badge-veto" id="hdrNorthBadgeDesktop">北岸 🔴 越浪熔斷</span>
+                    <span class="badge badge-veto" id="hdrSouthBadgeDesktop">南岸 🔴 淺水觸底</span>
+                </div>
+            </div>
 
-      <div style="background: rgba(168, 85, 247, 0.15); padding: 6px 8px; border-left: 3px solid #a855f7; border-radius: 4px; margin-bottom: 6px;">
-        <div style="color: #e9d5ff; font-weight: bold; font-size: 11px;">🧭 未來方向向量：南南東 (165°) (0.8 m/s)</div>
-        <div style="color: #cbd5e1; font-size: 11px; margin-top: 2px;">
-          🎯 <b>預測目標地點：</b>護管所泥塘散熱區 (預測終點)
-          <br><span style="color: #38bdf8; font-size: 10px;">途經：鞍部南側草叢 (預測途經點) (+10 分鐘)</span>
+            <div class="flex flex-wrap gap-1.5 text-center font-mono">
+                <div class="bg-[#0b1120] border border-[#334155] px-2 py-0.5 rounded min-w-[70px]">
+                    <div class="text-[8.5px] text-[#94a3b8]">TDX AIS 吻合</div>
+                    <div class="text-[11.5px] font-bold text-emerald-400" id="valAIS">99.2%</div>
+                </div>
+                <div class="bg-[#0b1120] border border-[#334155] px-2 py-0.5 rounded min-w-[70px]">
+                    <div class="text-[8.5px] text-[#94a3b8]">CV 越浪率</div>
+                    <div class="text-[11.5px] font-bold text-[#facc15]" id="valCV">1.31 p/m</div>
+                </div>
+                <div class="bg-[#0b1120] border border-[#334155] px-2 py-0.5 rounded min-w-[70px]">
+                    <div class="text-[8.5px] text-[#94a3b8]">雙體船蹲沉</div>
+                    <div class="text-[11.5px] font-bold text-[#38bdf8]" id="valSquat">0.82 m</div>
+                </div>
+                <div class="bg-[#0b1120] border border-[#334155] px-2 py-0.5 rounded min-w-[70px]">
+                    <div class="text-[8.5px] text-[#94a3b8]">自適應緊縮 α</div>
+                    <div class="text-[11.5px] font-bold text-purple-400" id="valAlphaBadge">0.94</div>
+                </div>
+            </div>
         </div>
-      </div>
+    </header>
 
-      <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 6px;">
-        <div style="color: #94a3b8; font-size: 10px; margin-bottom: 4px;">⏱️ <b>未來登步道/橫越風險時序：</b></div>
-        <div style="display: flex; justify-content: space-between; text-align: center; font-size: 10px;">
-          <div style="flex: 1; background: rgba(239, 68, 68, 0.25); margin: 0 2px; padding: 3px 0; border-radius: 4px;">
-            <div style="color: #cbd5e1;">06:13 (+1h)</div>
-            <div style="color: #f87171; font-weight: bold;">85% (高)</div>
-          </div>
-          <div style="flex: 1; background: rgba(245, 158, 11, 0.25); margin: 0 2px; padding: 3px 0; border-radius: 4px;">
-            <div style="color: #cbd5e1;">07:13 (+2h)</div>
-            <div style="color: #fbbf24; font-weight: bold;">60% (中)</div>
-          </div>
-          <div style="flex: 1; background: rgba(34, 197, 94, 0.25); margin: 0 2px; padding: 3px 0; border-radius: 4px;">
-            <div style="color: #cbd5e1;">08:13 (+3h)</div>
-            <div style="color: #4ade80; font-weight: bold;">20% (低)</div>
-          </div>
+    <!-- 戰術沙盤調度演練控制台 -->
+    <section class="bg-[#111d33] border border-[#2563eb] rounded-xl p-2.5 mb-3 flex flex-wrap justify-between items-center gap-2">
+        <div class="flex items-center gap-2">
+            <span class="text-[11.5px] font-bold text-[#60a5fa]">🎮 戰術沙盤調度：</span>
+            <button class="flex items-center gap-1.5 bg-[#0f172a] border border-[#38bdf8] text-[#38bdf8] px-2.5 py-0.5 rounded-full text-[10.5px] font-bold" id="btnLiveModeToggle" onclick="toggleDataSourceMode()">
+                <span class="pulse-dot-blue"></span>
+                <span id="txtLiveMode">● SSOT 實時監聽模式 (每3秒自動同步 latest_decision.json)</span>
+            </button>
         </div>
-      </div>
-    </div>
+        <div class="flex flex-wrap gap-1 items-center">
+            <span class="text-[10.5px] text-[#94a3b8]">情境演練：</span>
+            <button class="bg-[#1e293b] border border-[#38bdf8] text-[#38bdf8] px-2 py-0.5 rounded text-[10.5px] font-bold" id="btnScen1" onclick="loadScenario('CURRENT')">1. 現況 (長浪雙岸熔斷)</button>
+            <button class="bg-[#1e293b] border border-[#475569] text-[#e2e8f0] px-2 py-0.5 rounded text-[10.5px]" id="btnScen2" onclick="loadScenario('GUERRILLA')">2. 游擊 (南岸權宜靠泊)</button>
+            <button class="bg-[#1e293b] border border-[#475569] text-[#e2e8f0] px-2 py-0.5 rounded text-[10.5px]" id="btnScen3" onclick="loadScenario('CALM')">3. 平穩 (全線開放)</button>
+            <button class="bg-[#1e293b] border border-[#475569] text-[#e2e8f0] px-2 py-0.5 rounded text-[10.5px]" id="btnScen4" onclick="loadScenario('OVERTOPPING')">4. 大潮 (PINN越浪蓋頂)</button>
+            <button class="bg-emerald-500/15 border border-emerald-500 text-emerald-400 px-2 py-0.5 rounded text-[10.5px] font-bold ml-1 hover:bg-emerald-500/30" onclick="exportDecisionJSON()">📥 導出 latest_decision.json</button>
+        </div>
+    </section>
+
+    <!-- 參數滑桿微調抽屜 -->
+    <section class="bg-[#131d31] border border-[#334155] rounded-xl p-2.5 mb-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2" id="simDrawer">
+        <div class="slider-item">
+            <div class="slider-header"><span>外海波高 (Hs)</span><span class="val" id="lblHsCWA">3.71 m</span></div>
+            <input type="range" id="rngHsCWA" min="0.4" max="6.0" step="0.05" value="3.71" oninput="onParamChange()">
+        </div>
+        <div class="slider-item">
+            <div class="slider-header"><span>局域風速 (W)</span><span class="val" id="lblWCWA">9.50 m/s</span></div>
+            <input type="range" id="rngWCWA" min="2.0" max="22.0" step="0.2" value="9.50" oninput="onParamChange()">
+        </div>
+        <div class="slider-item">
+            <div class="slider-header"><span>湧浪週期 (Tp)</span><span class="val" id="lblTp">15.5 s</span></div>
+            <input type="range" id="rngTp" min="6.0" max="20.0" step="0.5" value="15.5" oninput="onParamChange()">
+        </div>
+        <div class="slider-item">
+            <div class="slider-header"><span>風向攻角 (Δθ)</span><span class="val" id="lblDeltaTheta">58 °</span></div>
+            <input type="range" id="rngDeltaTheta" min="0" max="90" step="1" value="58" oninput="onParamChange()">
+        </div>
+        <div class="slider-item">
+            <div class="slider-header"><span>動態潮位 (Eta)</span><span class="val" id="lblTide">0.65 m</span></div>
+            <input type="range" id="rngTide" min="-0.5" max="2.0" step="0.05" value="0.65" oninput="onParamChange()">
+        </div>
+        <div class="slider-item">
+            <div class="slider-header"><span>奇門同化率</span><span class="val" id="lblQimen">100 %</span></div>
+            <input type="range" id="rngQimen" min="40" max="100" step="1" value="100" oninput="onParamChange()">
+        </div>
+    </section>
+
+    <!-- 主分頁 1: 桌面戰術主控 -->
+    <main id="tabDesktopView" class="flex flex-col lg:flex-row gap-3 w-full">
+        <!-- 左側戰術控制面板 (35%) -->
+        <div class="w-full lg:w-[35%] flex flex-col gap-2.5">
+            <!-- 1. PINN Engine 剛性水文門檻檢核 -->
+            <div class="card">
+                <div class="card-header">
+                    <span>1. PINN Engine 剛性水文門檻檢核</span>
+                    <span id="badgeDecision" class="badge badge-veto">🔴 熔斷禁止靠泊</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-center">
+                    <div class="bg-[#0b1120] p-2 rounded-lg border border-[#334155]" id="boxHs">
+                        <div class="text-[9.5px] text-[#94a3b8]">碼頭有效波高 (Hs)</div>
+                        <div class="text-[17px] font-extrabold text-red-400 mt-0.5" id="valHs">3.71 m</div>
+                        <div class="badge badge-veto mt-1" id="badgeHs">FAIL (>1.13m)</div>
+                    </div>
+                    <div class="bg-[#0b1120] p-2 rounded-lg border border-[#334155]" id="boxWeff">
+                        <div class="text-[9.5px] text-[#94a3b8]">攻角有效風速 (Weff)</div>
+                        <div class="text-[17px] font-extrabold text-emerald-400 mt-0.5" id="valWeff">9.50 m/s</div>
+                        <div class="badge badge-pass mt-1" id="badgeWeff">PASS (≤10.17m/s)</div>
+                    </div>
+                    <div class="bg-[#0b1120] p-2 rounded-lg border border-[#334155]" id="boxUKC">
+                        <div class="text-[9.5px] text-[#94a3b8]">南岸動態裕深 (UKC)</div>
+                        <div class="text-[17px] font-extrabold text-red-400 mt-0.5" id="valUKC">0.42 m</div>
+                        <div class="badge badge-veto mt-1" id="badgeUKC">FAIL (<1.50m 觸底)</div>
+                    </div>
+                    <div class="bg-[#0b1120] p-2 rounded-lg border border-[#334155]" id="boxFB">
+                        <div class="text-[9.5px] text-[#94a3b8]">北岸預留乾舷 (FB)</div>
+                        <div class="text-[17px] font-extrabold text-red-400 mt-0.5" id="valFB">0.15 m</div>
+                        <div class="badge badge-veto mt-1" id="badgeFB">FAIL (<0.50m 越浪)</div>
+                    </div>
+                </div>
+                <div class="text-[10px] text-[#94a3b8] mt-2 pt-1.5 border-t border-[#334155]/60 flex justify-between">
+                    <span>退潮位：<b id="valTide" class="text-white">0.65 m</b></span>
+                    <span>南岸水深：<b class="text-sky-300">-5.50m CD</b></span>
+                    <span>緊縮 α：<b id="valAlpha" class="text-white">0.94</b></span>
+                    <span>風場 W_local：<b id="valWLocal" class="text-white">9.50 m/s</b></span>
+                </div>
+            </div>
+
+            <!-- 2. 官方開封島標準與當日管制時程 -->
+            <div class="card">
+                <div class="card-header">
+                    <span>2. 官方開封島標準與當日管制時程 (2026-10-06)</span>
+                    <span class="badge badge-yellow">標準時程鎖定</span>
+                </div>
+                <div class="text-[11px] leading-relaxed text-[#cbd5e1] space-y-1">
+                    <p>• <b>07:30 當日開島裁決</b>：官方放行 | GEM 實測 <span class="text-[#ef4444] font-bold">🔴 剛性熔斷</span> (Hs=3.71m > 1.13m, UKC=0.42m < 1.50m)</p>
+                    <p>• <b>10:50 預警廣播</b>：全島廣播預發（提早 30 分鐘準備止登）</p>
+                    <p>• <b class="text-[#facc15]">11:20 止登時窗</b>：<span class="text-[#facc15] font-bold">雙岸封島【直航返航烏石港】</span></p>
+                    <p>• <b>13:50 預警廣播</b>：全島廣播預發（提早 30 分鐘準備清島）</p>
+                    <p>• <b class="text-[#facc15]">14:20 強制撤離</b>：<span class="text-[#facc15] font-bold">全員清島撤離【烏石港】</span> (耗時精算 20分鐘)</p>
+                    <p>• <b>16:30 明日開島預報</b>：風浪超過6級/長浪警告 <span class="text-[#ef4444] font-bold">🔴 預警次日全天封島</span></p>
+                </div>
+            </div>
+
+            <!-- 3. ⚓ 游擊式動態調度與避險 (即時突發感知) -->
+            <div class="card border-[#f59e0b]">
+                <div class="card-header !text-[#f59e0b]">
+                    <span>3. ⚓ 游擊式動態調度與避險 (即時突發感知)</span>
+                    <span id="badgeGuerrillaState" class="badge badge-veto">雙岸失效</span>
+                </div>
+                <div class="text-[11.5px] leading-relaxed space-y-1">
+                    <p>• 登島靠泊碼頭：<b id="txtBerthing" class="text-[#f87171]">無 (雙岸失效，禁止靠泊)</b></p>
+                    <p>• 應急撤離碼頭：<b id="txtEvac" class="text-[#f8fafc]">無 (雙岸失效，直航返航烏石港)</b></p>
+                    <p class="text-[10.5px] text-[#94a3b8]">• 清島撤離精算耗時：<b id="txtEvacDuration" class="text-[#facc15] font-bold">20</b> 分鐘 (150人 / 蹲沉 0.82m)</p>
+                    <div id="dynamicHazardPrompt" class="p-1.5 rounded text-[10.5px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 mt-1">
+                        ⚠️ 突發因素感知：長浪 Tp=15.5s 穿透港池，南岸泊位水深扣減蹲沉僅剩 0.42m，觸底風險極高！
+                    </div>
+                    <div class="box-alert-danger mt-1.5" id="boxTacticalSummary">
+                        🔴 第一位階 Hard VETO 剛性熔斷（浪高 3.71m、裕深 0.42m、乾舷 0.15m 三重觸發）。全天禁止登島與靠泊，<span class="text-[#facc15] font-bold">11:20 止登</span>，<span class="text-[#facc15] font-bold">14:20 全員撤離</span> 直航返航烏石港。
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. 雙岸水文監測維度、標準值檢核與 NCDR 行政防災開設專區 -->
+            <div class="card border-slate-700">
+                <div class="card-header accordion-header flex justify-between items-center !border-b-0 cursor-pointer select-none py-1" onclick="togglePierMonitorAccordion()">
+                    <div class="flex items-center gap-2">
+                        <span class="text-[12.5px] font-bold text-[#38bdf8] flex items-center gap-1.5">
+                            📍 雙岸水文監測維度與標準值檢核
+                        </span>
+                        <span class="badge badge-veto" id="drawerSummaryBadge">🔴 雙岸全面熔斷</span>
+                    </div>
+                    <div class="text-[11px] text-[#38bdf8] flex items-center gap-1 font-mono">
+                        <span id="txtPierAccordionStatus">▼ 點擊展開南北岸檢核表</span>
+                    </div>
+                </div>
+
+                <!-- 頂部南北岸收盒常駐燈號總結條 (不用點開也能秒看結果) -->
+                <div class="grid grid-cols-2 gap-2 mt-1 pt-1.5 border-t border-[#334155]/60 text-center font-mono">
+                    <div class="bg-[#0b1120] p-1.5 rounded border border-red-500/50 flex flex-col items-center justify-between">
+                        <div class="text-[10px] text-slate-300 font-bold flex items-center gap-1">
+                            ⚓ 北岸 (+3.2m CD)
+                        </div>
+                        <div class="mt-0.5">
+                            <span class="badge badge-veto text-[10px] px-2 py-0.5" id="boxNorthStatusBadge">🔴 越浪漫頂 (FB: 0.15m)</span>
+                        </div>
+                        <div class="text-[9px] text-red-300/80 mt-0.5">波高 3.93m / 裕深 -1.30m 坐灘</div>
+                    </div>
+                    <div class="bg-[#0b1120] p-1.5 rounded border border-red-500/50 flex flex-col items-center justify-between">
+                        <div class="text-[10px] text-slate-300 font-bold flex items-center gap-1">
+                            ⚓ 南岸 (-5.5m CD)
+                        </div>
+                        <div class="mt-0.5">
+                            <span class="badge badge-veto text-[10px] px-2 py-0.5" id="boxSouthStatusBadge">🔴 淺水觸底 (UKC: 0.42m)</span>
+                        </div>
+                        <div class="text-[9px] text-red-300/80 mt-0.5">波高 3.71m / 攻角 58° 屏障失守</div>
+                    </div>
+                </div>
+
+                <!-- 🏛️ 國家災害防救科技中心 (NCDR)・行政防災開設專區 (收盒抽屜版 / 與右側版面對齊) -->
+                <div class="mt-2 bg-[#081224] border border-red-500/60 rounded-xl p-2 shadow-md">
+                    <!-- 收盒抽屜標題列 (點擊切換展開/收合) -->
+                    <div class="accordion-header flex items-center justify-between cursor-pointer select-none py-0.5" onclick="toggleNcdrAccordion()">
+                        <div class="flex items-center gap-1.5">
+                            <span class="inline-block w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+                            <span class="text-[11px] font-bold text-white flex items-center gap-1">
+                                🏛️ NCDR 行政防災開設專區
+                            </span>
+                            <span class="badge badge-veto !min-w-[48px] text-[9px]">🔴 一級開設</span>
+                        </div>
+                        <div class="text-[10px] text-[#38bdf8] flex items-center gap-1 font-mono">
+                            <span id="txtNcdrAccordionStatus">▼ 點擊展開</span>
+                        </div>
+                    </div>
+
+                    <!-- 常駐收盒精準摘要條 (未展開時亦秒級掌握核心狀況) -->
+                    <div class="grid grid-cols-2 gap-1.5 text-[9.5px] mt-1 pt-1 border-t border-red-500/30 font-mono">
+                        <div class="bg-black/40 px-1.5 py-0.5 rounded border border-slate-800 text-slate-300 flex justify-between items-center">
+                            <span class="text-slate-400">應變中心:</span>
+                            <b class="text-red-400 font-bold">🔴 宜蘭/中央 一級開設</b>
+                        </div>
+                        <div class="bg-black/40 px-1.5 py-0.5 rounded border border-slate-800 text-slate-300 flex justify-between items-center">
+                            <span class="text-slate-400">警報狀態:</span>
+                            <b class="text-amber-300 font-bold">⚠️ 海陸颱風警報</b>
+                        </div>
+                    </div>
+
+                    <!-- 點擊展開的詳細處置條目 (已去除冗長法規字樣，純粹業務執行與海況衝擊) -->
+                    <div class="accordion-content collapsed border-t border-red-500/30 pt-1.5 mt-1.5 space-y-1 text-[10px]" id="ncdrAccordionContent">
+                        <div class="p-1.5 rounded bg-red-950/40 border border-red-500/40 space-y-1">
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-300 font-semibold">• 龜山島管制作業：</span>
+                                <b class="text-red-300 font-bold">🔴 全面封島管制 / 嚴禁人員登島</b>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-300 font-semibold">• 港口及沿海作業：</span>
+                                <b class="text-yellow-300 font-bold">船舶進港避風 / 航線停航 / 水域活動暫停</b>
+                            </div>
+                            <div class="flex items-center justify-between text-[9px] text-slate-400 pt-0.5 border-t border-red-500/20">
+                                <span>衝擊情勢：<b class="text-red-400">外海巨浪 (Hs&gt;3.5m) / 強陣風 10~11 級</b></span>
+                                <span class="text-emerald-400 font-mono">NCDR 連動 0.8s 前</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 點擊展開的詳細監測維度與剛性標準比對表格 (無 LaTeX 未解析字元) -->
+                <div class="accordion-content collapsed border-t border-[#334155]/60 pt-2.5 mt-2" id="pierMonitorAccordionContent">
+                    <div class="bg-[#0b1120] border border-[#334155] rounded-lg p-2 mb-2 space-y-1.5 text-[10px]">
+                        <div class="flex items-center justify-between border-b border-[#334155]/60 pb-1">
+                            <span class="font-bold text-amber-400 flex items-center gap-1">
+                                🌀 颱風路徑與東北季風共伴全參數
+                            </span>
+                            <span class="badge badge-veto text-[9px]">中颱 955 hPa</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-1.5 text-slate-300 font-mono">
+                            <div>中心強度: <b class="text-white">955 hPa / 40m/s</b></div>
+                            <div>移向移速: <b class="text-amber-300">WNW 295° / 18 km/h</b></div>
+                            <div>共伴壓差: <b class="text-sky-400">1.15 hPa/km (ENE 65°)</b></div>
+                            <div>侵襲峰值: <b class="text-purple-300">D+0~D+1 巨浪直擊</b></div>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="data-table text-[10px]">
+                            <thead>
+                                <tr>
+                                    <th style="width: 25%;">監測維度</th>
+                                    <th style="width: 27%;">剛性標準值</th>
+                                    <th style="width: 24%;">北岸 (+3.2m CD)</th>
+                                    <th style="width: 24%;">南岸 (-5.5m CD)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><b>工程基準高程</b></td>
+                                    <td class="text-slate-400">水深/標高基線</td>
+                                    <td><b class="text-white">+3.2m / -3.2m</b></td>
+                                    <td><b class="text-white">+2.5m / -5.5m</b></td>
+                                </tr>
+                                <tr>
+                                    <td><b>局域風速 (風向)</b></td>
+                                    <td class="text-emerald-400">≤ 10.8 m/s (6級)</td>
+                                    <td>10.2 m/s <span class="badge badge-pass !min-w-[34px] !text-[9px]">🟢合格</span></td>
+                                    <td>9.5 m/s <span class="badge badge-pass !min-w-[34px] !text-[9px]">🟢合格</span></td>
+                                </tr>
+                                <tr>
+                                    <td><b>背風遮蔽 (Kw)</b></td>
+                                    <td class="text-emerald-400">Δθ &lt; 45°, Kw ≤ 0.78</td>
+                                    <td>58° / <b class="text-red-400">1.00</b> <span class="badge badge-veto !min-w-[34px] !text-[9px]">🔴迎風</span></td>
+                                    <td>58° / <b class="text-red-400">1.00</b> <span class="badge badge-veto !min-w-[34px] !text-[9px]">🔴崩潰</span></td>
+                                </tr>
+                                <tr>
+                                    <td><b>攻角有效風 (Weff)</b></td>
+                                    <td class="text-emerald-400">≤ 10.17 m/s</td>
+                                    <td><b class="text-red-400">10.20 m/s</b> <span class="badge badge-veto !min-w-[34px] !text-[9px]">🔴超標</span></td>
+                                    <td><b class="text-emerald-300">9.50 m/s</b> <span class="badge badge-pass !min-w-[34px] !text-[9px]">🟢合格</span></td>
+                                </tr>
+                                <tr>
+                                    <td><b>港池波高 (Hs)</b></td>
+                                    <td class="text-emerald-400">≤ 1.13 m (α=0.94)</td>
+                                    <td><b class="text-red-400">3.93 m</b> <span class="badge badge-veto !min-w-[34px] !text-[9px]">🔴越浪</span></td>
+                                    <td><b class="text-red-400">3.71 m</b> <span class="badge badge-veto !min-w-[34px] !text-[9px]">🔴擊穿</span></td>
+                                </tr>
+                                <tr>
+                                    <td><b>湧浪週期 (Tp/Kd)</b></td>
+                                    <td class="text-emerald-400">≤ 12.0s, Kd ≤ 0.883</td>
+                                    <td>15.5s / <b class="text-red-400">1.00</b> <span class="badge badge-veto !min-w-[34px] !text-[9px]">🔴共振</span></td>
+                                    <td>15.5s / <b class="text-red-400">1.00</b> <span class="badge badge-veto !min-w-[34px] !text-[9px]">🔴穿透</span></td>
+                                </tr>
+                                <tr>
+                                    <td><b>預留乾舷 (FB)</b></td>
+                                    <td class="text-emerald-400">≥ 0.50 m (防漫頂)</td>
+                                    <td><b class="text-red-400">0.15 m</b> <span class="badge badge-veto !min-w-[34px] !text-[9px]">🔴覆寫</span></td>
+                                    <td><b class="text-red-400">0.15 m</b> <span class="badge badge-veto !min-w-[34px] !text-[9px]">🔴漫頂</span></td>
+                                </tr>
+                                <tr>
+                                    <td><b>動態裕深 (UKC)</b></td>
+                                    <td class="text-emerald-400">≥ 1.50 m (防觸底)</td>
+                                    <td><b class="text-red-400">-1.30 m</b> <span class="badge badge-veto !min-w-[34px] !text-[9px]">🔴坐灘</span></td>
+                                    <td><b class="text-red-400">0.42 m</b> <span class="badge badge-veto !min-w-[34px] !text-[9px]">🔴觸底</span></td>
+                                </tr>
+                                <tr>
+                                    <td><b>CV 越浪率</b></td>
+                                    <td class="text-emerald-400">= 0.00 p/min</td>
+                                    <td>1.31 p/min <span class="badge badge-veto !min-w-[34px] !text-[9px]">🔴超標</span></td>
+                                    <td>0.85 p/min <span class="badge badge-veto !min-w-[34px] !text-[9px]">🔴超標</span></td>
+                                </tr>
+                                <tr>
+                                    <td><b>綜合裁決狀態</b></td>
+                                    <td class="text-emerald-400">雙岸放行靠泊</td>
+                                    <td><span class="badge badge-veto !min-w-[48px] !text-[9.5px]">🔴漫頂坐灘</span></td>
+                                    <td><span class="badge badge-veto !min-w-[48px] !text-[9.5px]">🔴觸底熔斷</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右側圖表與決策比對 (65%) -->
+        <div class="w-full lg:w-[65%] flex flex-col gap-2.5">
+            <!-- 2x2 時間線預測矩陣 -->
+            <div class="card">
+                <div class="card-header">
+                    <span>2x2 時間線預測矩陣 (游標數值與判準完全對齊 | 止登撤離純黃虛線)</span>
+                    <span class="text-[10px] text-[#38bdf8]">幾何凍結 CLS=0</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 h-[340px] w-full">
+                    <div class="bg-[#0b1120] border border-[#334155] rounded-lg p-1 relative h-[165px] chart-canvas-wrap">
+                        <canvas id="canvasChartHs" class="chart-canvas"></canvas>
+                        <div id="tipChartHs" class="chart-tooltip"></div>
+                    </div>
+                    <div class="bg-[#0b1120] border border-[#334155] rounded-lg p-1 relative h-[165px] chart-canvas-wrap">
+                        <canvas id="canvasChartWind" class="chart-canvas"></canvas>
+                        <div id="tipChartWind" class="chart-tooltip"></div>
+                    </div>
+                    <div class="bg-[#0b1120] border border-[#334155] rounded-lg p-1 relative h-[165px] chart-canvas-wrap">
+                        <canvas id="canvasChartUKC" class="chart-canvas"></canvas>
+                        <div id="tipChartUKC" class="chart-tooltip"></div>
+                    </div>
+                    <div class="bg-[#0b1120] border border-[#334155] rounded-lg p-1 relative h-[165px] chart-canvas-wrap">
+                        <canvas id="canvasChartTp" class="chart-canvas"></canvas>
+                        <div id="tipChartTp" class="chart-tooltip"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 未來 7 天雙軸海象趨勢預報 -->
+            <div class="card">
+                <div class="card-header">
+                    <span>未來 7 天雙軸海象趨勢預報 (波高紅線 #ef4444 / 限 1.13m | 風速橙線 #f59e0b / 限 10.17m/s 雙門檻對齊)</span>
+                    <span class="text-[10px] text-[#94a3b8]">D+1 至 D+7 趨勢</span>
+                </div>
+                <div class="bg-[#0b1120] border border-[#334155] rounded-lg p-1 relative h-[190px] w-full chart-canvas-wrap">
+                    <canvas id="canvasChart7Days" class="chart-canvas"></canvas>
+                    <div id="tipChart7Days" class="chart-tooltip"></div>
+                </div>
+            </div>
+
+            <!-- 實監值與法定標準值全維度結構化橫向比對 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                <div class="border-2 border-[#38bdf8] bg-slate-900/95 rounded-xl p-3 shadow-md flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center border-b border-[#38bdf8]/40 pb-1.5 mb-2">
+                            <span class="text-[12.5px] font-bold text-[#38bdf8] flex items-center gap-1.5">
+                                🏛️ 官方標準體系 (CWA / 東北角)
+                            </span>
+                            <span class="badge badge-veto">🔴 官方封島</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="data-table !text-[10px]">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 25%;">檢核項目</th>
+                                        <th style="width: 27%;">法定安全標準</th>
+                                        <th style="width: 27%;">現場實監值 (14:08)</th>
+                                        <th style="width: 21%;">判定</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><b>平均風 (陣風)</b></td>
+                                        <td class="text-emerald-400">≤ 5級 (≤10.8m/s)</td>
+                                        <td><b class="text-red-400">13.8m/s (6~7級)</b></td>
+                                        <td><span class="badge badge-veto !min-w-[42px] !text-[9.5px]">🔴 封島</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>近岸浪高 (海況)</b></td>
+                                        <td class="text-emerald-400">&lt; 2.0m (中浪以下)</td>
+                                        <td><b class="text-red-400">3.5~4.0m 大浪</b></td>
+                                        <td><span class="badge badge-veto !min-w-[42px] !text-[9.5px]">🔴 停航</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>長浪警報 (Tp)</b></td>
+                                        <td class="text-emerald-400">Tp &lt; 8.0s (無長浪)</td>
+                                        <td><b class="text-purple-300">15.5s (≥8s警戒)</b></td>
+                                        <td><span class="badge badge-veto !min-w-[42px] !text-[9.5px]">🔴 警報</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-2 border-[#c084fc] bg-slate-900/95 rounded-xl p-3 shadow-md flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center border-b border-[#c084fc]/40 pb-1.5 mb-2">
+                            <span class="text-[12.5px] font-bold text-[#c084fc] flex items-center gap-1.5">
+                                🤖 GEM 模型微觀算子 (GT 基準)
+                            </span>
+                            <span class="badge badge-veto">🔴 0.0% 熔斷</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="data-table !text-[10px]">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 25%;">物理算子</th>
+                                        <th style="width: 27%;">剛性安全限值</th>
+                                        <th style="width: 27%;">GEM 實算值 (14:08)</th>
+                                        <th style="width: 21%;">判定</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><b>港池波高 (Hs)</b></td>
+                                        <td class="text-emerald-400">≤ 1.13m (α=0.94)</td>
+                                        <td><b class="text-red-400">3.71 m</b></td>
+                                        <td><span class="badge badge-veto !min-w-[42px] !text-[9.5px]">🔴 熔斷</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>動態裕深 (UKC)</b></td>
+                                        <td class="text-emerald-400">≥ 1.50m (防觸底)</td>
+                                        <td><b class="text-red-400">0.42 m</b></td>
+                                        <td><span class="badge badge-veto !min-w-[42px] !text-[9.5px]">🔴 觸底</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>預留乾舷 (FB)</b></td>
+                                        <td class="text-emerald-400">≥ 0.50m (防漫頂)</td>
+                                        <td><b class="text-red-400">0.15 m</b></td>
+                                        <td><span class="badge badge-veto !min-w-[42px] !text-[9.5px]">🔴 漫頂</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 底端總裁示區塊（收盒抽屜折疊版） -->
+            <div class="border-2 border-flashing-alert bg-slate-950/95 rounded-xl p-3 shadow-2xl">
+                <!-- 抽屜標題列：點擊展開/收合 -->
+                <div class="accordion-header flex justify-between items-center cursor-pointer select-none py-0.5" onclick="toggleExecutiveRulingAccordion()">
+                    <div class="flex items-center gap-2">
+                        <span class="inline-block w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
+                        <span class="text-[12.5px] font-extrabold text-white flex items-center gap-1.5">
+                            ⚖ 龜山島雙層海事戰術控制台・總裁綜合裁示 (Executive Ruling)
+                        </span>
+                        <span class="bg-red-600 text-white font-mono font-bold text-[10px] px-2 py-0.5 rounded shadow">Q4 絕對物理熔斷</span>
+                    </div>
+                    <div class="text-[10.5px] text-[#38bdf8] flex items-center gap-1 font-mono">
+                        <span id="txtExecAccordionStatus">▼ 點擊展開詳細裁示說帖</span>
+                    </div>
+                </div>
+
+                <!-- 頂部常駐摘要卡片：收起時亦能秒級掌握裁定結果 -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2 pt-2 border-t border-slate-800 text-[10.5px]">
+                    <div class="bg-[#0b1120] p-1.5 rounded border border-red-500/40 flex items-center justify-between">
+                        <span class="text-slate-400">總體裁定：</span>
+                        <b class="text-red-400 font-bold">全線封島管制 (禁靠雙岸)</b>
+                    </div>
+                    <div class="bg-[#0b1120] p-1.5 rounded border border-amber-500/40 flex items-center justify-between">
+                        <span class="text-slate-400">時程指令：</span>
+                        <b class="text-yellow-400 font-bold">11:20 止登 ➔ 14:20 撤離</b>
+                    </div>
+                    <div class="bg-[#0b1120] p-1.5 rounded border border-emerald-500/40 flex items-center justify-between">
+                        <span class="text-slate-400">避難航向：</span>
+                        <b class="text-emerald-400 font-bold">直航烏石港 (精算 20 分鐘)</b>
+                    </div>
+                </div>
+
+                <!-- 點擊展開的詳細微觀水動力裁決全文與 SSOT 結算條 -->
+                <div class="accordion-content collapsed border-t border-[#334155]/60 pt-2.5 mt-2" id="execRulingAccordionContent">
+                    <div class="text-[11px] leading-relaxed text-slate-200 bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
+                        <b class="text-red-400 block mb-1">【裁決指令】全線封島管制，嚴禁靠泊北岸與南岸碼頭！</b>
+                        今日受 955 hPa 颱風外圍長浪直擊，港池湧浪週期 <b>Tp=15.5 s &gt; 12.0 s</b> 穿透消能屏障 (Kd=1.00)，港池有效波高 <b>Hs,pier=3.71 m</b> 嚴重超標；南岸碼頭泊位水深基點 -5.50m CD，扣除客輪吃水 1.20m、蹲沉 0.82m 與穿透長浪後，船底動態裕深僅剩 <b>UKC=0.42 m &lt; 1.50 m</b> 觸發觸底危險；北岸碼頭標高 +3.20m CD 遭朔望大潮滿潮 (+1.35m) 與湧浪漫頂，Vision-PINN 偵測越浪率 1.31 p/min，預留乾舷強制覆寫為 <b>FB=0.15 m &lt; 0.50 m</b>。雙岸泊位全面失效，客輪一律直航返航避風母港【烏石港】。
+                    </div>
+                    <div class="mt-2 pt-1.5 border-t border-slate-800/80 flex flex-wrap justify-between items-center text-[10px] text-slate-400 gap-1">
+                        <span>游擊指令：<b>11:20 止登截止</b> ➔ <b>14:20 強制清島全員撤退</b> (撤離耗時精算: <b class="text-yellow-400">20 分鐘</b>)</span>
+                        <span class="text-emerald-400 font-mono">SSOT ACK: 100.0% 合約同化完成</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 分頁 2: 南北雙岸色塊防碰撞剖面圖 -->
+    <main id="tabBathymetryView" class="hidden flex-col gap-3 w-full">
+        <div class="card border-[#38bdf8]">
+            <div class="card-header !text-[#38bdf8]">
+                <span>📐 龜山島南、北岸碼頭 CD 水深海陸工程色塊防碰撞雙斷面圖 (鼎興 92-021 & 97-05 竣工細設藍圖校準)</span>
+                <span class="text-[11px] text-[#38bdf8]">高程基準：最低潮位 CD ±0.00m (Chart Datum)</span>
+            </div>
+            <div class="p-3 bg-slate-950 rounded-xl border border-slate-700 text-[11px] text-slate-300 space-y-3">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-center font-mono">
+                    <div class="p-2 bg-slate-900 border border-slate-800 rounded-lg">
+                        <span class="text-slate-400 block text-[9.5px]">北岸主碼頭標高 / 設計水深</span>
+                        <b class="text-white text-[12.5px]">+3.20m CD / -3.20m CD</b>
+                        <div class="text-[9.5px] text-red-400 mt-0.5">越浪 FB 0.15m / 裕深 -1.30m (坐灘)</div>
+                    </div>
+                    <div class="p-2 bg-slate-900 border border-slate-800 rounded-lg">
+                        <span class="text-slate-400 block text-[9.5px]">南岸權宜碼頭標高 / 設計水深</span>
+                        <b class="text-sky-400 text-[12.5px]">+2.50m CD / -5.50m CD</b>
+                        <div class="text-[9.5px] text-red-400 mt-0.5">裕深 UKC 0.42m &lt; 1.50m (觸底)</div>
+                    </div>
+                    <div class="p-2 bg-slate-900 border border-slate-800 rounded-lg">
+                        <span class="text-slate-400 block text-[9.5px]">客輪吃水 + 雙體高速蹲沉</span>
+                        <b class="text-amber-400 text-[12.5px]">1.20m + 0.82m = 2.02m</b>
+                        <div class="text-[9.5px] text-slate-400 mt-0.5">佔用吃水包絡線 2.02m</div>
+                    </div>
+                    <div class="p-2 bg-slate-900 border border-slate-800 rounded-lg">
+                        <span class="text-slate-400 block text-[9.5px]">即時退潮水位 (14:08 CST)</span>
+                        <b class="text-emerald-400 text-[12.5px]">+0.65m CD</b>
+                        <div class="text-[9.5px] text-purple-300 mt-0.5">滿潮 +1.35m / 乾潮 -0.45m</div>
+                    </div>
+                </div>
+
+                <!-- 雙斷面動態 Canvas 渲染畫布 (色塊分區防碰撞、游標懸停即時提示) -->
+                <div class="w-full h-[480px] bg-slate-900 border border-slate-700 rounded-xl relative overflow-hidden chart-canvas-wrap">
+                    <canvas id="canvasDualPierProfile" class="w-full h-full block"></canvas>
+                    <div id="tipDualPierProfile" class="chart-tooltip"></div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-[11px] leading-relaxed">
+                    <div class="p-2.5 bg-red-500/10 border border-red-500/30 rounded-lg text-red-200">
+                        <b class="text-red-300 block mb-1">⚓ 北岸主碼頭（鼎興 92-021 竣工圖）：</b>
+                        • 碼頭面標高 +3.20m CD（引道頂 +3.60m），原海床拋石水深僅 <b>-3.20m CD</b>。<br>
+                        • 朔望滿潮 +1.35m 遭外海 <b>3.93m</b> 巨浪直擊撲頂，Vision 偵測越浪率 1.31 p/min 覆寫 <b>FB=0.15m</b>！總水深 3.85m 扣除吃水蹲沉 2.02m 與波高 3.93m，裕深 <b>UKC = -1.30m 嚴重坐灘</b>，龍骨砸入拋石，全日禁止停泊。
+                    </div>
+                    <div class="p-2.5 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-200">
+                        <b class="text-amber-300 block mb-1">⚓ 南岸權宜碼頭（鼎興 97-05 細設圖）：</b>
+                        • 沉箱碼頭面標高 <b>+2.50m CD</b>，浚挖設計水深為 <b>-5.50m CD</b>（回填拋石面 -4.5m）。<br>
+                        • 退潮位 +0.65m，總水深 6.15m，扣除客輪吃水 1.20m 與蹲沉 0.82m（佔用 2.02m）後遭穿透波高 <b>3.71m</b> 直擊，動態裕深僅剩 <b>UKC = 0.42m &lt; 1.50m</b>，龍骨直接陷入<b>【紅色觸底危險區】</b>！雙岸泊位全面失效，直航返航烏石港。
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 分頁 3: 30 天月度宏觀推估 -->
+    <main id="tabLongtermView" class="hidden flex-col gap-3 w-full">
+        <div class="card border-[#c084fc] bg-[#161726]">
+            <div class="card-header !text-[#c084fc]">
+                <span>🔮 30 天月度宏觀水文氣象推估 (常秉義周天 360° 公度曆法與太乙奇門氣場同化)</span>
+                <span class="badge bg-[#c084fc]/20 text-[#c084fc] border border-[#c084fc]">推估週期：2026-10-06 至 2026-11-05 (30 天)</span>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5 mb-3 text-center">
+                <div class="bg-[#0b1120] border border-[#334155] p-2.5 rounded-lg">
+                    <div class="text-[10px] text-[#94a3b8]">北岸碼頭可作業天數</div>
+                    <div class="text-[16px] font-extrabold text-[#10b981] mt-0.5">14 <span class="text-[10px] font-normal text-[#94a3b8]">/ 30天</span></div>
+                    <div class="text-[9.5px] text-[#94a3b8] mt-1">平穩期：10/08-10/12, 10/18-10/26</div>
+                </div>
+                <div class="bg-[#0b1120] border border-[#334155] p-2.5 rounded-lg">
+                    <div class="text-[10px] text-[#94a3b8]">南岸權宜調撥天數</div>
+                    <div class="text-[16px] font-extrabold text-[#38bdf8] mt-0.5">8 <span class="text-[10px] font-normal text-[#94a3b8]">/ 30天</span></div>
+                    <div class="text-[9.5px] text-[#38bdf8] mt-1">背風調撥：Δθ≥38° 且 Hs≤1.2m</div>
+                </div>
+                <div class="bg-[#0b1120] border border-[#334155] p-2.5 rounded-lg">
+                    <div class="text-[10px] text-[#94a3b8]">長浪共振穿透封島天數</div>
+                    <div class="text-[16px] font-extrabold text-[#c084fc] mt-0.5">5 <span class="text-[10px] font-normal text-[#94a3b8]">/ 30天</span></div>
+                    <div class="text-[9.5px] text-[#c084fc] mt-1">Tp&gt;12.0s 港池Kd=1.00共振</div>
+                </div>
+                <div class="bg-[#0b1120] border border-[#334155] p-2.5 rounded-lg">
+                    <div class="text-[10px] text-[#94a3b8]">低壓/大潮雙岸全線熔斷</div>
+                    <div class="text-[16px] font-extrabold text-[#ef4444] mt-0.5">8 <span class="text-[10px] font-normal text-[#94a3b8]">/ 30天</span></div>
+                    <div class="text-[9.5px] text-[#ef4444] mt-1">10/06 (中颱), 10/27-31 (秋季低壓)</div>
+                </div>
+            </div>
+            <!-- 30天走勢雙圖 -->
+            <div class="flex flex-col gap-2.5">
+                <div class="w-full h-[190px] bg-[#0b1120] rounded-lg border border-[#334155] p-1 relative chart-canvas-wrap">
+                    <canvas id="canvas30DaysWaves" class="chart-canvas"></canvas>
+                    <div id="tip30DaysWaves" class="chart-tooltip"></div>
+                </div>
+                <div class="w-full h-[190px] bg-[#0b1120] rounded-lg border border-[#334155] p-1 relative chart-canvas-wrap">
+                    <canvas id="canvas30DaysWind" class="chart-canvas"></canvas>
+                    <div id="tip30DaysWind" class="chart-tooltip"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span>📅 30 天各日海事水文戰術推估與南北岸監測日曆 (圖示直觀化版)</span>
+                <span class="text-[10px] text-[#38bdf8]">常秉義 360° 公度分形對齊</span>
+            </div>
+            <div class="overflow-x-auto max-h-[380px]">
+                <table class="data-table text-center" id="table30Days">
+                    <thead>
+                        <tr>
+                            <th class="w-[10%]">預估日期</th><th class="w-[8%]">公度/農曆</th><th class="w-[14%]">氣象/低壓系統</th><th class="w-[9%]">動態潮位(Eta)</th>
+                            <th class="w-[12%]">北岸波高/風速</th><th class="w-[12%]">南岸波高/風速</th><th class="w-[8%]">Tp 週期</th>
+                            <th class="w-[9%]">風向攻角(Δθ)</th><th class="w-[9%]">奇門門控</th><th class="w-[9%]">戰術裁決</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody30Days"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- 分頁 4: Soft Ocean 龜山島周邊海域地圖 -->
+    <main id="tabSoftOceanView" class="hidden flex-col gap-3 w-full">
+        <div class="card border-[#38bdf8] bg-[#0c1628]">
+            <div class="card-header !text-[#38bdf8]">
+                <div class="flex items-center gap-2">
+                    <span>🌊 龜山島周邊海域實體高精度海圖 (NLSC 國土測繪雲 / ESRI Ocean + 邊界約束動態流場)</span>
+                    <span class="badge badge-pass text-[10px]">官方高可用 (No 403)</span>
+                </div>
+                <div class="flex flex-wrap gap-1.5 text-[10.5px]">
+                    <button class="bg-[#1e293b] border border-[#38bdf8] text-[#38bdf8] px-2 py-0.5 rounded text-[10px] font-bold" id="btnDeskNLSC" onclick="switchTileLayer('nlsc')">🗺 臺灣通用電子圖 (NLSC)</button>
+                    <button class="bg-[#1e293b] border border-slate-600 text-slate-300 px-2 py-0.5 rounded text-[10px]" id="btnDeskEsri" onclick="switchTileLayer('esri')">🌊 實體深海圖 (ESRI Ocean)</button>
+                    <button class="bg-[#1e293b] border border-emerald-500 text-emerald-300 px-2 py-0.5 rounded text-[10px] font-bold transition-all" id="btnDeskToggleFlow" onclick="toggleDesktopFlowLayer()">🌊 表面潮流：開 (315° NW / 1.4 kts)</button>
+                    <button class="bg-[#1e293b] border border-amber-500 text-amber-300 px-2 py-0.5 rounded text-[10px] font-bold transition-all" id="btnDeskToggleWind" onclick="toggleDesktopWindLayer()">💨 風浪湧浪：開 (65° ENE / 8.5 m/s)</button>
+                    <button class="bg-[#1e293b] border border-red-500 text-red-300 px-2 py-0.5 rounded text-[10px] font-bold transition-all" id="btnDeskToggleTyphoon" onclick="toggleDesktopTyphoonLayer()">🌀 氣象署路徑暴風圈：開</button>
+                </div>
+            </div>
+            <div class="relative w-full h-[540px] rounded-lg overflow-hidden border border-[#334155] bg-[#0b1120]">
+                <div id="osmMapContainer" class="w-full h-full relative z-[10]"></div>
+                <canvas id="softOceanFlowCanvasDesktop" class="absolute top-0 left-0 w-full h-full pointer-events-none z-[500]"></canvas>
+
+                <!-- 左側一：國海院 Soft Ocean 實時模式遙測 -->
+                <div class="absolute top-3 left-3 bg-slate-900/95 border border-slate-700 p-2.5 rounded-lg text-[10.5px] space-y-1 z-[1000] backdrop-blur-md shadow-2xl max-w-[270px]">
+                    <div class="text-[#38bdf8] font-bold flex items-center gap-1.5 border-b border-slate-700/80 pb-1">
+                        <span class="pulse-dot-blue"></span> 國海院 Soft Ocean 實時模式遙測
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span>• 表面潮流 (青綠)：</span>
+                        <b class="text-emerald-300 font-mono">315° NW / 1.4 kts ↖️ (陸地約束)</b>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span>• 局域風場 (金橙)：</span>
+                        <b class="text-amber-400 font-mono">110° ESE / 9.5 m/s ↙ (屏障瓦解)</b>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span>• 遠洋湧浪 (赤紅)：</span>
+                        <b class="text-[#ef4444] font-mono">Hs 3.71m / Tp 15.5s 🌊</b>
+                    </div>
+                    <div class="pt-1 border-t border-slate-700/60 text-[9.5px] text-slate-300">
+                        • 避難航向：<b class="text-emerald-400 font-mono">245° WSW ➔ 烏石港 (10.8浬)</b>
+                    </div>
+                </div>
+
+                <!-- 右側二：氣象署颱風動態與龜山島水文衝擊情勢剖析面板 -->
+                <div class="absolute top-3 right-3 bg-slate-950/95 border-2 border-red-500/70 p-3 rounded-xl text-[10.5px] z-[1000] backdrop-blur-md shadow-2xl max-w-[320px] space-y-1.5" id="typhoonAnalysisBox">
+                    <div class="flex items-center justify-between border-b border-red-500/40 pb-1">
+                        <span class="font-extrabold text-amber-300 flex items-center gap-1">
+                            🌀 氣象署颱風動態與龜山島水文衝擊
+                        </span>
+                        <span class="badge badge-veto text-[9px]">中颱 955 hPa</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-1 font-mono text-[9.5px] bg-[#0b1120] p-1.5 rounded border border-slate-800">
+                        <div>中心位置: <b class="text-white">23.6°N, 122.8°E</b></div>
+                        <div>中心氣壓: <b class="text-red-400">955 hPa</b></div>
+                        <div>最大風速: <b class="text-amber-300">40 m/s (13級)</b></div>
+                        <div>暴風半徑: <b class="text-red-400">7級 250km</b></div>
+                        <div>移向移速: <b class="text-sky-300">WNW 295° / 18km/h</b></div>
+                        <div>距龜山島: <b class="text-red-400">東南方約 142 km</b></div>
+                    </div>
+
+                    <div class="text-[10px] text-slate-200 leading-snug space-y-1 pt-0.5">
+                        <div class="font-bold text-red-300">🎯 對龜山島海事安全實質影響情勢分析：</div>
+                        <p class="text-slate-300">• <b>長浪擊穿屏障</b>：長浪週期 <b class="text-purple-300 font-mono">Tp=15.5s &gt; 12.0s</b>，提前侵入，港池防波堤消能完全失效 (<b class="text-red-400 font-mono">Kd=1.00</b>)，波高達 3.71m~3.93m。</p>
+                        <p class="text-slate-300">• <b>共伴壓差風暴</b>：颱風外圍強風與東北季風產生共伴效應，宜蘭外海陣風達 <b class="text-red-400 font-mono">9~10 級</b>，雙岸側風與下風湧浪劇烈。</p>
+                        <p class="text-slate-300">• <b>朔望大潮漫頂</b>：疊加大潮滿潮高程 (+1.35m)，預留乾舷被壓迫至 <b class="text-red-400 font-mono">FB=0.15m</b>，全線越浪漫堤。</p>
+                    </div>
+
+                    <div class="bg-red-950/60 border border-red-500/60 p-1.5 rounded text-[9.5px] text-center font-bold text-amber-200">
+                        🚨 裁決總結：全線觸發一票否決熔斷，嚴禁登島！
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
 
     <script>
-      let count = parseInt(localStorage.getItem('caoling_map_refresh_count') || '0') + 1;
-      localStorage.setItem('caoling_map_refresh_count', count);
-      document.getElementById('refresh-count').innerText = '#' + count;
+        const CONSTANTS = {
+            HARD_HS_MAX: 1.20,
+            HARD_WEFF_MAX: 10.80,
+            HARD_UKC_MIN: 1.50,
+            HARD_FB_MIN: 0.50,
+            NORTH_DECK_CD: 3.20,
+            NORTH_DEPTH_CD: 3.20,
+            SOUTH_DECK_CD: 2.50,
+            SOUTH_DEPTH_CD: 5.50,
+            D_DRAFT: 1.20,
+            S_SQUAT: 0.82,
+            PASSENGER_COUNT: 150
+        };
 
-      let now = new Date();
-      document.getElementById('update-time').innerText = now.toTimeString().split(' ')[0];
+        let currentTelemetry = {
+            hs_cwa: 3.71,
+            w_cwa: 9.50,
+            tp_s: 15.5,
+            delta_theta_deg: 58.0,
+            tide_eta_m: 0.65,
+            qimen_consensus_pct: 100.0,
+            video_overtopping_rate: 1.31,
+            video_kd_bias: 0.0295
+        };
 
-      setTimeout(function(){ location.reload(); }, 10000);
-    </script>
-    </body>
-    
-<script>
-    
-    
-            var map_7fd60a5ee42bd3d68d505604e267ef55 = L.map(
-                "map_7fd60a5ee42bd3d68d505604e267ef55",
-                {
-                    center: [24.978, 121.9242],
-                    crs: L.CRS.EPSG3857,
-                    ...{
-  "zoom": 15,
-  "zoomControl": true,
-  "preferCanvas": false,
-}
+        let currentEvaluation = {};
+        let currentTab = 'desktop';
+        let heartbeatCount = 29;
+        let isAutoSyncEnabled = true;
+        let leafletMap = null;
+        let currentBaseTileLayer = null;
+        let isDeskFlowActive = true;
+        let isDeskWindActive = true;
+        let isDeskTyphoonActive = true;
+        let deskFlowParticles = [];
+        let deskWindParticles = [];
+        let deskFlowAnimationId = null;
+        let typhoonLayersGroup = null;
 
+        const TYPHOON_DATA = {
+            name: "中度颱風 (955 hPa)",
+            center: [23.6, 122.8],
+            r7_km: 250,
+            r10_km: 80,
+            track: [
+                { pos: [22.4, 124.6], label: "10/05 08:00 (過去)", color: "#94a3b8" },
+                { pos: [23.0, 123.7], label: "10/05 20:00 (過去)", color: "#cbd5e1" },
+                { pos: [23.6, 122.8], label: "10/06 14:00 (當前中心 955hPa / 40m/s)", color: "#ef4444" },
+                { pos: [24.3, 121.9], label: "10/06 20:00 (預測 +6h 掠過龜山島東南海域)", color: "#f59e0b" },
+                { pos: [24.9, 121.2], label: "10/07 08:00 (預測 +18h 登陸北臺灣)", color: "#facc15" },
+                { pos: [25.6, 120.3], label: "10/07 20:00 (預測 +30h 出海向閩浙)", color: "#38bdf8" }
+            ]
+        };
+
+        const forecast30DaysData = [];
+        (function generate30DaysModel() {
+            const startDate = new Date(2026, 9, 6);
+            for (let i = 0; i < 30; i++) {
+                const cur = new Date(startDate);
+                cur.setDate(startDate.getDate() + i);
+                const y = cur.getFullYear();
+                const m = String(cur.getMonth() + 1).padStart(2, '0');
+                const d = String(cur.getDate()).padStart(2, '0');
+                const dateStr = `${y}-${m}-${d}`;
+                const deg = ((i * 12) % 360);
+
+                let hs, w, tp, tide, weather, deltaTheta, gate, status, badgeClass, pier, weatherIcon, dirArrow;
+                if (i === 0) {
+                    hs = 3.71; w = 9.50; tp = 15.5; tide = 0.65; deltaTheta = 58;
+                    weather = "中颱侵襲 (955hPa)"; weatherIcon = "🌀"; dirArrow = "↘️ ESE"; gate = '死門 (坤宮)'; status = '🔴 0.0% 封島'; badgeClass = 'badge-veto'; pier = '無 (雙岸失效)';
+                } else if (i === 1) {
+                    hs = 1.45; w = 7.20; tp = 11.2; tide = 0.90; deltaTheta = 38;
+                    weather = "颱風遠離浪退"; weatherIcon = "☁️"; dirArrow = "➡ E"; gate = '杜門 (巽宮)'; status = '🟡 條件靠泊'; badgeClass = 'badge-warn'; pier = '【南岸權宜碼頭】';
+                } else if (i === 2) {
+                    hs = 0.85; w = 4.80; tp = 8.2; tide = 0.65; deltaTheta = 20;
+                    weather = "高壓籠罩平穩"; weatherIcon = "☀️"; dirArrow = "↘️ ESE"; gate = '開門 (乾宮)'; status = '🟢 100% 全線開放'; badgeClass = 'badge-pass'; pier = '【北岸主碼頭】';
+                } else if (i >= 3 && i <= 7) {
+                    hs = Number((0.68 + Math.sin(i) * 0.22).toFixed(2));
+                    w = Number((4.60 + Math.cos(i) * 1.4).toFixed(2));
+                    tp = Number((8.2 + (i % 3) * 0.6).toFixed(1));
+                    tide = Number((0.60 + Math.sin(i * 0.5) * 0.25).toFixed(2));
+                    deltaTheta = 22 + (i % 3) * 5;
+                    weather = "副高邊緣平穩"; weatherIcon = "☀"; dirArrow = "↘️ ESE";
+                    gate = (i % 2 === 0) ? '開門 (乾宮)' : '休門 (坎宮)';
+                    status = '🟢 100% 全線開放'; badgeClass = 'badge-pass'; pier = '【北岸主碼頭】';
+                } else if (i >= 8 && i <= 12) {
+                    hs = Number((1.12 + Math.sin(i) * 0.30).toFixed(2));
+                    w = Number((7.40 + (i % 2) * 1.6).toFixed(2));
+                    tp = 12.4;
+                    tide = Number((1.35 + Math.sin(i) * 0.15).toFixed(2));
+                    deltaTheta = 38 + (i % 2) * 6;
+                    weather = "天文大潮弱低壓"; weatherIcon = "🌊"; dirArrow = "➡️ E";
+                    gate = '驚門 (兌宮)'; status = '🟠 預警限制'; badgeClass = 'badge-warn'; pier = '【南岸權宜碼頭】';
+                } else if (i >= 13 && i <= 21) {
+                    hs = Number((0.55 + Math.cos(i) * 0.18).toFixed(2));
+                    w = Number((4.20 + Math.sin(i) * 1.1).toFixed(2));
+                    tp = 8.0;
+                    tide = Number((0.50 + Math.cos(i * 0.4) * 0.20).toFixed(2));
+                    deltaTheta = 18 + (i % 4) * 4;
+                    weather = "秋高氣爽海象"; weatherIcon = "☀️"; dirArrow = "↘ ESE";
+                    gate = '生門 (艮宮)'; status = '🟢 100% 全線開放'; badgeClass = 'badge-pass'; pier = '【北岸主碼頭】';
+                } else {
+                    hs = Number((1.65 + (i % 3) * 0.35).toFixed(2));
+                    w = Number((9.20 + (i % 2) * 1.8).toFixed(2));
+                    tp = 13.2;
+                    tide = Number((0.85 + Math.cos(i) * 0.20).toFixed(2));
+                    deltaTheta = 48 + (i % 2) * 5;
+                    weather = "秋季熱帶低壓"; weatherIcon = "🌀"; dirArrow = "↗️ ENE";
+                    gate = '死門 (坤宮)'; status = '🔴 0.0% 封島'; badgeClass = 'badge-veto'; pier = '無 (雙岸失效)';
                 }
-            );
 
+                forecast30DaysData.push({
+                    date: dateStr, deg: `${deg}°`, lunar: `八月${25 + i > 30 ? i - 5 : 25 + i}`,
+                    hs, w, tp, tide, weather, weatherIcon, dirArrow, deltaTheta,
+                    northHs: Number((hs * 1.06).toFixed(2)), southHs: hs,
+                    northW: Number((w * 1.05).toFixed(2)), southW: Number((w * 0.82).toFixed(2)),
+                    gate, status, badgeClass, pier
+                });
+            }
+        })();
+
+        let liveBaseDate = new Date(2026, 9, 6, 14, 8, 0);
+        function updateLiveClock() {
+            liveBaseDate.setSeconds(liveBaseDate.getSeconds() + 1);
+            const hh = String(liveBaseDate.getHours()).padStart(2, '0');
+            const mm = String(liveBaseDate.getMinutes()).padStart(2, '0');
+            const ss = String(liveBaseDate.getSeconds()).padStart(2, '0');
+            const clk = document.getElementById('liveClock');
+            if (clk) clk.textContent = `${hh}:${mm}:${ss} CST`;
+            if (liveBaseDate.getSeconds() % 5 === 0) {
+                heartbeatCount++;
+                const hb = document.getElementById('heartbeatCounter');
+                if (hb) hb.textContent = heartbeatCount;
+            }
+        }
+        setInterval(updateLiveClock, 1000);
+
+        function calcKd(tp, videoBias = 0.0295) {
+            let baseKd;
+            if (tp < 11.5) baseKd = 0.883;
+            else if (tp <= 12.0) baseKd = 0.883 + (1.00 - 0.883) * ((tp - 11.5) / 0.5);
+            else baseKd = 1.00;
+            return Math.min(1.00, Number((baseKd + videoBias).toFixed(4)));
+        }
+
+        function calcKw(deltaTheta) {
+            if (deltaTheta < 30.0) return 0.78;
+            else if (deltaTheta < 45.0) return 0.78 + (1.00 - 0.78) * ((deltaTheta - 30.0) / 15.0);
+            else return 1.00;
+        }
+
+        function evaluatePhysics(telemetry) {
+            const kd = calcKd(telemetry.tp_s, telemetry.video_kd_bias);
+            const kw = calcKw(telemetry.delta_theta_deg);
+            const hs_pier = Number((telemetry.hs_cwa * kd).toFixed(2));
+            const w_local = Number((telemetry.w_cwa * kw).toFixed(2));
+            const rad = telemetry.delta_theta_deg * (Math.PI / 180);
+            const w_eff = Number((w_local * Math.abs(Math.cos(rad))).toFixed(2));
             
+            const south_total_depth = CONSTANTS.SOUTH_DEPTH_CD + telemetry.tide_eta_m;
+            const vessel_occupancy = CONSTANTS.D_DRAFT + CONSTANTS.S_SQUAT;
+            const ukc_south = Number((south_total_depth - vessel_occupancy - hs_pier).toFixed(2));
 
-        
-    
-            var tile_layer_91b5fb897c5510c0babe878df544f727 = L.tileLayer(
-                "https://wmts.nlsc.gov.tw/wmts/EMAP/default/GoogleMapsCompatible/{z}/{y}/{x}",
-                {
-  "minZoom": 0,
-  "maxZoom": 19,
-  "maxNativeZoom": 19,
-  "noWrap": false,
-  "attribution": "\u0026copy; \u5167\u653f\u90e8\u570b\u571f\u6e2c\u7e6a\u5716\u8cc7\u670d\u52d9\u96f2 (EMAP)",
-  "subdomains": "abc",
-  "detectRetina": false,
-  "tms": false,
-  "opacity": 1,
-}
+            const north_total_depth = CONSTANTS.NORTH_DEPTH_CD + telemetry.tide_eta_m;
+            const ukc_north = Number((north_total_depth - vessel_occupancy - (hs_pier * 1.06)).toFixed(2));
 
-            );
-        
-    
-            tile_layer_91b5fb897c5510c0babe878df544f727.addTo(map_7fd60a5ee42bd3d68d505604e267ef55);
-        
-    
-            var tile_layer_ee3a7ff9c34095773099d2c8f30abeb5 = L.tileLayer(
-                "https://wmts.nlsc.gov.tw/wmts/PHOTO2/default/GoogleMapsCompatible/{z}/{y}/{x}",
-                {
-  "minZoom": 0,
-  "maxZoom": 19,
-  "maxNativeZoom": 19,
-  "noWrap": false,
-  "attribution": "\u0026copy; \u5167\u653f\u90e8\u570b\u571f\u6e2c\u7e6a\u5716\u8cc7\u670d\u52d9\u96f2 (PHOTO2)",
-  "subdomains": "abc",
-  "detectRetina": false,
-  "tms": false,
-  "opacity": 1,
-}
+            let fb_pier = Number((CONSTANTS.NORTH_DECK_CD - telemetry.tide_eta_m).toFixed(2));
+            if (telemetry.video_overtopping_rate > 0.0) fb_pier = 0.15;
 
-            );
-        
-    
-            tile_layer_ee3a7ff9c34095773099d2c8f30abeb5.addTo(map_7fd60a5ee42bd3d68d505604e267ef55);
-        
-    
-            var poly_line_5de25c3a13b9ae8f9578f61536c72355 = L.polyline(
-                [[25.0034, 121.9318], [24.996, 121.9285], [24.9886, 121.925], [24.9785, 121.924], [24.978, 121.9242], [24.9745, 121.9248], [24.9696, 121.9253], [24.9691, 121.9258]],
-                {"bubblingMouseEvents": true, "color": "#2563eb", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#2563eb", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.85, "smoothFactor": 1.0, "stroke": true, "weight": 5}
-            ).addTo(map_7fd60a5ee42bd3d68d505604e267ef55);
-        
-    
-        var popup_9f2eadc1b853bd4301fe1d27a33dfb9f = L.popup({
-  "maxWidth": "100%",
-});
+            let alpha_tune = 0.94;
+            if (telemetry.hs_cwa > 2.0 || telemetry.tp_s > 12.0) alpha_tune = 0.94;
 
-        
-            
-                var html_8de9c3ab05be3a9c296f08add80f5787 = $(`<div id="html_8de9c3ab05be3a9c296f08add80f5787" style="width: 100.0%; height: 100.0%;"><b>🚶‍♂️ 草嶺古道主線</b></div>`)[0];
-                popup_9f2eadc1b853bd4301fe1d27a33dfb9f.setContent(html_8de9c3ab05be3a9c296f08add80f5787);
-            
-        
+            const eff_hs_limit = Number((CONSTANTS.HARD_HS_MAX * alpha_tune).toFixed(2));
+            const eff_weff_limit = Number((CONSTANTS.HARD_WEFF_MAX * alpha_tune).toFixed(2));
+            const pass_hs = hs_pier <= eff_hs_limit;
+            const pass_w = w_eff <= eff_weff_limit;
+            const pass_ukc = ukc_south >= CONSTANTS.HARD_UKC_MIN;
+            const pass_fb = fb_pier >= CONSTANTS.HARD_FB_MIN;
+            const has_veto = !(pass_hs && pass_w && pass_ukc && pass_fb);
 
-        poly_line_5de25c3a13b9ae8f9578f61536c72355.bindPopup(popup_9f2eadc1b853bd4301fe1d27a33dfb9f)
-        ;
-
-        
-    
-    
-            var poly_line_5c9ce1a378e01a717b42ff6a2abbe151 = L.polyline(
-                [[24.9782, 121.924], [24.976, 121.9244], [24.9745, 121.9248]],
-                {"bubblingMouseEvents": true, "color": "#a855f7", "dashArray": "8, 8", "dashOffset": null, "fill": false, "fillColor": "#a855f7", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.9, "smoothFactor": 1.0, "stroke": true, "weight": 5}
-            ).addTo(map_7fd60a5ee42bd3d68d505604e267ef55);
-        
-    
-        var popup_8cf9cc3ee8a4df79fd201cb26923ebea = L.popup({
-  "maxWidth": "100%",
-});
-
-        
-            
-                var html_230093ba01b2ce6515d113a79b48c8f5 = $(`<div id="html_230093ba01b2ce6515d113a79b48c8f5" style="width: 100.0%; height: 100.0%;"><b>🧭 未來移動向量</b><br>方向: 南南東 (165°)<br>速度: 0.8 m/s</div>`)[0];
-                popup_8cf9cc3ee8a4df79fd201cb26923ebea.setContent(html_230093ba01b2ce6515d113a79b48c8f5);
-            
-        
-
-        poly_line_5c9ce1a378e01a717b42ff6a2abbe151.bindPopup(popup_8cf9cc3ee8a4df79fd201cb26923ebea)
-        ;
-
-        
-    
-    
-            poly_line_5c9ce1a378e01a717b42ff6a2abbe151.bindTooltip(
-                `<div>
-                     🧭 未來向量方向：南南東 (165°) ➔ 目標：護管所泥塘散熱區 (預測終點)
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-            var marker_e00553437fa4429c62d673874f571a8f = L.marker(
-                [24.976, 121.9244],
-                {
-}
-            ).addTo(map_7fd60a5ee42bd3d68d505604e267ef55);
-        
-    
-            var icon_5251236e151f99135f85e672819d87db = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "cadetblue",
-  "iconColor": "white",
-  "icon": "arrow-right",
-  "prefix": "glyphicon",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_e3bbc3b85a702c0d1793f559ce97b1ea = L.popup({
-  "maxWidth": "100%",
-});
-
-        
-            
-                var html_c930a5f154be5e85e621497d18774951 = $(`<div id="html_c930a5f154be5e85e621497d18774951" style="width: 100.0%; height: 100.0%;"><b>🎯 預測地點：鞍部南側草叢 (預測途經點)</b><br>預估抵達時間：+10 分鐘<br>說明：沿向量 165° 移動中</div>`)[0];
-                popup_e3bbc3b85a702c0d1793f559ce97b1ea.setContent(html_c930a5f154be5e85e621497d18774951);
-            
-        
-
-        marker_e00553437fa4429c62d673874f571a8f.bindPopup(popup_e3bbc3b85a702c0d1793f559ce97b1ea)
-        ;
-
-        
-    
-    
-            marker_e00553437fa4429c62d673874f571a8f.bindTooltip(
-                `<div>
-                     📍 未來預測地點：<b>鞍部南側草叢 (預測途經點)</b> (+10 分鐘)
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_e00553437fa4429c62d673874f571a8f.setIcon(icon_5251236e151f99135f85e672819d87db);
-            
-    
-            var marker_836da98a16fd679db2bebe7430bf86fa = L.marker(
-                [24.9745, 121.9248],
-                {
-}
-            ).addTo(map_7fd60a5ee42bd3d68d505604e267ef55);
-        
-    
-            var icon_43ecef48141abcaa52153bb59b3a6a9a = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "purple",
-  "iconColor": "white",
-  "icon": "flag",
-  "prefix": "glyphicon",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_d7faa611f584cb66b9905212c6fdd319 = L.popup({
-  "maxWidth": "100%",
-});
-
-        
-            
-                var html_67afa8f280de78882a1a66023145a316 = $(`<div id="html_67afa8f280de78882a1a66023145a316" style="width: 100.0%; height: 100.0%;"><b>🎯 預測地點：護管所泥塘散熱區 (預測終點)</b><br>預估抵達時間：+25 分鐘<br>說明：高溫 THI 驅動泡水目的地</div>`)[0];
-                popup_d7faa611f584cb66b9905212c6fdd319.setContent(html_67afa8f280de78882a1a66023145a316);
-            
-        
-
-        marker_836da98a16fd679db2bebe7430bf86fa.bindPopup(popup_d7faa611f584cb66b9905212c6fdd319)
-        ;
-
-        
-    
-    
-            marker_836da98a16fd679db2bebe7430bf86fa.bindTooltip(
-                `<div>
-                     📍 未來預測地點：<b>護管所泥塘散熱區 (預測終點)</b> (+25 分鐘)
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_836da98a16fd679db2bebe7430bf86fa.setIcon(icon_43ecef48141abcaa52153bb59b3a6a9a);
-            
-    
-            var circle_89171fd14539df4019a79857bcb8de27 = L.circle(
-                [24.9782, 121.924],
-                {"bubblingMouseEvents": true, "color": "#ef4444", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ef4444", "fillOpacity": 0.4, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 10, "stroke": true, "weight": 3}
-            ).addTo(map_7fd60a5ee42bd3d68d505604e267ef55);
-        
-    
-            circle_89171fd14539df4019a79857bcb8de27.bindTooltip(
-                `<div>
-                     🔴 10m 硬防線 | 水牛數量：7 頭
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-            var marker_07b3342de62f61d1591d5207c4dccd52 = L.marker(
-                [24.9782, 121.924],
-                {
-}
-            ).addTo(map_7fd60a5ee42bd3d68d505604e267ef55);
-        
-    
-            var icon_dcc5e2c5c76bbdd649d772a235cef313 = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "red",
-  "iconColor": "white",
-  "icon": "warning",
-  "prefix": "glyphicon",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_d182d26a26ba4d35b6db3399a93a5e5e = L.popup({
-  "maxWidth": "100%",
-});
-
-        
-            
-                var html_3125761a09d09a7173a02b1c22e2f1ef = $(`<div id="html_3125761a09d09a7173a02b1c22e2f1ef" style="width: 100.0%; height: 100.0%;">🦬 <b>水牛即時點位資訊</b><br>• 即時數量：7 頭<br>• 移動向量：南南東 (165°) (0.8 m/s)<br>• 預測地點：護管所泥塘散熱區 (預測終點)<br>• 預估抵達：25 分鐘內</div>`)[0];
-                popup_d182d26a26ba4d35b6db3399a93a5e5e.setContent(html_3125761a09d09a7173a02b1c22e2f1ef);
-            
-        
-
-        marker_07b3342de62f61d1591d5207c4dccd52.bindPopup(popup_d182d26a26ba4d35b6db3399a93a5e5e)
-        ;
-
-        
-    
-    
-            marker_07b3342de62f61d1591d5207c4dccd52.bindTooltip(
-                `<div>
-                     🦬 <b>水牛數量：7 頭</b><br>向量方向：南南東 (165°)
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_07b3342de62f61d1591d5207c4dccd52.setIcon(icon_dcc5e2c5c76bbdd649d772a235cef313);
-            
-    
-            var marker_6d63a29c114cee23c9c0c30871a55cda = L.marker(
-                [25.0034, 121.9318],
-                {
-}
-            ).addTo(map_7fd60a5ee42bd3d68d505604e267ef55);
-        
-    
-            var icon_ba88c3509aceedfc92548b48807e166f = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "green",
-  "iconColor": "white",
-  "icon": "info-sign",
-  "prefix": "glyphicon",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_634afe833521f3d284e619b045c98ea9 = L.popup({
-  "maxWidth": "100%",
-});
-
-        
-            
-                var html_f8b44475065d040c492fd257ddcf7473 = $(`<div id="html_f8b44475065d040c492fd257ddcf7473" style="width: 100.0%; height: 100.0%;"><b>📍 遠望坑入口</b></div>`)[0];
-                popup_634afe833521f3d284e619b045c98ea9.setContent(html_f8b44475065d040c492fd257ddcf7473);
-            
-        
-
-        marker_6d63a29c114cee23c9c0c30871a55cda.bindPopup(popup_634afe833521f3d284e619b045c98ea9)
-        ;
-
-        
-    
-    
-            marker_6d63a29c114cee23c9c0c30871a55cda.bindTooltip(
-                `<div>
-                     📍 遠望坑入口
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_6d63a29c114cee23c9c0c30871a55cda.setIcon(icon_ba88c3509aceedfc92548b48807e166f);
-            
-    
-            var marker_a72ad9f47371621f76b8d7e833137c1e = L.marker(
-                [24.996, 121.9285],
-                {
-}
-            ).addTo(map_7fd60a5ee42bd3d68d505604e267ef55);
-        
-    
-            var icon_c16c63d7383f2ecde7eb339a754f081f = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "green",
-  "iconColor": "white",
-  "icon": "info-sign",
-  "prefix": "glyphicon",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_8cbb5167ce81d5df6493897f0ac84030 = L.popup({
-  "maxWidth": "100%",
-});
-
-        
-            
-                var html_ba11e1f7a56afac3ee9612e8a7ff87a9 = $(`<div id="html_ba11e1f7a56afac3ee9612e8a7ff87a9" style="width: 100.0%; height: 100.0%;"><b>📍 跌死馬橋</b></div>`)[0];
-                popup_8cbb5167ce81d5df6493897f0ac84030.setContent(html_ba11e1f7a56afac3ee9612e8a7ff87a9);
-            
-        
-
-        marker_a72ad9f47371621f76b8d7e833137c1e.bindPopup(popup_8cbb5167ce81d5df6493897f0ac84030)
-        ;
-
-        
-    
-    
-            marker_a72ad9f47371621f76b8d7e833137c1e.bindTooltip(
-                `<div>
-                     📍 跌死馬橋
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_a72ad9f47371621f76b8d7e833137c1e.setIcon(icon_c16c63d7383f2ecde7eb339a754f081f);
-            
-    
-            var marker_ead7cb7f6e1abb855350db66b984b713 = L.marker(
-                [24.9886, 121.925],
-                {
-}
-            ).addTo(map_7fd60a5ee42bd3d68d505604e267ef55);
-        
-    
-            var icon_5d729aff128963d40be6ad6b42681629 = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "green",
-  "iconColor": "white",
-  "icon": "info-sign",
-  "prefix": "glyphicon",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_04abb05388315eea2a77cde7325dc202 = L.popup({
-  "maxWidth": "100%",
-});
-
-        
-            
-                var html_91cf45aa7b4581b69d8b87a7d92860a2 = $(`<div id="html_91cf45aa7b4581b69d8b87a7d92860a2" style="width: 100.0%; height: 100.0%;"><b>📍 雄鎮蠻煙碑</b></div>`)[0];
-                popup_04abb05388315eea2a77cde7325dc202.setContent(html_91cf45aa7b4581b69d8b87a7d92860a2);
-            
-        
-
-        marker_ead7cb7f6e1abb855350db66b984b713.bindPopup(popup_04abb05388315eea2a77cde7325dc202)
-        ;
-
-        
-    
-    
-            marker_ead7cb7f6e1abb855350db66b984b713.bindTooltip(
-                `<div>
-                     📍 雄鎮蠻煙碑
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_ead7cb7f6e1abb855350db66b984b713.setIcon(icon_5d729aff128963d40be6ad6b42681629);
-            
-    
-            var marker_656c7c2657ff40b0ec73320a8884fd86 = L.marker(
-                [24.9785, 121.924],
-                {
-}
-            ).addTo(map_7fd60a5ee42bd3d68d505604e267ef55);
-        
-    
-            var icon_9d34c16b0c8a3d576b948b4ef25bbf4b = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "green",
-  "iconColor": "white",
-  "icon": "info-sign",
-  "prefix": "glyphicon",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_74a8ab077765f7a9af9023c162712718 = L.popup({
-  "maxWidth": "100%",
-});
-
-        
-            
-                var html_0bfc501e1682b8a170f7b8246ecf6a79 = $(`<div id="html_0bfc501e1682b8a170f7b8246ecf6a79" style="width: 100.0%; height: 100.0%;"><b>📍 虎字碑</b></div>`)[0];
-                popup_74a8ab077765f7a9af9023c162712718.setContent(html_0bfc501e1682b8a170f7b8246ecf6a79);
-            
-        
-
-        marker_656c7c2657ff40b0ec73320a8884fd86.bindPopup(popup_74a8ab077765f7a9af9023c162712718)
-        ;
-
-        
-    
-    
-            marker_656c7c2657ff40b0ec73320a8884fd86.bindTooltip(
-                `<div>
-                     📍 虎字碑
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_656c7c2657ff40b0ec73320a8884fd86.setIcon(icon_9d34c16b0c8a3d576b948b4ef25bbf4b);
-            
-    
-            var marker_317921c30fe19d0c99af2ea819b8b6bf = L.marker(
-                [24.978, 121.9242],
-                {
-}
-            ).addTo(map_7fd60a5ee42bd3d68d505604e267ef55);
-        
-    
-            var icon_dc54192deafe40a4e050373b39fb82d3 = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "orange",
-  "iconColor": "white",
-  "icon": "info-sign",
-  "prefix": "glyphicon",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_8880785d7fae53565213baa141f90f39 = L.popup({
-  "maxWidth": "100%",
-});
-
-        
-            
-                var html_d35c17d6c624cb7bed2e4a78f5f78bbe = $(`<div id="html_d35c17d6c624cb7bed2e4a78f5f78bbe" style="width: 100.0%; height: 100.0%;"><b>📍 埡口涼亭 (鞍部核心區)</b></div>`)[0];
-                popup_8880785d7fae53565213baa141f90f39.setContent(html_d35c17d6c624cb7bed2e4a78f5f78bbe);
-            
-        
-
-        marker_317921c30fe19d0c99af2ea819b8b6bf.bindPopup(popup_8880785d7fae53565213baa141f90f39)
-        ;
-
-        
-    
-    
-            marker_317921c30fe19d0c99af2ea819b8b6bf.bindTooltip(
-                `<div>
-                     📍 埡口涼亭 (鞍部核心區)
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_317921c30fe19d0c99af2ea819b8b6bf.setIcon(icon_dc54192deafe40a4e050373b39fb82d3);
-            
-    
-            var marker_577cbc7abb73788f163371ba95ee5673 = L.marker(
-                [24.9745, 121.9248],
-                {
-}
-            ).addTo(map_7fd60a5ee42bd3d68d505604e267ef55);
-        
-    
-            var icon_e1aefba392582cac916bf313b9e4f1be = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "orange",
-  "iconColor": "white",
-  "icon": "info-sign",
-  "prefix": "glyphicon",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_5d5b3dd2d34623929d88b72db8310bd2 = L.popup({
-  "maxWidth": "100%",
-});
-
-        
-            
-                var html_e55d788d76fbf8862ed541908961faa7 = $(`<div id="html_e55d788d76fbf8862ed541908961faa7" style="width: 100.0%; height: 100.0%;"><b>📍 護管所 (泥塘散熱區)</b></div>`)[0];
-                popup_5d5b3dd2d34623929d88b72db8310bd2.setContent(html_e55d788d76fbf8862ed541908961faa7);
-            
-        
-
-        marker_577cbc7abb73788f163371ba95ee5673.bindPopup(popup_5d5b3dd2d34623929d88b72db8310bd2)
-        ;
-
-        
-    
-    
-            marker_577cbc7abb73788f163371ba95ee5673.bindTooltip(
-                `<div>
-                     📍 護管所 (泥塘散熱區)
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_577cbc7abb73788f163371ba95ee5673.setIcon(icon_e1aefba392582cac916bf313b9e4f1be);
-            
-    
-            var marker_46aae832737d1abba7858b2eec5ef0a3 = L.marker(
-                [24.9696, 121.9253],
-                {
-}
-            ).addTo(map_7fd60a5ee42bd3d68d505604e267ef55);
-        
-    
-            var icon_a56f0b5757950d231f735a2581333079 = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "green",
-  "iconColor": "white",
-  "icon": "info-sign",
-  "prefix": "glyphicon",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_1d6e35feac0741f437692b0214a2cf08 = L.popup({
-  "maxWidth": "100%",
-});
-
-        
-            
-                var html_2e2d786eaa930129eaacbf5a804a924a = $(`<div id="html_2e2d786eaa930129eaacbf5a804a924a" style="width: 100.0%; height: 100.0%;"><b>📍 大里天公廟</b></div>`)[0];
-                popup_1d6e35feac0741f437692b0214a2cf08.setContent(html_2e2d786eaa930129eaacbf5a804a924a);
-            
-        
-
-        marker_46aae832737d1abba7858b2eec5ef0a3.bindPopup(popup_1d6e35feac0741f437692b0214a2cf08)
-        ;
-
-        
-    
-    
-            marker_46aae832737d1abba7858b2eec5ef0a3.bindTooltip(
-                `<div>
-                     📍 大里天公廟
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_46aae832737d1abba7858b2eec5ef0a3.setIcon(icon_a56f0b5757950d231f735a2581333079);
-            
-    
-            var marker_a799b71fcfe41d6291fac9a19410f2a7 = L.marker(
-                [24.9691, 121.9258],
-                {
-}
-            ).addTo(map_7fd60a5ee42bd3d68d505604e267ef55);
-        
-    
-            var icon_1b1df922b26e6ac8a97d493a16ee17ee = L.AwesomeMarkers.icon(
-                {
-  "markerColor": "green",
-  "iconColor": "white",
-  "icon": "info-sign",
-  "prefix": "glyphicon",
-  "extraClasses": "fa-rotate-0",
-}
-            );
-        
-    
-        var popup_f397f7a467708e4a232aeff62618994a = L.popup({
-  "maxWidth": "100%",
-});
-
-        
-            
-                var html_8206d66b4f999f09d16f48481a55deb8 = $(`<div id="html_8206d66b4f999f09d16f48481a55deb8" style="width: 100.0%; height: 100.0%;"><b>📍 大里遊客中心</b></div>`)[0];
-                popup_f397f7a467708e4a232aeff62618994a.setContent(html_8206d66b4f999f09d16f48481a55deb8);
-            
-        
-
-        marker_a799b71fcfe41d6291fac9a19410f2a7.bindPopup(popup_f397f7a467708e4a232aeff62618994a)
-        ;
-
-        
-    
-    
-            marker_a799b71fcfe41d6291fac9a19410f2a7.bindTooltip(
-                `<div>
-                     📍 大里遊客中心
-                 </div>`,
-                {
-  "sticky": true,
-}
-            );
-        
-    
-                marker_a799b71fcfe41d6291fac9a19410f2a7.setIcon(icon_1b1df922b26e6ac8a97d493a16ee17ee);
-            
-    
-            var layer_control_e213619ecd136379ebaa366f7dc34885_layers = {
-                base_layers : {
-                    "\ud83d\uddfa\ufe0f \u570b\u571f\u901a\u7528\u96fb\u5b50\u5730\u5716 (\u7b49\u9ad8\u7dda/\u6b65\u9053)" : tile_layer_91b5fb897c5510c0babe878df544f727,
-                    "\ud83d\udef0\ufe0f \u570b\u571f\u885b\u661f\u822a\u7167\u5716" : tile_layer_ee3a7ff9c34095773099d2c8f30abeb5,
-                },
-                overlays :  {
-                },
+            return {
+                kd, kw, hs_pier, w_local, w_eff, ukc: ukc_south, ukc_north, fb_pier, alpha_tune,
+                eff_hs_limit, eff_weff_limit, pass_hs, pass_w, pass_ukc, pass_fb, has_veto,
+                evacMinutes: 20
             };
-            let layer_control_e213619ecd136379ebaa366f7dc34885 = L.control.layers(
-                layer_control_e213619ecd136379ebaa366f7dc34885_layers.base_layers,
-                layer_control_e213619ecd136379ebaa366f7dc34885_layers.overlays,
-                {
-  "position": "topright",
-  "collapsed": false,
-  "autoZIndex": true,
-}
-            ).addTo(map_7fd60a5ee42bd3d68d505604e267ef55);
+        }
 
-        
-</script>
+        function switchMainTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('active-tab'));
+            
+            const tabs = ['tabDesktopView', 'tabBathymetryView', 'tabLongtermView', 'tabSoftOceanView'];
+            tabs.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.classList.add('hidden');
+                    el.classList.remove('flex');
+                }
+            });
+
+            if (tab === 'desktop') {
+                const btn = document.getElementById('tabBtnDesktop');
+                const view = document.getElementById('tabDesktopView');
+                if (btn) btn.classList.add('active-tab');
+                if (view) { view.classList.remove('hidden'); view.classList.add('flex'); }
+                setTimeout(redrawAllDesktopCanvas, 30);
+            } else if (tab === 'bathymetry') {
+                const btn = document.getElementById('tabBtnBathymetry');
+                const view = document.getElementById('tabBathymetryView');
+                if (btn) btn.classList.add('active-tab');
+                if (view) { view.classList.remove('hidden'); view.classList.add('flex'); }
+                setTimeout(initDualPierProfileCanvas, 30);
+            } else if (tab === 'longterm') {
+                const btn = document.getElementById('tabBtnLongterm');
+                const view = document.getElementById('tabLongtermView');
+                if (btn) btn.classList.add('active-tab');
+                if (view) { view.classList.remove('hidden'); view.classList.add('flex'); }
+                setTimeout(draw30DaysCanvas, 30);
+            } else if (tab === 'softocean') {
+                const btn = document.getElementById('tabBtnSoftOcean');
+                const view = document.getElementById('tabSoftOceanView');
+                if (btn) btn.classList.add('active-tab');
+                if (view) { view.classList.remove('hidden'); view.classList.add('flex'); }
+                setTimeout(() => {
+                    initLeafletMap();
+                    if (leafletMap) leafletMap.invalidateSize();
+                    resizeDesktopFlowCanvas();
+                    initDesktopFlowEngine();
+                }, 60);
+            }
+        }
+
+        function togglePierMonitorAccordion() {
+            const content = document.getElementById('pierMonitorAccordionContent');
+            const status = document.getElementById('txtPierAccordionStatus');
+            if (!content) return;
+            if (content.classList.contains('collapsed')) {
+                content.classList.remove('collapsed');
+                content.classList.add('expanded');
+                if (status) status.textContent = '▲ 點擊收起南北岸檢核表';
+            } else {
+                content.classList.remove('expanded');
+                content.classList.add('collapsed');
+                if (status) status.textContent = '▼ 點擊展開南北岸檢核表';
+            }
+        }
+
+        /* NCDR 行政防災開設專區收盒抽屜切換 */
+        function toggleNcdrAccordion() {
+            const content = document.getElementById('ncdrAccordionContent');
+            const status = document.getElementById('txtNcdrAccordionStatus');
+            if (!content) return;
+            if (content.classList.contains('collapsed')) {
+                content.classList.remove('collapsed');
+                content.classList.add('expanded');
+                if (status) status.textContent = '▲ 點擊收起';
+            } else {
+                content.classList.remove('expanded');
+                content.classList.add('collapsed');
+                if (status) status.textContent = '▼ 點擊展開';
+            }
+        }
+
+        function toggleExecutiveRulingAccordion() {
+            const content = document.getElementById('execRulingAccordionContent');
+            const status = document.getElementById('txtExecAccordionStatus');
+            if (!content) return;
+            if (content.classList.contains('collapsed')) {
+                content.classList.remove('collapsed');
+                content.classList.add('expanded');
+                if (status) status.textContent = '▲ 點擊收起詳細裁示說帖';
+            } else {
+                content.classList.remove('expanded');
+                content.classList.add('collapsed');
+                if (status) status.textContent = '▼ 點擊展開詳細裁示說帖';
+            }
+        }
+
+        function drawLineChartCanvas(canvasId, tipId, cfg) {
+            const canvas = document.getElementById(canvasId);
+            const tooltip = document.getElementById(tipId);
+            if (!canvas) return;
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            const w = Math.floor(rect.width || canvas.parentElement.clientWidth || 300);
+            const h = Math.floor(rect.height || canvas.parentElement.clientHeight || 160);
+            if (w <= 0 || h <= 0) return;
+
+            canvas.width = w * dpr;
+            canvas.height = h * dpr;
+            const ctx = canvas.getContext('2d');
+            ctx.scale(dpr, dpr);
+            ctx.clearRect(0, 0, w, h);
+
+            const padL = cfg.padL || 38;
+            const padR = cfg.padR || 50;
+            const padT = cfg.padT || 26;
+            const padB = cfg.padB || 24;
+            const chartW = w - padL - padR;
+            const chartH = h - padT - padB;
+
+            ctx.font = 'bold 11px -apple-system, sans-serif';
+            ctx.fillStyle = cfg.titleColor || '#38bdf8';
+            ctx.textAlign = 'left';
+            ctx.fillText(cfg.title, 8, 16);
+
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                const y = padT + (chartH / 4) * i;
+                ctx.beginPath();
+                ctx.moveTo(padL, y);
+                ctx.lineTo(w - padR, y);
+                ctx.stroke();
+            }
+
+            const xCats = cfg.xCats;
+            ctx.font = '10px -apple-system, sans-serif';
+            ctx.fillStyle = '#94a3b8';
+            ctx.textAlign = 'center';
+            const xStep = chartW / (xCats.length - 1);
+            xCats.forEach((cat, idx) => {
+                const x = padL + idx * xStep;
+                ctx.fillText(cat, x, h - 8);
+            });
+
+            if (cfg.vLines) {
+                cfg.vLines.forEach(vl => {
+                    const idx = xCats.indexOf(vl.cat);
+                    if (idx !== -1) {
+                        const x = padL + idx * xStep;
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.setLineDash([4, 4]);
+                        ctx.strokeStyle = vl.color || '#facc15';
+                        ctx.lineWidth = 1.5;
+                        ctx.moveTo(x, padT);
+                        ctx.lineTo(x, padT + chartH);
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+                });
+            }
+
+            if (cfg.limitY !== undefined) {
+                const yNorm = 1 - (cfg.limitY - cfg.minY) / (cfg.maxY - cfg.minY);
+                const ly = padT + yNorm * chartH;
+                ctx.save();
+                ctx.beginPath();
+                ctx.setLineDash([4, 4]);
+                ctx.strokeStyle = cfg.limitColor || '#ef4444';
+                ctx.lineWidth = 1.5;
+                ctx.moveTo(padL, ly);
+                ctx.lineTo(w - padR, ly);
+                ctx.stroke();
+                ctx.restore();
+
+                ctx.font = 'bold 9.5px -apple-system, sans-serif';
+                ctx.fillStyle = cfg.limitColor || '#ef4444';
+                ctx.textAlign = 'left';
+                ctx.fillText(cfg.limitText, w - padR + 3, ly + 3);
+            }
+
+            const points = [];
+            cfg.data.forEach((val, idx) => {
+                const x = padL + idx * xStep;
+                const yNorm = 1 - (val - cfg.minY) / (cfg.maxY - cfg.minY);
+                const y = padT + yNorm * chartH;
+                points.push({ x, y, val, cat: xCats[idx] });
+            });
+
+            ctx.beginPath();
+            points.forEach((pt, idx) => {
+                if (idx === 0) ctx.moveTo(pt.x, pt.y);
+                else ctx.lineTo(pt.x, pt.y);
+            });
+            ctx.strokeStyle = cfg.lineColor;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            points.forEach(pt => {
+                ctx.beginPath();
+                ctx.arc(pt.x, pt.y, 3.5, 0, Math.PI * 2);
+                ctx.fillStyle = cfg.lineColor;
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            });
+
+            if (tooltip) {
+                canvas.onmousemove = function(e) {
+                    const crect = canvas.getBoundingClientRect();
+                    const mx = e.clientX - crect.left;
+                    let closest = null;
+                    let minDist = 999;
+                    points.forEach(pt => {
+                        const dist = Math.abs(pt.x - mx);
+                        if (dist < minDist) { minDist = dist; closest = pt; }
+                    });
+                    if (closest && minDist < 35) {
+                        let isPass = true;
+                        if (cfg.limitY !== undefined) {
+                            if (cfg.isMinLimit) isPass = closest.val >= cfg.limitY;
+                            else isPass = closest.val <= cfg.limitY;
+                        }
+                        const badgeText = isPass ? '🟢 PASS 合格' : '🔴 VETO 超標';
+                        tooltip.style.display = 'block';
+                        tooltip.style.left = (closest.x - 30) + 'px';
+                        tooltip.style.top = (closest.y - 45) + 'px';
+                        tooltip.innerHTML = `<b>時段 ${closest.cat}</b>: <span style="color:${cfg.lineColor};font-weight:bold;">${closest.val.toFixed(2)}${cfg.unit || ''}</span><br>判準: <span class="badge ${isPass ? 'badge-pass' : 'badge-veto'}">${badgeText}</span>`;
+                    } else {
+                        tooltip.style.display = 'none';
+                    }
+                };
+                canvas.onmouseleave = function() { tooltip.style.display = 'none'; };
+            }
+        }
+
+        function draw7DaysDualCanvas() {
+            const canvas = document.getElementById('canvasChart7Days');
+            const tooltip = document.getElementById('tipChart7Days');
+            if (!canvas) return;
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.getBoundingClientRect();
+            const w = Math.floor(rect.width || canvas.parentElement.clientWidth || 500);
+            const h = Math.floor(rect.height || canvas.parentElement.clientHeight || 190);
+            if (w <= 0 || h <= 0) return;
+
+            canvas.width = w * dpr;
+            canvas.height = h * dpr;
+            const ctx = canvas.getContext('2d');
+            ctx.scale(dpr, dpr);
+            ctx.clearRect(0, 0, w, h);
+
+            const padL = 40, padR = 55, padT = 30, padB = 25;
+            const chartW = w - padL - padR, chartH = h - padT - padB;
+
+            ctx.font = 'bold 11px -apple-system, sans-serif';
+            ctx.fillStyle = '#ef4444';
+            ctx.fillText('Hs 波高 (m)', 10, 18);
+            ctx.fillStyle = '#f59e0b';
+            ctx.textAlign = 'right';
+            ctx.fillText('Wind 風速 (m/s)', w - 10, 18);
+
+            const xCats = ['D+0(10/06)', 'D+1(10/07)', 'D+2(10/08)', 'D+3', 'D+4', 'D+5', 'D+6'];
+            const hsData = [3.71, 1.45, 0.85, 0.90, 1.25, 0.95, 0.70];
+            const wData = [9.50, 7.20, 4.80, 6.20, 9.80, 7.50, 4.80];
+
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                const y = padT + (chartH / 4) * i;
+                ctx.beginPath();
+                ctx.moveTo(padL, y);
+                ctx.lineTo(w - padR, y);
+                ctx.stroke();
+            }
+
+            const xStep = chartW / (xCats.length - 1);
+            ctx.font = '10px -apple-system, sans-serif';
+            ctx.fillStyle = '#94a3b8';
+            ctx.textAlign = 'center';
+            xCats.forEach((cat, idx) => { ctx.fillText(cat, padL + idx * xStep, h - 8); });
+
+            const lyHs = padT + (1 - (1.13 - 0) / (5.0 - 0)) * chartH;
+            ctx.save();
+            ctx.beginPath();
+            ctx.setLineDash([4, 4]);
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 1.5;
+            ctx.moveTo(padL, lyHs);
+            ctx.lineTo(w - padR, lyHs);
+            ctx.stroke();
+            ctx.restore();
+            ctx.font = 'bold 9.5px -apple-system, sans-serif';
+            ctx.fillStyle = '#ef4444';
+            ctx.textAlign = 'right';
+            ctx.fillText('Hs 1.13m', padL - 4, lyHs + 3);
+
+            const lyW = padT + (1 - (10.17 - 0) / (15.0 - 0)) * chartH;
+            ctx.save();
+            ctx.beginPath();
+            ctx.setLineDash([4, 4]);
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 1.5;
+            ctx.moveTo(padL, lyW);
+            ctx.lineTo(w - padR, lyW);
+            ctx.stroke();
+            ctx.restore();
+            ctx.font = 'bold 9.5px -apple-system, sans-serif';
+            ctx.fillStyle = '#f59e0b';
+            ctx.textAlign = 'left';
+            ctx.fillText('Wind 10.17m/s', w - padR + 3, lyW + 3);
+
+            const pointsHs = [];
+            ctx.beginPath();
+            hsData.forEach((val, idx) => {
+                const x = padL + idx * xStep;
+                const y = padT + (1 - val / 5.0) * chartH;
+                pointsHs.push({ x, y, val, cat: xCats[idx] });
+                if (idx === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.beginPath();
+            wData.forEach((val, idx) => {
+                const x = padL + idx * xStep;
+                const y = padT + (1 - val / 15.0) * chartH;
+                if (idx === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            if (tooltip) {
+                canvas.onmousemove = function(e) {
+                    const crect = canvas.getBoundingClientRect();
+                    const mx = e.clientX - crect.left;
+                    let closestIdx = -1, minDist = 999;
+                    pointsHs.forEach((pt, idx) => {
+                        const dist = Math.abs(pt.x - mx);
+                        if (dist < minDist) { minDist = dist; closestIdx = idx; }
+                    });
+                    if (closestIdx !== -1 && minDist < 35) {
+                        const hVal = hsData[closestIdx];
+                        const wVal = wData[closestIdx];
+                        const isPassHs = hVal <= 1.13;
+                        const isPassW = wVal <= 10.17;
+                        const overall = (isPassHs && isPassW) ? '🟢 正常開航' : '🔴 封島停航';
+                        tooltip.style.display = 'block';
+                        tooltip.style.left = (pointsHs[closestIdx].x - 40) + 'px';
+                        tooltip.style.top = (pointsHs[closestIdx].y - 55) + 'px';
+                        tooltip.innerHTML = `<b>${xCats[closestIdx]} 預報</b><br>Hs: <b style="color:#ef4444">${hVal}m</b> (${isPassHs ? '合格' : '超標'})<br>W: <b style="color:#f59e0b">${wVal}m/s</b> (${isPassW ? '合格' : '超標'})<br>判準: <span class="badge ${overall.includes('開航') ? 'badge-pass' : 'badge-veto'}">${overall}</span>`;
+                    } else {
+                        tooltip.style.display = 'none';
+                    }
+                };
+                canvas.onmouseleave = function() { tooltip.style.display = 'none'; };
+            }
+        }
+
+        let dualPierHitZones = [];
+        function initDualPierProfileCanvas() {
+            const canvas = document.getElementById('canvasDualPierProfile');
+            const tooltip = document.getElementById('tipDualPierProfile');
+            if (!canvas) return;
+
+            drawDualPierProfileCanvas();
+
+            canvas.onmousemove = function(e) {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+
+                let hit = null;
+                for (let i = dualPierHitZones.length - 1; i >= 0; i--) {
+                    const zone = dualPierHitZones[i];
+                    if (mouseX >= zone.x && mouseX <= zone.x + zone.w &&
+                        mouseY >= zone.y && mouseY <= zone.y + zone.h) {
+                        hit = zone;
+                        break;
+                    }
+                }
+
+                if (hit && tooltip) {
+                    tooltip.style.display = 'block';
+                    let left = mouseX + 16;
+                    let top = mouseY - 25;
+                    const tipWidth = 270;
+                    if (left + tipWidth > rect.width) {
+                        left = mouseX - tipWidth - 16;
+                    }
+                    if (top < 10) top = 10;
+
+                    tooltip.style.left = left + 'px';
+                    tooltip.style.top = top + 'px';
+                    tooltip.innerHTML = hit.tooltipHtml;
+                } else if (tooltip) {
+                    tooltip.style.display = 'none';
+                }
+            };
+
+            canvas.onmouseleave = function() {
+                if (tooltip) tooltip.style.display = 'none';
+            };
+        }
+
+        function drawDualPierProfileCanvas() {
+            const canvas = document.getElementById('canvasDualPierProfile');
+            if (!canvas) return;
+            const dpr = window.devicePixelRatio || 1;
+            const w = Math.floor(canvas.parentElement.clientWidth || 800);
+            const h = Math.floor(canvas.parentElement.clientHeight || 480);
+            if (w <= 0 || h <= 0) return;
+
+            canvas.width = w * dpr;
+            canvas.height = h * dpr;
+            const ctx = canvas.getContext('2d');
+            ctx.scale(dpr, dpr);
+            ctx.clearRect(0, 0, w, h);
+
+            dualPierHitZones = [];
+
+            ctx.fillStyle = '#060911';
+            ctx.fillRect(0, 0, w, h);
+
+            const midX = w * 0.50;
+            const pxPerM = 28;
+            const yCD0 = h * 0.44;
+            const curTide = currentTelemetry.tide_eta_m ?? 0.65;
+            const yCurrentTide = yCD0 - (curTide * pxPerM);
+            const yHighTide = yCD0 - (1.35 * pxPerM);
+            const yLowTide = yCD0 - (-0.45 * pxPerM);
+
+            const vesselOccupancyM = CONSTANTS.D_DRAFT + CONSTANTS.S_SQUAT;
+            const vesselOccupancyPx = vesselOccupancyM * pxPerM;
+            const sKeelY = yCurrentTide + vesselOccupancyPx;
+
+            ctx.save();
+            ctx.setLineDash([5, 5]);
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(midX, 42);
+            ctx.lineTo(midX, h - 8);
+            ctx.stroke();
+            ctx.restore();
+
+            // 頂部圖例條
+            ctx.save();
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.94)';
+            ctx.fillRect(8, 8, w - 16, 28);
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(8, 8, w - 16, 28);
+
+            ctx.font = 'bold 10px -apple-system, sans-serif';
+            ctx.textAlign = 'left';
+
+            ctx.fillStyle = 'rgba(16, 185, 129, 0.35)';
+            ctx.fillRect(16, 15, 13, 13);
+            ctx.strokeStyle = '#10b981'; ctx.strokeRect(16, 15, 13, 13);
+            ctx.fillStyle = '#10b981';
+            ctx.fillText('🟢 安全通航區 (UKC≥1.5m / FB≥0.5m)', 34, 25);
+
+            ctx.fillStyle = 'rgba(245, 158, 11, 0.40)';
+            ctx.fillRect(232, 15, 13, 13);
+            ctx.strokeStyle = '#f59e0b'; ctx.strokeRect(232, 15, 13, 13);
+            ctx.fillStyle = '#f59e0b';
+            ctx.fillText('🟠 低裕深警戒區 (0.5m≤UKC<1.5m)', 250, 25);
+
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.50)';
+            ctx.fillRect(445, 15, 13, 13);
+            ctx.strokeStyle = '#ef4444'; ctx.strokeRect(445, 15, 13, 13);
+            ctx.fillStyle = '#ef4444';
+            ctx.fillText('🔴 觸底/越浪危險區 (UKC<0.5m)', 463, 25);
+
+            ctx.fillStyle = 'rgba(250, 204, 21, 0.50)';
+            ctx.fillRect(645, 15, 13, 13);
+            ctx.strokeStyle = '#facc15'; ctx.strokeRect(645, 15, 13, 13);
+            ctx.fillStyle = '#facc15';
+            ctx.fillText('🟡 凱鯨號 (吃水+蹲沉2.02m)', 663, 25);
+            ctx.restore();
+
+            // 左側：南岸權宜碼頭
+            const sPierX = midX * 0.68;
+            const sBedY = yCD0 + (5.50 * pxPerM);
+            const sRubbleY = yCD0 + (4.50 * pxPerM);
+            const sDeckY = yCD0 - (2.50 * pxPerM);
+            const sWarningTopY = sBedY - (1.50 * pxPerM);
+            const sDangerTopY = sBedY - (0.50 * pxPerM);
+
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(15, sBedY, sPierX - 15, h - sBedY);
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(sPierX - 45, sRubbleY, 45, sBedY - sRubbleY);
+
+            if (sWarningTopY > yCurrentTide) {
+                ctx.fillStyle = 'rgba(16, 185, 129, 0.20)';
+                ctx.fillRect(15, yCurrentTide, sPierX - 15, sWarningTopY - yCurrentTide);
+                dualPierHitZones.push({
+                    x: 15, y: yCurrentTide, w: sPierX - 15, h: sWarningTopY - yCurrentTide,
+                    tooltipHtml: `<div class="font-bold text-emerald-400">🟢 南岸水體：安全通航區</div>
+                                  <div>當前退潮水位：<b>+0.65m CD</b></div>
+                                  <div>裕深裕度：<b>UKC ≥ 1.50m</b></div>
+                                  <div>狀態：<span class="badge badge-pass">🟢 PASS 充足安全裕深</span></div>`
+                });
+            }
+
+            ctx.fillStyle = 'rgba(245, 158, 11, 0.30)';
+            ctx.fillRect(15, sWarningTopY, sPierX - 15, sDangerTopY - sWarningTopY);
+            dualPierHitZones.push({
+                x: 15, y: sWarningTopY, w: sPierX - 15, h: sDangerTopY - sWarningTopY,
+                tooltipHtml: `<div class="font-bold text-amber-400">🟠 南岸水體：低裕深警戒區間</div>
+                              <div>裕深範圍：<b>0.50m ≤ UKC < 1.50m</b></div>
+                              <div>戰術指令：嚴防波谷下陷，限制航速 ≤ 3 節</div>
+                              <div>狀態：<span class="badge badge-warn">🟠 預警限制</span></div>`
+            });
+
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.45)';
+            ctx.fillRect(15, sDangerTopY, sPierX - 15, sBedY - sDangerTopY);
+            dualPierHitZones.push({
+                x: 15, y: sDangerTopY, w: sPierX - 15, h: sBedY - sDangerTopY,
+                tooltipHtml: `<div class="font-bold text-red-400">🔴 南岸底床：淺水觸底危險區！</div>
+                              <div>海床基線：<b>-5.50m CD</b> (拋石面 -4.50m)</div>
+                              <div>當前裕深：<b>UKC = 0.42m < 1.50m</b> (觸底熔斷)</div>
+                              <div>狀態：<span class="badge badge-veto">🔴 VETO 坐灘硬熔斷</span></div>`
+            });
+
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(sPierX, sDeckY, midX - sPierX - 12, sBedY - sDeckY + 25);
+            ctx.strokeStyle = '#475569'; ctx.lineWidth = 1.2;
+            ctx.strokeRect(sPierX, sDeckY, midX - sPierX - 12, sBedY - sDeckY + 25);
+            dualPierHitZones.push({
+                x: sPierX, y: sDeckY, w: midX - sPierX - 12, h: sBedY - sDeckY + 25,
+                tooltipHtml: `<div class="font-bold text-sky-400">⚓ 南岸權宜碼頭結構 (鼎興 97-05)</div>
+                              <div>沉箱頂面標高：<b>+2.50m CD</b></div>
+                              <div>浚挖底床水深：<b>-5.50m CD</b></div>
+                              <div>迎風攻角：<b>ESE 58° (背風屏障崩潰)</b></div>`
+            });
+
+            const sWaveHeightPx = 3.71 * pxPerM * 0.45;
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(15, yCurrentTide - sWaveHeightPx);
+            ctx.bezierCurveTo(sPierX * 0.35, yCurrentTide + sWaveHeightPx, sPierX * 0.70, yCurrentTide - sWaveHeightPx, sPierX, sDeckY + 6);
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2.4;
+            ctx.stroke();
+
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.12)';
+            ctx.lineTo(sPierX, yCurrentTide);
+            ctx.lineTo(15, yCurrentTide);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+
+            dualPierHitZones.push({
+                x: 15, y: yCurrentTide - sWaveHeightPx - 8, w: sPierX - 15, h: sWaveHeightPx * 2 + 10,
+                tooltipHtml: `<div class="font-bold text-red-400">🌊 南岸港池：穿透湧浪包絡帶</div>
+                              <div>碼頭有效波高：<b>Hs = 3.71m</b> (限值 1.13m)</div>
+                              <div>湧浪週期：<b>Tp = 15.5s > 12.0s</b> (Kd=1.00 共振擊穿)</div>
+                              <div>狀態：<span class="badge badge-veto">🔴 波高擊穿 VETO</span></div>`
+            });
+
+            // 凱鯨號雙體船
+            const boatW = 120;
+            const boatX = sPierX - 155;
+            ctx.fillStyle = 'rgba(250, 204, 21, 0.50)';
+            ctx.fillRect(boatX, yCurrentTide - 10, boatW, vesselOccupancyPx + 10);
+            ctx.strokeStyle = '#facc15'; ctx.lineWidth = 1.8;
+            ctx.strokeRect(boatX, yCurrentTide - 10, boatW, vesselOccupancyPx + 10);
+
+            ctx.save();
+            ctx.strokeStyle = '#facc15'; ctx.setLineDash([4, 4]); ctx.lineWidth = 1.6;
+            ctx.beginPath(); ctx.moveTo(15, sKeelY); ctx.lineTo(sPierX, sKeelY); ctx.stroke();
+            ctx.restore();
+
+            ctx.font = 'bold 9.5px -apple-system, sans-serif';
+            ctx.fillStyle = '#0f172a';
+            ctx.fillText('🚢 凱鯨號 (CATAMARAN)', boatX + 6, yCurrentTide + 12);
+            ctx.font = 'bold 8.5px -apple-system, sans-serif';
+            ctx.fillText('吃水+蹲沉 2.02m (50%透明)', boatX + 6, yCurrentTide + 26);
+
+            dualPierHitZones.push({
+                x: boatX, y: yCurrentTide - 10, w: boatW, h: vesselOccupancyPx + 10,
+                tooltipHtml: `<div class="font-bold text-amber-400">🚢 凱鯨號穿浪雙體客輪</div>
+                              <div>基本吃水：<b>1.20m</b> | 高速蹲沉：<b>0.82m</b></div>
+                              <div>水體佔用包絡：<b>2.02m</b> (龍骨深 -1.37m CD)</div>
+                              <div class="text-red-300">船底沉降已吃入【紅色觸底危險色塊】！</div>
+                              <div>動態裕深：<b class="text-red-400">UKC = 0.42m < 1.50m</b></div>
+                              <div>狀態：<span class="badge badge-veto">🔴 觸底硬熔斷</span></div>`
+            });
+
+            ctx.font = 'bold 11px -apple-system, sans-serif'; ctx.fillStyle = '#38bdf8';
+            ctx.fillText('⚓ 南岸權宜碼頭 (鼎興 97-05 細設)', 20, 52);
+            ctx.font = '9.5px -apple-system, sans-serif'; ctx.fillStyle = '#94a3b8';
+            ctx.fillText('沉箱頂面 +2.50m CD | 浚挖底床 -5.50m CD | 攻角 ESE 58°', 20, 66);
+
+            // 右側：北岸主碼頭
+            const nPierX = midX + (w - midX) * 0.66;
+            const nBedY = yCD0 + (3.20 * pxPerM);
+            const nDeckY = yCD0 - (3.20 * pxPerM);
+            const nApproachY = yCD0 - (3.60 * pxPerM);
+
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(midX + 15, nBedY, nPierX - midX - 15, h - nBedY);
+
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.45)';
+            ctx.fillRect(midX + 15, yCurrentTide, nPierX - midX - 15, nBedY - yCurrentTide);
+            dualPierHitZones.push({
+                x: midX + 15, y: yCurrentTide, w: nPierX - midX - 15, h: nBedY - yCurrentTide,
+                tooltipHtml: `<div class="font-bold text-red-400">🔴 北岸水體：嚴重坐灘危險區！</div>
+                              <div>拋石水深：<b>-3.20m CD</b> (基底淺狹)</div>
+                              <div>吃水佔用 2.02m + 浪高 3.93m ＝ <b>5.95m</b></div>
+                              <div>動態裕深：<b class="text-red-400">UKC = -1.30m (龍骨砸入拋石)</b></div>
+                              <div>狀態：<span class="badge badge-veto">🔴 嚴重坐灘破底 VETO</span></div>`
+            });
+
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(nPierX, nDeckY, w - nPierX - 15, nBedY - nDeckY + 25);
+            ctx.fillRect(nPierX + 55, nApproachY, w - nPierX - 70, nDeckY - nApproachY);
+            ctx.strokeStyle = '#475569'; ctx.lineWidth = 1.2;
+            ctx.strokeRect(nPierX, nDeckY, w - nPierX - 15, nBedY - nDeckY + 25);
+            dualPierHitZones.push({
+                x: nPierX, y: nDeckY, w: w - nPierX - 15, h: nBedY - nDeckY + 25,
+                tooltipHtml: `<div class="font-bold text-sky-400">⚓ 北岸主碼頭結構 (鼎興 92-021)</div>
+                              <div>碼頭面標高：<b>+3.20m CD</b> (引道頂 +3.60m)</div>
+                              <div>原海床拋石：<b>-3.20m CD</b></div>
+                              <div>攻角態勢：<b>ESE 58° (迎風面直擊)</b></div>`
+            });
+
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.55)';
+            ctx.fillRect(nPierX - 10, nDeckY - 14, 65, 14);
+            dualPierHitZones.push({
+                x: nPierX - 10, y: nDeckY - 14, w: 65, h: 14,
+                tooltipHtml: `<div class="font-bold text-red-400">🚨 碼頭面越浪浸頂區！</div>
+                              <div>Vision-PINN 偵測越浪率：<b>1.31 p/min</b></div>
+                              <div>預留乾舷：<b class="text-red-400">FB = 0.15m < 0.50m (強制覆寫)</b></div>
+                              <div>狀態：<span class="badge badge-veto">🔴 越浪漫頂 VETO</span></div>`
+            });
+
+            const nWaveHeightPx = 3.93 * pxPerM * 0.45;
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(midX + 15, yCurrentTide - nWaveHeightPx);
+            ctx.bezierCurveTo(midX + 70, yCurrentTide + nWaveHeightPx, nPierX - 15, nDeckY - 24, nPierX + 60, nDeckY - 10);
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2.4;
+            ctx.stroke();
+
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.14)';
+            ctx.lineTo(nPierX + 60, yCurrentTide);
+            ctx.lineTo(midX + 15, yCurrentTide);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+
+            dualPierHitZones.push({
+                x: midX + 15, y: yCurrentTide - nWaveHeightPx - 8, w: nPierX - midX + 45, h: nWaveHeightPx * 2 + 10,
+                tooltipHtml: `<div class="font-bold text-red-400">🌊 北岸迎風：巨浪衝刷撲頂帶</div>
+                              <div>港池波高：<b>Hs = 3.93m</b> (限值 1.13m)</div>
+                              <div>迎風直擊，巨浪翻過防波堤與碼頭面</div>
+                              <div>狀態：<span class="badge badge-veto">🔴 巨浪漫頂 VETO</span></div>`
+            });
+
+            ctx.save();
+            ctx.strokeStyle = '#facc15'; ctx.setLineDash([4, 4]); ctx.lineWidth = 1.6;
+            ctx.beginPath(); ctx.moveTo(midX + 15, sKeelY); ctx.lineTo(nPierX - 10, sKeelY); ctx.stroke();
+            ctx.restore();
+
+            ctx.font = 'bold 11px -apple-system, sans-serif'; ctx.fillStyle = '#38bdf8';
+            ctx.fillText('⚓ 北岸主碼頭 (鼎興 92-021 竣工)', midX + 20, 52);
+            ctx.font = '9.5px -apple-system, sans-serif'; ctx.fillStyle = '#94a3b8';
+            ctx.fillText('碼頭面: +3.20m CD | 拋石水深: -3.20m CD | 迎風直擊', midX + 20, 66);
+
+            // 基準刻度線
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)'; ctx.setLineDash([4, 4]); ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(8, yCD0); ctx.lineTo(w - 8, yCD0); ctx.stroke();
+            ctx.font = 'bold 9px monospace'; ctx.fillStyle = '#94a3b8';
+            ctx.fillText('高程基準 CD ±0.00m', 20, yCD0 - 4);
+
+            ctx.strokeStyle = 'rgba(192, 132, 252, 0.55)'; ctx.setLineDash([3, 3]);
+            ctx.beginPath(); ctx.moveTo(8, yHighTide); ctx.lineTo(w - 8, yHighTide); ctx.stroke();
+            ctx.font = 'bold 9px -apple-system, sans-serif'; ctx.fillStyle = '#c084fc';
+            ctx.fillText('朔望滿潮 +1.35m CD (09:12)', midX + 15, yHighTide - 4);
+
+            ctx.strokeStyle = '#38bdf8'; ctx.setLineDash([]); ctx.lineWidth = 1.4;
+            ctx.beginPath(); ctx.moveTo(8, yCurrentTide); ctx.lineTo(w - 8, yCurrentTide); ctx.stroke();
+            ctx.font = 'bold 9.5px -apple-system, sans-serif'; ctx.fillStyle = '#38bdf8';
+            ctx.fillText('當前退潮水位 +0.65m CD (14:08)', midX + 15, yCurrentTide - 5);
+
+            ctx.strokeStyle = 'rgba(251, 146, 60, 0.55)'; ctx.setLineDash([3, 3]);
+            ctx.beginPath(); ctx.moveTo(8, yLowTide); ctx.lineTo(w - 8, yLowTide); ctx.stroke();
+            ctx.font = 'bold 9px -apple-system, sans-serif'; ctx.fillStyle = '#fb923c';
+            ctx.fillText('乾潮低谷 -0.45m CD (15:42)', midX + 15, yLowTide + 12);
+            ctx.restore();
+        }
+
+        function draw30DaysCanvas() {
+            const dates = forecast30DaysData.map(d => d.date.slice(5));
+            const hsList = forecast30DaysData.map(d => d.hs);
+            const wList = forecast30DaysData.map(d => d.w);
+
+            drawLineChartCanvas('canvas30DaysWaves', 'tip30DaysWaves', {
+                title: '圖 A：30 天港池波高 (Hs) 與動態潮位走勢 [Hs標準限值 ≤1.13m | 大潮警戒 +1.20m]',
+                titleColor: '#ef4444',
+                xCats: dates.filter((_, idx) => idx % 4 === 0),
+                data: hsList.filter((_, idx) => idx % 4 === 0),
+                minY: 0, maxY: 5.0,
+                lineColor: '#ef4444',
+                limitY: 1.13, limitColor: '#ef4444', limitText: 'Hs限值 1.13m',
+                unit: 'm'
+            });
+
+            drawLineChartCanvas('canvas30DaysWind', 'tip30DaysWind', {
+                title: '圖 B：30 天風速向量 (W) 與長浪湧浪週期走勢 [風速標準限值 ≤10.17m/s | 共振限值 ≤12.0s]',
+                titleColor: '#f59e0b',
+                xCats: dates.filter((_, idx) => idx % 4 === 0),
+                data: wList.filter((_, idx) => idx % 4 === 0),
+                minY: 0, maxY: 15.0,
+                lineColor: '#f59e0b',
+                limitY: 10.17, limitColor: '#f59e0b', limitText: '風速限值 10.17m/s',
+                unit: 'm/s'
+            });
+
+            render30DaysTable();
+        }
+
+        function render30DaysTable() {
+            const tbody = document.getElementById('tbody30Days');
+            if (!tbody || tbody.children.length > 0) return;
+            forecast30DaysData.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="font-mono text-white font-bold">${item.date}</td>
+                    <td class="text-[#38bdf8]">${item.deg}<br><span class="text-[10px] text-[#94a3b8]">${item.lunar}</span></td>
+                    <td class="text-indigo-300 font-medium text-left"><span class="text-[13px] mr-0.5">${item.weatherIcon}</span> ${item.weather}</td>
+                    <td class="text-[#38bdf8] font-bold">🌊 ${item.tide} m</td>
+                    <td><b class="text-[#ef4444]">${item.northHs}m</b><br><span class="text-[10px] text-[#f59e0b]">${item.northW}m/s</span></td>
+                    <td><b class="text-[#38bdf8]">${item.southHs}m</b><br><span class="text-[10px] text-[#f59e0b]">${item.southW}m/s</span></td>
+                    <td class="text-[#c084fc] font-bold">${item.tp} s</td>
+                    <td class="text-white font-mono">${item.dirArrow} (${item.deltaTheta}°)</td>
+                    <td class="text-[#c084fc] font-bold">🚪 ${item.gate}</td>
+                    <td><span class="badge ${item.badgeClass}">${item.status}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function redrawAllDesktopCanvas() {
+            const timeCategories = ['08:00', '10:00', '11:20', '12:26', '14:20', '16:00'];
+            const res = currentEvaluation.hs_pier !== undefined ? currentEvaluation : evaluatePhysics(currentTelemetry);
+            const effHs = res.eff_hs_limit ?? 1.13;
+            const effW = res.eff_weff_limit ?? 10.17;
+
+            drawLineChartCanvas('canvasChartHs', 'tipChartHs', {
+                title: 'Hs 碼頭有效波高 (m) [限值 ≤1.13m]',
+                titleColor: '#ef4444',
+                xCats: timeCategories,
+                data: [3.50, 3.65, 3.71, res.hs_pier, 3.60, 3.20],
+                minY: 0, maxY: 5.0,
+                lineColor: '#ef4444',
+                limitY: effHs, limitColor: '#ef4444', limitText: `限值 ${effHs}m`,
+                vLines: [{ cat: '11:20' }, { cat: '14:20' }],
+                unit: 'm'
+            });
+
+            drawLineChartCanvas('canvasChartWind', 'tipChartWind', {
+                title: 'Wind 攻角有效風速 (m/s) [限值 ≤10.17m/s]',
+                titleColor: '#f59e0b',
+                xCats: timeCategories,
+                data: [5.20, 5.80, 8.50, res.w_eff, 6.50, 5.10],
+                minY: 0, maxY: 15.0,
+                lineColor: '#f59e0b',
+                limitY: effW, limitColor: '#f59e0b', limitText: `限值 ${effW}m/s`,
+                vLines: [{ cat: '11:20' }, { cat: '14:20' }],
+                unit: 'm/s'
+            });
+
+            drawLineChartCanvas('canvasChartUKC', 'tipChartUKC', {
+                title: 'UKC 南岸動態裕深 (m) [限值 ≥1.50m / 基點 -5.5m CD]',
+                titleColor: '#ef4444',
+                xCats: timeCategories,
+                data: [1.10, 0.85, 0.77, res.ukc, 0.35, -0.68],
+                minY: -1.0, maxY: 4.0,
+                lineColor: '#ef4444',
+                limitY: 1.50, limitColor: '#ef4444', limitText: '限值 1.50m (觸底)',
+                vLines: [{ cat: '11:20' }, { cat: '14:20' }],
+                isMinLimit: true,
+                unit: 'm'
+            });
+
+            drawLineChartCanvas('canvasChartTp', 'tipChartTp', {
+                title: 'Tp 湧浪週期 (s) [共振限值 ≤12.0s]',
+                titleColor: '#c084fc',
+                xCats: timeCategories,
+                data: [15.2, 15.4, 15.5, currentTelemetry.tp_s, 14.8, 14.2],
+                minY: 4, maxY: 20.0,
+                lineColor: '#c084fc',
+                limitY: 12.0, limitColor: '#c084fc', limitText: '限值 12.0s',
+                vLines: [{ cat: '11:20' }, { cat: '14:20' }],
+                unit: 's'
+            });
+
+            draw7DaysDualCanvas();
+        }
+
+        function updateUI() {
+            const res = evaluatePhysics(currentTelemetry);
+            currentEvaluation = res;
+
+            const vetoBanner = document.getElementById('vetoBanner');
+            const decisionBadge = document.getElementById('ssotDecisionBadge');
+            const headerMaster = document.getElementById('headerMaster');
+            const badgeDecision = document.getElementById('badgeDecision');
+
+            if (res.has_veto) {
+                if (vetoBanner) {
+                    vetoBanner.style.display = 'block';
+                    vetoBanner.style.background = '#ef4444';
+                    vetoBanner.textContent = `🚨 剛性警告：實體觸發 4 層物理 VETO 熔斷（浪高 ${res.hs_pier}m / 裕深 ${res.ukc}m / 乾舷 ${res.fb_pier}m 超標），全線強制管制！`;
+                }
+                if (decisionBadge) {
+                    decisionBadge.textContent = '🔴 0.0% 物理 VETO 熔斷';
+                    decisionBadge.style.color = '#ef4444';
+                }
+                if (headerMaster) headerMaster.style.borderLeftColor = '#ef4444';
+                if (badgeDecision) {
+                    badgeDecision.textContent = '🔴 熔斷禁止靠泊';
+                    badgeDecision.className = 'badge badge-veto';
+                }
+            } else {
+                if (vetoBanner) vetoBanner.style.display = 'none';
+                if (decisionBadge) {
+                    decisionBadge.textContent = '🟢 100.0% 放行開放';
+                    decisionBadge.style.color = '#10b981';
+                }
+                if (headerMaster) headerMaster.style.borderLeftColor = '#10b981';
+                if (badgeDecision) {
+                    badgeDecision.textContent = '🟢 放行靠泊';
+                    badgeDecision.className = 'badge badge-pass';
+                }
+            }
+
+            const valHs = document.getElementById('valHs');
+            if (valHs) valHs.textContent = `${res.hs_pier.toFixed(2)} m`;
+            const valWeff = document.getElementById('valWeff');
+            if (valWeff) valWeff.textContent = `${res.w_eff.toFixed(2)} m/s`;
+            const valUKC = document.getElementById('valUKC');
+            if (valUKC) valUKC.textContent = `${res.ukc.toFixed(2)} m`;
+            const valFB = document.getElementById('valFB');
+            if (valFB) valFB.textContent = `${res.fb_pier.toFixed(2)} m`;
+            const valTide = document.getElementById('valTide');
+            if (valTide) valTide.textContent = `${currentTelemetry.tide_eta_m.toFixed(2)} m`;
+            const valAlpha = document.getElementById('valAlpha');
+            if (valAlpha) valAlpha.textContent = res.alpha_tune.toFixed(2);
+            const valWLocal = document.getElementById('valWLocal');
+            if (valWLocal) valWLocal.textContent = `${res.w_local.toFixed(2)} m/s`;
+
+            const bHs = document.getElementById('badgeHs');
+            if (bHs) {
+                bHs.className = res.pass_hs ? 'badge badge-pass mt-1' : 'badge badge-veto mt-1';
+                bHs.textContent = res.pass_hs ? `PASS (≤${res.eff_hs_limit}m)` : `FAIL (>${res.eff_hs_limit}m)`;
+            }
+
+            const bWeff = document.getElementById('badgeWeff');
+            if (bWeff) {
+                bWeff.className = res.pass_w ? 'badge badge-pass mt-1' : 'badge badge-veto mt-1';
+                bWeff.textContent = res.pass_w ? `PASS (≤${res.eff_weff_limit}m/s)` : `FAIL (>${res.eff_weff_limit}m/s)`;
+            }
+
+            const bUKC = document.getElementById('badgeUKC');
+            if (bUKC) {
+                bUKC.className = res.pass_ukc ? 'badge badge-pass mt-1' : 'badge badge-veto mt-1';
+                bUKC.textContent = res.pass_ukc ? `PASS (≥1.50m)` : `FAIL (<1.50m 觸底)`;
+            }
+
+            const bFB = document.getElementById('badgeFB');
+            if (bFB) {
+                bFB.className = res.pass_fb ? 'badge badge-pass mt-1' : 'badge badge-veto mt-1';
+                bFB.textContent = res.pass_fb ? `PASS (≥0.50m)` : `FAIL (<0.50m 越浪)`;
+            }
+
+            if (currentTab === 'desktop') redrawAllDesktopCanvas();
+            else if (currentTab === 'bathymetry') initDualPierProfileCanvas();
+            else if (currentTab === 'longterm') draw30DaysCanvas();
+        }
+
+        const KUEISHAN_LAND_POLYGON = [
+            [24.8488, 121.9330], [24.8505, 121.9385], [24.8512, 121.9430],
+            [24.8518, 121.9490], [24.8490, 121.9580], [24.8450, 121.9640],
+            [24.8415, 121.9655], [24.8380, 121.9620], [24.8360, 121.9540],
+            [24.8375, 121.9465], [24.8420, 121.9425], [24.8445, 121.9370],
+            [24.8475, 121.9332]
+        ];
+
+        function isPointInPolygon(point, vs) {
+            const x = point[0], y = point[1];
+            let inside = false;
+            for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
+                const xi = vs[i][0], yi = vs[i][1];
+                const xj = vs[j][0], yj = vs[j][1];
+                const intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+                if (intersect) inside = !inside;
+            }
+            return inside;
+        }
+
+        function isCoordOnLand(lat, lng) {
+            if (lng <= 121.838 && lat <= 24.90) return true;
+            if (lng <= 121.848 && lat > 24.90) return true;
+            if (lat >= 24.835 && lat <= 24.853 && lng >= 121.932 && lng <= 121.966) {
+                return isPointInPolygon([lat, lng], KUEISHAN_LAND_POLYGON);
+            }
+            return false;
+        }
+
+        function initLeafletMap() {
+            if (leafletMap) {
+                leafletMap.invalidateSize();
+                resizeDesktopFlowCanvas();
+                return;
+            }
+            const wushiPort = [24.8711, 121.8340];
+            leafletMap = L.map('osmMapContainer', {
+                center: [24.856, 121.895],
+                zoom: 12,
+                zoomControl: true
+            });
+            currentBaseTileLayer = L.tileLayer('https://wmts.nlsc.gov.tw/wmts/EMAP/default/GoogleMapsCompatible/{z}/{y}/{x}', {
+                maxZoom: 19,
+                attribution: '&copy; 內政部國土測繪中心 NLSC | Soft Ocean'
+            }).addTo(leafletMap);
+
+            L.circleMarker([24.8428, 121.9535], { radius: 7, fillColor: '#f59e0b', color: '#ffffff', weight: 2, fillOpacity: 0.95 })
+                .addTo(leafletMap)
+                .bindPopup("<b>⛰ 401 高地 (標高 398m)</b><br>401高地迎風屏障監測點");
+
+            L.circleMarker([24.8486, 121.9432], { radius: 6.5, fillColor: '#ef4444', color: '#ffffff', weight: 2, fillOpacity: 0.95 })
+                .addTo(leafletMap)
+                .bindPopup("<b>⚓ 北岸主碼頭 (+3.20m CD) [校準位置]</b><br>• 鼎興 92-021 竣工圖細設位置<br>• 狀態：🔴 越浪漫頂覆寫 (FB=0.15m) / 坐灘 (-1.30m)");
+
+            L.circleMarker([24.8438, 121.9416], { radius: 6.5, fillColor: '#ef4444', color: '#ffffff', weight: 2, fillOpacity: 0.95 })
+                .addTo(leafletMap)
+                .bindPopup("<b>⚓ 南岸權宜碼頭 (-5.50m CD) [校準位置]</b><br>• 鼎興 97-05 沉箱碼頭細設位置<br>• 狀態：🔴 淺水觸底熔斷 (UKC=0.42m < 1.50m)");
+
+            L.circleMarker(wushiPort, { radius: 7, fillColor: '#10b981', color: '#ffffff', weight: 2, fillOpacity: 0.95 })
+                .addTo(leafletMap)
+                .bindPopup("<b>🚢 頭城烏石港 (避風母港安全)</b><br>避風塢泊位安全");
+
+            L.polyline([[24.8462, 121.9424], wushiPort], { color: '#facc15', weight: 2.5, dashArray: '6, 6', opacity: 0.9 })
+                .addTo(leafletMap)
+                .bindPopup("<b>🚢 避難直航航線 (245° WSW / 10.8浬)</b>");
+
+            initTyphoonTrackLayer();
+
+            leafletMap.on('zoom move resize', resizeDesktopFlowCanvas);
+            initDesktopFlowEngine();
+        }
+
+        /* 繪製氣象署颱風中心、暴風圈與路徑趨勢線 */
+        function initTyphoonTrackLayer() {
+            if (!leafletMap) return;
+            if (typhoonLayersGroup) {
+                leafletMap.removeLayer(typhoonLayersGroup);
+            }
+            typhoonLayersGroup = L.layerGroup();
+
+            // 1. 7級風暴風半徑 (250km)
+            const r7Circle = L.circle(TYPHOON_DATA.center, {
+                radius: TYPHOON_DATA.r7_km * 1000,
+                color: '#ef4444',
+                weight: 1.5,
+                dashArray: '6, 6',
+                fillColor: '#ef4444',
+                fillOpacity: 0.08
+            }).bindPopup(`<b>🌀 氣象署 7 級風暴風半徑 (${TYPHOON_DATA.r7_km} km)</b><br>已覆蓋臺灣東北部海面與宜蘭龜山島全境`);
+            typhoonLayersGroup.addLayer(r7Circle);
+
+            // 2. 10級風暴風半徑 (80km)
+            const r10Circle = L.circle(TYPHOON_DATA.center, {
+                radius: TYPHOON_DATA.r10_km * 1000,
+                color: '#dc2626',
+                weight: 2,
+                fillColor: '#dc2626',
+                fillOpacity: 0.16
+            }).bindPopup(`<b>🌪 10 級風暴風核心半徑 (${TYPHOON_DATA.r10_km} km)</b><br>中心最大風速 40m/s (13級)`);
+            typhoonLayersGroup.addLayer(r10Circle);
+
+            // 3. 過去路徑實線 (灰/藍) 與未來趨勢虛線 (黃/紅)
+            const ptsPast = [TYPHOON_DATA.track[0].pos, TYPHOON_DATA.track[1].pos, TYPHOON_DATA.track[2].pos];
+            const ptsFuture = [TYPHOON_DATA.track[2].pos, TYPHOON_DATA.track[3].pos, TYPHOON_DATA.track[4].pos, TYPHOON_DATA.track[5].pos];
+
+            const polyPast = L.polyline(ptsPast, { color: '#94a3b8', weight: 3, opacity: 0.8 });
+            const polyFuture = L.polyline(ptsFuture, { color: '#f59e0b', weight: 3.5, dashArray: '8, 6', opacity: 0.95 });
+            typhoonLayersGroup.addLayer(polyPast);
+            typhoonLayersGroup.addLayer(polyFuture);
+
+            // 4. 路徑點位與當前中心動態標記
+            TYPHOON_DATA.track.forEach((pt, idx) => {
+                const isCurrent = (idx === 2);
+                if (isCurrent) {
+                    const centerIcon = L.divIcon({
+                        className: 'typhoon-center-marker',
+                        html: `<div style="background:#ef4444;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 16px #ef4444;border:2px solid #fff;animation:pulseAlert 1.5s infinite;">🌀</div>`,
+                        iconSize: [28, 28],
+                        iconAnchor: [14, 14]
+                    });
+                    const marker = L.marker(pt.pos, { icon: centerIcon })
+                        .bindPopup(`<b>🌀 氣象署颱風中心實測定位 (955 hPa)</b><br>${pt.label}<br>座標：${pt.pos[0]}°N, ${pt.pos[1]}°E<br>直逼龜山島東南方，長浪大潮雙重疊加！`);
+                    typhoonLayersGroup.addLayer(marker);
+                } else {
+                    const circle = L.circleMarker(pt.pos, {
+                        radius: 5,
+                        fillColor: pt.color,
+                        color: '#ffffff',
+                        weight: 1.5,
+                        fillOpacity: 0.95
+                    }).bindPopup(`<b>路徑節點：${pt.label}</b><br>座標：${pt.pos[0]}°N, ${pt.pos[1]}°E`);
+                    typhoonLayersGroup.addLayer(circle);
+                }
+            });
+
+            if (isDeskTyphoonActive) {
+                typhoonLayersGroup.addTo(leafletMap);
+            }
+        }
+
+        function toggleDesktopTyphoonLayer() {
+            isDeskTyphoonActive = !isDeskTyphoonActive;
+            const btn = document.getElementById('btnDeskToggleTyphoon');
+            const box = document.getElementById('typhoonAnalysisBox');
+            if (isDeskTyphoonActive) {
+                if (leafletMap && typhoonLayersGroup) leafletMap.addLayer(typhoonLayersGroup);
+                if (btn) {
+                    btn.className = 'bg-[#1e293b] border border-red-500 text-red-300 px-2 py-0.5 rounded text-[10px] font-bold transition-all';
+                    btn.textContent = '🌀 氣象署路徑暴風圈：開';
+                }
+                if (box) box.style.display = 'block';
+            } else {
+                if (leafletMap && typhoonLayersGroup) leafletMap.removeLayer(typhoonLayersGroup);
+                if (btn) {
+                    btn.className = 'bg-[#1e293b] border border-slate-600 text-slate-400 px-2 py-0.5 rounded text-[10px] transition-all';
+                    btn.textContent = '🌀 氣象署路徑暴風圈：關 (點擊開啟)';
+                }
+                if (box) box.style.display = 'none';
+            }
+        }
+
+        function initDesktopFlowEngine() {
+            const canvas = document.getElementById('softOceanFlowCanvasDesktop');
+            if (!canvas) return;
+            resizeDesktopFlowCanvas();
+
+            const w = canvas.width || 800;
+            const h = canvas.height || 540;
+
+            deskFlowParticles = [];
+            for (let i = 0; i < 95; i++) {
+                deskFlowParticles.push({
+                    x: Math.random() * w,
+                    y: Math.random() * h,
+                    length: Math.random() * 22 + 14,
+                    speed: Math.random() * 1.8 + 1.2,
+                    opacity: Math.random() * 0.65 + 0.35,
+                    age: Math.random() * 70,
+                    maxAge: Math.random() * 60 + 50
+                });
+            }
+
+            deskWindParticles = [];
+            for (let i = 0; i < 75; i++) {
+                deskWindParticles.push({
+                    x: Math.random() * w,
+                    y: Math.random() * h,
+                    length: Math.random() * 26 + 18,
+                    speed: Math.random() * 2.4 + 1.8,
+                    opacity: Math.random() * 0.7 + 0.3,
+                    age: Math.random() * 60,
+                    maxAge: Math.random() * 50 + 40
+                });
+            }
+
+            if (deskFlowAnimationId) cancelAnimationFrame(deskFlowAnimationId);
+            runDesktopFlowLoop();
+        }
+
+        function resizeDesktopFlowCanvas() {
+            const container = document.getElementById('osmMapContainer');
+            const canvas = document.getElementById('softOceanFlowCanvasDesktop');
+            if (!container || !canvas) return;
+            const rect = container.getBoundingClientRect();
+            const w = Math.floor(rect.width || container.clientWidth || 800);
+            const h = Math.floor(rect.height || container.clientHeight || 540);
+            if (canvas.width !== w || canvas.height !== h) {
+                canvas.width = w;
+                canvas.height = h;
+            }
+        }
+
+        function runDesktopFlowLoop() {
+            const canvas = document.getElementById('softOceanFlowCanvasDesktop');
+            if (!canvas || currentTab !== 'softocean' || (!isDeskFlowActive && !isDeskWindActive)) {
+                deskFlowAnimationId = requestAnimationFrame(runDesktopFlowLoop);
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            const cw = canvas.width;
+            const ch = canvas.height;
+            ctx.clearRect(0, 0, cw, ch);
+
+            if (isDeskFlowActive && cw > 10 && ch > 10 && leafletMap) {
+                const currentAngleRad = (315 - 90) * (Math.PI / 180);
+                const cdx = Math.cos(currentAngleRad);
+                const cdy = Math.sin(currentAngleRad);
+
+                ctx.save();
+                ctx.lineCap = 'round';
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+                ctx.shadowBlur = 3;
+
+                deskFlowParticles.forEach(p => {
+                    p.x += cdx * p.speed;
+                    p.y += cdy * p.speed;
+                    p.age++;
+
+                    let onLand = false;
+                    try {
+                        const latLng = leafletMap.containerPointToLatLng([p.x, p.y]);
+                        onLand = isCoordOnLand(latLng.lat, latLng.lng);
+                    } catch (e) {
+                        onLand = (p.x < cw * 0.22);
+                    }
+
+                    if (onLand || p.y < -30 || p.x > cw + 30 || p.y > ch + 30 || p.age > p.maxAge) {
+                        p.x = cw * 0.35 + Math.random() * (cw * 0.65);
+                        p.y = ch * 0.10 + Math.random() * (ch * 0.90);
+                        p.age = 0;
+                        p.speed = Math.random() * 1.8 + 1.2;
+                        return;
+                    }
+
+                    const tailX = p.x - cdx * p.length;
+                    const tailY = p.y - cdy * p.length;
+
+                    const grad = ctx.createLinearGradient(tailX, tailY, p.x, p.y);
+                    grad.addColorStop(0, 'rgba(56, 189, 248, 0)');
+                    grad.addColorStop(0.6, `rgba(56, 189, 248, ${p.opacity * 0.7})`);
+                    grad.addColorStop(1, `rgba(0, 245, 212, ${p.opacity})`);
+
+                    ctx.strokeStyle = grad;
+                    ctx.lineWidth = 2.2;
+                    ctx.beginPath();
+                    ctx.moveTo(tailX, tailY);
+                    ctx.lineTo(p.x, p.y);
+                    ctx.stroke();
+
+                    ctx.fillStyle = `rgba(0, 245, 212, ${Math.min(1, p.opacity * 1.2)})`;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 1.8, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+                ctx.restore();
+            }
+
+            if (isDeskWindActive && cw > 10 && ch > 10 && leafletMap) {
+                const windAngleRad = (245 - 90) * (Math.PI / 180);
+                const wdx = Math.cos(windAngleRad);
+                const wdy = Math.sin(windAngleRad);
+
+                ctx.save();
+                ctx.lineCap = 'round';
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+                ctx.shadowBlur = 4;
+
+                deskWindParticles.forEach(p => {
+                    p.x += wdx * p.speed;
+                    p.y += wdy * p.speed;
+                    p.age++;
+
+                    let onLand = false;
+                    try {
+                        const latLng = leafletMap.containerPointToLatLng([p.x, p.y]);
+                        onLand = isCoordOnLand(latLng.lat, latLng.lng);
+                    } catch (e) {
+                        onLand = (p.x < cw * 0.22);
+                    }
+
+                    if (onLand || p.x < -30 || p.y < -30 || p.x > cw + 30 || p.y > ch + 30 || p.age > p.maxAge) {
+                        p.x = Math.random() > 0.3 ? (cw + Math.random() * 20) : (cw * 0.35 + Math.random() * cw * 0.65);
+                        p.y = Math.random() > 0.3 ? (-20 + Math.random() * 20) : (Math.random() * ch);
+                        p.age = 0;
+                        p.speed = Math.random() * 2.4 + 1.8;
+                        return;
+                    }
+
+                    const tailX = p.x - wdx * p.length;
+                    const tailY = p.y - wdy * p.length;
+
+                    const grad = ctx.createLinearGradient(tailX, tailY, p.x, p.y);
+                    grad.addColorStop(0, 'rgba(245, 158, 11, 0)');
+                    grad.addColorStop(0.6, `rgba(245, 158, 11, ${p.opacity * 0.7})`);
+                    grad.addColorStop(1, `rgba(239, 68, 68, ${p.opacity})`);
+
+                    ctx.strokeStyle = grad;
+                    ctx.lineWidth = 2.4;
+                    ctx.beginPath();
+                    ctx.moveTo(tailX, tailY);
+                    ctx.lineTo(p.x, p.y);
+                    ctx.stroke();
+
+                    ctx.fillStyle = `rgba(254, 202, 202, ${p.opacity})`;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 2.0, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+                ctx.restore();
+            }
+
+            deskFlowAnimationId = requestAnimationFrame(runDesktopFlowLoop);
+        }
+
+        function toggleDesktopFlowLayer() {
+            isDeskFlowActive = !isDeskFlowActive;
+            const btn = document.getElementById('btnDeskToggleFlow');
+            if (isDeskFlowActive) {
+                btn.className = 'bg-[#1e293b] border border-emerald-500 text-emerald-300 px-2 py-0.5 rounded text-[10px] font-bold transition-all';
+                btn.textContent = '🌊 表面潮流：開 (315° NW / 1.4 kts)';
+            } else {
+                btn.className = 'bg-[#1e293b] border border-slate-600 text-slate-400 px-2 py-0.5 rounded text-[10px] transition-all';
+                btn.textContent = '🌊 表面潮流：關 (點擊開啟)';
+            }
+        }
+
+        function toggleDesktopWindLayer() {
+            isDeskWindActive = !isDeskWindActive;
+            const btn = document.getElementById('btnDeskToggleWind');
+            if (isDeskWindActive) {
+                btn.className = 'bg-[#1e293b] border border-amber-500 text-amber-300 px-2 py-0.5 rounded text-[10px] font-bold transition-all';
+                btn.textContent = '💨 風浪湧浪：開 (65° ENE / 8.5 m/s)';
+            } else {
+                btn.className = 'bg-[#1e293b] border border-slate-600 text-slate-400 px-2 py-0.5 rounded text-[10px] transition-all';
+                btn.textContent = '💨 風浪湧浪：關 (點擊開啟)';
+            }
+        }
+
+        function switchTileLayer(type) {
+            if (!leafletMap) return;
+            if (currentBaseTileLayer) leafletMap.removeLayer(currentBaseTileLayer);
+            if (type === 'nlsc') {
+                currentBaseTileLayer = L.tileLayer('https://wmts.nlsc.gov.tw/wmts/EMAP/default/GoogleMapsCompatible/{z}/{y}/{x}', { maxZoom: 19 }).addTo(leafletMap);
+            } else if (type === 'esri') {
+                currentBaseTileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean/MapServer/tile/{z}/{y}/{x}', { maxZoom: 16 }).addTo(leafletMap);
+            }
+        }
+
+        function onParamChange() {
+            if (isAutoSyncEnabled) isAutoSyncEnabled = false;
+            currentTelemetry.hs_cwa = parseFloat(document.getElementById('rngHsCWA').value);
+            currentTelemetry.w_cwa = parseFloat(document.getElementById('rngWCWA').value);
+            currentTelemetry.tp_s = parseFloat(document.getElementById('rngTp').value);
+            currentTelemetry.delta_theta_deg = parseFloat(document.getElementById('rngDeltaTheta').value);
+            currentTelemetry.tide_eta_m = parseFloat(document.getElementById('rngTide').value);
+            currentTelemetry.qimen_consensus_pct = parseFloat(document.getElementById('rngQimen').value);
+
+            document.getElementById('lblHsCWA').textContent = `${currentTelemetry.hs_cwa.toFixed(2)} m`;
+            document.getElementById('lblWCWA').textContent = `${currentTelemetry.w_cwa.toFixed(2)} m/s`;
+            document.getElementById('lblTp').textContent = `${currentTelemetry.tp_s.toFixed(1)} s`;
+            document.getElementById('lblDeltaTheta').textContent = `${currentTelemetry.delta_theta_deg}°`;
+            document.getElementById('lblTide').textContent = `${currentTelemetry.tide_eta_m.toFixed(2)} m`;
+            document.getElementById('lblQimen').textContent = `${currentTelemetry.qimen_consensus_pct}%`;
+            updateUI();
+        }
+
+        function toggleDataSourceMode() {
+            isAutoSyncEnabled = !isAutoSyncEnabled;
+            const btn = document.getElementById('btnLiveModeToggle');
+            const txt = document.getElementById('txtLiveMode');
+            if (isAutoSyncEnabled) {
+                btn.className = 'flex items-center gap-1.5 bg-[#0f172a] border border-[#38bdf8] text-[#38bdf8] px-2.5 py-0.5 rounded-full text-[10.5px] font-bold';
+                txt.textContent = '● SSOT 實時監聽模式 (每3秒自動同步 latest_decision.json)';
+                fetchSSOTFile();
+            } else {
+                btn.className = 'flex items-center gap-1.5 bg-[#0f172a] border border-amber-500 text-amber-400 px-2.5 py-0.5 rounded-full text-[10.5px] font-bold';
+                txt.textContent = '🎮 沙盤手動演練模式 (已暫停同步，點擊恢復)';
+            }
+        }
+
+        function loadScenario(type) {
+            if (isAutoSyncEnabled) isAutoSyncEnabled = false;
+            if (type === 'CURRENT') {
+                currentTelemetry = { hs_cwa: 3.71, w_cwa: 9.50, tp_s: 15.5, delta_theta_deg: 58.0, tide_eta_m: 0.65, qimen_consensus_pct: 100.0, video_overtopping_rate: 1.31, video_kd_bias: 0.0295 };
+            } else if (type === 'GUERRILLA') {
+                currentTelemetry = { hs_cwa: 1.15, w_cwa: 7.20, tp_s: 9.8, delta_theta_deg: 38.0, tide_eta_m: 0.85, qimen_consensus_pct: 92.0, video_overtopping_rate: 0.0, video_kd_bias: 0.015 };
+            } else if (type === 'CALM') {
+                currentTelemetry = { hs_cwa: 0.65, w_cwa: 4.80, tp_s: 8.0, delta_theta_deg: 18.0, tide_eta_m: 0.60, qimen_consensus_pct: 95.0, video_overtopping_rate: 0.0, video_kd_bias: 0.0 };
+            } else if (type === 'OVERTOPPING') {
+                currentTelemetry = { hs_cwa: 2.10, w_cwa: 11.50, tp_s: 13.0, delta_theta_deg: 42.0, tide_eta_m: 1.45, qimen_consensus_pct: 88.0, video_overtopping_rate: 2.50, video_kd_bias: 0.03 };
+            }
+
+            document.getElementById('rngHsCWA').value = currentTelemetry.hs_cwa;
+            document.getElementById('rngWCWA').value = currentTelemetry.w_cwa;
+            document.getElementById('rngTp').value = currentTelemetry.tp_s;
+            document.getElementById('rngDeltaTheta').value = currentTelemetry.delta_theta_deg;
+            document.getElementById('rngTide').value = currentTelemetry.tide_eta_m;
+            document.getElementById('rngQimen').value = currentTelemetry.qimen_consensus_pct;
+
+            document.getElementById('lblHsCWA').textContent = `${currentTelemetry.hs_cwa.toFixed(2)} m`;
+            document.getElementById('lblWCWA').textContent = `${currentTelemetry.w_cwa.toFixed(2)} m/s`;
+            document.getElementById('lblTp').textContent = `${currentTelemetry.tp_s.toFixed(1)} s`;
+            document.getElementById('lblDeltaTheta').textContent = `${currentTelemetry.delta_theta_deg}°`;
+            document.getElementById('lblTide').textContent = `${currentTelemetry.tide_eta_m.toFixed(2)} m`;
+            document.getElementById('lblQimen').textContent = `${currentTelemetry.qimen_consensus_pct}%`;
+
+            updateUI();
+        }
+
+        async function fetchSSOTFile() {
+            if (!isAutoSyncEnabled) return;
+            try {
+                const res = await fetch(`latest_decision.json?_t=${Date.now()}`, { cache: 'no-store' });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.physics_metrics) {
+                        const pm = data.physics_metrics;
+                        currentTelemetry.hs_cwa = pm.hs_cwa ?? 3.71;
+                        currentTelemetry.w_cwa = pm.w_cwa ?? 9.50;
+                        currentTelemetry.tp_s = pm.tp_s ?? 15.5;
+                        currentTelemetry.delta_theta_deg = pm.delta_theta_deg ?? 58.0;
+                        currentTelemetry.tide_eta_m = pm.tide_eta_m ?? 0.65;
+                        updateUI();
+                    }
+                }
+            } catch (e) {}
+        }
+
+        function exportDecisionJSON() {
+            const res = evaluatePhysics(currentTelemetry);
+            const now = new Date();
+            const timeStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')} CST`;
+            const payload = {
+                version: "v36D.330.0 Dual-Pier Engineering Profile & Strict Benchmark Matrix",
+                timestamp: timeStr,
+                decision: res.has_veto ? "🔴 0.0% 物理 VETO 熔斷 / 全線封島" : "🟢 100.0% 全線開放",
+                physics_metrics: {
+                    hs_cwa: currentTelemetry.hs_cwa,
+                    w_cwa: currentTelemetry.w_cwa,
+                    hs_pier_m: res.hs_pier,
+                    w_local_ms: res.w_local,
+                    w_eff_ms: res.w_eff,
+                    tp_s: currentTelemetry.tp_s,
+                    delta_theta_deg: currentTelemetry.delta_theta_deg,
+                    tide_eta_m: currentTelemetry.tide_eta_m,
+                    chart_depth_south_m: CONSTANTS.SOUTH_DEPTH_CD,
+                    chart_depth_north_m: CONSTANTS.NORTH_DEPTH_CD,
+                    alpha_adaptive: res.alpha_tune,
+                    eff_hs_limit: res.eff_hs_limit,
+                    eff_weff_limit: res.eff_weff_limit,
+                    eff_ukc_limit: CONSTANTS.HARD_UKC_MIN,
+                    eff_fb_limit: CONSTANTS.HARD_FB_MIN,
+                    ukc_south_m: res.ukc,
+                    ukc_north_m: res.ukc_north,
+                    fb_pier_m: res.fb_pier,
+                    has_veto: res.has_veto
+                }
+            };
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
+            const dl = document.createElement('a');
+            dl.setAttribute("href", dataStr);
+            dl.setAttribute("download", "latest_decision.json");
+            document.body.appendChild(dl);
+            dl.click();
+            dl.remove();
+        }
+
+        function downloadCurrentPage() {
+            const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "desktop.html";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function initApp() {
+            updateUI();
+            redrawAllDesktopCanvas();
+            fetchSSOTFile();
+            setInterval(fetchSSOTFile, 3000);
+            window.addEventListener('resize', () => {
+                if (currentTab === 'desktop') redrawAllDesktopCanvas();
+                else if (currentTab === 'bathymetry') initDualPierProfileCanvas();
+                else if (currentTab === 'longterm') draw30DaysCanvas();
+                else if (currentTab === 'softocean') resizeDesktopFlowCanvas();
+            });
+        }
+
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            initApp();
+        } else {
+            window.addEventListener('DOMContentLoaded', initApp);
+        }
+    </script>
+</body>
 </html>
