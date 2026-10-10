@@ -269,7 +269,7 @@ class LiveAsyncAPIPollingRouter:
         return assimilated_data
 
 # ==============================================================================
-# 4. 升級 2：FAISS 規模化向量檢索算子 (FAISS 20-Year Climate Search Engine)
+# 4. FAISS 規模化向量檢索算子 (FAISS 20-Year Climate Search Engine)
 # ==============================================================================
 class GEM37DNormalizedFeatureExtractor:
     BOUNDS = np.array([
@@ -298,17 +298,14 @@ class GEM37DNormalizedFeatureExtractor:
         )
 
 class FAISSClimate20YrEngine:
-    """高效餘弦向量檢索算子 (支援高維巨量歷史數據矩陣歸一化低於 5ms 檢索)"""
     def __init__(self, num_records: int = 10000):
         self.num_records = num_records
         self.feature_dim = 37
         
-        # 建立特徵加權張量
         weights = np.ones(37, dtype=np.float32)
         weights[0], weights[1], weights[23], weights[10], weights[34] = 3.5, 3.0, 3.5, 2.0, 2.0
         self.weights_sqrt = np.sqrt(weights / weights.sum())
 
-        # 初始化向量資料庫並進行 L2 歸一化
         raw_db = np.random.uniform(0.1, 0.9, size=(num_records, 37)).astype(np.float32)
         self.db_weighted = raw_db * self.weights_sqrt
         self.norms = np.linalg.norm(self.db_weighted, axis=1, keepdims=True) + 1e-8
@@ -320,7 +317,6 @@ class FAISSClimate20YrEngine:
         query_w = live_vec_37d * self.weights_sqrt
         query_norm = query_w / (np.linalg.norm(query_w) + 1e-8)
         
-        # 矩陣乘法計算 Cosine Similarity
         sim_scores = np.dot(self.db_normalized, query_norm)
         topk_idx = np.argpartition(sim_scores, -top_k)[-top_k:]
         topk_scores = sim_scores[topk_idx]
@@ -342,24 +338,21 @@ class FAISSClimate20YrEngine:
         }
 
 # ==============================================================================
-# 5. 升級 3：ONNX Runtime 輕量推論 Provider (ONNX / TensorRT Provider)
+# 5. ONNX Runtime 輕量推論 Provider (ONNX / TensorRT Provider)
 # ==============================================================================
 class ONNXInferenceProvider:
-    """實時導出 / 執行輕量化神經算子 (FNO-1D 頻譜 + Vision-PINN 越浪識別)"""
     def __init__(self):
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
     def predict_fno_and_pinn(self, hs_cwa: float, tp_s: float, video_rate: float) -> Tuple[float, float]:
-        """ONNX 高效微推論 (模擬 ONNXRuntime 執行 <2ms)"""
         fno_kd_bias = 0.0295 if tp_s >= 11.5 else 0.005
         pinn_overtopping = max(video_rate, 1.31 if hs_cwa > 1.20 and tp_s > 12.0 else 0.0)
         return round(fno_kd_bias, 4), round(pinn_overtopping, 2)
 
 # ==============================================================================
-# 6. 升級 4：動態羽狀流流體擴散地理圍欄 (Dynamic Plume Geofencing)
+# 6. 動態羽狀流流體擴散地理圍欄 (Dynamic Plume Geofencing)
 # ==============================================================================
 class DynamicPlumeGeofencingOperator:
-    """結合潮汐流速 V_tide(t) 之牛奶海強酸水團動態形變地理圍欄算子"""
     @staticmethod
     def haversine_distance_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
         R = 6371000.0
@@ -375,12 +368,9 @@ class DynamicPlumeGeofencingOperator:
             data.vessel_lat, data.vessel_lon,
             data.thermal_source_lat, data.thermal_source_lon
         )
-        
-        # 依據潮位變率 (tide_eta) 與海流 (current_speed_kts) 精算動態危害半徑形變 (200m ~ 350m)
         plume_dynamic_radius_m = 200.0 + (data.current_speed_kts * 35.0)
         inside_dynamic_zone = base_dist <= plume_dynamic_radius_m
 
-        # 周易二十四向方位精算
         bearing = math.degrees(math.atan2(
             data.thermal_source_lon - data.vessel_lon,
             data.thermal_source_lat - data.vessel_lat
@@ -524,7 +514,7 @@ class QimenAssimilationEngine:
         }
 
 # ==============================================================================
-# 9. 升級 5：Gymnasium 10D RL 策略與 Edge Masking (Production RL Engine)
+# 9. Gymnasium 10D RL 策略與 Edge Masking (Production RL Engine)
 # ==============================================================================
 class GuerrillaRLPolicyNet(nn.Module):
     def __init__(self, state_dim: int = 10, action_dim: int = 4):
@@ -541,7 +531,6 @@ class GuerrillaRLPolicyNet(nn.Module):
         state_t = torch.tensor(state_vec, dtype=torch.float32).unsqueeze(0)
         logits = self.fc(state_t)
         if has_veto:
-            # 硬掩碼 (Edge Masking)：硬性阻斷非 Q4 動作
             logits += torch.tensor([[-9999.0, -9999.0, -9999.0, 100.0]], dtype=torch.float32)
 
         probs = F.softmax(logits, dim=-1)
@@ -599,7 +588,6 @@ class TGGuerrillaMasterEngine:
         self.rl_policy = GuerrillaRLPolicyNet()
 
     async def execute_async(self, override_data: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        # 1. 異步抓取雙源 (TDX & CWA) API 實時數據
         if override_data:
             raw_telemetry = override_data
         else:
@@ -607,33 +595,24 @@ class TGGuerrillaMasterEngine:
 
         telemetry = MarineSafetyData.from_api_json(raw_telemetry)
 
-        # 2. ONNX 算子微推論
         video_bias, overtopping = self.onnx_provider.predict_fno_and_pinn(
             telemetry.hs_cwa, telemetry.tp_s, telemetry.video_overtopping_rate
         )
         telemetry.video_kd_bias = video_bias
         telemetry.video_overtopping_rate = overtopping
 
-        # 3. 37D 特徵歸一化與 FAISS 向量比對
         vec37 = self.extractor.build_normalized_vector(telemetry)
         faiss_res = self.climate_faiss.search(vec37, top_k=50)
         alpha_final = faiss_res["alpha_tune_historical_corrected"]
 
-        # 4. 四層 Hard VETO 解算
         physics_res = PhysicsEngine.evaluate_veto(telemetry, alpha_final)
-
-        # 5. 動態羽狀流流體圍欄檢核
         plume_res = DynamicPlumeGeofencingOperator.evaluate_dynamic_plume(telemetry)
-
-        # 6. 雙重遲滯碼頭切換
         pier_id, pier_msg = self.hysteresis.evaluate_pier_switch(telemetry.delta_theta_deg, telemetry.current_speed_kts)
 
-        # 7. 奇門 70% 門控同化
         qimen_res = QimenAssimilationEngine.evaluate(
             telemetry.qimen_consensus_pct, telemetry.tp_s, telemetry.delta_theta_deg, physics_res["has_veto"]
         )
 
-        # 8. RL 代理人推理與掩碼熔斷
         state_10d = np.array([
             physics_res["hs_pier_m"], physics_res["w_local_ms"], physics_res["ukc_m"],
             physics_res["fb_pier_m"], telemetry.tp_s, telemetry.delta_theta_deg,
@@ -641,10 +620,8 @@ class TGGuerrillaMasterEngine:
         ], dtype=np.float32)
         action, rl_reward = self.rl_policy.select_action_with_mask(state_10d, physics_res["has_veto"])
 
-        # 9. 撤離耗時精算
         evac_minutes = math.ceil(telemetry.passenger_count / 10.0 + max(0.0, (telemetry.s_quat_m - 0.50) * 15.0) + 5.0)
 
-        # 10. 戰術裁決打包
         if physics_res["has_veto"]:
             decision_text = "🔴 0.0% 物理 VETO 熔斷 / 全線封島"
             berthing = "無 (雙岸失效，禁止靠泊)"
@@ -679,7 +656,6 @@ class TGGuerrillaMasterEngine:
             }
         }
 
-        # 執行 Watchdog 與 SSOT 檢查
         healed_payload, is_healed = SSOTAuditGuard.inspect_and_heal(output_payload)
         healed_payload["ssot_self_healed"] = is_healed
 
@@ -701,11 +677,18 @@ async def main():
     print(json.dumps(payload, ensure_ascii=False, indent=2))
 
 if __name__ == "__main__":
+    # 1. 選擇性載入 nest_asyncio，避免環境未安裝時直接 Crash
     try:
         import nest_asyncio
         nest_asyncio.apply()
+    except ImportError:
+        pass
+
+    # 2. 跨平台安全 Event Loop 啟動
+    try:
         asyncio.run(main())
-    except Exception:
+    except RuntimeError:
+        # 應對 Jupyter/Colab 中已在運行的 Event Loop
         loop = asyncio.get_event_loop()
         if loop.is_running():
             loop.create_task(main())
