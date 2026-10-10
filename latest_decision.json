@@ -1,44 +1,53 @@
 {
-  "version": "v36D.360 Production Master Brain (Live API)",
-  "timestamp_cst": "2026-10-10 11:02:57 CST",
-  "data_timestamp_utc": 1791601377.6328332,
+  "version": "v36D.370 Production Master Brain (GEBCO 10m & Live API)",
+  "timestamp_cst": "2026-10-10 17:35:55 CST",
+  "data_timestamp_utc": 1791624955.8597357,
   "decision": "🔴 0.0% 物理 VETO 熔斷 / 全線封島",
   "confidence_label": "🟢 100.0% [完整同化 PASS]",
   "hard_veto_alert": true,
+  "bathymetry_hydrodynamics": {
+    "source": "GEBCO 2024 15-arcsec + ENC 10m Mesh Fusion",
+    "grid_resolution_m": 10.0,
+    "dynamic_chart_depth_m": 8.5,
+    "dynamic_squat_m": 0.337,
+    "depth_froude_number": 0.704,
+    "shoaling_factor_ks": 1.2032
+  },
   "faiss_climate_search": {
-    "top_k_similarity_mean": 0.8582,
-    "historical_20yr_veto_probability": 0.88,
-    "reliability_score_pct": 85.82,
-    "alpha_tune_historical_corrected": 0.692,
-    "faiss_latency_ms": 0.31
+    "top_k_similarity_mean": 0.8551,
+    "historical_20yr_veto_probability": 0.92,
+    "reliability_score_pct": 85.51,
+    "alpha_tune_historical_corrected": 0.678,
+    "faiss_latency_ms": 0.237
   },
   "physics_metrics": {
-    "hs_pier_m": 3.71,
+    "hs_pier_m": 4.46,
     "w_local_ms": 8.5,
     "w_eff_ms": 5.46,
-    "ukc_m": 3.77,
+    "ukc_m": 3.5,
     "fb_pier_m": 0.15,
-    "eff_hs_limit": 0.83,
-    "eff_weff_limit": 7.47,
+    "eff_hs_limit": 0.81,
+    "eff_weff_limit": 7.32,
     "pass_hs": false,
     "pass_w": true,
     "pass_ukc": true,
     "pass_fb": false,
     "has_veto": true,
     "kd": 1.0,
-    "kw": 1.0
+    "kw": 1.0,
+    "ks_shoaling": 1.2032
   },
   "dynamic_plume_geofence": {
     "dist_to_thermal_m": 60.48,
-    "dynamic_plume_radius_m": 266.5,
+    "dynamic_plume_radius_m": 637.5,
     "inside_hazard_zone": true,
     "twenty_four_fenye": "辰",
-    "warning_msg": "🚨 警報：載具進入強酸流體擴散範圍 (266m)，即刻撤離！"
+    "warning_msg": "🚨 警報：載具進入強酸流體擴散範圍 (638m)，即刻撤離！"
   },
   "guerrilla_dispatch": {
     "berthing_pier": "無 (雙岸失效，禁止靠泊)",
     "evacuation_pier": "無 (雙岸失效，直航返航烏石港)",
-    "evacuation_time_minutes": 25,
+    "evacuation_time_minutes": 20,
     "hysteresis_msg": "🔀 巽風/流速過大：切換至【南岸權宜碼頭】"
   },
   "rl_agent_inference": {
