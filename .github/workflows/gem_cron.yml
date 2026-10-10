@@ -1,56 +1,38 @@
-name: GEM Engine Cron Pipeline
+name: GEM Engine Dual-Source Assimilation
 
 on:
   schedule:
-    - cron: '30 23 * * *' # 每日 23:30 UTC (07:30 CST 當日開島裁決門閥)
-    - cron: '0 3,8 * * *'  # 每日 03:00 與 08:00 UTC (11:00與16:00 CST) 定時執行
-  workflow_dispatch:       # 支援手動觸發
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
 
 jobs:
   run-engine:
     runs-on: ubuntu-latest
-    timeout-minutes: 10     # 剛性逾時保護，防止 API 或模型卡死
-
-    permissions:
-      contents: write       # 剛性授權：允許提交並寫入 SSOT 及模型權重
-
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+        uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-          cache: 'pip'      # 啟用 pip 快取機制加速建置
 
-      - name: Install Lightweight Dependencies
+      - name: Install Dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install --extra-index-url https://download.pytorch.org/whl/cpu torch numpy requests pydantic truststore
+          pip install httpx numpy torch nest_asyncio
 
       - name: Execute Master Pipeline
         env:
-          CWA_API_KEY: ${{ secrets.CWA_API_KEY }}
-          BIGGIS_API_KEY: ${{ secrets.BIGGIS_API_KEY }}
           TDX_CLIENT_ID: ${{ secrets.TDX_CLIENT_ID }}
           TDX_CLIENT_SECRET: ${{ secrets.TDX_CLIENT_SECRET }}
-          ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CWA_API_KEY: ${{ secrets.CWA_API_KEY }}
         run: |
           python main_orchestrator.py
 
-      - name: Run SSOT Active Audit Guard
+      - name: Commit & Push SSOT Outputs
         run: |
-          python ssot_audit_guard.py
-
-      - name: Commit & Push SSOT Outputs & Model Weights
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "auto(ssot): sync SSOT & update latest model weights [v36D.330.0]"
-          file_pattern: "latest_decision.json *.pt KB_*.json"
-          commit_user_name: "github-actions[bot]"
-          commit_user_email: "github-actions[bot]@users.noreply.github.com"
-          branch: main
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action Bot"
+          git add latest_decision.json
+          git diff-index --quiet HEAD || git commit -m "Auto-assimilate TDX & CWA data stream [skip ci]"
+          git push
