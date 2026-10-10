@@ -1,157 +1,50 @@
 {
-  "version": "v36D.330.0 Three-Scheme & Guerrilla Vector Master Complete",
-  "timestamp": "2026-10-09 18:18:01 CST",
+  "version": "v36D.360 Production Master Brain (Live API)",
+  "timestamp_cst": "2026-10-10 11:02:57 CST",
+  "data_timestamp_utc": 1791601377.6328332,
   "decision": "🔴 0.0% 物理 VETO 熔斷 / 全線封島",
-  "confidence_score": 100.0,
   "confidence_label": "🟢 100.0% [完整同化 PASS]",
   "hard_veto_alert": true,
-  "reliability_score_pct": 77.69,
-  "precision_metrics": {
-    "converged_sigma": 0.3125,
-    "precision_gain_pct": 58.4
-  },
-  "attention_gate": {
-    "micro_physics_weight": 65.0,
-    "macro_qimen_weight": 35.0
+  "faiss_climate_search": {
+    "top_k_similarity_mean": 0.8582,
+    "historical_20yr_veto_probability": 0.88,
+    "reliability_score_pct": 85.82,
+    "alpha_tune_historical_corrected": 0.692,
+    "faiss_latency_ms": 0.31
   },
   "physics_metrics": {
     "hs_pier_m": 3.71,
     "w_local_ms": 8.5,
     "w_eff_ms": 5.46,
-    "delta_theta_deg": 50.0,
-    "tp_s": 15.5,
-    "tide_eta_m": 1.0,
-    "alpha_adaptive": 0.65,
-    "eff_hs_limit": 0.78,
-    "eff_weff_limit": 7.02,
-    "eff_ukc_limit": 1.5,
-    "eff_fb_limit": 0.5,
     "ukc_m": 3.77,
-    "fb_pier_m": 2.2,
+    "fb_pier_m": 0.15,
+    "eff_hs_limit": 0.83,
+    "eff_weff_limit": 7.47,
     "pass_hs": false,
     "pass_w": true,
     "pass_ukc": true,
-    "pass_fb": true,
+    "pass_fb": false,
     "has_veto": true,
     "kd": 1.0,
-    "kw": 1.0,
-    "s_quat_m": 0.82,
-    "slope_landslide_risk": 0.15,
-    "north_pier": {
-      "hs_m": 3.93,
-      "w_ms": 8.93,
-      "status": "[🔴 VETO]"
-    },
-    "south_pier": {
-      "hs_m": 3.71,
-      "w_ms": 6.97,
-      "status": "[🔴 VETO]"
-    },
-    "north_pier_status": "[🔴 VETO]",
-    "south_pier_status": "[🔴 VETO]",
-    "alpha_tune": 0.65,
-    "hs_threshold_m": 0.78
+    "kw": 1.0
   },
-  "hydrothermal_geothermal_gate": {
-    "high_tide_time": "09:12",
-    "peak_release_time": "12:42",
-    "risk_window_start": "11:12",
-    "risk_window_end": "14:12",
-    "warning": "強酸水團 (pH 1.75~2.0) 與高溫羽狀流擴散峰值期 (11:12 - 14:12)，牛奶海水下活動與 SUP 全線暫停，保持 200m 安全避險距離"
+  "dynamic_plume_geofence": {
+    "dist_to_thermal_m": 60.48,
+    "dynamic_plume_radius_m": 266.5,
+    "inside_hazard_zone": true,
+    "twenty_four_fenye": "辰",
+    "warning_msg": "🚨 警報：載具進入強酸流體擴散範圍 (266m)，即刻撤離！"
   },
   "guerrilla_dispatch": {
     "berthing_pier": "無 (雙岸失效，禁止靠泊)",
     "evacuation_pier": "無 (雙岸失效，直航返航烏石港)",
-    "guerrilla_mode": "BOTH_PIERS_DISABLED",
-    "hysteresis_status": "🔀 切換至【南岸權宜碼頭】",
-    "morning_tactic": "🚨 全線熔斷：港池波高超標，雙岸碼頭失效禁止靠泊",
-    "afternoon_tactic": "🚨 撤離執行：雙岸越浪嚴重，11:20 止登，14:20 全員撤離至【烏石港】",
-    "tactical_summary": "🔴 第一位階 Hard VETO 剛性熔斷（Hs=3.71m）。全天禁止登島與靠泊，預計撤離耗時 20 分鐘。",
-    "tactical_timeline": [],
-    "evacuation_time_minutes": 20
+    "evacuation_time_minutes": 25,
+    "hysteresis_msg": "🔀 巽風/流速過大：切換至【南岸權宜碼頭】"
   },
-  "three_schemes_comparison": {
-    "scheme_a_cwa": {
-      "label": "方案 A (官方 CWA 經驗預報)",
-      "hs_m": 3.71,
-      "status": "🔴 預測封島",
-      "evaluation": "未考量港池消能 Kd=0.883，呈偏高 False Positive"
-    },
-    "scheme_b_field": {
-      "label": "方案 B (現場感測 CCTV/AIS)",
-      "hs_m": 3.34,
-      "status": "🔴 現場越浪",
-      "evaluation": "未考量 401 高地背風 Kw=0.78 陰影，存在即時預警遲滯"
-    },
-    "scheme_c_gem": {
-      "label": "方案 C (GEM-V36D 智庫 GROUND TRUTH)",
-      "hs_m": 3.71,
-      "status": "🔴 0.0% 物理 VETO 熔斷 / 全線封島",
-      "evaluation": "精算 UKC 及 FB，經 UKF 同化與 PINN 殘差修復，為唯一 Ground Truth 基準"
-    }
-  },
-  "trend_forecast_3d": {
-    "d_plus_1": {
-      "date": "2026-10-05",
-      "status": "🔴 0.0% 全線封島",
-      "hs_m": 3.71,
-      "desc": "長浪穿透雙岸失效，直航烏石港避險。"
-    },
-    "d_plus_2": {
-      "date": "2026-10-06",
-      "status": "🟠 預警限制 / 🟡 條件靠泊",
-      "hs_m": 1.45,
-      "desc": "波高顯著消退，實施游擊式調撥至【南岸權宜碼頭】。"
-    },
-    "d_plus_3": {
-      "date": "2026-10-07",
-      "status": "🟢 100.0% 全線開放",
-      "hs_m": 0.85,
-      "desc": "海象恢復平穩，Q1 正常開放【北岸碼頭】靠泊。"
-    }
-  },
-  "level5_advanced_metrics": {
-    "vision_overtopping_rate_pmin": 1.31,
-    "vision_kd_bias": 0.0295,
-    "vessel_hydrodynamics": {
-      "vessel_name": "凱鯨號 (穿浪雙體船)",
-      "vessel_type": "CATAMARAN",
-      "dynamic_squat_m": 0.82,
-      "roll_deg": 3.3,
-      "pitch_deg": 4.4
-    },
-    "fno_forecast_mean_hs_m": 1.58,
-    "quantum_topology_coherence": 0.4682,
-    "swarm_dispatch_plan": [
-      {
-        "agent_id": 1,
-        "vessel_label": "凱鯨號 (Agent 1)",
-        "assigned_pier": "無 (雙岸失效)",
-        "tactical_action": "直航返航烏石港"
-      }
-    ]
-  },
-  "rl_agent_diagnostics": {
-    "state_vector_10d": [
-      3.7100000381469727,
-      8.5,
-      3.7699999809265137,
-      2.200000047683716,
-      15.5,
-      50.0,
-      0.96875,
-      0.9420999884605408,
-      1.0,
-      1.0
-    ],
+  "rl_agent_inference": {
     "action_selected": 3,
     "reward_score": 100.0,
-    "latency_ms": 12.4
+    "edge_masking_active": true
   },
-  "qimen_macro_consensus": {
-    "consensus_rate_pct": 100.0,
-    "macro_advisory_enabled": true,
-    "octagram_gate_state": "死門 (坤宮 - 剛性熔斷直航烏石港)",
-    "qimen_status_prompt": "🔮 奇門氣場匹配率達 100.0% (>=70%)，已啟動 35% 宏觀參研偏置與【死門 (坤宮 - 剛性熔斷直航烏石港)】戰術導引"
-  }
+  "ssot_self_healed": true
 }
