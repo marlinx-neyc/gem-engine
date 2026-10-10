@@ -684,11 +684,10 @@ if __name__ == "__main__":
     except ImportError:
         pass
 
-    # 2. 跨平台安全 Event Loop 啟動
+    # 2. 跨平台安全 Event Loop 啟動，防止 main 未定義錯誤
     try:
         asyncio.run(main())
     except RuntimeError:
-        # 應對 Jupyter/Colab 中已在運行的 Event Loop
         loop = asyncio.get_event_loop()
         if loop.is_running():
             loop.create_task(main())
