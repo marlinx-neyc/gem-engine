@@ -418,3 +418,247 @@
 
         function updateClock() {
             liveBaseDate.setSeconds(liveBaseDate.getSeconds() + 1);
+            const hh = String(liveBaseDate.getHours()).padStart(2, '0');
+            const mm = String(liveBaseDate.getMinutes()).padStart(2, '0');
+            const ss = String(liveBaseDate.getSeconds()).padStart(2, '0');
+            
+            const clk = document.getElementById('liveClock');
+            if (clk) clk.textContent = `${hh}:${mm}:${ss} CST`;
+
+            const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
+            const y = liveBaseDate.getFullYear();
+            const m = String(liveBaseDate.getMonth() + 1).padStart(2, '0');
+            const d = String(liveBaseDate.getDate()).padStart(2, '0');
+            const baseDateEl = document.getElementById('baseDateStr');
+            if (baseDateEl) {
+                baseDateEl.textContent = `${y}-${m}-${d} (${weekDays[liveBaseDate.getDay()]})`;
+            }
+
+            heartbeatCount++;
+            const hb = document.getElementById('heartbeatCounter');
+            if (hb) hb.textContent = heartbeatCount;
+        }
+
+        // 分頁切換邏輯
+        function switchMainTab(tabName) {
+            const tabs = ['desktop', 'bathymetry', 'longterm', 'softocean'];
+            tabs.forEach(t => {
+                const view = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}View`);
+                const btn = document.getElementById(`btnTab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+                if (view) view.classList.add('hidden');
+                if (btn) btn.classList.remove('active-tab');
+            });
+
+            const activeView = document.getElementById(`tab${tabName.charAt(0).toUpperCase() + tabName.slice(1)}View`);
+            const activeBtn = document.getElementById(`btnTab${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`);
+            if (activeView) activeView.classList.remove('hidden');
+            if (activeBtn) activeBtn.classList.add('active-tab');
+
+            if (tabName === 'desktop') {
+                setTimeout(renderAllMatrixCharts, 50);
+            } else if (tabName === 'softocean') {
+                if (!mapInstance) initMap();
+                else setTimeout(() => mapInstance.invalidateSize(), 100);
+            }
+        }
+
+        // 地圖初始化
+        function initMap() {
+            if (typeof L === 'undefined') return;
+            mapInstance = L.map('osmMapContainer').setView([24.8438, 121.9545], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap'
+            }).addTo(mapInstance);
+
+            L.marker([24.8438, 121.9545]).addTo(mapInstance).bindPopup("🐢 龜山島北岸碼頭 (登島點)").openPopup();
+            L.marker([24.8422, 121.9510]).addTo(mapInstance).bindPopup("⚓ 龜山島南岸權宜碼頭");
+            L.circle([24.8435, 121.9550], { color: 'red', fillColor: '#f03', fillOpacity: 0.35, radius: 637.5 }).addTo(mapInstance).bindPopup("🌋 動態牛奶海強酸羽狀流圍欄 (638m)");
+        }
+
+        // Slider 與情境演練切換算子
+        function onSliderChange() {
+            const hs = parseFloat(document.getElementById('sliderHs').value);
+            const w = parseFloat(document.getElementById('sliderW').value);
+            const tp = parseFloat(document.getElementById('sliderTp').value);
+            const angle = parseFloat(document.getElementById('sliderAngle').value);
+            const tide = parseFloat(document.getElementById('sliderTide').value);
+            const qimen = parseFloat(document.getElementById('sliderQimen').value);
+
+            document.getElementById('valSliderHs').textContent = `${hs.toFixed(2)} m`;
+            document.getElementById('valSliderW').textContent = `${w.toFixed(1)} m/s`;
+            document.getElementById('valSliderTp').textContent = `${tp.toFixed(1)} s`;
+            document.getElementById('valSliderAngle').textContent = `${angle} °`;
+            document.getElementById('valSliderTide').textContent = `${tide.toFixed(2)} m`;
+            document.getElementById('valSliderQimen').textContent = `${qimen} %`;
+
+            document.getElementById('valHs').textContent = `${hs.toFixed(2)} m`;
+            const weff = (w * Math.cos(angle * Math.PI / 180)).toFixed(2);
+            document.getElementById('valWeff').textContent = `${Math.abs(weff)} m/s`;
+            
+            const ukc = (-5.50 + tide - 1.20 - 0.82 - (hs * 0.883)).toFixed(2);
+            document.getElementById('valUKC').textContent = `${ukc} m`;
+
+            renderAllMatrixCharts();
+        }
+
+        function applyPreset(scenario) {
+            if (scenario === 1) { // 長浪雙岸熔斷
+                document.getElementById('sliderHs').value = 3.71;
+                document.getElementById('sliderW').value = 9.5;
+                document.getElementById('sliderTp').value = 15.5;
+                document.getElementById('sliderAngle').value = 58;
+                document.getElementById('sliderTide').value = 0.65;
+            } else if (scenario === 2) { // 游擊 (南岸靠泊)
+                document.getElementById('sliderHs').value = 0.85;
+                document.getElementById('sliderW').value = 6.0;
+                document.getElementById('sliderTp').value = 8.5;
+                document.getElementById('sliderAngle').value = 42;
+                document.getElementById('sliderTide').value = 1.20;
+            } else if (scenario === 3) { // 全線開放
+                document.getElementById('sliderHs').value = 0.45;
+                document.getElementById('sliderW').value = 4.0;
+                document.getElementById('sliderTp').value = 7.0;
+                document.getElementById('sliderAngle').value = 15;
+                document.getElementById('sliderTide').value = 1.50;
+            } else if (scenario === 4) { // PINN越浪蓋頂
+                document.getElementById('sliderHs').value = 2.80;
+                document.getElementById('sliderW').value = 14.0;
+                document.getElementById('sliderTp').value = 14.0;
+                document.getElementById('sliderAngle').value = 75;
+                document.getElementById('sliderTide').value = 2.10;
+            }
+            onSliderChange();
+        }
+
+        // 2x2 動態波形繪製算子
+        function drawChart(canvasId, title, baseData, limit, unit, isWarning) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const parent = canvas.parentElement;
+            if (!parent || parent.clientWidth === 0) return;
+
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = parent.clientWidth * dpr;
+            canvas.height = parent.clientHeight * dpr;
+
+            const ctx = canvas.getContext('2d');
+            ctx.scale(dpr, dpr);
+            const w = parent.clientWidth;
+            const h = parent.clientHeight;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // 背景網格
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 1;
+            for (let x = 35; x < w; x += 40) {
+                ctx.beginPath(); ctx.moveTo(x, 22); ctx.lineTo(x, h - 18); ctx.stroke();
+            }
+            for (let y = 25; y < h - 18; y += 22) {
+                ctx.beginPath(); ctx.moveTo(35, y); ctx.lineTo(w - 10, y); ctx.stroke();
+            }
+
+            // 微小波動計算
+            const dynamicData = baseData.map((v, i) => {
+                if (i === baseData.length - 1) return v + Math.sin(animPhase + i) * 0.04;
+                return v + Math.sin(animPhase + i) * 0.02;
+            });
+
+            const lastVal = dynamicData[dynamicData.length - 1];
+
+            // 標題與數值
+            ctx.font = 'bold 11px sans-serif';
+            ctx.fillStyle = '#38bdf8';
+            ctx.fillText(title, 35, 15);
+
+            ctx.font = 'bold 11px monospace';
+            ctx.fillStyle = isWarning ? '#ef4444' : '#10b981';
+            ctx.fillText(`${lastVal.toFixed(2)} ${unit}`, w - 75, 15);
+
+            const maxVal = Math.max(...dynamicData, limit * 1.25);
+            const minVal = Math.min(...dynamicData, 0);
+            const getY = (v) => (h - 20) - ((v - minVal) / (maxVal - minVal + 1e-5)) * (h - 42);
+
+            // 警戒門檻線
+            const limitY = getY(limit);
+            ctx.setLineDash([4, 4]);
+            ctx.strokeStyle = '#facc15';
+            ctx.beginPath(); ctx.moveTo(35, limitY); ctx.lineTo(w - 10, limitY); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.font = '9px monospace';
+            ctx.fillStyle = '#facc15';
+            ctx.fillText(`門檻:${limit}`, 37, limitY - 3);
+
+            // 數據趨勢折線
+            ctx.beginPath();
+            const stepX = (w - 45) / (dynamicData.length - 1);
+            dynamicData.forEach((v, i) => {
+                const x = 35 + i * stepX;
+                const y = getY(v);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.strokeStyle = isWarning ? '#f87171' : '#34d399';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // 頂點標註
+            dynamicData.forEach((v, i) => {
+                const x = 35 + i * stepX;
+                const y = getY(v);
+                ctx.beginPath();
+                ctx.arc(x, y, 3, 0, Math.PI * 2);
+                ctx.fillStyle = isWarning ? '#ef4444' : '#10b981';
+                ctx.fill();
+            });
+        }
+
+        function renderAllMatrixCharts() {
+            animPhase += 0.08;
+            const liveHs = parseFloat(document.getElementById('sliderHs').value) || 3.71;
+            const liveW = parseFloat(document.getElementById('sliderW').value) || 9.5;
+            const liveTp = parseFloat(document.getElementById('sliderTp').value) || 15.5;
+
+            drawChart('canvasChartHs', '有效波高 Hs', [1.20, 1.85, 2.60, 3.20, liveHs], 1.13, 'm', liveHs > 1.13);
+            drawChart('canvasChartWind', '攻角風速 Weff', [6.20, 7.50, 8.80, 9.20, liveW], 10.17, 'm/s', liveW > 10.17);
+            drawChart('canvasChartUKC', '動態裕深 UKC', [1.80, 1.40, 0.90, 0.60, 0.42], 1.50, 'm', true);
+            drawChart('canvasChartTp', '湧浪週期 Tp', [10.5, 12.0, 13.8, 14.9, liveTp], 12.0, 's', liveTp > 12.0);
+        }
+
+        async function fetchSSOTFile() {
+            try {
+                const res = await fetch(`latest_decision.json?_t=${Date.now()}`, { cache: 'no-store' });
+                if (res.ok) {
+                    const data = await res.json();
+                    const tsCst = data.timestamp_cst || data.timestamp;
+                    if (tsCst) {
+                        const ssotEl = document.getElementById('ssotTimestamp');
+                        if (ssotEl) ssotEl.textContent = tsCst;
+
+                        const cleanTs = tsCst.replace(' CST', '').replace(/-/g, '/');
+                        const parsedDate = new Date(cleanTs);
+                        if (!isNaN(parsedDate.getTime())) {
+                            liveBaseDate = parsedDate;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn("SSOT 同步中...", e);
+            }
+        }
+
+        // 初始化與定時運算循環
+        window.addEventListener('DOMContentLoaded', () => {
+            updateClock();
+            fetchSSOTFile();
+            setTimeout(renderAllMatrixCharts, 100);
+
+            setInterval(updateClock, 1000);
+            setInterval(fetchSSOTFile, 3000);
+            setInterval(renderAllMatrixCharts, 200);
+        });
+
+        window.addEventListener('resize', renderAllMatrixCharts);
+    </script>
+</body>
+</html>
