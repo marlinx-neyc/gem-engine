@@ -4,12 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>🌊 GEM-V36D 龜山島雙層海事戰術控制台 (全功能完整版)</title>
+    <title>🌊 GEM-V36D 龜山島雙層海事戰術控制台 (全功能修復完整版)</title>
 
-    <!-- Tailwind CSS 官方 CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Leaflet.js 高可用地圖套件 -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -124,24 +121,6 @@
         .badge-pass { background: rgba(16, 185, 129, 0.2); color: var(--status-pass); border: 1px solid var(--status-pass); }
         .badge-warn { background: rgba(245, 158, 11, 0.2); color: var(--status-warn); border: 1px solid var(--status-warn); }
         .badge-yellow { background: rgba(250, 204, 21, 0.2); color: var(--status-yellow); border: 1px solid var(--status-yellow); }
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 11px;
-            table-layout: fixed;
-            border: 1px solid var(--card-border);
-            border-radius: 6px;
-            overflow: hidden;
-        }
-        .data-table th, .data-table td {
-            padding: 5.5px 6.5px;
-            text-align: left;
-            border-bottom: 1px solid var(--card-border);
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .data-table th { background: var(--table-header-bg); color: #cbd5e1; font-weight: 600; font-size: 10.5px; }
         .bullet-bar-track {
             position: relative;
             width: 100%;
@@ -174,32 +153,6 @@
             border-radius: 0 4px 4px 0;
             line-height: 1.45;
         }
-        .slider-item { display: flex; flex-direction: column; gap: 2px; }
-        .slider-header { display: flex; justify-content: space-between; font-size: 10.5px; color: #cbd5e1; }
-        .slider-header span.val { font-family: monospace; font-weight: 700; color: var(--accent-blue); }
-        .slider-item input[type="range"] {
-            width: 100%;
-            height: 5px;
-            background: #334155;
-            border-radius: 3px;
-            outline: none;
-            accent-color: var(--accent-blue);
-            cursor: pointer;
-        }
-        .accordion-header { cursor: pointer; user-select: none; transition: background 0.2s ease; }
-        .accordion-header:hover { background: rgba(56, 189, 248, 0.08); }
-        .accordion-content { transition: max-height 0.35s cubic-bezier(0, 1, 0, 1); overflow: hidden; }
-        .accordion-content.collapsed { max-height: 0; padding-top: 0; padding-bottom: 0; }
-        .accordion-content.expanded { max-height: 1400px; transition: max-height 0.45s ease-in-out; }
-        #osmMapContainer {
-            width: 100%;
-            height: 540px;
-            border-radius: 8px;
-            border: 1px solid #334155;
-            overflow: hidden;
-            background: #0b1120;
-            z-index: 10;
-        }
         .chart-canvas-wrap {
             position: relative;
             width: 100%;
@@ -210,40 +163,6 @@
             width: 100% !important;
             height: 100% !important;
             display: block;
-        }
-        .chart-tooltip {
-            position: absolute;
-            display: none;
-            background: rgba(15, 23, 42, 0.96);
-            border: 1px solid #38bdf8;
-            border-radius: 6px;
-            padding: 6px 10px;
-            font-size: 11px;
-            color: #f8fafc;
-            pointer-events: none;
-            z-index: 100;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.7);
-            white-space: nowrap;
-            backdrop-filter: blur(4px);
-            transition: opacity 0.15s ease;
-        }
-        .pier-tab-active {
-            background: #2563eb !important;
-            color: #ffffff !important;
-            border-color: #60a5fa !important;
-            box-shadow: 0 0 10px rgba(37, 99, 235, 0.5);
-        }
-        .pier-tab-south-active {
-            background: #059669 !important;
-            color: #ffffff !important;
-            border-color: #34d399 !important;
-            box-shadow: 0 0 10px rgba(5, 150, 105, 0.5);
-        }
-        .pier-tab-compare-active {
-            background: #7c3aed !important;
-            color: #ffffff !important;
-            border-color: #a78bfa !important;
-            box-shadow: 0 0 10px rgba(124, 58, 237, 0.5);
         }
     </style>
 </head>
@@ -257,9 +176,9 @@
                     <span class="pulse-dot-blue"></span> 龜山島海事戰術智庫與自主學習執行中樞 (GEM-V36D Master)
                 </h1>
                 <div class="text-[11px] text-[#94a3b8] mt-1 flex flex-wrap items-center gap-2">
-                    <span>時鐘：<b id="liveClock" class="font-mono text-white bg-slate-800 px-1.5 py-0.5 rounded">20:55:00 CST</b></span>
+                    <span>時鐘：<b id="liveClock" class="font-mono text-white bg-slate-800 px-1.5 py-0.5 rounded">20:45:00 CST</b></span>
                     <span>基準日：<b id="baseDateStr" class="font-mono text-emerald-400 bg-slate-800 px-1.5 py-0.5 rounded">2026-10-12 (一)</b></span>
-                    <span>| SSOT 結算：<b id="ssotTimestamp" class="font-mono text-white bg-slate-800 px-1.5 py-0.5 rounded">2026-10-12 20:55:00 CST</b></span>
+                    <span>| SSOT 結算：<b id="ssotTimestamp" class="font-mono text-white bg-slate-800 px-1.5 py-0.5 rounded">2026-10-12 20:45:00 CST</b></span>
                     <span>| 心跳：<b id="heartbeatCounter" class="text-[#38bdf8]">29</b> 次</span>
                     <span>| 總裁決：<b id="ssotDecisionBadge" class="text-[#ef4444] font-bold">🔴 0.0% 物理 VETO 熔斷</b></span>
                 </div>
@@ -273,7 +192,6 @@
         </div>
     </header>
 
-    <!-- 主頁面控制區塊 -->
     <main id="tabDesktopView" class="flex flex-col lg:flex-row gap-3 w-full">
         <div class="w-full lg:w-[35%] flex flex-col gap-2.5">
             <div class="card">
@@ -345,7 +263,7 @@
     </main>
 
     <script>
-        // 自動抓取作業系統實時時間（2026-10-12）
+        // 自動對齊裝置當前實時系統時間
         let liveBaseDate = new Date();
         let heartbeatCount = 29;
         let isAutoSyncEnabled = true;
