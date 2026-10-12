@@ -6,10 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <title>🌊 GEM-V36D 龜山島雙層海事戰術控制台 (全功能完整版)</title>
 
-    <!-- Tailwind CSS 官方 CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- Leaflet.js 高可用地圖套件 -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -243,7 +240,6 @@
     </main>
 
     <script>
-        // 自動對齊裝置當前實時系統時間（動態計算非硬編碼）
         let liveBaseDate = new Date();
         let heartbeatCount = 0;
 
@@ -271,9 +267,88 @@
                 if (hb) hb.textContent = heartbeatCount;
             }
         }
-        setInterval(updateLiveClock, 1000);
 
-        // 同步 latest_decision.json 動態數據與結算時間
+        // 2x2 Canvas 圖表渲染算子
+        function drawChart(canvasId, title, data, limit, unit, isWarning) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const parent = canvas.parentElement;
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = parent.clientWidth * dpr;
+            canvas.height = parent.clientHeight * dpr;
+            const ctx = canvas.getContext('2d');
+            ctx.scale(dpr, dpr);
+            const w = parent.clientWidth;
+            const h = parent.clientHeight;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // 繪製背景網格
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 1;
+            for (let x = 30; x < w; x += 40) {
+                ctx.beginPath(); ctx.moveTo(x, 22); ctx.lineTo(x, h - 18); ctx.stroke();
+            }
+            for (let y = 25; y < h - 18; y += 22) {
+                ctx.beginPath(); ctx.moveTo(30, y); ctx.lineTo(w - 10, y); ctx.stroke();
+            }
+
+            // 繪製圖表標題與即時數值
+            const lastVal = data[data.length - 1];
+            ctx.font = 'bold 11px sans-serif';
+            ctx.fillStyle = '#38bdf8';
+            ctx.fillText(title, 30, 15);
+
+            ctx.font = 'bold 11px monospace';
+            ctx.fillStyle = isWarning ? '#ef4444' : '#10b981';
+            ctx.fillText(`${lastVal.toFixed(2)} ${unit}`, w - 70, 15);
+
+            // 計算座標比例
+            const maxVal = Math.max(...data, limit * 1.25);
+            const minVal = Math.min(...data, 0);
+            const getY = (v) => (h - 20) - ((v - minVal) / (maxVal - minVal + 1e-5)) * (h - 42);
+
+            // 繪製門檻虛線
+            const limitY = getY(limit);
+            ctx.setLineDash([4, 4]);
+            ctx.strokeStyle = '#facc15';
+            ctx.beginPath(); ctx.moveTo(30, limitY); ctx.lineTo(w - 10, limitY); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.font = '9px monospace';
+            ctx.fillStyle = '#facc15';
+            ctx.fillText(`門檻:${limit}`, 32, limitY - 3);
+
+            // 繪製數據趨勢線
+            ctx.beginPath();
+            const stepX = (w - 40) / (data.length - 1);
+            data.forEach((v, i) => {
+                const x = 30 + i * stepX;
+                const y = getY(v);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.strokeStyle = isWarning ? '#f87171' : '#34d399';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // 繪製數據轉折點
+            data.forEach((v, i) => {
+                const x = 30 + i * stepX;
+                const y = getY(v);
+                ctx.beginPath();
+                ctx.arc(x, y, 3, 0, Math.PI * 2);
+                ctx.fillStyle = isWarning ? '#ef4444' : '#10b981';
+                ctx.fill();
+            });
+        }
+
+        function renderAllMatrixCharts() {
+            drawChart('canvasChartHs', '有效波高 Hs', [1.20, 1.85, 2.60, 3.20, 3.71], 1.13, 'm', true);
+            drawChart('canvasChartWind', '攻角風速 Weff', [6.20, 7.50, 8.80, 9.20, 9.50], 10.17, 'm/s', false);
+            drawChart('canvasChartUKC', '動態裕深 UKC', [1.80, 1.40, 0.90, 0.60, 0.42], 1.50, 'm', true);
+            drawChart('canvasChartTp', '湧浪週期 Tp', [10.5, 12.0, 13.8, 14.9, 15.5], 12.0, 's', true);
+        }
+
         async function fetchSSOTFile() {
             try {
                 const res = await fetch(`latest_decision.json?_t=${Date.now()}`, { cache: 'no-store' });
@@ -304,8 +379,11 @@
             }
         }
 
+        window.addEventListener('resize', renderAllMatrixCharts);
         updateLiveClock();
+        renderAllMatrixCharts();
         fetchSSOTFile();
+        setInterval(updateLiveClock, 1000);
         setInterval(fetchSSOTFile, 3000);
     </script>
 </body>
