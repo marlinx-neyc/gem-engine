@@ -37,9 +37,6 @@ except ImportError:
   nest_asyncio.apply()
 
 
-# ==============================================================================
-# 1. 安全數值解析算子
-# ==============================================================================
 def safe_float(val: Any, default: float) -> float:
   if val is None:
     return default
@@ -59,36 +56,33 @@ def safe_int(val: Any, default: int) -> int:
     return default
 
 
-# ==============================================================================
-# 2. 海事安全遙測資料結構 (Schema)
-# ==============================================================================
 @dataclass
 class MarineSafetyData:
-  hs_cwa: float  # 官方 CWA 外海有效波高 (m)
-  w_cwa: float  # 官方 CWA 風速 (m/s)
-  tp_s: float  # 遠洋湧浪週期 (s)
-  delta_theta_deg: float  # 風向攻角 / 背風偏角 (deg)
-  tide_eta_m: float  # 動態潮位 (m)
-  d_draft_m: float  # 船隻靜態吃水深度 (m)
-  s_quat_m: float  # 動態蹲沉量 Squat (m)
-  chart_depth_m: float  # 碼頭圖水深 (m)
-  current_speed_kts: float  # 沿岸橫流/船速 (kts)
-  qimen_consensus_pct: float  # 奇門氣場同化率 (%)
-  s_cos_sim: float  # 自適應歷史餘弦相似度 alpha_tune 基準
-  high_tide_time_str: str  # 當日天文滿潮時間字串
-  video_overtopping_rate: float = 0.0  # Vision-PINN 越浪率 (p/min)
-  video_kd_bias: float = 0.0  # 繞射消能殘差偏置
-  passenger_count: int = 150  # 同化登島遊客總數
-  slope_landslide_risk: float = 0.15  # 邊坡崩塌風險值
-  official_closure_status: float = 0.0  # 官方預警封島狀態
-  active_pier_select: int = 0  # 0: 北岸碼頭, 1: 南岸權宜碼頭
-  typhoon_dist_km: float = 650.0  # 颱風距離 (km)
-  pressure_gradient_2d: float = 1.10  # 局域氣壓梯度
-  vessel_lat: float = 24.8438  # 載具/船隻緯度
-  vessel_lon: float = 121.9545  # 載具/船隻經度
-  thermal_source_lat: float = 24.8435  # 牛奶海熱泉噴口緯度
-  thermal_source_lon: float = 121.9550  # 牛奶海熱泉噴口經度
-  timestamp_utc: float = 0.0  # 數據生成時間戳記
+  hs_cwa: float
+  w_cwa: float
+  tp_s: float
+  delta_theta_deg: float
+  tide_eta_m: float
+  d_draft_m: float
+  s_quat_m: float
+  chart_depth_m: float
+  current_speed_kts: float
+  qimen_consensus_pct: float
+  s_cos_sim: float
+  high_tide_time_str: str
+  video_overtopping_rate: float = 0.0
+  video_kd_bias: float = 0.0
+  passenger_count: int = 150
+  slope_landslide_risk: float = 0.15
+  official_closure_status: float = 0.0
+  active_pier_select: int = 0
+  typhoon_dist_km: float = 650.0
+  pressure_gradient_2d: float = 1.10
+  vessel_lat: float = 24.8438
+  vessel_lon: float = 121.9545
+  thermal_source_lat: float = 24.8435
+  thermal_source_lon: float = 121.9550
+  timestamp_utc: float = 0.0
 
   @classmethod
   def from_api_json(cls, raw_data: Dict[str, Any]) -> "MarineSafetyData":
@@ -141,9 +135,6 @@ class MarineSafetyData:
     )
 
 
-# ==============================================================================
-# 3. GEBCO 2024 + 10m 雙源水深矩陣與水動力算子
-# ==============================================================================
 class GEBCOBathymetryEngine:
 
   def __init__(self, bbox=[121.70, 24.80, 122.00, 25.00], grid_res_m=10.0):
@@ -215,9 +206,6 @@ class GEBCOBathymetryEngine:
     return round(max(0.70, min(1.80, ks)), 4)
 
 
-# ==============================================================================
-# 4. 雙源非同步 API 輪詢與調度器
-# ==============================================================================
 class LiveAsyncAPIPollingRouter:
 
   def __init__(self, request_timeout_sec: float = 3.5, max_retries: int = 3):
@@ -245,9 +233,6 @@ class LiveAsyncAPIPollingRouter:
     return assimilated_data
 
 
-# ==============================================================================
-# 5. FAISS 氣候檢索算子
-# ==============================================================================
 class GEM37DNormalizedFeatureExtractor:
 
   BOUNDS = np.array(
@@ -393,9 +378,6 @@ class FAISSClimate20YrEngine:
     }
 
 
-# ==============================================================================
-# 6. ONNX 推論 Provider
-# ==============================================================================
 class ONNXInferenceProvider:
 
   def predict_fno_and_pinn(
@@ -408,9 +390,6 @@ class ONNXInferenceProvider:
     return round(fno_kd_bias, 4), round(pinn_overtopping, 2)
 
 
-# ==============================================================================
-# 7. 動態羽狀流地理圍欄
-# ==============================================================================
 class DynamicPlumeGeofencingOperator:
 
   @staticmethod
@@ -488,9 +467,6 @@ class DynamicPlumeGeofencingOperator:
     }
 
 
-# ==============================================================================
-# 8. 四層 Hard VETO 剛性物理防線算子
-# ==============================================================================
 class PhysicsEngine:
 
   HARD_HS_MAX = 1.20
@@ -578,9 +554,6 @@ class PhysicsEngine:
     }
 
 
-# ==============================================================================
-# 9. 遲滯與奇門同化引擎
-# ==============================================================================
 class GuerrillaHysteresisController:
 
   def __init__(
@@ -653,9 +626,6 @@ class QimenAssimilationEngine:
     }
 
 
-# ==============================================================================
-# 10. Gymnasium RL 策略網絡
-# ==============================================================================
 class GuerrillaRLPolicyNet(nn.Module):
 
   def __init__(self, state_dim: int = 10, action_dim: int = 4):
@@ -684,9 +654,6 @@ class GuerrillaRLPolicyNet(nn.Module):
     return action, reward
 
 
-# ==============================================================================
-# 11. SSOT Guard & Watchdog
-# ==============================================================================
 class SSOTAuditGuard:
 
   STALENESS_THRESHOLD_SEC = 30.0
@@ -725,9 +692,6 @@ class SSOTAuditGuard:
     return payload, healed
 
 
-# ==============================================================================
-# 12. 最高統合主控執行器 (TG Master Engine v36D.370)
-# ==============================================================================
 class TGGuerrillaMasterEngine:
 
   def __init__(self):
@@ -868,362 +832,14 @@ class TGGuerrillaMasterEngine:
       json.dump(payload, f, ensure_ascii=False, indent=2)
 
 
-# ==============================================================================
-# 13. 原生建立並寫入純淨完整版 desktop.html 控制台
-# ==============================================================================
-def create_desktop_html():
-  html_content = """<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>🌊 GEM-V36D 龜山島雙層海事戰術控制台 (全功能修復完整版)</title>
-
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-    <style>
-        :root {
-            --bg-color: #0b1120;
-            --card-bg: #1e293b;
-            --card-border: #334155;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --accent-blue: #38bdf8;
-            --accent-purple: #c084fc;
-            --status-pass: #10b981;
-            --status-warn: #f59e0b;
-            --status-danger: #ef4444;
-            --status-yellow: #facc15;
-            --table-header-bg: rgba(56, 189, 248, 0.12);
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            padding: 12px;
-            font-variant-numeric: tabular-nums;
-            overflow-x: hidden;
-            -webkit-tap-highlight-color: transparent;
-        }
-        @keyframes pulseDot {
-            0%, 100% { transform: scale(0.9); opacity: 0.6; }
-            50% { transform: scale(1.2); opacity: 1; }
-        }
-        .pulse-dot-blue {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: var(--accent-blue);
-            box-shadow: 0 0 10px var(--accent-blue);
-            animation: pulseDot 1.8s infinite;
-        }
-        @keyframes pulseAlert {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.85; transform: scale(0.995); }
-        }
-        #vetoBanner {
-            display: block;
-            background: var(--status-danger);
-            color: #ffffff;
-            padding: 9px 16px;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 13px;
-            margin-bottom: 12px;
-            text-align: center;
-            box-shadow: 0 0 16px rgba(239, 68, 68, 0.45);
-            animation: pulseAlert 2s infinite;
-        }
-        .nav-tab-btn {
-            padding: 7px 14px;
-            border-radius: 8px;
-            font-size: 11.5px;
-            font-weight: 700;
-            color: #94a3b8;
-            background: #111d33;
-            border: 1px solid #334155;
-            transition: all 0.25s ease;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            white-space: nowrap;
-        }
-        .nav-tab-btn:hover { color: #ffffff; border-color: var(--accent-blue); }
-        .nav-tab-btn.active-tab {
-            background: rgba(56, 189, 248, 0.18);
-            border-color: var(--accent-blue);
-            color: var(--accent-blue);
-            box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
-        }
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 10px;
-            padding: 12px;
-            contain: content;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-            margin-bottom: 10px;
-        }
-        .card-header {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--accent-blue);
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--card-border);
-            padding-bottom: 6px;
-        }
-        .badge {
-            font-size: 10px;
-            font-weight: 700;
-            padding: 2px 6px;
-            border-radius: 4px;
-            display: inline-block;
-            min-width: 46px;
-            text-align: center;
-            white-space: nowrap;
-        }
-        .badge-veto { background: rgba(239, 68, 68, 0.2); color: var(--status-danger); border: 1px solid var(--status-danger); }
-        .badge-pass { background: rgba(16, 185, 129, 0.2); color: var(--status-pass); border: 1px solid var(--status-pass); }
-        .badge-warn { background: rgba(245, 158, 11, 0.2); color: var(--status-warn); border: 1px solid var(--status-warn); }
-        .badge-yellow { background: rgba(250, 204, 21, 0.2); color: var(--status-yellow); border: 1px solid var(--status-yellow); }
-        .bullet-bar-track {
-            position: relative;
-            width: 100%;
-            height: 10px;
-            background: #0f172a;
-            border-radius: 4px;
-            overflow: hidden;
-            border: 1px solid #334155;
-        }
-        .bullet-bar-fill {
-            height: 100%;
-            border-radius: 3px;
-            transition: width 0.35s ease-in-out, background-color 0.35s ease;
-        }
-        .bullet-threshold-line {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background-color: #facc15;
-            box-shadow: 0 0 6px rgba(250, 204, 21, 0.85);
-            z-index: 10;
-        }
-        .box-alert-danger {
-            background: rgba(239, 68, 68, 0.15);
-            border-left: 3px solid var(--status-danger);
-            color: #fca5a5;
-            padding: 7px 9px;
-            font-size: 11px;
-            border-radius: 0 4px 4px 0;
-            line-height: 1.45;
-        }
-        .chart-canvas-wrap {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            min-height: 140px;
-        }
-        .chart-canvas {
-            width: 100% !important;
-            height: 100% !important;
-            display: block;
-        }
-    </style>
-</head>
-<body>
-    <div id="vetoBanner">🚨 剛性警告：實體觸發 4 層物理 VETO 熔斷（Hs=3.71m / UKC=0.42m / FB=0.15m 越浪覆寫），11:20 止登已過，全員備撤中！</div>
-
-    <header class="bg-[#1e293b] border border-[#334155] border-l-[6px] border-l-[#ef4444] rounded-xl p-3.5 mb-3 shadow-lg" id="headerMaster">
-        <div class="flex flex-wrap justify-between items-center gap-2.5">
-            <div>
-                <h1 class="text-[16px] font-extrabold text-white flex items-center gap-1.5">
-                    <span class="pulse-dot-blue"></span> 龜山島海事戰術智庫與自主學習執行中樞 (GEM-V36D Master)
-                </h1>
-                <div class="text-[11px] text-[#94a3b8] mt-1 flex flex-wrap items-center gap-2">
-                    <span>時鐘：<b id="liveClock" class="font-mono text-white bg-slate-800 px-1.5 py-0.5 rounded">20:47:00 CST</b></span>
-                    <span>基準日：<b id="baseDateStr" class="font-mono text-emerald-400 bg-slate-800 px-1.5 py-0.5 rounded">2026-10-12 (一)</b></span>
-                    <span>| SSOT 結算：<b id="ssotTimestamp" class="font-mono text-white bg-slate-800 px-1.5 py-0.5 rounded">2026-10-12 20:47:00 CST</b></span>
-                    <span>| 心跳：<b id="heartbeatCounter" class="text-[#38bdf8]">29</b> 次</span>
-                    <span>| 總裁決：<b id="ssotDecisionBadge" class="text-[#ef4444] font-bold">🔴 0.0% 物理 VETO 熔斷</b></span>
-                </div>
-            </div>
-            <div class="flex flex-wrap gap-1.5">
-                <button class="nav-tab-btn active-tab" id="tabBtnDesktop" onclick="switchMainTab('desktop')">🖥 桌面戰術主控</button>
-                <button class="nav-tab-btn" id="tabBtnBathymetry" onclick="switchMainTab('bathymetry')">📐 南北雙岸色塊防碰撞剖面圖</button>
-                <button class="nav-tab-btn" id="tabBtnLongterm" onclick="switchMainTab('longterm')">🔮 30 天月度宏觀推估</button>
-                <button class="nav-tab-btn" id="tabBtnSoftOcean" onclick="switchMainTab('softocean')">🌊 Soft Ocean 實體海圖與動態流場</button>
-            </div>
-        </div>
-    </header>
-
-    <main id="tabDesktopView" class="flex flex-col lg:flex-row gap-3 w-full">
-        <div class="w-full lg:w-[35%] flex flex-col gap-2.5">
-            <div class="card">
-                <div class="card-header">
-                    <span>1. PINN Engine 剛性水文門檻檢核</span>
-                    <span id="badgeDecision" class="badge badge-veto">🔴 熔斷禁止靠泊</span>
-                </div>
-                <div class="grid grid-cols-2 gap-2 text-center">
-                    <div class="bg-[#0b1120] p-2 rounded-lg border border-[#334155]">
-                        <div class="text-[9.5px] text-[#94a3b8]">碼頭有效波高 (Hs)</div>
-                        <div class="text-[17px] font-extrabold text-red-400 mt-0.5" id="valHs">3.71 m</div>
-                        <div class="badge badge-veto mt-1">FAIL (>1.13m)</div>
-                    </div>
-                    <div class="bg-[#0b1120] p-2 rounded-lg border border-[#334155]">
-                        <div class="text-[9.5px] text-[#94a3b8]">攻角有效風速 (Weff)</div>
-                        <div class="text-[17px] font-extrabold text-emerald-400 mt-0.5" id="valWeff">9.50 m/s</div>
-                        <div class="badge badge-pass mt-1">PASS (≤10.17m/s)</div>
-                    </div>
-                    <div class="bg-[#0b1120] p-2 rounded-lg border border-[#334155]">
-                        <div class="text-[9.5px] text-[#94a3b8]">南岸動態裕深 (UKC)</div>
-                        <div class="text-[17px] font-extrabold text-red-400 mt-0.5" id="valUKC">0.42 m</div>
-                        <div class="badge badge-veto mt-1">FAIL (<1.50m 觸底)</div>
-                    </div>
-                    <div class="bg-[#0b1120] p-2 rounded-lg border border-[#334155]">
-                        <div class="text-[9.5px] text-[#94a3b8]">北岸預留乾舷 (FB)</div>
-                        <div class="text-[17px] font-extrabold text-red-400 mt-0.5" id="valFB">0.15 m</div>
-                        <div class="badge badge-veto mt-1">FAIL (<0.50m 越浪)</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card border-[#f59e0b]">
-                <div class="card-header !text-[#f59e0b]">
-                    <span>2. ⚓ 游擊式動態調度與避險 (即時突發感知)</span>
-                    <span class="badge badge-veto">雙岸失效</span>
-                </div>
-                <div class="text-[11.5px] leading-relaxed space-y-1">
-                    <p>• 登島靠泊碼頭：<b class="text-[#f87171]">無 (雙岸失效，禁止靠泊)</b></p>
-                    <p>• 應急撤離碼頭：<b class="text-[#f8fafc]">無 (雙岸失效，直航返航烏石港)</b></p>
-                    <div class="box-alert-danger mt-1.5">
-                        🔴 第一位階 Hard VETO 剛性熔斷（浪高 3.71m、裕深 0.42m、乾舷 0.15m 三重觸發）。全天禁止登島與靠泊，11:20 止登，14:20 全員撤離直航烏石港。
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="w-full lg:w-[65%] flex flex-col gap-2.5">
-            <div class="card">
-                <div class="card-header">
-                    <span>2x2 時間線預測矩陣 (游標數值與判準完全對齊)</span>
-                    <span class="text-[10px] text-[#38bdf8]">幾何凍結 CLS=0</span>
-                </div>
-                <div class="grid grid-cols-2 gap-2 h-[340px] w-full">
-                    <div class="bg-[#0b1120] border border-[#334155] rounded-lg p-1 relative h-[165px] chart-canvas-wrap">
-                        <canvas id="canvasChartHs" class="chart-canvas"></canvas>
-                    </div>
-                    <div class="bg-[#0b1120] border border-[#334155] rounded-lg p-1 relative h-[165px] chart-canvas-wrap">
-                        <canvas id="canvasChartWind" class="chart-canvas"></canvas>
-                    </div>
-                    <div class="bg-[#0b1120] border border-[#334155] rounded-lg p-1 relative h-[165px] chart-canvas-wrap">
-                        <canvas id="canvasChartUKC" class="chart-canvas"></canvas>
-                    </div>
-                    <div class="bg-[#0b1120] border border-[#334155] rounded-lg p-1 relative h-[165px] chart-canvas-wrap">
-                        <canvas id="canvasChartTp" class="chart-canvas"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <script>
-        // 自動對齊裝置當前實時系統時間
-        let liveBaseDate = new Date();
-        let heartbeatCount = 29;
-        let isAutoSyncEnabled = true;
-
-        function updateLiveClock() {
-            liveBaseDate.setSeconds(liveBaseDate.getSeconds() + 1);
-            const hh = String(liveBaseDate.getHours()).padStart(2, '0');
-            const mm = String(liveBaseDate.getMinutes()).padStart(2, '0');
-            const ss = String(liveBaseDate.getSeconds()).padStart(2, '0');
-            
-            const clk = document.getElementById('liveClock');
-            if (clk) clk.textContent = `${hh}:${mm}:${ss} CST`;
-
-            const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
-            const y = liveBaseDate.getFullYear();
-            const m = String(liveBaseDate.getMonth() + 1).padStart(2, '0');
-            const d = String(liveBaseDate.getDate()).padStart(2, '0');
-            const baseDateEl = document.getElementById('baseDateStr');
-            if (baseDateEl) {
-                baseDateEl.textContent = `${y}-${m}-${d} (${weekDays[liveBaseDate.getDay()]})`;
-            }
-
-            if (liveBaseDate.getSeconds() % 5 === 0) {
-                heartbeatCount++;
-                const hb = document.getElementById('heartbeatCounter');
-                if (hb) hb.textContent = heartbeatCount;
-            }
-        }
-        setInterval(updateLiveClock, 1000);
-
-        async function fetchSSOTFile() {
-            if (!isAutoSyncEnabled) return;
-            try {
-                const res = await fetch(`latest_decision.json?_t=${Date.now()}`, { cache: 'no-store' });
-                if (res.ok) {
-                    const data = await res.json();
-                    const tsCst = data.timestamp_cst || data.timestamp;
-                    if (tsCst) {
-                        const ssotEl = document.getElementById('ssotTimestamp');
-                        if (ssotEl) ssotEl.textContent = tsCst;
-
-                        const cleanTs = tsCst.replace(' CST', '').replace(/-/g, '/');
-                        const parsedDate = new Date(cleanTs);
-                        if (!isNaN(parsedDate.getTime())) {
-                            liveBaseDate = parsedDate;
-                        }
-                    }
-
-                    if (data.staleness_warning) {
-                        const vetoBanner = document.getElementById('vetoBanner');
-                        if (vetoBanner) {
-                            vetoBanner.style.display = 'block';
-                            vetoBanner.textContent = data.staleness_warning;
-                        }
-                    }
-                }
-            } catch (e) {
-                console.warn("SSOT 同步失敗:", e);
-            }
-        }
-
-        fetchSSOTFile();
-        setInterval(fetchSSOTFile, 3000);
-    </script>
-</body>
-</html>"""
-
-  with open("desktop.html", "w", encoding="utf-8") as f:
-    f.write(html_content)
-  print("✅ desktop.html 已成功原生建立！無任何雜質且包含完整戰術面板與動態時間。")
-
-
-# ==============================================================================
-# 入口執行流程
-# ==============================================================================
 async def main():
   print("🚀 啟動 GEM Engine v36D.370 同化流程...")
   engine = TGGuerrillaMasterEngine()
   payload = await engine.execute_async()
 
-  # 1. 導出最新 JSON 數據
+  # 只更新數據，絕不覆寫或刪除 desktop.html
   engine.export_ssot_json(payload, "latest_decision.json")
   print("✅ 最新 SSOT 裁決已寫入 latest_decision.json")
-
-  # 2. 原生自動生成 desktop.html 檔案
-  create_desktop_html()
 
 
 if __name__ == "__main__":
