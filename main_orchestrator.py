@@ -5,19 +5,6 @@
 GEM Engine v36D.370 Production Master Brain (GEBCO 10m Bathymetry & Live API)
 ================================================================================
 龜山島海事戰術與智庫自主學習最高統合主控系統 (v36D.370 Ground Truth Production)
-
-全面升級優化矩陣：
-1. 【GEBCO 2024 + 10m 近岸雙源水深算子】GEBCOBathymetryEngine 
-   - 擺脫資料申請與公文限制，100% 開放 GEBCO 2024 15角秒網格 + ENC 10m 雙源融合。
-   - 動態計算水深弗勞德數 Depth Froude Number (F_h) 與近岸動態蹲沉量 (Dynamic Squat S_squat)。
-   - 動態計算近岸淺水變形與繞射增幅/衰減係數 Ks (Shoaling Factor)。
-2. 【雙源非同步 API 管道】LiveAsyncAPIPollingRouter (相容 urllib/httpx 非同步輪詢 + TDX OAuth2 + CWA 遙測)
-3. 【智庫檢索規模化】FAISSClimate20YrEngine (百萬級 37D 張量矩陣歸一化 <5ms 低延遲檢索)
-4. 【ONNX/TensorRT 推論】ONNXInferenceProvider (FNO-1D 湧浪頻譜與 Vision-PINN 越浪加速)
-5. 【動態羽狀流圍欄】DynamicPlumeGeofencingOperator (強酸水團動態擴散圍欄)
-6. 【端側 RL 硬掩碼】ProductionRLPolicyEngine (10D Gymnasium 狀態空間 + <50ms 硬掩碼熔斷)
-7. 【Watchdog 與 SSOT Guard】SSOTAuditGuard (>30s 數據過期 Circuit Breaker 與自癒結算)
-================================================================================
 """
 
 import asyncio
@@ -34,6 +21,16 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+# 自動修復 Colab / Jupyter 既有 Asyncio Event Loop 衝突
+try:
+    import nest_asyncio
+    nest_asyncio.apply()
+except ImportError:
+    import subprocess
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "nest_asyncio"])
+    import nest_asyncio
+    nest_asyncio.apply()
 
 # ==============================================================================
 # 1. 安全數值解析算子
@@ -66,8 +63,8 @@ class MarineSafetyData:
     delta_theta_deg: float         # 風向攻角 / 背風偏角 (deg)
     tide_eta_m: float              # 動態潮位 (m)
     d_draft_m: float               # 船隻靜態吃水深度 (m)
-    s_quat_m: float                # 動態蹲沉量 Squat (m) [由 GEBCO 算子即時更新]
-    chart_depth_m: float           # 碼頭圖水深 (m) [由 GEBCO 10m 網格即時更新]
+    s_quat_m: float                # 動態蹲沉量 Squat (m)
+    chart_depth_m: float           # 碼頭圖水深 (m)
     current_speed_kts: float       # 沿岸橫流/船速 (kts)
     qimen_consensus_pct: float    # 奇門氣場同化率 (%)
     s_cos_sim: float               # 自適應歷史餘弦相似度 alpha_tune 基準
@@ -91,7 +88,7 @@ class MarineSafetyData:
         cst_now = datetime.datetime.now(timezone(timedelta(hours=8)))
         default_high_tide = f"{cst_now.strftime('%Y-%m-%d')} 09:12:00"
         now_ts = datetime.datetime.now(timezone.utc).timestamp()
-        
+
         return cls(
             hs_cwa=safe_float(raw_data.get("hs_cwa"), 3.71),
             w_cwa=safe_float(raw_data.get("w_cwa"), 8.50),
@@ -121,13 +118,9 @@ class MarineSafetyData:
         )
 
 # ==============================================================================
-# 3. GEBCO 2024 + 10m 雙源水深矩陣與水動力算子 (GEBCO Bathymetry Engine)
+# 3. GEBCO 2024 + 10m 雙源水深矩陣與水動力算子
 # ==============================================================================
 class GEBCOBathymetryEngine:
-    """
-    GEBCO 2024 全球 15 角秒水深 + 近岸航道/碼頭 10m 雙源融合水深算子
-    免公文、免審核，100% 開放資料與數值算子升級
-    """
     def __init__(self, bbox=[121.70, 24.80, 122.00, 25.00], grid_res_m=10.0):
         self.bbox = bbox
         self.grid_res_m = grid_res_m
@@ -136,7 +129,6 @@ class GEBCOBathymetryEngine:
         self.depth_toucheng_channel = 6.20 # 烏石港/頭城航道水深 (m)
 
     def get_chart_depth_m(self, lat: float, lon: float, pier_select: int = 0) -> float:
-        """根據載具座標與碼頭選擇，自 10m 雙源網格動態檢索精確水深 d_chart"""
         if abs(lat - 24.8438) < 0.02 and abs(lon - 121.9545) < 0.02:
             return self.depth_guishan_north if pier_select == 0 else self.depth_guishan_south
         elif lon < 121.90:
@@ -145,21 +137,18 @@ class GEBCOBathymetryEngine:
             return 8.50
 
     def compute_dynamic_squat_m(self, vessel_speed_kts: float, d_chart: float, draft_m: float = 1.20, C_B: float = 0.65) -> Dict[str, float]:
-        """
-        利用 10m 局域水深動態精算淺水效應蹲沉量 Squat (m) 與 Depth Froude Number (F_h)
-        """
         if d_chart <= draft_m:
             d_chart = draft_m + 0.1
         depth_draft_ratio = d_chart / draft_m
         squat_barrass = (C_B * (vessel_speed_kts ** 2)) / (30.0 * depth_draft_ratio)
-        
+
         v_ms = vessel_speed_kts * 0.514444
         g = 9.80665
-        F_h = v_ms / math.sqrt(g * d_chart) # Depth Froude Number
+        F_h = v_ms / math.sqrt(g * d_chart)
         F_h_clamped = min(0.95, F_h)
-        
+
         froude_corr = 1.0 / math.sqrt(max(0.05, 1.0 - F_h_clamped ** 2))
-        squat_final = squat_barrass * froude_corr * 0.50 # 雙體船水動力修正
+        squat_final = squat_barrass * froude_corr * 0.50
         s_squat = round(max(0.15, min(2.50, squat_final)), 3)
 
         return {
@@ -169,9 +158,6 @@ class GEBCOBathymetryEngine:
         }
 
     def compute_shoaling_factor_ks(self, d_chart: float, tp_s: float) -> float:
-        """
-        利用 10m 局域水深精算近岸淺水變形與波高增幅/衰減係數 Ks (Shoaling Factor)
-        """
         if d_chart <= 0.5 or tp_s <= 1.0:
             return 1.0
         g = 9.80665
@@ -179,7 +165,7 @@ class GEBCOBathymetryEngine:
         L = L0 * math.sqrt(math.tanh(2.0 * math.pi * d_chart / L0))
         k = (2.0 * math.pi) / L
         kd = k * d_chart
-        
+
         tanh_kd = math.tanh(kd)
         sinh_2kd = math.sinh(min(20.0, 2.0 * kd))
         if sinh_2kd <= 1e-5:
@@ -266,11 +252,11 @@ class FAISSClimate20YrEngine:
         t0 = time.perf_counter()
         query_w = live_vec_37d * self.weights_sqrt
         query_norm = query_w / (np.linalg.norm(query_w) + 1e-8)
-        
+
         sim_scores = np.dot(self.db_normalized, query_norm)
         topk_idx = np.argpartition(sim_scores, -top_k)[-top_k:]
         topk_scores = sim_scores[topk_idx]
-        
+
         latency_ms = (time.perf_counter() - t0) * 1000.0
         avg_similarity = float(np.mean(topk_scores))
         veto_prob = float(np.mean(self.veto_labels[topk_idx]))
@@ -339,7 +325,7 @@ class DynamicPlumeGeofencingOperator:
         }
 
 # ==============================================================================
-# 8. 四層 Hard VETO 剛性物理防線算子 (升級版)
+# 8. 四層 Hard VETO 剛性物理防線算子
 # ==============================================================================
 class PhysicsEngine:
     HARD_HS_MAX = 1.20
@@ -372,14 +358,12 @@ class PhysicsEngine:
         kd = cls.calculate_kd(data.tp_s, data.video_kd_bias)
         kw = cls.calculate_kw(data.delta_theta_deg)
 
-        # 結合 FNO 繞射 Kd 與 GEBCO 10m 淺水變形 Ks 計算碼頭實際波高
         hs_pier = round(data.hs_cwa * kd * ks_shoaling, 2)
         w_local = round(data.w_cwa * kw, 2)
         w_eff = round(w_local * abs(math.cos(math.radians(data.delta_theta_deg))), 2)
 
         tide_ukc_penalty = 0.45 if data.tide_eta_m < 0.20 else 0.0
         vessel_system_depth = data.d_draft_m + data.s_quat_m
-        # 動態 UKC 計算：由 10m 網格圖水深 + 動態潮位 - 動態 Squat - 碼頭波高
         ukc = round((data.chart_depth_m + data.tide_eta_m - tide_ukc_penalty) - vessel_system_depth - hs_pier, 2)
 
         fb_pier = 0.15 if data.video_overtopping_rate > 0.0 else round(cls.BASE_FREEBOARD - data.tide_eta_m, 2)
@@ -531,7 +515,7 @@ class SSOTAuditGuard:
 class TGGuerrillaMasterEngine:
     def __init__(self):
         self.router = LiveAsyncAPIPollingRouter()
-        self.bathymetry_engine = GEBCOBathymetryEngine() # GEBCO 10m 水深雙源算子
+        self.bathymetry_engine = GEBCOBathymetryEngine()
         self.extractor = GEM37DNormalizedFeatureExtractor()
         self.climate_faiss = FAISSClimate20YrEngine(num_records=10000)
         self.onnx_provider = ONNXInferenceProvider()
@@ -546,7 +530,6 @@ class TGGuerrillaMasterEngine:
 
         telemetry = MarineSafetyData.from_api_json(raw_telemetry)
 
-        # 1. GEBCO 2024 + 10m 網格水深與動態蹲沉量 (Squat) 同化計算
         d_chart_dynamic = self.bathymetry_engine.get_chart_depth_m(
             telemetry.vessel_lat, telemetry.vessel_lon, telemetry.active_pier_select
         )
@@ -557,28 +540,23 @@ class TGGuerrillaMasterEngine:
             d_chart_dynamic, telemetry.tp_s
         )
 
-        # 動態更新水深與蹲沉量
         telemetry.chart_depth_m = d_chart_dynamic
         telemetry.s_quat_m = squat_dict["s_quat_m"]
 
-        # 2. AI 繞射與越浪推論
         video_bias, overtopping = self.onnx_provider.predict_fno_and_pinn(
             telemetry.hs_cwa, telemetry.tp_s, telemetry.video_overtopping_rate
         )
         telemetry.video_kd_bias = video_bias
         telemetry.video_overtopping_rate = overtopping
 
-        # 3. FAISS 氣候特徵檢索
         vec37 = self.extractor.build_normalized_vector(telemetry)
         faiss_res = self.climate_faiss.search(vec37, top_k=50)
         alpha_final = faiss_res["alpha_tune_historical_corrected"]
 
-        # 4. 四層硬性 VETO 評估
         physics_res = PhysicsEngine.evaluate_veto(telemetry, alpha_final, ks_shoaling)
         plume_res = DynamicPlumeGeofencingOperator.evaluate_dynamic_plume(telemetry)
         pier_id, pier_msg = self.hysteresis.evaluate_pier_switch(telemetry.delta_theta_deg, telemetry.current_speed_kts)
 
-        # 5. 奇門與 RL 決策
         qimen_res = QimenAssimilationEngine.evaluate(
             telemetry.qimen_consensus_pct, telemetry.tp_s, telemetry.delta_theta_deg, physics_res["has_veto"]
         )
@@ -653,10 +631,12 @@ async def main():
 
 if __name__ == "__main__":
     try:
-        asyncio.run(main())
-    except RuntimeError:
         loop = asyncio.get_event_loop()
         if loop.is_running():
-            loop.create_task(main())
-        else:
+            nest_asyncio.apply()
             loop.run_until_complete(main())
+        else:
+            asyncio.run(main())
+    except Exception:
+        nest_asyncio.apply()
+        asyncio.run(main())
