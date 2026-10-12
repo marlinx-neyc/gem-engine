@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>🌊 GEM-V36D 龜山島雙層海事戰術控制台 (全功能修復完整版)</title>
+    <title>🌊 GEM-V36D 龜山島雙層海事戰術控制台 (全功能完整版)</title>
 
     <!-- Tailwind CSS 官方 CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -124,6 +124,127 @@
         .badge-pass { background: rgba(16, 185, 129, 0.2); color: var(--status-pass); border: 1px solid var(--status-pass); }
         .badge-warn { background: rgba(245, 158, 11, 0.2); color: var(--status-warn); border: 1px solid var(--status-warn); }
         .badge-yellow { background: rgba(250, 204, 21, 0.2); color: var(--status-yellow); border: 1px solid var(--status-yellow); }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            table-layout: fixed;
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .data-table th, .data-table td {
+            padding: 5.5px 6.5px;
+            text-align: left;
+            border-bottom: 1px solid var(--card-border);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .data-table th { background: var(--table-header-bg); color: #cbd5e1; font-weight: 600; font-size: 10.5px; }
+        .bullet-bar-track {
+            position: relative;
+            width: 100%;
+            height: 10px;
+            background: #0f172a;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid #334155;
+        }
+        .bullet-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.35s ease-in-out, background-color 0.35s ease;
+        }
+        .bullet-threshold-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: #facc15;
+            box-shadow: 0 0 6px rgba(250, 204, 21, 0.85);
+            z-index: 10;
+        }
+        .box-alert-danger {
+            background: rgba(239, 68, 68, 0.15);
+            border-left: 3px solid var(--status-danger);
+            color: #fca5a5;
+            padding: 7px 9px;
+            font-size: 11px;
+            border-radius: 0 4px 4px 0;
+            line-height: 1.45;
+        }
+        .slider-item { display: flex; flex-direction: column; gap: 2px; }
+        .slider-header { display: flex; justify-content: space-between; font-size: 10.5px; color: #cbd5e1; }
+        .slider-header span.val { font-family: monospace; font-weight: 700; color: var(--accent-blue); }
+        .slider-item input[type="range"] {
+            width: 100%;
+            height: 5px;
+            background: #334155;
+            border-radius: 3px;
+            outline: none;
+            accent-color: var(--accent-blue);
+            cursor: pointer;
+        }
+        .accordion-header { cursor: pointer; user-select: none; transition: background 0.2s ease; }
+        .accordion-header:hover { background: rgba(56, 189, 248, 0.08); }
+        .accordion-content { transition: max-height 0.35s cubic-bezier(0, 1, 0, 1); overflow: hidden; }
+        .accordion-content.collapsed { max-height: 0; padding-top: 0; padding-bottom: 0; }
+        .accordion-content.expanded { max-height: 1400px; transition: max-height 0.45s ease-in-out; }
+        #osmMapContainer {
+            width: 100%;
+            height: 540px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            overflow: hidden;
+            background: #0b1120;
+            z-index: 10;
+        }
+        .chart-canvas-wrap {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            min-height: 140px;
+        }
+        .chart-canvas {
+            width: 100% !important;
+            height: 100% !important;
+            display: block;
+        }
+        .chart-tooltip {
+            position: absolute;
+            display: none;
+            background: rgba(15, 23, 42, 0.96);
+            border: 1px solid #38bdf8;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 11px;
+            color: #f8fafc;
+            pointer-events: none;
+            z-index: 100;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.7);
+            white-space: nowrap;
+            backdrop-filter: blur(4px);
+            transition: opacity 0.15s ease;
+        }
+        .pier-tab-active {
+            background: #2563eb !important;
+            color: #ffffff !important;
+            border-color: #60a5fa !important;
+            box-shadow: 0 0 10px rgba(37, 99, 235, 0.5);
+        }
+        .pier-tab-south-active {
+            background: #059669 !important;
+            color: #ffffff !important;
+            border-color: #34d399 !important;
+            box-shadow: 0 0 10px rgba(5, 150, 105, 0.5);
+        }
+        .pier-tab-compare-active {
+            background: #7c3aed !important;
+            color: #ffffff !important;
+            border-color: #a78bfa !important;
+            box-shadow: 0 0 10px rgba(124, 58, 237, 0.5);
+        }
     </style>
 </head>
 <body>
@@ -136,17 +257,95 @@
                     <span class="pulse-dot-blue"></span> 龜山島海事戰術智庫與自主學習執行中樞 (GEM-V36D Master)
                 </h1>
                 <div class="text-[11px] text-[#94a3b8] mt-1 flex flex-wrap items-center gap-2">
-                    <span>時鐘：<b id="liveClock" class="font-mono text-white bg-slate-800 px-1.5 py-0.5 rounded">20:36:00 CST</b></span>
+                    <span>時鐘：<b id="liveClock" class="font-mono text-white bg-slate-800 px-1.5 py-0.5 rounded">20:55:00 CST</b></span>
                     <span>基準日：<b id="baseDateStr" class="font-mono text-emerald-400 bg-slate-800 px-1.5 py-0.5 rounded">2026-10-12 (一)</b></span>
-                    <span>| SSOT 結算：<b id="ssotTimestamp" class="font-mono text-white bg-slate-800 px-1.5 py-0.5 rounded">2026-10-12 20:36:00 CST</b></span>
+                    <span>| SSOT 結算：<b id="ssotTimestamp" class="font-mono text-white bg-slate-800 px-1.5 py-0.5 rounded">2026-10-12 20:55:00 CST</b></span>
                     <span>| 心跳：<b id="heartbeatCounter" class="text-[#38bdf8]">29</b> 次</span>
                     <span>| 總裁決：<b id="ssotDecisionBadge" class="text-[#ef4444] font-bold">🔴 0.0% 物理 VETO 熔斷</b></span>
                 </div>
             </div>
+            <div class="flex flex-wrap gap-1.5">
+                <button class="nav-tab-btn active-tab" id="tabBtnDesktop" onclick="switchMainTab('desktop')">🖥 桌面戰術主控</button>
+                <button class="nav-tab-btn" id="tabBtnBathymetry" onclick="switchMainTab('bathymetry')">📐 南北雙岸色塊防碰撞剖面圖</button>
+                <button class="nav-tab-btn" id="tabBtnLongterm" onclick="switchMainTab('longterm')">🔮 30 天月度宏觀推估</button>
+                <button class="nav-tab-btn" id="tabBtnSoftOcean" onclick="switchMainTab('softocean')">🌊 Soft Ocean 實體海圖與動態流場</button>
+            </div>
         </div>
     </header>
 
+    <!-- 主頁面控制區塊 -->
+    <main id="tabDesktopView" class="flex flex-col lg:flex-row gap-3 w-full">
+        <div class="w-full lg:w-[35%] flex flex-col gap-2.5">
+            <div class="card">
+                <div class="card-header">
+                    <span>1. PINN Engine 剛性水文門檻檢核</span>
+                    <span id="badgeDecision" class="badge badge-veto">🔴 熔斷禁止靠泊</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-center">
+                    <div class="bg-[#0b1120] p-2 rounded-lg border border-[#334155]">
+                        <div class="text-[9.5px] text-[#94a3b8]">碼頭有效波高 (Hs)</div>
+                        <div class="text-[17px] font-extrabold text-red-400 mt-0.5" id="valHs">3.71 m</div>
+                        <div class="badge badge-veto mt-1">FAIL (>1.13m)</div>
+                    </div>
+                    <div class="bg-[#0b1120] p-2 rounded-lg border border-[#334155]">
+                        <div class="text-[9.5px] text-[#94a3b8]">攻角有效風速 (Weff)</div>
+                        <div class="text-[17px] font-extrabold text-emerald-400 mt-0.5" id="valWeff">9.50 m/s</div>
+                        <div class="badge badge-pass mt-1">PASS (≤10.17m/s)</div>
+                    </div>
+                    <div class="bg-[#0b1120] p-2 rounded-lg border border-[#334155]">
+                        <div class="text-[9.5px] text-[#94a3b8]">南岸動態裕深 (UKC)</div>
+                        <div class="text-[17px] font-extrabold text-red-400 mt-0.5" id="valUKC">0.42 m</div>
+                        <div class="badge badge-veto mt-1">FAIL (<1.50m 觸底)</div>
+                    </div>
+                    <div class="bg-[#0b1120] p-2 rounded-lg border border-[#334155]">
+                        <div class="text-[9.5px] text-[#94a3b8]">北岸預留乾舷 (FB)</div>
+                        <div class="text-[17px] font-extrabold text-red-400 mt-0.5" id="valFB">0.15 m</div>
+                        <div class="badge badge-veto mt-1">FAIL (<0.50m 越浪)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-[#f59e0b]">
+                <div class="card-header !text-[#f59e0b]">
+                    <span>2. ⚓ 游擊式動態調度與避險 (即時突發感知)</span>
+                    <span class="badge badge-veto">雙岸失效</span>
+                </div>
+                <div class="text-[11.5px] leading-relaxed space-y-1">
+                    <p>• 登島靠泊碼頭：<b class="text-[#f87171]">無 (雙岸失效，禁止靠泊)</b></p>
+                    <p>• 應急撤離碼頭：<b class="text-[#f8fafc]">無 (雙岸失效，直航返航烏石港)</b></p>
+                    <div class="box-alert-danger mt-1.5">
+                        🔴 第一位階 Hard VETO 剛性熔斷（浪高 3.71m、裕深 0.42m、乾舷 0.15m 三重觸發）。全天禁止登島與靠泊，11:20 止登，14:20 全員撤離直航烏石港。
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-full lg:w-[65%] flex flex-col gap-2.5">
+            <div class="card">
+                <div class="card-header">
+                    <span>2x2 時間線預測矩陣 (游標數值與判準完全對齊)</span>
+                    <span class="text-[10px] text-[#38bdf8]">幾何凍結 CLS=0</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 h-[340px] w-full">
+                    <div class="bg-[#0b1120] border border-[#334155] rounded-lg p-1 relative h-[165px] chart-canvas-wrap">
+                        <canvas id="canvasChartHs" class="chart-canvas"></canvas>
+                    </div>
+                    <div class="bg-[#0b1120] border border-[#334155] rounded-lg p-1 relative h-[165px] chart-canvas-wrap">
+                        <canvas id="canvasChartWind" class="chart-canvas"></canvas>
+                    </div>
+                    <div class="bg-[#0b1120] border border-[#334155] rounded-lg p-1 relative h-[165px] chart-canvas-wrap">
+                        <canvas id="canvasChartUKC" class="chart-canvas"></canvas>
+                    </div>
+                    <div class="bg-[#0b1120] border border-[#334155] rounded-lg p-1 relative h-[165px] chart-canvas-wrap">
+                        <canvas id="canvasChartTp" class="chart-canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
     <script>
+        // 自動抓取作業系統實時時間（2026-10-12）
         let liveBaseDate = new Date();
         let heartbeatCount = 29;
         let isAutoSyncEnabled = true;
@@ -204,7 +403,7 @@
                     }
                 }
             } catch (e) {
-                console.warn("SSOT 檔案讀取失敗:", e);
+                console.warn("SSOT 同步失敗:", e);
             }
         }
 
