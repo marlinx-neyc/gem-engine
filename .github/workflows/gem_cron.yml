@@ -10,22 +10,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
       - name: Install Dependencies
         run: |
-          pip install httpx numpy torch nest_asyncio
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; else pip install httpx numpy torch nest_asyncio folium pydantic requests google-genai notion-client; fi
 
       - name: Execute Master Pipeline
         env:
           TDX_CLIENT_ID: ${{ secrets.TDX_CLIENT_ID }}
           TDX_CLIENT_SECRET: ${{ secrets.TDX_CLIENT_SECRET }}
           CWA_API_KEY: ${{ secrets.CWA_API_KEY }}
+          TGOS_API_KEY: ${{ secrets.TGOS_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+          ESTAT_API_KEY: ${{ secrets.ESTAT_API_KEY }}
+          KTO_DATA_LAB_KEY: ${{ secrets.KTO_DATA_LAB_KEY }}
+          MAPBOX_TOKEN: ${{ secrets.MAPBOX_TOKEN }}
         run: |
           python main_orchestrator.py
 
@@ -33,6 +41,6 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action Bot"
-          git add latest_decision.json
+          git add latest_decision.json || true
           git diff-index --quiet HEAD || git commit -m "Auto-assimilate TDX & CWA data stream [skip ci]"
           git push
