@@ -6,7 +6,10 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <title>🌊 GEM-V36D 龜山島雙層海事戰術控制台 (全功能完整版)</title>
 
+    <!-- Tailwind CSS 官方 CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Leaflet.js 高可用地圖套件 -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -240,7 +243,7 @@
     </main>
 
     <script>
-        // 自動對齊裝置當前實時系統時間
+        // 自動對齊裝置當前實時系統時間（動態計算非硬編碼）
         let liveBaseDate = new Date();
         let heartbeatCount = 0;
 
@@ -270,6 +273,7 @@
         }
         setInterval(updateLiveClock, 1000);
 
+        // 同步 latest_decision.json 動態數據與結算時間
         async function fetchSSOTFile() {
             try {
                 const res = await fetch(`latest_decision.json?_t=${Date.now()}`, { cache: 'no-store' });
