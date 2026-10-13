@@ -1,75 +1,189 @@
-# GEM_SPEC_MASTER.md
-# GEM-V40「大道至簡・道器合一」海事數位雙生戰術控制台暨自主進化智庫最高技術規格檔
-
-**文件版本**：v40.0 Complete Master Autonomous & Da Dao Production Edition[cite: 22]  
-**生效日期**：2026-10-13[cite: 22]  
-**適用範疇**：後端 Python SSOT 狀態中樞、RL 自適應強化學習算子、前端幾何絕對凍結控制台、各工具物件化模組 (OOP Widgets)、跨模組事件總線 (EventBus) 與權威總裁示稽核存根[cite: 22]。
-
----
-
-## 1. 哲學總綱、SSOT 合約與戰略二元坍縮 (Philosophy & Binary Collapse)
-
-### 1.1 道器合一方法論溯源
-當代海事工程與決策極易陷入西方還原論的「拆零泥淖」：將波高、風速、週期、攻角、潮位拆解得極其細碎，卻忘記如何將其組裝為一體場域，導致前額葉認知超載與系統失律[cite: 1, 22]。  
-本規範落實邵雍「合一斯為一，衍之斯為萬」與「四象收斂為兩儀，兩儀收斂為太極」之哲學體系[cite: 1]：
-- **太極一元（道）**：戰略決斷最終必須收斂為二進制指令：**要（1，全線開放靠泊）** 或 **不要（0，0.0% 物理熔斷/全線封島）**[cite: 1, 22]。生死關頭嚴禁給出模糊不決的折衷推論[cite: 1]。
-- **兩儀平衡（理）**：多維環境特徵向量統一轉換為**全域等效能量標量 $\mathcal{E}_{net}$**，由**陽儀（外海動能通量 $\mathcal{K}$）**與**陰儀（泊位勢能與幾何阻抗 $\mathcal{V}$）**的動態消長決定[cite: 1, 22]。
-- **四象器用（器）**：立不易方，將剛性防線卡、雙岸子彈儀、六軸雷達、水下防碰撞雙斷面剖面儀等工具全面物件化解耦，純數據注入驅動[cite: 1, 22]。
-
-### 1.2 單一真實數據源 (SSOT) 與握手協定
-1. **SSOT 唯一狀態中樞**：後端由 Python 統合引擎每秒解算並輸出唯一決策封包至 `latest_decision.json`[cite: 3, 7]。前端所有視覺工具箱與 AI 專家顧問均為消費者，強制採納該數據作為唯一真實基準 (Ground Truth)[cite: 7, 22]。
-2. **剛性稽核前置檢核**：
-   $$\text{Audit\_Pass} = \left( H_{s,pier} \le 1.13\text{ m} \right) \land \left( W_{eff} \le 10.17\text{ m/s} \right) \land \left( UKC \ge 1.50\text{ m} \right) \land \left( FB_{pier} \ge 0.50\text{ m} \right)$$
-[cite: 7]
-   若 $\text{Audit\_Pass} = \text{False}$，系統強制將狀態標記為 `🔴 0.0% 物理 VETO 熔斷`，並觸發全線封島管制指令[cite: 7, 22]。
+# GEM-SPEC-2026-V43: 龜山島海事戰術動態調和系統工程規範
+**文件編號**：GEM-ENG-SPEC-2026-V43  
+**密級標籤**：生產級核心技術規範 (Production Standard)  
+**生效日期**：2026-10-13  
+**適用範圍**：龜山島海域客輪航行、碼頭靠泊調度、防災應急避險與自主學習主控系統  
 
 ---
 
-## 2. 四大工程幾何與軟體剛性架構法則 (The 4 Methodological Pillars)
+## 1. 文件基本資訊與系統定義
 
-### 2.1 法則一：【立不易方】容器幾何絕對凍結 (CLS = 0)
-1. 外觀佈局、容器邊界、Canvas 尺寸在頁面載入第 0 毫秒即宣告定型，累計版面位移 (CLS) 恆等於 0[cite: 1, 22]。
-2. 每個工具在 HTML 中只佔據封閉、具備固定尺寸邊界的獨立外殼（`contain: content`）[cite: 1, 22]。
-3. 嚴禁在執行階段動態重組結構或以 `innerHTML` 拼裝父級 DOM 節點，杜絕排版重繪與幾何錯位[cite: 1, 22]。
+### 1.1 系統使命
+本系統（GEM Engine v43.0 Master）為龜山島海事戰術指揮智庫之最高 AI 主控大腦[cite: 5]。系統宗旨在於將《易經》「執兩用中」哲學深度轉化為約束馬可夫決策過程（Constrained Markov Decision Process, CMDP），解決傳統二分法（非開即封）在佔全年營運時間 85% 以上之灰色過渡態（中間 62 卦）頻繁引發的「誤判開島（坐灘翻船）」與「過度停航（扼殺營運）」問題[cite: 3, 5]。
 
-### 2.2 法則二：【變動不居，出入以度】純數據單向注入管線
-1. 所有感測數據統一匯入中央狀態引擎 (`CentralStateEngine`)[cite: 1, 22]。
-2. 各視覺工具箱抽象為標準類別 (`Widget Class`)，僅暴露標準單一介面 `widget.update(data)`，內部僅以 `textContent` 或 Canvas 重繪填入數值，嚴禁跨界向外竄改鄰近物件[cite: 1, 22]。
-3. **獨立保險絲 (Error Boundary)**：每個工具的更新邏輯必須由獨立 `try...catch` 完整包覆[cite: 1, 22]。任一 Canvas 繪圖坐標異常報錯，防線卡與子彈條依然以 100% 精確度運行，核心海事裁決不受干擾[cite: 1, 22]。
-
-### 2.3 法則三：【一而二，二而一】能量張量轉換
-定義輸入環境狀態特徵向量：
-$$\mathbf{X} = \begin{bmatrix} H_{s,CWA} \\ W_{local} \\ T_p \\ \vert\cos(\Delta\theta)\vert \\ \eta_{tide} \end{bmatrix} \in \mathbb{R}^5$$
-[cite: 1]
-透過空間攻角、地形阻抗與水深濾波基係數矩陣 $\mathbf{M}(\Delta\theta, T_p, d_{chart})$，折算為碼頭泊位承受之**全域等效紊動通量標量**[cite: 1]：
-$$\mathcal{E}_{net} = \mathbf{X}^T \mathbf{M} \mathbf{X} = \mathcal{K}_{\text{陽儀動能通量}} - \mathcal{V}_{\text{陰儀勢能阻抗}}$$
-[cite: 1]
-- **陽儀動能通量 ($\mathcal{K}$)**：外海波能密度 $\frac{1}{8}\rho g H_s^2$ 與局域風剪應力 $\frac{1}{2}\rho_{air} W^2$[cite: 1]。長浪週期 $T_p > 12.0\text{ s}$ 觸發長浪港池共振時，繞射消能瓦解，$K_d = 1.00$[cite: 1, 22]；風向攻角 $\Delta\theta \ge 45^\circ$ 時，401 高地背風屏障失效，$K_w = 1.00$[cite: 1, 22]。
-- **陰儀勢能阻抗 ($\mathcal{V}$)**：水深底質空間裕度位能與碼頭乾舷重力勢壘[cite: 1]。穿浪雙體客輪靜吃水 $1.20\text{ m}$ 疊加淺水高速蹲沉 $S_{squat}=0.82\text{ m}$，動態吃水包絡線固定佔用 $2.02\text{ m}$[cite: 1, 2, 22]。
-
-### 2.4 法則四：【太極一元】戰略二元坍縮
-設定安全臨界勢壘 $\mathcal{E}_{crit} = 1.00$ 與熔斷上限 $1.25\,\mathcal{E}_{crit}$[cite: 1, 22]：
-$$\text{Strategic Ruling} = \begin{cases} \mathbf{1} \text{ (要：全線開放靠泊)} & \text{若 } \mathcal{E}_{net} \le \mathcal{E}_{crit} \land \text{Hard\_Veto} = \text{False} \\ \mathbf{0} \text{ (不要：0.0\% 物理熔斷 / 全線封島)} & \text{若 } \mathcal{E}_{net} > 1.25\,\mathcal{E}_{crit} \lor \text{Hard\_Veto} = \text{True} \end{cases}$$
-[cite: 1, 22]
+### 1.2 控制論架構：執兩用中
+* **執兩（剛性邊界約束）**：
+  * **純乾極陽邊界（100.0% 放行）**：環境能量完全受控，四層物理防線全數通過，系統零干預常態通行[cite: 5]。
+  * **純坤極陰邊界（0.0% 熔斷）**：一旦遭遇港池長浪消能瓦解或水下觸底坐灘風險，一票否決觸發 Hard VETO 剛性熔斷，全線封島[cite: 5]。
+* **用中（62 卦灰色相變調和）**：
+  在兩極邊界之間，主動釋放**「航速連續調控（消減蹲沉）」**、**「雙岸空間位移（背風掩蔽）」**與**「時域非線性截斷（動態時窗）」**三個控制自由度，以人為損益陰陽，維持流形空間動態平衡[cite: 3, 5]。
 
 ---
 
-## 3. 微觀水動力四層剛性防線合約 (Hard VETO Physics Matrix)
+## 2. 立體多維物理感知硬體與通信規範
 
-剛性防線遵循一票否決制：$\text{Hard\_Veto} = \text{Veto}_{Hs} \lor \text{Veto}_{W} \lor \text{Veto}_{UKC} \lor \text{Veto}_{FB}$[cite: 7]。
+### 2.1 X-band 高頻雷達與波浪頻譜儀
+* **採樣頻率**：$\ge 10\text{ Hz}$，方向解析度 $\le 2.5^\circ$，頻率解析度 $\le 0.01\text{ Hz}$。
+* **物理功能**：即時解算二維方向波能譜 $S(f, \theta)$，提取譜峰頻率 $f_p$ 與湧浪週期 $T_p = \frac{1}{f_p}$[cite: 3]。
+* **港池共振消能崩潰判定**：
+  當低頻能量通量佔比 $> 35\%$ 或 $T_p \ge 12.0\text{ s}$ 時，港池防波堤繞射消能機制完全崩潰，繞射消能因子強制覆寫為 $K_d = 1.00$[cite: 3, 5]。
 
-| 防線層級 | 物理指標 | 遲滯精算公式與破防機制 | 剛性通過門檻 ($\alpha_{tune}=0.90\sim0.94$) | 狀態燈號表現 |
+### 2.2 AIS-GEBCO 載具雙生融合模組
+* **AIS 協議**：Class A 載具動態更新週期 $\le 2.0\text{ s}$，網路延遲 $\le 500\text{ ms}$。
+* **高解析度水深數據庫**：融合 GEBCO 2024 與電子海圖（ENC）10m 網格數據（北岸基線水深 $-8.50\text{ m CD}$，南岸浚挖水深 $-9.80\text{ m CD}$）[cite: 5]。
+* **動態淺水蹲沉方程（Squat）**：
+  $$F_h = \min\left(0.95, \; \frac{V_{\text{speed}} \cdot 0.514444}{\sqrt{g \cdot d_{\text{chart}}}}\right)$$
+  $$S_{\text{squat}} = \frac{C_B \cdot V_{\text{speed}}^2}{30 \cdot (d_{\text{chart}} / d_{\text{draft}})} \cdot \frac{1}{\sqrt{\max(0.05, 1 - F_h^2)}} \cdot 0.50$$
+  *(基準客輪參數：方形係數 $C_B = 0.65$，靜吃水 $d_{\text{draft}} = 1.20\text{ m}$；12.5 節常速時 $S_{\text{squat}} = 0.82\text{ m}$，指令限速 3.0 節時 $S_{\text{squat}} = 0.15\text{ m}$)*[cite: 3, 5]。
+
+### 2.3 Vision-PINN 引橋邊緣光學感知儀
+* **邊緣硬體規格**：防鹽霧邊緣 AI 攝影機，幀率 $\ge 30\text{ FPS}$，推理時延 $\le 33\text{ ms}$。
+* **越浪量化指標**：邊緣神經網路捕捉碎波翻越引橋的高程與頻次，輸出即時越浪率 $CV$（次/分鐘）[cite: 3]。
+* **覆寫協議**：一旦檢測到 $CV > 0.0\text{ p/min}$，系統於 $100\text{ ms}$ 內將預留乾舷強制覆寫為 $FB = 0.15\text{ m}$[cite: 3, 5]。
+
+### 2.4 雙岸差分氣象超音波風速儀
+* **測站佈局**：分別部署於北岸碼頭引橋與南岸權宜碼頭泊位。
+* **掩蔽係數解算 ($K_w$)**：
+  $$K_w = \frac{W_{\text{local, pier}}}{W_{\text{CWA, offshore}} \cdot \vert{}\cos(\Delta\theta)\vert{}}$$
+  當風向攻角 $\Delta\theta < 35^\circ$ 且南岸受風時，$K_w = 0.78$（401 高地吸收 22% 風能）；$35^\circ \le \Delta\theta < 45^\circ$ 時，$K_w = 0.88$；$\Delta\theta \ge 45^\circ$ 時，$K_w = 1.00$（掩蔽完全失效）[cite: 5]。
+
+---
+
+## 3. 四層剛性物理防線（Hard VETO Physics Matrix）
+
+決策遵循「一票否決（Hard VETO）」原則，任一物理防線未通過即強制觸發純坤熔斷[cite: 5]：
+$$\text{Hard\_Veto} = \text{Veto}_{Hs} \lor \text{Veto}_{W} \lor \text{Veto}_{UKC} \lor \text{Veto}_{FB}$$
+
+| 防線層級 | 物理指標 | 量化精算公式 / 條件約束 | 剛性通過門檻 | 違規危害等級 |
 | :--- | :--- | :--- | :--- | :--- |
-| **第一層【太陽：波能】** | 港池有效波高 $H_{s,pier}$ | $H_{s,pier} = H_{s,CWA} \cdot K_d(T_p) + PINN_{offset}$<br>若 $T_p > 12.0\text{ s} \implies K_d = 1.00$ (長浪擊穿消能)[cite: 1, 7] | $H_{s,pier} \le 1.13\text{ m}$[cite: 1, 7] | Pass: 🟢 `text-emerald-400`<br>Fail: 🔴 `text-red-400` (超標)[cite: 7] |
-| **第二層【少陽：風能】** | 攻角有效風速 $W_{eff}$ | $W_{eff} = W_{local} \cdot \vert\cos(\Delta\theta)\vert \cdot K_w$<br>若 $\Delta\theta \ge 45^\circ \implies K_w = 1.00$ (背風屏障失守)[cite: 1, 7] | $W_{eff} \le 10.17\text{ m/s}$[cite: 1, 7] | Pass: 🟢 `text-emerald-400`<br>Fail: 🔴 `text-red-400` (橫風)[cite: 7] |
-| **第三層【少陰：底阻】** | 動態安全裕深 $UKC$ | $UKC = (d_{chart} + \eta_{tide}) - 2.02\text{ m} - H_{s,pier}$<br>(北岸拋石 -3.20m CD / 南岸浚挖 -5.50m CD)[cite: 2, 7] | $UKC \ge 1.50\text{ m}$[cite: 1, 7] | Pass: 🟢 `text-emerald-400`<br>Warn: 🟡 `text-amber-300`<br>Fail: 🔴 `text-red-400` (觸底/坐灘)[cite: 7] |
-| **第四層【太陰：頂阻】** | 預留乾舷高程 $FB_{pier}$ | $FB_{pier} = Deck_{elev} - \eta_{tide}$<br>若 Vision-PINN 越浪率 $CV > 0\text{ p/m} \implies FB_{pier} = 0.15\text{ m}$ (覆寫)[cite: 1, 7] | $FB_{pier} \ge 0.50\text{ m}$[cite: 1, 7] | Pass: 🟢 `text-emerald-400`<br>Fail: 🔴 `text-red-400` (漫頂越浪)[cite: 7] |
+| **第一層【太陽：波能】** | 港池折算波高 $H_{s,pier}$ | $H_{s,pier} = H_{s,cwa} \cdot K_d(T_p)$<br>*(若 $T_p \ge 12.0\text{ s} \implies K_d = 1.00$)*[cite: 5] | $H_{s,pier} \le 1.13\text{ m}$[cite: 5] | 🔴 港池共振、船舶劇烈搖晃斷纜[cite: 3] |
+| **第二層【少陽：風能】** | 攻角有效風速 $W_{eff}$ | $W_{eff} = W_{cwa} \cdot \vert{}\cos(\Delta\theta)\vert{} \cdot K_w$[cite: 5] | $W_{eff} \le 10.17\text{ m/s}$[cite: 5] | 🔴 橫風橫流推擠、難以控舷靠泊 |
+| **第三層【少陰：底阻】** | 動態安全裕深 $UKC$ | $UKC = (d_{chart} + \eta_{tide}) - (d_{draft} + S_{squat}) - H_{s,pier}$[cite: 5] | $UKC \ge 1.50\text{ m}$[cite: 5] | 🔴 船底龍骨直接碰撞海底拋石坐灘[cite: 3] |
+| **第四層【太陰：頂阻】** | 預留乾舷高程 $FB_{pier}$ | $FB_{pier} = 3.20\text{ m} - \eta_{tide}$<br>*(若 $CV > 0.0\text{ p/min} \implies FB_{pier} = 0.15\text{ m}$)*[cite: 5] | $FB_{pier} \ge 0.50\text{ m}$[cite: 5] | 🔴 引橋遭碎波淹沒漫頂、旅客踏空落海[cite: 3] |
 
 ---
 
-## 4. 空間地理坐標、實體海圖與極端天候因性同化規範
+## 4. 全域能量張量與 Fermi-Dirac 相變機率算子
 
-### 4.1 精準水域地理坐標錨定
-為確保海圖視覺化絕對精準，坐標必須精確錨定於外海水域，嚴禁偏移至陸地中心[cite: 22]：
-- **北岸碼頭 (North Pier)**：`[24.8437, 121.9438]`（北側引道外緣水域，標高 +3.20m CD / 拋石水深 -3.20m CD）[cite: 2, 22]。
-- **南岸碼頭 (South Pier)**：`[24.8415, 121.9425]`（龜尾湖南側突堤泊位水面，標高 +2.50m CD / 浚挖水深 -5.50m CD）
+### 4.1 兩儀動能阻抗平衡
+將多維水文環境升維折算為全域等效能量標量 $\mathcal{E}_{net}$[cite: 3, 5]：
+$$\mathcal{E}_{net} = \frac{\mathcal{K}_{\text{陽儀動能通量}}}{\mathcal{V}_{\text{陰儀勢能阻抗}}} = \frac{H_{s,pier} + (W_{eff} \cdot 0.1) + S_{\text{squat}}}{0.5 \cdot UKC + 0.5 \cdot FB_{\text{pier}}}$$
+
+### 4.2 Fermi-Dirac 光滑相變風險函數
+消除傳統階躍門檻在臨界點的斷崖突變，計算破防相變機率 $P_{\text{veto}}$[cite: 3, 5]：
+$$P_{\text{veto}} = \frac{1}{1 + \exp\left( -\frac{\mathcal{E}_{net} - \mathcal{E}_{crit}}{\beta \cdot \alpha_{tune}} \right)}$$
+* $\mathcal{E}_{crit} = 1.00$（臨界平衡標量），$\beta = 0.25$（相變溫度係數），$\alpha_{tune} \in [0.75, 0.95]$（RL 自適應緊縮係數）[cite: 5]。
+* **狀態判準律**：
+  * $P_{\text{veto}} < 0.20$：純乾卦（全線常態開放）[cite: 3]。
+  * $P_{\text{veto}} > 0.80$：純坤卦（剛性熔斷封島）[cite: 3]。
+  * $0.20 \le P_{\text{veto}} \le 0.80$：中間 62 卦灰色過渡帶，強制啟動 YZ-RL 主動調和戰術[cite: 3]。
+
+---
+
+## 5. 14 維正交物理基底特徵展開規範（Orthogonal Physics Bases）
+
+為消除非線性特徵間的線性串擾（Cross-talk），狀態向量必須嚴格投影至 14 維正交基底空間 $\phi(\mathbf{s})$[cite: 3, 5]：
+
+$$\phi(\mathbf{s}) = \begin{bmatrix} 1.0 & \text{// 1. 基礎 Bias 偏置常數項} \\ H_{s,cwa} / 2.0 & \text{// 2. 外海波高正規化標量} \\ W_{cwa} / 12.0 & \text{// 3. 外海風速正規化標量} \\ T_{p,s} / 15.0 & \text{// 4. 湧浪週期正規化標量} \\ \eta_{tide} / 1.5 & \text{// 5. 動態潮位正規化標量} \\ \Delta\theta / 45.0 & \text{// 6. 風向攻角正規化標量} \\ CV / 2.0 & \text{// 7. 越浪率正規化標量} \\ \text{Match}_{rate} & \text{// 8. 歷史吻合度 (0.75 ~ 0.96)} \\ \mathbf{B}_{\text{clear}} & \text{// 9.  晴朗常態基底 } (H_s \le 0.95 \land T_p < 10.0 \land CV = 0.0 \land \eta \ge 0.6) \\ \mathbf{B}_{\text{squat}} & \text{// 10. 低潮蹲沉基底 } (\eta < 0.40 \land V_{\text{speed}} \ge 10.0\text{ kts}) \\ \mathbf{B}_{\text{swell}} & \text{// 11. 長浪穿透基底 } (T_p \ge 12.0\text{ s} \land H_s > 0.90\text{ m}) \\ \mathbf{B}_{\text{overtop}} & \text{// 12. 引橋越浪基底 } (CV \ge 1.0\text{ p/min}) \\ \mathbf{B}_{\text{wind\_south}} & \text{// 13. 南岸掩蔽基底 } (35.0^\circ \le \Delta\theta < 45.0^\circ) \\ \mathbf{B}_{\text{veto}} & \text{// 14. 極端熔斷基底 } (H_s \ge 2.2\text{ m} \lor W \ge 13.0\text{ m/s}) \end{bmatrix}$$
+
+---
+
+## 6. YZ-RL 雙 Q 強化學習與優先級經驗回放協議
+
+### 6.1 優先級經驗回放（PER Buffer）
+* **緩衝區容量**：$Capacity = 3000$，超額時以 FIFO 淘汰最低優先級樣本[cite: 5]。
+* **採樣機率分佈**：
+  $$P(i) = \frac{p_i^\alpha}{\sum_k p_k^\alpha}, \quad p_i = \left( \vert{}\text{TD-error}_i\vert{} + 10^{-4} \right)^\alpha \quad (\alpha = 0.6)$$
+* **重要性採樣權重（Importance Sampling）**：
+  $$w_i = \frac{(N \cdot P(i))^{-\beta}}{\max_k(w_k)} \quad (\beta \text{ 自 0.4 線性退火至 1.0})$$
+
+### 6.2 雙 Q 網絡軟更新機制（Target-Q Soft Update）
+* **超參數**：學習率 $\alpha = 0.035$，折扣因子 $\gamma = 0.92$，Polyak 軟更新係數 $\tau = 0.05$[cite: 5]。
+* **時序差分誤差（TD-Error）**：
+  $$\text{TD-error} = \left( Reward + \gamma \cdot \max_{a'} Q_{\text{target}}(\mathbf{s}', a') \right) - Q_{\text{eval}}(\mathbf{s}, a)$$
+* **梯度更新與軟更新公式**：
+  $$W_{\text{eval}}[:, a] \leftarrow W_{\text{eval}}[:, a] + \alpha \cdot \text{TD-error} \cdot \phi(\mathbf{s}) \cdot w_i$$
+  $$W_{\text{target}} \leftarrow (1 - \tau) W_{\text{target}} + \tau W_{\text{eval}}$$
+
+### 6.3 獎勵函數工程矩陣（Reward Matrix）
+* **化險為夷最優解（Action 1 / 移防南岸 + 限速 3 節）**：$+18.0$[cite: 5]。
+* **剛性熔斷正確避險（Action 0 / 熔斷長浪共振或極端風暴）**：$+18.0$[cite: 5]。
+* **動態開窗最優解（Action 3 / 滿潮越浪及時止登清島）**：$+16.0$[cite: 5]。
+* **常態通航最優解（Action 2 / 晴朗平穩靠泊北岸）**：$+16.0$[cite: 5]。
+* **盲目冒進巨額懲罰（長浪共振穿透或水下蹲沉觸底冒進）**：$-35.0$[cite: 5]。
+* **過度停航誤封懲罰（晴朗無風條件下誤宣告封島）**：$-20.0$[cite: 5]。
+
+---
+
+## 7. 態互歷史蒸餾器標準（FAISS 90% 目標 / 75% 底線）
+
+### 7.1 吻合度計算與在線反饋閉環方程
+$$\text{Penalty} = \max(0.0, (H_{s,cwa} - 1.1) \cdot 0.05) + \max(0.0, (1.5 - UKC) \cdot 0.06)$$
+$$\text{learned\_bias} \leftarrow \operatorname{clip}\left(\text{learned\_bias} + Reward \cdot 0.0004, \; -0.03, \; 0.06\right)$$
+$$\text{Match}_{rate} = \operatorname{clip}\left(0.90 - \text{Penalty} + \text{learned\_bias}, \; 0.75, \; 0.96\right)$$
+
+### 7.2 質量控制指標
+* **常態海況**：歷史吻合度穩定落在 **93.8% ~ 95.0%** 置信區間[cite: 5]。
+* **極端暴風海況**：歷史吻合度剛性維持於 **75.0% 底線以上**（實測維持在 **83.0%**），杜絕 AI 外推幻覺[cite: 5]。
+
+---
+
+## 8. 現場戰術調度、行動映射與應急時程規範
+
+### 8.1 四態戰術行動映射集（Tactical Action Set）
+
+| 動作代碼 | 戰術名稱 | 卦象映射 | 觸發邊界條件 | 航速限制 | 泊位配置 | 時窗管制 |
+| :---: | :--- | :--- | :--- | :---: | :--- | :--- |
+| **`0`** | **🔴 0.0% 物理熔斷**[cite: 5] | 純坤 | $T_p \ge 12.0\text{ s}$ 或四層防線破防[cite: 5] | $0.0\text{ kts}$ | 雙岸失效禁止靠泊[cite: 5] | 全天剛性封閉[cite: 5] |
+| **`1`** | **🟡 Q2 游擊調撥**[cite: 5] | 水山蹇 / 風水渙 | 退潮低水位或 $\Delta\theta \in [35^\circ, 42^\circ]$[cite: 5] | **強制 $\le 3.0\text{ kts}$**[cite: 5] | 移防南岸權宜碼頭[cite: 5] | 常態通航視窗[cite: 5] |
+| **`2`** | **🟢 100.0% Q1 全線開放**[cite: 5] | 純乾 / 中孚 | 全線通過，波平浪靜 | 常規 $\le 12.0\text{ kts}$[cite: 5] | 北岸碼頭主泊位[cite: 5] | 全天優良視窗[cite: 5] |
+| **`3`** | **⏱️ Q3 動態開窗**[cite: 5] | 水澤節 / 水天需 | 滿潮 $CV > 1.0\text{ p/m}$ 或午後退潮變天[cite: 5] | 謹慎 $\le 8.0\text{ kts}$[cite: 5] | 北岸碼頭限時泊位[cite: 5] | **11:20 止登 / 14:20 撤離**[cite: 5] |
+
+### 8.2 當日關鍵管制時程節點
+* **07:30**：晨間第一階段開島初審（比對外海浮標與現場頻譜儀）[cite: 2]。
+* **10:00**：滿潮高水位窗口（水深充裕但啟動 Vision-PINN 監控引橋漫頂）[cite: 2]。
+* **10:50**：預警廣播節點（廣播提醒即將關閉登島引橋）[cite: 2]。
+* **11:20 關鍵止登節點**：剛性關閉登島引橋，全線嚴禁新增遊客登島[cite: 2, 5]。
+* **13:50**：清島預警廣播（全島廣播提醒遊客前往碼頭候船撤離）[cite: 2]。
+* **14:20 強制清島撤離節點**：全島清空全員登船，直航返航頭城烏石港[cite: 2, 5]。
+* **16:30**：發布次日開島海象預報[cite: 2]。
+
+### 8.3 避難撤離耗時精算公式
+$$Evac\_Minutes = \left\lceil \frac{Passenger\_Count}{10} + \max(0.0, (S_{\text{squat}} - 0.50) \cdot 15.0) + 5.0 \right\rceil$$
+*(基準配置：150 名遊客、常速蹲沉 0.82m 條件下，精算撤離耗時恆為 25 分鐘；限速 3.0 節蹲沉 0.15m 時，耗時縮減至 20 分鐘)*[cite: 2, 5]。
+
+### 8.4 牛奶海酸泉擴散禁戒規範
+滿潮後 3.5 小時達到強酸擴散極值（pH 1.75 ~ 2.0）[cite: 2]。於滿潮後 2.0 ~ 5.0 小時區間內，嚴禁任何人員下水、SUP 及潛水活動，巡邏艇戒護線外推 200m[cite: 2]。
+
+---
+
+## 9. 系統驗收與測試標準（6 大基準情境）
+
+系統部署前必須通過以下 6 大基準案例之自動化單元測試，各案例之置信度必須達標：
+
+```text
+========================================================================================
+情境 1：低潮蹲沉陷阱 (Hs=0.85m, 退潮低位 0.15m, 12.5kts航速)
+ 期望裁定：Action 1 [🟡 Q2 游擊調撥 (移防南岸權宜碼頭 + 強制降速至 3 kts)]
+ 驗收標準：置信度 >= 99.0%，UKC >= 1.50m 通航，吻合度 >= 94.0%
+----------------------------------------------------------------------------------------
+情境 2：長浪共振穿透 (Hs=1.15m 看似安全, 但 Tp=14.8s 長浪)
+ 期望裁定：Action 0 [🔴 0.0% 物理 VETO 熔斷 (全線封島)]
+ 驗收標準：置信度 >= 99.0%，Kd = 1.00 熔斷，吻合度 >= 94.0%
+----------------------------------------------------------------------------------------
+情境 3：滿潮引橋越浪 (Hs=1.20m, 滿潮 1.45m 水深足, 但越浪 2.1 p/min)
+ 期望裁定：Action 3 [⏱️ Q3 動態開窗 (11:20 剛性止登 / 14:20 強制清島)]
+ 驗收標準：置信度 >= 99.0%，FB 覆寫為 0.15m，吻合度 >= 94.0%
+----------------------------------------------------------------------------------------
+情境 4：背風剪切過渡 (Hs=1.35m, 東北風攻角 38.5°, 401 高地地質掩蔽)
+ 期望裁定：Action 1 [🟡 Q2 游擊調撥 (移防南岸權宜碼頭 + 強制降速至 3 kts)]
+ 驗收標準：置信度 >= 99.0%，Kw = 0.78，吻合度 >= 93.0%
+----------------------------------------------------------------------------------------
+情境 5：晴朗無風常態環境 (Hs=0.60m, Tp=7.5s, 潮位 1.10m 水平如鏡)
+ 期望裁定：Action 2 [🟢 100.0% Q1 全線開放 (靠泊北岸主泊位)]
+ 驗收標準：置信度 >= 99.0%，四層防線全通，吻合度 >= 95.0%
+----------------------------------------------------------------------------------------
+情境 6：颱風極端巨浪 (Hs=3.50m, Tp=15.0s, 風速 16.0m/s)
+ 期望裁定：Action 0 [🔴 0.0% 物理 VETO 熔斷 (全線封島)]
+ 驗收標準：置信度 = 100.0%，吻合度 >= 75.0% (底線保底，實測 >= 83.0%)
+========================================================================================
