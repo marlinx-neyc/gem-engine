@@ -549,6 +549,27 @@
   <div class="bg-[#070d18] p-1.5 rounded border border-slate-800 text-center">
     <span class="text-slate-400 block text-[8.5px]">🤖 GEM 雙生模型判斷</span>
     <b id="txtModelVerdict" class="text-red-400 font-bold">🔴 0.0% 剛性熔斷</b>
+  <!-- 5. 關鍵數值檢核對比列 -->
+<div id="boxNumericalCheck" class="mt-1.5 pt-1.5 border-t border-slate-800/80 space-y-1 text-[9.5px] font-mono">
+  <div class="text-[9px] text-slate-400 font-bold flex justify-between items-center px-1">
+    <span>🔍 關鍵指標數值檢核</span>
+    <span class="text-sky-400">官方 / 模型</span>
+  </div>
+  <div class="grid grid-cols-3 gap-1 text-center">
+    <div class="bg-[#070d18] p-1 rounded border border-slate-800">
+      <span class="text-slate-400 block text-[8px]">波高 Hs</span>
+      <span id="numValHsOff" class="text-amber-300">1.2m</span> <span class="text-slate-600">/</span> <b id="numValHsMod" class="text-red-400">3.7m</b>
+    </div>
+    <div class="bg-[#070d18] p-1 rounded border border-slate-800">
+      <span class="text-slate-400 block text-[8px]">攻角風 Weff</span>
+      <span id="numValWOff" class="text-emerald-400">4.5m/s</span> <span class="text-slate-600">/</span> <b id="numValWMod" class="text-emerald-400">5.0m/s</b>
+    </div>
+    <div class="bg-[#070d18] p-1 rounded border border-slate-800">
+      <span class="text-slate-400 block text-[8px]">裕深 UKC</span>
+      <span id="numValUkcOff" class="text-emerald-400">1.8m</span> <span class="text-slate-600">/</span> <b id="numValUkcMod" class="text-red-400">0.4m</b>
+    </div>
+  </div>
+</div>
   </div>
 </div>
                 </div>
@@ -1271,11 +1292,27 @@
                     this.barWeffN.className = `bullet-bar-fill ${data.veto_weff ? 'bg-red-500' : 'bg-emerald-500'}`;
                     this.barWeffS.style.width = `${Math.min(100, ((data.w_eff * 0.9) / 15.0) * 100)}%`;
                     this.barWeffS.className = `bullet-bar-fill bg-emerald-500`;
-                    if (data.official_comparison) {
+if (data.official_comparison) {
+          const c = data.official_comparison;
           const elOff = document.getElementById('txtOfficialVerdict');
           const elMod = document.getElementById('txtModelVerdict');
-          if (elOff) elOff.textContent = data.official_comparison.summary_official || "🟡 官方預警";
-          if (elMod) elMod.textContent = data.official_comparison.summary_model || "🔴 剛性熔斷";
+          if (elOff) elOff.textContent = c.summary_official || "🟡 官方預警";
+          if (elMod) elMod.textContent = c.summary_model || "🔴 剛性熔斷";
+
+          // 動態寫入數值檢核對比
+          const elHsOff = document.getElementById('numValHsOff');
+          const elHsMod = document.getElementById('numValHsMod');
+          const elWOff = document.getElementById('numValWOff');
+          const elWMod = document.getElementById('numValWMod');
+          const elUkcOff = document.getElementById('numValUkcOff');
+          const elUkcMod = document.getElementById('numValUkcMod');
+
+          if (elHsOff) elHsOff.textContent = c.hs_official ? `${c.hs_official}m` : '1.2m';
+          if (elHsMod) elHsMod.textContent = c.hs_model ? `${c.hs_model}m` : `${data.hs_pier.toFixed(1)}m`;
+          if (elWOff) elWOff.textContent = c.w_official ? `${c.w_official}m/s` : '4.5m/s';
+          if (elWMod) elWMod.textContent = c.w_model ? `${c.w_model}m/s` : `${data.w_eff.toFixed(1)}m/s`;
+          if (elUkcOff) elUkcOff.textContent = c.ukc_official ? `${c.ukc_official}m` : '1.8m';
+          if (elUkcMod) elUkcMod.textContent = c.ukc_model ? `${c.ukc_model}m` : `${data.ukc_south.toFixed(1)}m`;
         }
                 } catch (e) { console.error("[DualBulletWidget Error]", e); }
             }
