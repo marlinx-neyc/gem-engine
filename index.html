@@ -292,7 +292,7 @@
                 <div class="text-[11px] text-[#94a3b8] mt-1 flex flex-wrap items-center gap-2 font-mono">
                     <span class="flex items-center gap-1.5 text-slate-200 bg-slate-900 px-2 py-0.5 rounded border border-slate-700">
                         <span class="pulse-dot-green"></span>
-                        <b id="liveClock"><span id="gem-live-clock"><span id="gem-live-clock">10:04:00 CST</span></span></b>
+                        <b id="liveClock"><span id="gem-live-clock"><span id="gem-live-clock"><span id="gem-live-clock">10:04:00 CST</span></span></span></b>
                     </span>
                     <span id="liveDate" class="bg-slate-900 px-2 py-0.5 rounded text-emerald-400 border border-slate-700">2026-10-14 (三)</span>
                     <span>| 心跳: <b id="heartbeatCounter" class="text-sky-400">1</b> 次</span>
@@ -430,7 +430,7 @@
             <!-- 工具 2：當日船班航次檢核 -->
             <div id="toolFerrySchedule" class="card">
                 <div class="card-header">
-                    <span>2. 當日船班航次檢核 (2026-10-13)</span>
+                    <span>2. P26-10-14)</span>
                     <span class="badge badge-yellow">標準時程鎖定</span>
                 </div>
                 <div class="overflow-x-auto">
@@ -831,7 +831,7 @@
                     <span>🔮 30 天月度宏觀全域能量走勢大圖 (常秉義周天 360° 公度曆法與太乙奇門同化)</span>
                     <span class="text-[9.5px] px-2 py-0.5 rounded bg-purple-900/60 text-purple-200 border border-purple-500/50">大道至簡・單一全域能量標量 (E_net)</span>
                 </div>
-                <span class="text-[10px] text-purple-300 font-mono">推估週期：2026-10-13 至 2026-11-11</span>
+                <span class="text-[10px] text-purple-300 font-mono">推估週期：2026-10-14 至 2026-11-11</span>
             </div>
             
             <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-2 text-center font-mono">
@@ -2675,7 +2675,7 @@ if (data.official_comparison) {
 window.gemSyncState = { lastTime: null, timer: null };
 
 function startLiveClock(baseTsStr) {
-  // 解析 "2026-10-14 <span id="gem-live-clock"><span id="gem-live-clock">16:17:50 CST</span></span>" 格式
+  // 解析 "2026-10-14 <span id="gem-live-clock"><span id="gem-live-clock"><span id="gem-live-clock">16:17:50 CST</span></span></span>" 格式
   const cleanStr = baseTsStr.replace(' CST', '').replace(/-/g, '/');
   window.gemSyncState.lastTime = new Date(cleanStr);
   
@@ -2769,17 +2769,21 @@ setInterval(syncLatestDecision, 3000);
 
 
 
+
 <script id="gem-ssot-hydration">
 (function() {
   'use strict';
 
-  // 1. 強制清空全域殘留舊定時器
-  const highestIntervalId = setInterval(";");
-  for (let i = 0; i < highestIntervalId; i++) {
-    clearInterval(i);
+  // [A] 清理全頁殘留定時器
+  function killAllIntervals() {
+    const highestId = setTimeout(";");
+    for (let i = 0; i < highestId; i++) {
+      clearInterval(i);
+    }
   }
+  killAllIntervals();
 
-  // 2.【時間絕緣鎖定】純本地秒級更新，精準單點點擊 ID 節點
+  // [B] 純前端極簡單點時鐘 (唯一更新 gem-live-clock，100% 絕緣不閃爍)
   function tickLiveClock() {
     const now = new Date();
     const hh = String(now.getHours()).padStart(2, '0');
@@ -2789,18 +2793,17 @@ setInterval(syncLatestDecision, 3000);
 
     const clockEl = document.getElementById('gem-live-clock');
     if (clockEl) clockEl.textContent = timeStr;
-
-    document.querySelectorAll('.live-clock, #live-clock, [data-gem-clock="live_time"]').forEach(el => {
-      if (el.id !== 'gem-live-clock') el.textContent = timeStr;
-    });
   }
 
   setInterval(tickLiveClock, 1000);
   tickLiveClock();
 
-  // 3.【SSOT 水合引擎】同步颱風海象、動態數據與重構雙欄對比
+  // [C] 全動態 SSOT 水合
   async function syncSSOTData() {
     try {
+      killAllIntervals();
+      setInterval(tickLiveClock, 1000);
+
       const res = await fetch('latest_decision.json?t=' + Date.now(), { cache: 'no-store' });
       if (!res.ok) return;
       const d = await res.json();
@@ -2808,15 +2811,24 @@ setInterval(syncLatestDecision, 3000);
       window.__gem_isVeto = isVeto;
       const p = d.physics_metrics || {};
 
+      const activeDate = d.timestamp ? d.timestamp.split(' ')[0] : '2026-10-14';
+
+      // 強制同步當日船班航次檢核標題日期
+      document.querySelectorAll('h1, h2, h3, h4, div, span, p').forEach(el => {
+        if (el.children.length === 0 && el.textContent.includes('當日船班航次檢核')) {
+          el.textContent = `2. 當日船班航次檢核 (${activeDate})`;
+        }
+      });
+
       function safeSetText(selector, text, className) {
         document.querySelectorAll(selector).forEach(el => {
-          if (el.id === 'gem-live-clock' || el.getAttribute('data-gem-clock') === 'live_time') return;
+          if (el.id === 'gem-live-clock') return;
           if (text !== undefined) el.textContent = text;
           if (className !== undefined) el.className = className;
         });
       }
 
-      // 3.1 颱風與海象遙測面板同化 (擺脫硬編碼)
+      // 颱風與海象遙測同化
       const currentSpeed = isVeto ? '0.0' : String(p.vessel_speed_kts ?? 11.5);
       const currentSquat = isVeto ? '0.00' : String(p.squat ?? 0.45);
       const currentHs = (p.hs_cwa ?? 1.35).toFixed(2);
@@ -2830,12 +2842,11 @@ setInterval(syncLatestDecision, 3000);
       safeSetText('[data-ssot-key="map_ship_squat"]', `動感蹲沉: ${currentSquat} m`);
       safeSetText('[data-ssot-key="map_ship_status"]', isVeto ? '⚓ 凱鯨號 0.0kts (烏石港靜止避風中)' : `🚢 凱鯨號 ${currentSpeed}kts (通航中)`);
 
-      // 3.2 重構「官方 vs GEM 雙生模型」對比區塊為乾淨獨立雙欄
+      // 獨立雙欄比較結構
       const compContainer = document.querySelector('#official-vs-model-comparison, [data-ssot-container="comparison"]');
       if (compContainer) {
         compContainer.innerHTML = `
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full p-3 bg-slate-900/80 rounded-lg border border-slate-700/60 text-xs">
-            <!-- 左欄：官方氣象署 CWA 報文 -->
             <div class="flex flex-col gap-2 p-3 bg-slate-800/60 rounded border border-amber-500/30">
               <div class="flex items-center justify-between pb-2 border-b border-amber-500/20 font-bold text-amber-300">
                 <span>🏛️ 官方氣象署 CWA 判斷</span>
@@ -2847,7 +2858,6 @@ setInterval(syncLatestDecision, 3000);
                 <div class="flex justify-between items-center"><span>水下裕深 UKC:</span> <span class="font-mono text-amber-300 font-bold text-sm">1.80 m</span></div>
               </div>
             </div>
-            <!-- 右欄：GEM 雙生 PINN 模型 -->
             <div class="flex flex-col gap-2 p-3 bg-slate-800/60 rounded border ${isVeto ? 'border-rose-500/30' : 'border-emerald-500/30'}">
               <div class="flex items-center justify-between pb-2 border-b ${isVeto ? 'border-rose-500/20 text-rose-300' : 'border-emerald-500/20 text-emerald-300'} font-bold">
                 <span>🤖 GEM 雙生模型判斷</span>
@@ -2863,7 +2873,7 @@ setInterval(syncLatestDecision, 3000);
         `;
       }
 
-      // 3.3 數據標籤點對點綁定
+      // 數據節點點對點標記
       document.querySelectorAll('*').forEach(el => {
         if (el.children.length === 0 && !el.id && !el.getAttribute('data-ssot-key')) {
           const txt = el.textContent.trim();
