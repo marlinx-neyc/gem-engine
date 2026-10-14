@@ -540,6 +540,17 @@
                             <div class="bullet-bar-track"><div id="barBulletWeffS" class="bullet-bar-fill bg-emerald-500" style="width: 63%;"></div><div class="bullet-threshold-line" style="left: 67%;"></div></div>
                         </div>
                     </div>
+                    <!-- 貼在第 542 行 </div> 下方、第 543 行 </div> 上方 -->
+<div id="boxOfficialComparison" class="mt-2 pt-1.5 border-t border-slate-800 grid grid-cols-2 gap-1.5 text-[10px] font-mono">
+  <div class="bg-[#070d18] p-1.5 rounded border border-slate-800 text-center">
+    <span class="text-slate-400 block text-[8.5px]">🏛️ 官方氣象署判斷</span>
+    <b id="txtOfficialVerdict" class="text-amber-300 font-bold">🟡 預警開放</b>
+  </div>
+  <div class="bg-[#070d18] p-1.5 rounded border border-slate-800 text-center">
+    <span class="text-slate-400 block text-[8.5px]">🤖 GEM 雙生模型判斷</span>
+    <b id="txtModelVerdict" class="text-red-400 font-bold">🔴 0.0% 剛性熔斷</b>
+  </div>
+</div>
                 </div>
             </div>
         </div>
@@ -1260,6 +1271,12 @@
                     this.barWeffN.className = `bullet-bar-fill ${data.veto_weff ? 'bg-red-500' : 'bg-emerald-500'}`;
                     this.barWeffS.style.width = `${Math.min(100, ((data.w_eff * 0.9) / 15.0) * 100)}%`;
                     this.barWeffS.className = `bullet-bar-fill bg-emerald-500`;
+                    if (data.official_comparison) {
+          const elOff = document.getElementById('txtOfficialVerdict');
+          const elMod = document.getElementById('txtModelVerdict');
+          if (elOff) elOff.textContent = data.official_comparison.summary_official || "🟡 官方預警";
+          if (elMod) elMod.textContent = data.official_comparison.summary_model || "🔴 剛性熔斷";
+        }
                 } catch (e) { console.error("[DualBulletWidget Error]", e); }
             }
         }
