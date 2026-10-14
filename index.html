@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>🌊 GEM-V38F 龜山島大道至簡海事戰術決策與自主進化主控台</title>
+    <title>🌊 v43.0 Master SSOT 龜山島大道至簡海事戰術決策與自主進化主控台</title>
     <!-- Tailwind CSS 官方 CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Leaflet.js 高可用地圖套件 -->
@@ -260,7 +260,7 @@
     <section id="drawerExecutiveBriefing" class="card bg-slate-950 border-sky-500/60 p-3 hidden transition-all duration-300">
         <div class="flex justify-between items-center border-b border-slate-800 pb-1.5 mb-2">
             <span class="text-xs font-black text-sky-300 flex items-center gap-1.5">
-                🏛️ 【GEM-V38F 權威總裁海事戰略綜合簡報】
+                🏛️ 【v43.0 Master SSOT 權威總裁海事戰略綜合簡報】
             </span>
             <button class="text-slate-400 hover:text-white text-xs font-mono" onclick="toggleExecutiveBriefing()">✕ 關閉</button>
         </div>
@@ -294,7 +294,7 @@
                         <span class="pulse-dot-green"></span>
                         <b id="liveClock">10:04:00 CST</b>
                     </span>
-                    <span class="bg-slate-900 px-2 py-0.5 rounded text-emerald-400 border border-slate-700">2026-10-13 (二) 寒露候</span>
+                    <span id="liveDate" class="bg-slate-900 px-2 py-0.5 rounded text-emerald-400 border border-slate-700">2026-10-14 (三)</span>
                     <span>| 心跳: <b id="heartbeatCounter" class="text-sky-400">1</b> 次</span>
                     <span>| 裁決: <b id="ssotDecisionBadge" class="text-red-400 font-bold">🔴 0.0% 物理熔斷 (Q4)</b></span>
                 </div>
@@ -359,7 +359,7 @@
             <button class="px-2 py-0.5 bg-purple-900/60 hover:bg-purple-800 border border-purple-500 text-purple-200 rounded text-[10px] font-bold" onclick="triggerAutonomousTraining()">⚡ 自主訓練 10 步</button>
         </div>
         <div class="flex items-center gap-2 text-slate-400 font-mono text-[10px]">
-            <span>同化模式：<b class="text-purple-300">GEM-V38F (90%目標/75%底線)</b></span>
+            <span>同化模式：<b class="text-purple-300">v43.0 Master SSOT (90%目標/75%底線)</b></span>
         </div>
     </section>
 
@@ -2668,26 +2668,57 @@ if (data.official_comparison) {
             onInputChanged();
         });
     
-// --- SSOT 動態同步 latest_decision.json 時間與狀態中樞 ---
+
+
+
+// --- SSOT 動態時間與狀態同步終極中樞 ---
+window.gemSyncState = { lastTime: null, timer: null };
+
+function startLiveClock(baseTsStr) {
+  // 解析 "2026-10-14 16:17:50 CST" 格式
+  const cleanStr = baseTsStr.replace(' CST', '').replace(/-/g, '/');
+  window.gemSyncState.lastTime = new Date(cleanStr);
+  
+  if (window.gemSyncState.timer) clearInterval(window.gemSyncState.timer);
+  
+  window.gemSyncState.timer = setInterval(() => {
+    if (!window.gemSyncState.lastTime) return;
+    window.gemSyncState.lastTime.setSeconds(window.gemSyncState.lastTime.getSeconds() + 1);
+    
+    const d = window.gemSyncState.lastTime;
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const date = String(d.getDate()).padStart(2, '0');
+    const hours = String(d.getHours()).padStart(2, '0');
+    const mins = String(d.getMinutes()).padStart(2, '0');
+    const secs = String(d.getSeconds()).padStart(2, '0');
+    
+    const clockEl = document.getElementById('liveClock');
+    if (clockEl) clockEl.textContent = `${hours}:${mins}:${secs} CST`;
+    
+    const dateEl = document.getElementById('liveDate');
+    if (dateEl) dateEl.textContent = `${year}-${month}-${date} (三)`;
+  }, 1000);
+}
+
 async function syncLatestDecision() {
   try {
     const res = await fetch('latest_decision.json?t=' + Date.now(), { cache: 'no-store' });
     if (!res.ok) return;
     const data = await res.json();
     
-    // 同步時間與版本標籤
+    // 1. 接管時鐘並載入最新時間
     if (data.timestamp) {
-      const clockEl = document.getElementById('liveClock');
-      if (clockEl) clockEl.textContent = data.timestamp;
-      const dateEl = document.getElementById('liveDate');
-      if (dateEl) dateEl.textContent = data.timestamp.split(' ')[0];
+      startLiveClock(data.timestamp);
     }
+    
+    // 2. 同步版本標籤
     if (data.version) {
       const verEl = document.getElementById('versionBadge');
       if (verEl) verEl.textContent = data.version;
     }
     
-    // 同步決策標題
+    // 3. 同步決策標題
     if (data.decision) {
       const bannerTitle = document.getElementById('bannerTitle');
       if (bannerTitle) bannerTitle.textContent = data.decision;
@@ -2695,7 +2726,7 @@ async function syncLatestDecision() {
       if (ssotBadge) ssotBadge.textContent = data.decision;
     }
     
-    // 驅動頁面 UI 重新渲染
+    // 4. 驅動面板 UI 重繪
     if (data.physics_metrics && typeof engine !== 'undefined' && engine.state) {
       const p = data.physics_metrics;
       engine.state.hs_cwa = p.hs_cwa ?? engine.state.hs_cwa;
@@ -2708,8 +2739,9 @@ async function syncLatestDecision() {
     console.warn("Sync error:", err);
   }
 }
+
 syncLatestDecision();
-setInterval(syncLatestDecision, 2000);
+setInterval(syncLatestDecision, 3000);
 
 </script>
 </body>
