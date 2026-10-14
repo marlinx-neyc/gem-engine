@@ -2766,12 +2766,18 @@ setInterval(syncLatestDecision, 3000);
 
 
 
+
 <script id="gem-ssot-hydration">
 (function() {
-  if (window.__gem_clock_timer) clearInterval(window.__gem_clock_timer);
-  if (window.__gem_ssot_timer) clearInterval(window.__gem_ssot_timer);
+  // 1. 強制清空全域殘留舊定定時器 (1~10000 掃除)
+  for (let i = 1; i < 10000; i++) {
+    window.clearInterval(i);
+    window.clearTimeout(i);
+  }
 
-  // 【獨立前端即時時鐘】僅更新 [data-gem-clock] 或 .live-clock，絕不覆寫數據更新時間戳
+  window.__gem_heartbeat = (window.__gem_heartbeat || 0);
+
+  // 2. 獨立前端即時動態時鐘 (100% 本地瀏覽器驅動，純秒級運作)
   function updateClock() {
     const now = new Date();
     const hh = String(now.getHours()).padStart(2, '0');
@@ -2779,14 +2785,26 @@ setInterval(syncLatestDecision, 3000);
     const ss = String(now.getSeconds()).padStart(2, '0');
     const timeStr = `${hh}:${mm}:${ss} CST`;
 
-    document.querySelectorAll('[data-gem-clock], .live-clock, #live-clock').forEach(el => {
+    document.querySelectorAll('[data-gem-clock="live_time"], .live-clock, #live-clock').forEach(el => {
       el.textContent = timeStr;
+    });
+
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const date = String(now.getDate()).padStart(2, '0');
+    const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
+    const dayStr = `${year}-${month}-${date} (${weekDays[now.getDay()]})`;
+
+    document.querySelectorAll('[data-gem-clock="live_date"]').forEach(el => {
+      el.textContent = dayStr;
     });
   }
 
-  // 【SSOT 全面板持久標籤水合】使用 data-gem-ssot 屬性確保二次刷新不塌陷
+  // 3. SSOT 面板數據同步引擎 (徹底排除時間節點，不產生寫入搶佔)
   async function syncSSOT() {
     try {
+      window.__gem_heartbeat++;
+
       const res = await fetch('latest_decision.json?t=' + Date.now(), { cache: 'no-store' });
       if (!res.ok) return;
       const d = await res.json();
@@ -2794,10 +2812,26 @@ setInterval(syncLatestDecision, 3000);
       window.__gem_isVeto = isVeto;
       const p = d.physics_metrics || {};
 
-      // 首次執行自動為標的 DOM 添加 data-gem-ssot 屬性
+      // 首次 DOM 掃描：嚴格優先分類動態時鐘與數據屬性
       document.querySelectorAll('*').forEach(el => {
-        if (el.children.length === 0 && !el.getAttribute('data-gem-ssot')) {
+        if (el.children.length === 0 && !el.getAttribute('data-gem-ssot') && !el.getAttribute('data-gem-clock')) {
           const txt = el.textContent.trim();
+
+          // A. 優先隔離即時時鐘 (防止被 SSOT 時間覆寫)
+          if (/^\d{2}:\d{2}:\d{2}/.test(txt) || (txt.includes('CST') && !txt.includes('版本') && !txt.includes('同步'))) {
+            el.setAttribute('data-gem-clock', 'live_time');
+            return;
+          }
+          if (/^\d{4}-\d{2}-\d{2}\s*\([日一二三四五六]\)$/.test(txt)) {
+            el.setAttribute('data-gem-clock', 'live_date');
+            return;
+          }
+          if (txt.includes('心跳:')) {
+            el.setAttribute('data-gem-clock', 'heartbeat');
+            return;
+          }
+
+          // B. 精準鎖定數據標籤
           if (txt.includes('物理熔斷') || txt.includes('全線開放') || txt.includes('游擊調撥') || txt.includes('Q1') || txt.includes('Q4')) {
             el.setAttribute('data-gem-ssot', 'decision');
           } else if (txt.includes('決斷坍縮') || txt.includes('不要做') || txt.includes('要做')) {
@@ -2838,7 +2872,7 @@ setInterval(syncLatestDecision, 3000);
             el.setAttribute('data-gem-ssot', 'ship_heading');
           } else if (txt.includes('凱鯨號')) {
             el.setAttribute('data-gem-ssot', 'ship_title');
-          } else if (txt.includes('系統更新時間') || txt.includes('SSOT updated')) {
+          } else if (txt.includes('系統更新時間') || txt.includes('SSOT updated') || txt.includes('SSOT同步')) {
             el.setAttribute('data-gem-ssot', 'ssot_timestamp');
           }
         }
@@ -2878,11 +2912,17 @@ setInterval(syncLatestDecision, 3000);
       updateAttr('ship_heading', isVeto ? '航向: 烏石港錨泊區 (靜止避風)' : '航向: 245° WSW (直航烏石港)');
       updateAttr('ship_title', isVeto ? '⚓ 凱鯨號 0.0kts (烏石港停泊)' : `🚢 凱鯨號 ${p.vessel_speed_kts ?? 11.5}kts`);
 
+      // 更新心跳計數
+      document.querySelectorAll('[data-gem-clock="heartbeat"]').forEach(el => {
+        el.textContent = `心跳: ${window.__gem_heartbeat} 次`;
+      });
+
+      // 靜態 SSOT 資料版本時間戳
       if (d.timestamp) {
         updateAttr('ssot_timestamp', `系統數據版本: ${d.version || 'v43.0'} | SSOT同步: ${d.timestamp}`);
       }
 
-      // 鎖定船舶 Marker 位置防止圖層撕裂
+      // 船舶 Marker 位置鎖定
       if (window.shipMarker) {
         const wushiPort = [24.8700, 121.8390];
         if (!window.shipMarker.__gem_hooked) {
@@ -2907,7 +2947,7 @@ setInterval(syncLatestDecision, 3000);
         }
       }
 
-      // Chart.js 雷達圖更新
+      // 雷達圖更新
       if (window.radarChart && window.radarChart.data && window.radarChart.data.datasets && window.radarChart.data.datasets.length > 0) {
         window.radarChart.data.datasets[0].data = [
           p.hs_pier || 0,
@@ -2923,6 +2963,7 @@ setInterval(syncLatestDecision, 3000);
     }
   }
 
+  // 啟動專屬隔離定時器
   window.__gem_clock_timer = setInterval(updateClock, 1000);
   updateClock();
 
