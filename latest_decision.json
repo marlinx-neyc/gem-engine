@@ -1,6 +1,6 @@
 {
   "version": "v43.0 Master SSOT",
-  "timestamp": "2026-10-14 16:01:29 CST",
+  "timestamp": "2026-10-14 16:03:38 CST",
   "decision_code": "Q4",
   "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)",
   "confidence_score": 100.0,
@@ -8,12 +8,12 @@
   "sender_id": "CWA_API_REALTIME",
   "tier0_reason": "遠洋長浪穿透引發港池共振與越浪熔斷 (Hard VETO)",
   "system": {
-    "timestamp": "2026-10-14 16:01:29 CST",
+    "timestamp": "2026-10-14 16:03:38 CST",
     "status": "ONLINE",
     "comm_hz": 10
   },
   "feedback_control": {
-    "info_recv_timestamp": "2026-10-14 16:01:29 CST",
+    "info_recv_timestamp": "2026-10-14 16:03:38 CST",
     "has_contradiction": false,
     "raw_rl_prediction": "Q4"
   },
@@ -33,17 +33,19 @@
       "status": "PASS"
     },
     "ukc": {
-      "val": 0.49,
-      "status": "VETO"
+      "val": 5.28,
+      "status": "PASS"
     },
     "fb_pier": {
-      "val": 0.15,
-      "status": "VETO"
+      "val": 2.55,
+      "status": "PASS"
     }
   },
   "typhoon_qimen_prediction": {
     "cyclone_dynamic": "東北季風強湧浪槽線",
-    "qimen_anomaly_forecast": "【驚門長浪共振】"
+    "qimen_anomaly_forecast": "【驚門 (西方兌宮屬金)】驚門長浪共振穿透，港池消能瓦解（同化匹配度 96.0%）",
+    "eight_gods": "白虎 (主長浪狂湧) / 騰蛇 (主風場急轉)",
+    "qimen_match_rate": 96.0
   },
   "physics_metrics": {
     "hs_cwa": 3.7,
@@ -53,84 +55,32 @@
     "eta_tide": 0.65,
     "pax": 150,
     "draft": 1.2,
-    "squat": 0.76,
+    "squat": 0.337,
     "hs_pier": 3.7,
     "hs_north": 3.92,
     "w_eff": 5.03,
     "w_eff_south": 5.03,
-    "ukc_south": 0.49,
-    "ukc_north": -5.23,
-    "fb_north": 0.15,
-    "fb_south": 1.85,
+    "ukc_south": 5.28,
+    "ukc_north": 3.91,
+    "fb_north": 2.55,
+    "fb_south": 2.55,
     "is_overtopping": true,
     "limit_hs": 1.13,
     "limit_weff": 10.17,
     "veto_hs": true,
     "veto_weff": false,
-    "veto_ukc": true,
-    "veto_fb": true,
+    "veto_ukc": false,
+    "veto_fb": false,
     "hard_veto": true,
     "has_veto": true,
     "reason": "遠洋長浪穿透引發港池共振與越浪熔斷 (Hard VETO)",
     "is_guerrilla": false,
-    "hist_match_rate": 93.8,
+    "hist_match_rate": 96.0,
     "rl_alpha": 0.9,
     "flux_k": 10.97,
-    "impedance_v": 6.39,
-    "e_net": 9.14,
+    "impedance_v": 0.48,
+    "e_net": 6.77,
     "p_veto": 1.0,
-    "evac_minutes": 24
-  },
-  "guerrilla_dispatch": {
-    "north_role": "迎風失效 🔴 (越浪 FB=0.15m)",
-    "south_role": "淺水失效 🔴 (UKC=0.49m 觸底)",
-    "evac_time_min": 24,
-    "tactical_schedule": "11:20 止登 ｜ 14:20 全員撤離"
-  },
-  "official_comparison": {
-    "summary_official": "官方 🟡 3 PASS",
-    "summary_model": "GEM 🔴 3 VETO",
-    "rows": [
-      {
-        "metric": "• 波高 Hs",
-        "officialVal": "3.70m (限≤1.13m)",
-        "officialPass": false,
-        "modelVal": "北:3.92/南:3.70m",
-        "modelPass": false
-      },
-      {
-        "metric": "• 攻角風 Weff",
-        "officialVal": "9.50m/s (限≤10.17)",
-        "officialPass": true,
-        "modelVal": "北:5.03/南:5.03m/s",
-        "modelPass": true
-      },
-      {
-        "metric": "• 裕深 UKC",
-        "officialVal": "3.75m (粗估≥1.50)",
-        "officialPass": true,
-        "modelVal": "北:-5.23/南:0.49m",
-        "modelPass": false
-      },
-      {
-        "metric": "• 乾舷 FB",
-        "officialVal": "2.55m (靜態≥0.50)",
-        "officialPass": true,
-        "modelVal": "北:0.15/南:1.85m",
-        "modelPass": false
-      }
-    ],
-    "qualitative_text": "官方方案 A 採單點浮標粗估，忽視長浪共振穿透（Kd=1.00）與雙體船蹲沉下陷（0.82m），產生盲目 PASS 假象；GEM 方案 C 融合 Level 5/7 算子與越浪視覺感知，第一時間戳破假安全，執行剛性一票否決。",
-    "quantitative_text": "• 裕深偏差: 官方粗估 3.75m vs GEM 動態 0.49m (差 -3.26m 觸底)\n• 乾舷偏差: 官方粗算 2.55m vs GEM 覆寫 0.15m (差 -2.40m 覆頂)\n• 能量標量: E_net = 31.53 E_crit (破防機率 P_veto > 100.0%)",
-    "feedback_loop": "端側 Edge RL 即刻施加 -9999 懲罰並收斂至 Q4 封島；誤差張量回饋至 UKF 協方差矩陣並寫入 KB_20260904 智庫， 11:20 剛性止登、14:20 全員撤離。"
-  },
-  "rl_feedback_status": {
-    "has_contradiction": false,
-    "raw_rl_prediction": "Q4"
-  },
-  "pattern_match": {
-    "matched_cases": 12,
-    "historical_closure_rate": 0.35,
-    "max_similarity_score": 0.9123
+    "evac_minutes": 20
   }
 }
