@@ -2760,49 +2760,47 @@ setInterval(syncLatestDecision, 3000);
 
 
 
+
+
+
 <script id="gem-ssot-hydration">
 (function() {
+  // 終止背景殘留舊定時器
   if (window.__gem_clock_timer) clearInterval(window.__gem_clock_timer);
   if (window.__gem_ssot_timer) clearInterval(window.__gem_ssot_timer);
 
-  let liveClockDate = null;
-  let lastTimestampStr = "";
-
-  // 1. 純前端平滑秒數累加器
-  window.__gem_clock_timer = setInterval(() => {
-    if (!liveClockDate) return;
-    liveClockDate.setSeconds(liveClockDate.getSeconds() + 1);
-    const hh = String(liveClockDate.getHours()).padStart(2, '0');
-    const mm = String(liveClockDate.getMinutes()).padStart(2, '0');
-    const ss = String(liveClockDate.getSeconds()).padStart(2, '0');
+  // 1. 單一權威純前端時鐘累加器 (徹底消滅時間跳動/倒退/搶佔)
+  function updateAuthoritativeClock() {
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mm = String(now.getMinutes()).padStart(2, '0');
+    const ss = String(now.getSeconds()).padStart(2, '0');
     const timeStr = `${hh}:${mm}:${ss} CST`;
 
     document.querySelectorAll('*').forEach(el => {
-      if (el.children.length === 0 && (el.textContent.includes('CST') || /\d{2}:\d{2}:\d{2}/.test(el.textContent))) {
-        if (/\d{2}:\d{2}/.test(el.textContent)) el.textContent = timeStr;
+      if (el.children.length === 0 && (el.textContent.includes('CST') || /^\d{2}:\d{2}:\d{2}/.test(el.textContent.trim()))) {
+        el.textContent = timeStr;
       }
     });
-  }, 1000);
+  }
+  window.__gem_clock_timer = setInterval(updateAuthoritativeClock, 1000);
+  updateAuthoritativeClock();
 
-  // 2. SSOT 全面板水合與 DOM 完全修正
+  // 2. SSOT 全面板深度數據同化
   async function syncSSOT() {
     try {
       const res = await fetch('latest_decision.json?t=' + Date.now(), { cache: 'no-store' });
       if (!res.ok) return;
       const d = await res.json();
 
-      if (d.timestamp && d.timestamp !== lastTimestampStr) {
-        lastTimestampStr = d.timestamp;
-        liveClockDate = new Date(d.timestamp.replace(' CST', '').replace(/-/g, '/'));
-      }
-
       const isVeto = d.hard_veto_alert || (d.decision && d.decision.includes('Q4'));
+      window.__gem_isVeto = isVeto;
       const p = d.physics_metrics || {};
 
-      // DOM 節點文字即時更正
+      // DOM 文字逐節點檢核與客觀校正
       document.querySelectorAll('*').forEach(el => {
         if (el.children.length === 0) {
-          // 頂部裁決標題與坍縮
+          // 頂部大字決策與決斷坍縮
           if (el.textContent.includes('物理熔斷') || el.textContent.includes('全線開放') || el.textContent.includes('游擊調撥')) {
             el.textContent = d.decision;
           }
@@ -2816,9 +2814,23 @@ setInterval(syncLatestDecision, 3000);
             el.textContent = d.hard_veto_alert ? 'HARD VETO ACTIVE' : 'HARD VETO PASS';
           }
 
-          // NCDR 極端天候專區解鎖與數據連動
-          if (el.textContent.includes('應變中心一級開設') || el.textContent.includes('防險管制') || el.textContent.includes('常態監測')) {
-            el.textContent = isVeto ? '🔴 物理熔斷 (防險管制)' : '🟢 常態監測 (通航無虞)';
+          // 即時碼頭狀態：修復「北岸熔斷、南岸卻條件合格」之矛盾
+          if (el.textContent.includes('越浪熔斷') || el.textContent.includes('迎風超標') || el.textContent.includes('主泊位')) {
+            el.textContent = d.dock_status.north;
+          }
+          if (el.textContent.includes('條件合格') || el.textContent.includes('備用泊位') || el.textContent.includes('長浪穿透')) {
+            el.textContent = d.dock_status.south;
+            if (isVeto) el.className = el.className.replace('text-emerald-400', 'text-rose-400');
+          }
+
+          // 兩儀能量消長語意校正：消除「陽盛陰衰 (動能佔比 32%)」之語病
+          if (el.textContent.includes('能量破防：陽盛陰衰') || el.textContent.includes('超出臨界勢壘')) {
+            el.textContent = `能量破防：長浪越浪破防 (動能佔比 ${d.yang_ratio}%) 碼頭乾舷阻抗失效`;
+          }
+
+          // === NCDR 極端天候專區：解鎖硬編碼與數據連動 ===
+          if (el.textContent.includes('應變中心一級開設') || el.textContent.includes('未達開設標準') || el.textContent.includes('防險管制')) {
+            el.textContent = isVeto ? '🔴 未達開設標準 (海象長浪管制)' : '🟢 常態水文監測 (通航無虞)';
             el.className = isVeto ? 'bg-rose-950 text-rose-300 border border-rose-600/50 px-2 py-0.5 rounded text-xs font-bold' : 'bg-emerald-950 text-emerald-300 border border-emerald-600/50 px-2 py-0.5 rounded text-xs font-bold';
           }
           if (el.textContent.includes('955 hPa') || el.textContent.includes('實測風速')) {
@@ -2834,26 +2846,26 @@ setInterval(syncLatestDecision, 3000);
             el.textContent = `即時潮位：+${p.eta_tide || 0.85}m (預留乾舷 ${p.fb_north || 0.15}m)`;
           }
 
-          // NCDR 清單內容動態更新
+          // NCDR 清單項目動態更新
           if (el.textContent.includes('已劃定為禁止進入警戒區') || el.textContent.includes('全天禁止旅客登島') || el.textContent.includes('龜山島管制')) {
-            el.textContent = isVeto ? '• 龜山島管制：已劃定為禁止進入警戒區，全天禁止旅客登島' : '• 龜山島管制：全線開放通航，請遊客依船班時間登島';
+            el.textContent = isVeto ? '• 龜山島管制：因長浪與越浪熔斷，全日禁止旅客登島' : '• 龜山島管制：全線開放通航，請遊客依船班時間登島';
           }
           if (el.textContent.includes('客輪與娛樂漁船全數泊靠烏石港') || el.textContent.includes('船舶作業')) {
-            el.textContent = isVeto ? '• 船舶作業：客輪與娛樂漁船全數泊靠烏石港內港避風' : '• 船舶作業：客輪正常通航靠泊，嚴守限速指引';
+            el.textContent = isVeto ? '• 船舶作業：客輪全數進港停泊，禁止出海航行' : '• 船舶作業：客輪正常通航靠泊，嚴守限速指引';
           }
           if (el.textContent.includes('長浪衝擊：') || el.textContent.includes('外海遠洋湧浪直撲')) {
             el.textContent = `• 長浪衝擊：外海遠洋湧浪直撲，實測有效波高 Hs ${p.hs_cwa || 1.35}m, Tp ${p.tp || 12.8}s`;
           }
           if (el.textContent.includes('季風共伴：') || el.textContent.includes('局域風場：')) {
-            el.textContent = `• 局域風場：東北東風局域風速 ${p.w_local || 8.5} m/s 疊加，攻角 ${p.delta_theta || 42}°`;
+            el.textContent = `• 局域風場：東北季風風速 ${p.w_local || 8.5} m/s 疊加，攻角 ${p.delta_theta || 42}°`;
           }
           if (el.textContent.includes('滿潮暴潮：') || el.textContent.includes('潮位水文：')) {
             el.textContent = `• 潮位水文：即時潮位 +${p.eta_tide || 0.85}m，碼頭預留乾舷僅剩 ${p.fb_north || 0.15}m`;
           }
 
-          // AIS 船舶狀態動態糾錯 (防止出現「停泊中但航速 12.5kts」之矛盾)
-          if (el.textContent.includes('航行中') || el.textContent.includes('靜止靠泊')) {
-            el.textContent = isVeto ? '● 靜止靠泊 (烏石港)' : '● 航行中';
+          // === 海圖與 AIS 船舶狀態動態糾正 ===
+          if (el.textContent.includes('航行中') || el.textContent.includes('靜止避風')) {
+            el.textContent = isVeto ? '● 靜止避風 (烏石港內港碼頭)' : '● 航行中';
             el.className = isVeto ? 'text-amber-400 font-bold' : 'text-emerald-400 font-bold';
           }
           if (el.textContent.includes('航速:')) {
@@ -2869,27 +2881,40 @@ setInterval(syncLatestDecision, 3000);
             el.textContent = isVeto ? '⚓ 凱鯨號 0.0kts (烏石港停泊)' : `🚢 凱鯨號 ${p.vessel_speed_kts || 11.5}kts`;
           }
 
-          // 兩儀動態消長條
+          // 陽陰消長百分比文字
           if (/陽\s*\d+%/.test(el.textContent)) el.textContent = `陽 ${d.yang_ratio}%`;
           if (/陰\s*\d+%/.test(el.textContent)) el.textContent = `陰 ${d.yin_ratio}%`;
         }
       });
 
-      // 3. 地圖船舶標點 (Leaflet Map Marker) 座標動態搬移至烏石港內
-      if (window.shipMarker && isVeto) {
-        window.shipMarker.setLatLng([24.8700, 121.8390]);
-        if (window.shipMarker.getPopup()) {
-          window.shipMarker.getPopup().setContent(`
-            <div style="font-size:12px; font-weight:bold; color:#f8fafc; padding:2px;">
-              ⚓ 凱鯨號雙體客輪 (TDX AIS)<br/>
-              <span style="color:#f43f5e;">狀態: 物理熔斷 / 烏石港靜止避風中</span><br/>
-              航速: 0.0 kts | 航向: 烏石港錨泊區
-            </div>
-          `);
+      // 3. 船舶定位 Monkey-Patch 攔截器 (封鎖一切背景動畫位移，鎖死在烏石港泊位)
+      if (window.shipMarker) {
+        const wushiPort = [24.8700, 121.8390];
+        if (!window.shipMarker.__gem_hooked) {
+          window.shipMarker.__gem_hooked = true;
+          const origSetLatLng = window.shipMarker.setLatLng.bind(window.shipMarker);
+          window.shipMarker.setLatLng = function(latlng, options) {
+            if (window.__gem_isVeto) {
+              return origSetLatLng(wushiPort, options);
+            }
+            return origSetLatLng(latlng, options);
+          };
+        }
+        if (isVeto) {
+          window.shipMarker.setLatLng(wushiPort);
+          if (window.shipMarker.getPopup()) {
+            window.shipMarker.getPopup().setContent(`
+              <div style="font-size:12px; font-weight:bold; color:#f8fafc; padding:2px;">
+                ⚓ 凱鯨號雙體客輪 (TDX AIS)<br/>
+                <span style="color:#f43f5e;">狀態: 物理熔斷 / 烏石港靜止避風中</span><br/>
+                航速: 0.0 kts | 航向: 烏石港錨泊區
+              </div>
+            `);
+          }
         }
       }
 
-      // 4. 雷達圖 (Chart.js / Canvas) 雙端同步重繪
+      // 4. 雷達圖雙端同步重繪 (Chart.js 五維向量實時水合)
       if (window.radarChart && d.physics_metrics) {
         if (window.radarChart.data && window.radarChart.data.datasets) {
           window.radarChart.data.datasets[0].data = [
