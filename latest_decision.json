@@ -1,86 +1,81 @@
 {
   "version": "v43.0 Master SSOT",
-  "timestamp": "2026-10-14 16:17:50 CST",
+  "timestamp": "2026-10-14 18:56:28 CST",
   "decision_code": "Q4",
   "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)",
+  "binary_collapse": "【不要做（雙岸失效，嚴禁靠泊與登島，直航烏石港）】",
   "confidence_score": 100.0,
   "hard_veto_alert": true,
-  "sender_id": "CWA_API_REALTIME",
-  "tier0_reason": "遠洋長浪穿透引發港池共振與越浪熔斷 (Hard VETO)",
+  "e_net": 2.6,
+  "yang_ratio": 32,
+  "yin_ratio": 68,
+  "adaptive_tune_alpha": 0.657,
   "system": {
-    "timestamp": "2026-10-14 16:17:50 CST",
+    "timestamp": "2026-10-14 18:56:28 CST",
     "status": "ONLINE",
     "comm_hz": 10
   },
-  "feedback_control": {
-    "info_recv_timestamp": "2026-10-14 16:17:50 CST",
-    "has_contradiction": false,
-    "raw_rl_prediction": "Q4"
-  },
   "tactical_decision": {
-    "q_mode": "🔴 Q4 嚴禁靠泊",
-    "reason": "遠洋長浪穿透引發港池共振與越浪熔斷 (Hard VETO)",
+    "q_mode": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)",
+    "reason": "【不要做（雙岸失效，嚴禁靠泊與登島，直航烏石港）】",
     "veto_pass": false,
-    "dispatch_status": "NO_DISPATCH"
+    "speed_limit": "0.0 kts (禁止靠泊)",
+    "evac_time_min": 20,
+    "tactical_schedule": "11:20 止登 ｜ 14:20 全員撤離"
+  },
+  "historical_lake_distillation": {
+    "cosine_similarity": 0.9981,
+    "cosine_similarity_pct": 99.8,
+    "matched_case": "KB_20260904_ESE_OVERTOPPING",
+    "is_lake_tightened": true
+  },
+  "qimen_macro_topology": {
+    "gate": "驚門 (西方兌宮屬金)",
+    "god": "白虎 (主長浪共振穿透，港池消能瓦解)",
+    "q_consensus_pct": 95.0,
+    "attention_distribution": "65% 微觀物理 + 35% 宏觀奇門"
+  },
+  "dock_status": {
+    "north": "越浪熔斷 🔴",
+    "south": "淺水/共振失效 🔴"
+  },
+  "telemetry_metrics": {
+    "tdx_ais_pct": 99.2,
+    "cv_overtopping": 1.65,
+    "squat_m": 0.27,
+    "rl_alpha": 0.657
   },
   "veto_matrix": {
     "hs_pier": {
-      "val": 3.7,
-      "status": "VETO"
+      "val": 1.35,
+      "status": "FAIL"
     },
     "w_local": {
-      "val": 5.03,
+      "val": 6.32,
       "status": "PASS"
     },
     "ukc": {
-      "val": 5.28,
+      "val": 3.27,
       "status": "PASS"
     },
     "fb_pier": {
-      "val": 2.55,
-      "status": "PASS"
+      "val": 0.15,
+      "status": "FAIL"
     }
   },
-  "typhoon_qimen_prediction": {
-    "cyclone_dynamic": "東北季風強湧浪槽線",
-    "qimen_anomaly_forecast": "【驚門 (西方兌宮屬金)】驚門長浪共振穿透，港池消能瓦解（同化匹配度 96.0%）",
-    "eight_gods": "白虎 (主長浪狂湧) / 騰蛇 (主風場急轉)",
-    "qimen_match_rate": 96.0
-  },
   "physics_metrics": {
-    "hs_cwa": 3.7,
-    "w_local": 9.5,
-    "tp": 15.5,
-    "delta_theta": 58.0,
-    "eta_tide": 0.65,
-    "pax": 150,
-    "draft": 1.2,
-    "squat": 0.337,
-    "hs_pier": 3.7,
-    "hs_north": 3.92,
-    "w_eff": 5.03,
-    "w_eff_south": 5.03,
-    "ukc_south": 5.28,
-    "ukc_north": 3.91,
-    "fb_north": 2.55,
-    "fb_south": 2.55,
-    "is_overtopping": true,
-    "limit_hs": 1.13,
-    "limit_weff": 10.17,
-    "veto_hs": true,
-    "veto_weff": false,
-    "veto_ukc": false,
-    "veto_fb": false,
+    "hs_cwa": 1.35,
+    "w_local": 8.5,
+    "tp": 12.8,
+    "delta_theta": 42.0,
+    "eta_tide": 0.85,
+    "squat": 0.27,
+    "hs_pier": 1.35,
+    "w_eff": 6.32,
+    "ukc_south": 3.27,
+    "fb_north": 0.15,
     "hard_veto": true,
-    "has_veto": true,
-    "reason": "遠洋長浪穿透引發港池共振與越浪熔斷 (Hard VETO)",
-    "is_guerrilla": false,
-    "hist_match_rate": 96.0,
-    "rl_alpha": 0.9,
-    "flux_k": 10.97,
-    "impedance_v": 0.48,
-    "e_net": 6.77,
-    "p_veto": 1.0,
+    "e_net": 2.6,
     "evac_minutes": 20
   }
 }
