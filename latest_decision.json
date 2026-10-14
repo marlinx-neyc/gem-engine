@@ -1,6 +1,6 @@
 {
   "version": "v43.0 Master SSOT",
-  "timestamp": "2026-10-14 19:11:44 CST",
+  "timestamp": "2026-10-14 19:14:00 CST",
   "decision_code": "Q4",
   "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)",
   "binary_collapse": "【不要做（雙岸失效，嚴禁靠泊與登島，直航烏石港）】",
@@ -11,7 +11,7 @@
   "yin_ratio": 68,
   "adaptive_tune_alpha": 0.657,
   "system": {
-    "timestamp": "2026-10-14 19:11:44 CST",
+    "timestamp": "2026-10-14 19:14:00 CST",
     "status": "ONLINE",
     "comm_hz": 10
   },
@@ -22,7 +22,7 @@
   "telemetry_metrics": {
     "tdx_ais_pct": 99.2,
     "cv_overtopping": 1.65,
-    "squat_m": 0.27,
+    "squat_m": 0.0,
     "rl_alpha": 0.657
   },
   "physics_metrics": {
@@ -31,7 +31,7 @@
     "tp": 12.8,
     "delta_theta": 42.0,
     "eta_tide": 0.85,
-    "squat": 0.27,
+    "squat": 0.0,
     "hs_pier": 1.35,
     "w_eff": 6.32,
     "ukc_south": 3.27,
