@@ -1,6 +1,6 @@
 {
   "version": "v43.0 Master SSOT",
-  "timestamp": "2026-10-14 16:03:38 CST",
+  "timestamp": "2026-10-14 16:03:50 CST",
   "decision_code": "Q4",
   "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)",
   "confidence_score": 100.0,
@@ -8,12 +8,12 @@
   "sender_id": "CWA_API_REALTIME",
   "tier0_reason": "遠洋長浪穿透引發港池共振與越浪熔斷 (Hard VETO)",
   "system": {
-    "timestamp": "2026-10-14 16:03:38 CST",
+    "timestamp": "2026-10-14 16:03:50 CST",
     "status": "ONLINE",
     "comm_hz": 10
   },
   "feedback_control": {
-    "info_recv_timestamp": "2026-10-14 16:03:38 CST",
+    "info_recv_timestamp": "2026-10-14 16:03:50 CST",
     "has_contradiction": false,
     "raw_rl_prediction": "Q4"
   },
