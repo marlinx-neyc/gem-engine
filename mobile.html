@@ -1365,182 +1365,161 @@
 
 
 
+
+
 <script id="gem-ssot-hydration">
 (function() {
-  // 終止背景殘留舊定時器
+  // 終止背景殘留舊定時器，避免多重渲染
   if (window.__gem_clock_timer) clearInterval(window.__gem_clock_timer);
   if (window.__gem_ssot_timer) clearInterval(window.__gem_ssot_timer);
 
-  // 1. 單一權威純前端時鐘累加器 (徹底消滅時間跳動/倒退/搶佔)
-  function updateAuthoritativeClock() {
+  // 【獨立前端即時時鐘】僅更新 [data-gem-clock] 或 .live-clock，絕不覆寫數據更新時間戳
+  function updateClock() {
     const now = new Date();
     const hh = String(now.getHours()).padStart(2, '0');
     const mm = String(now.getMinutes()).padStart(2, '0');
     const ss = String(now.getSeconds()).padStart(2, '0');
     const timeStr = `${hh}:${mm}:${ss} CST`;
 
-    document.querySelectorAll('*').forEach(el => {
-      if (el.children.length === 0 && (el.textContent.includes('CST') || /^\d{2}:\d{2}:\d{2}/.test(el.textContent.trim()))) {
-        el.textContent = timeStr;
-      }
+    document.querySelectorAll('[data-gem-clock], .live-clock, #live-clock').forEach(el => {
+      el.textContent = timeStr;
     });
   }
-  window.__gem_clock_timer = setInterval(updateAuthoritativeClock, 1000);
-  updateAuthoritativeClock();
 
-  // 2. SSOT 全面板深度數據同化
+  // 【SSOT 全面板持久標籤水合】使用 data-gem-ssot 屬性確保二次刷新不會因為關鍵字變更而失效
   async function syncSSOT() {
     try {
       const res = await fetch('latest_decision.json?t=' + Date.now(), { cache: 'no-store' });
       if (!res.ok) return;
       const d = await res.json();
-
-      const isVeto = d.hard_veto_alert || (d.decision && d.decision.includes('Q4'));
+      const isVeto = !!(d.hard_veto_alert || (d.decision && d.decision.includes('Q4')));
       window.__gem_isVeto = isVeto;
       const p = d.physics_metrics || {};
 
-      // DOM 文字逐節點檢核與客觀校正
+      // 首次執行自動為標的 DOM 添加 data-gem-ssot 屬性
       document.querySelectorAll('*').forEach(el => {
-        if (el.children.length === 0) {
-          // 頂部大字決策與決斷坍縮
-          if (el.textContent.includes('物理熔斷') || el.textContent.includes('全線開放') || el.textContent.includes('游擊調撥')) {
-            el.textContent = d.decision;
+        if (el.children.length === 0 && !el.getAttribute('data-gem-ssot')) {
+          const txt = el.textContent.trim();
+          if (txt.includes('物理熔斷') || txt.includes('全線開放') || txt.includes('游擊調撥') || txt.includes('Q1') || txt.includes('Q4')) {
+            el.setAttribute('data-gem-ssot', 'decision');
+          } else if (txt.includes('決斷坍縮') || txt.includes('不要做') || txt.includes('要做')) {
+            el.setAttribute('data-gem-ssot', 'binary');
+          } else if (txt.includes('E_crit') || txt.includes('E_net')) {
+            el.setAttribute('data-gem-ssot', 'enet');
+          } else if (txt.includes('HARD VETO')) {
+            el.setAttribute('data-gem-ssot', 'veto_flag');
+          } else if (txt.includes('能量破防') || txt.includes('陽盛陰衰')) {
+            el.setAttribute('data-gem-ssot', 'energy_text');
+          } else if (txt.includes('應變中心') || txt.includes('開設標準') || txt.includes('防險管制') || txt.includes('常態水文')) {
+            el.setAttribute('data-gem-ssot', 'ncdr_status');
+          } else if (txt.includes('實測風速') || txt.includes('955 hPa')) {
+            el.setAttribute('data-gem-ssot', 'wind_spec');
+          } else if (txt.includes('外海有效波高')) {
+            el.setAttribute('data-gem-ssot', 'hs_spec');
+          } else if (txt.includes('港池消能波高')) {
+            el.setAttribute('data-gem-ssot', 'hs_pier_spec');
+          } else if (txt.includes('即時潮位')) {
+            el.setAttribute('data-gem-ssot', 'tide_spec');
+          } else if (txt.includes('龜山島管制')) {
+            el.setAttribute('data-gem-ssot', 'ncdr_item1');
+          } else if (txt.includes('船舶作業')) {
+            el.setAttribute('data-gem-ssot', 'ncdr_item2');
+          } else if (txt.includes('長浪衝擊')) {
+            el.setAttribute('data-gem-ssot', 'ncdr_item3');
+          } else if (txt.includes('局域風場') || txt.includes('季風共伴')) {
+            el.setAttribute('data-gem-ssot', 'ncdr_item4');
+          } else if (txt.includes('潮位水文') || txt.includes('滿潮暴潮')) {
+            el.setAttribute('data-gem-ssot', 'ncdr_item5');
+          } else if (txt.includes('航行中') || txt.includes('靜止避風')) {
+            el.setAttribute('data-gem-ssot', 'ship_status');
+          } else if (txt.startsWith('航速:')) {
+            el.setAttribute('data-gem-ssot', 'ship_speed');
+          } else if (txt.includes('動感蹲沉')) {
+            el.setAttribute('data-gem-ssot', 'ship_squat');
+          } else if (txt.startsWith('航向:')) {
+            el.setAttribute('data-gem-ssot', 'ship_heading');
+          } else if (txt.includes('凱鯨號')) {
+            el.setAttribute('data-gem-ssot', 'ship_title');
+          } else if (txt.includes('系統更新時間') || txt.includes('SSOT updated')) {
+            el.setAttribute('data-gem-ssot', 'ssot_timestamp');
           }
-          if (el.textContent.includes('決斷坍縮') || el.textContent.includes('不要做') || el.textContent.includes('要做')) {
-            el.textContent = `決斷坍縮：${d.binary_collapse}`;
-          }
-          if (el.textContent.includes('E_crit') || el.textContent.includes('E_net')) {
-            el.textContent = `E_net: ${d.e_net.toFixed(2)} E_crit`;
-          }
-          if (el.textContent.includes('HARD VETO')) {
-            el.textContent = d.hard_veto_alert ? 'HARD VETO ACTIVE' : 'HARD VETO PASS';
-          }
-
-          // 即時碼頭狀態：修復「北岸熔斷、南岸卻條件合格」之矛盾
-          if (el.textContent.includes('越浪熔斷') || el.textContent.includes('迎風超標') || el.textContent.includes('主泊位')) {
-            el.textContent = d.dock_status.north;
-          }
-          if (el.textContent.includes('條件合格') || el.textContent.includes('備用泊位') || el.textContent.includes('長浪穿透')) {
-            el.textContent = d.dock_status.south;
-            if (isVeto) el.className = el.className.replace('text-emerald-400', 'text-rose-400');
-          }
-
-          // 兩儀能量消長語意校正：消除「陽盛陰衰 (動能佔比 32%)」之語病
-          if (el.textContent.includes('能量破防：陽盛陰衰') || el.textContent.includes('超出臨界勢壘')) {
-            el.textContent = `能量破防：長浪越浪破防 (動能佔比 ${d.yang_ratio}%) 碼頭乾舷阻抗失效`;
-          }
-
-          // === NCDR 極端天候專區：解鎖硬編碼與數據連動 ===
-          if (el.textContent.includes('應變中心一級開設') || el.textContent.includes('未達開設標準') || el.textContent.includes('防險管制')) {
-            el.textContent = isVeto ? '🔴 未達開設標準 (海象長浪管制)' : '🟢 常態水文監測 (通航無虞)';
-            el.className = isVeto ? 'bg-rose-950 text-rose-300 border border-rose-600/50 px-2 py-0.5 rounded text-xs font-bold' : 'bg-emerald-950 text-emerald-300 border border-emerald-600/50 px-2 py-0.5 rounded text-xs font-bold';
-          }
-          if (el.textContent.includes('955 hPa') || el.textContent.includes('實測風速')) {
-            el.textContent = `實測風速：${p.w_local || 8.5} m/s (攻角 ${p.delta_theta || 42}°)`;
-          }
-          if (el.textContent.includes('宜蘭籠罩') || el.textContent.includes('暴風半徑') || el.textContent.includes('外海有效波高')) {
-            el.textContent = `外海有效波高：Hs ${p.hs_cwa || 1.35}m (Tp ${p.tp || 12.8}s)`;
-          }
-          if (el.textContent.includes('長浪共振擊穿') || el.textContent.includes('港池消能波高')) {
-            el.textContent = `港池消能波高：Hs,pier ${p.hs_pier || 1.35}m (消能 Kd=${p.kd || 1.0})`;
-          }
-          if (el.textContent.includes('氣壓梯度剪力') || el.textContent.includes('即時潮位')) {
-            el.textContent = `即時潮位：+${p.eta_tide || 0.85}m (預留乾舷 ${p.fb_north || 0.15}m)`;
-          }
-
-          // NCDR 清單項目動態更新
-          if (el.textContent.includes('已劃定為禁止進入警戒區') || el.textContent.includes('全天禁止旅客登島') || el.textContent.includes('龜山島管制')) {
-            el.textContent = isVeto ? '• 龜山島管制：因長浪與越浪熔斷，全日禁止旅客登島' : '• 龜山島管制：全線開放通航，請遊客依船班時間登島';
-          }
-          if (el.textContent.includes('客輪與娛樂漁船全數泊靠烏石港') || el.textContent.includes('船舶作業')) {
-            el.textContent = isVeto ? '• 船舶作業：客輪全數進港停泊，禁止出海航行' : '• 船舶作業：客輪正常通航靠泊，嚴守限速指引';
-          }
-          if (el.textContent.includes('長浪衝擊：') || el.textContent.includes('外海遠洋湧浪直撲')) {
-            el.textContent = `• 長浪衝擊：外海遠洋湧浪直撲，實測有效波高 Hs ${p.hs_cwa || 1.35}m, Tp ${p.tp || 12.8}s`;
-          }
-          if (el.textContent.includes('季風共伴：') || el.textContent.includes('局域風場：')) {
-            el.textContent = `• 局域風場：東北季風風速 ${p.w_local || 8.5} m/s 疊加，攻角 ${p.delta_theta || 42}°`;
-          }
-          if (el.textContent.includes('滿潮暴潮：') || el.textContent.includes('潮位水文：')) {
-            el.textContent = `• 潮位水文：即時潮位 +${p.eta_tide || 0.85}m，碼頭預留乾舷僅剩 ${p.fb_north || 0.15}m`;
-          }
-
-          // === 海圖與 AIS 船舶狀態動態糾正 ===
-          if (el.textContent.includes('航行中') || el.textContent.includes('靜止避風')) {
-            el.textContent = isVeto ? '● 靜止避風 (烏石港內港碼頭)' : '● 航行中';
-            el.className = isVeto ? 'text-amber-400 font-bold' : 'text-emerald-400 font-bold';
-          }
-          if (el.textContent.includes('航速:')) {
-            el.textContent = isVeto ? '航速: 0.0 kts' : `航速: ${p.vessel_speed_kts || 11.5} kts`;
-          }
-          if (el.textContent.includes('動感蹲沉:') || el.textContent.includes('雙體客輪蹲沉')) {
-            el.textContent = isVeto ? '動感蹲沉: 0.00 m' : `動感蹲沉: ${p.squat || 0.45} m`;
-          }
-          if (el.textContent.includes('航向:')) {
-            el.textContent = isVeto ? '航向: 烏石港錨泊區 (靜止避風)' : '航向: 245° WSW (直航烏石港)';
-          }
-          if (el.textContent.includes('凱鯨號')) {
-            el.textContent = isVeto ? '⚓ 凱鯨號 0.0kts (烏石港停泊)' : `🚢 凱鯨號 ${p.vessel_speed_kts || 11.5}kts`;
-          }
-
-          // 陽陰消長百分比文字
-          if (/陽\s*\d+%/.test(el.textContent)) el.textContent = `陽 ${d.yang_ratio}%`;
-          if (/陰\s*\d+%/.test(el.textContent)) el.textContent = `陰 ${d.yin_ratio}%`;
         }
       });
 
-      // 3. 船舶定位 Monkey-Patch 攔截器 (封鎖一切背景動畫位移，鎖死在烏石港泊位)
+      const updateAttr = (key, text, className) => {
+        document.querySelectorAll(`[data-gem-ssot="${key}"]`).forEach(el => {
+          if (text !== undefined) el.textContent = text;
+          if (className !== undefined) el.className = className;
+        });
+      };
+
+      updateAttr('decision', d.decision);
+      updateAttr('binary', `決斷坍縮：${d.binary_collapse}`);
+      updateAttr('enet', `E_net: ${Number(d.e_net).toFixed(2)} E_crit`);
+      updateAttr('veto_flag', d.hard_veto_alert ? 'HARD VETO ACTIVE' : 'HARD VETO PASS');
+      updateAttr('energy_text', `能量破防：長浪越浪破防 (動能佔比 ${d.yang_ratio}%) 碼頭乾舷阻抗失效`);
+
+      updateAttr('ncdr_status', 
+        isVeto ? '🔴 未達開設標準 (海象長浪管制)' : '🟢 常態水文監測 (通航無虞)',
+        isVeto ? 'bg-rose-950 text-rose-300 border border-rose-600/50 px-2 py-0.5 rounded text-xs font-bold' : 'bg-emerald-950 text-emerald-300 border border-emerald-600/50 px-2 py-0.5 rounded text-xs font-bold'
+      );
+      updateAttr('wind_spec', `實測風速：${p.w_local ?? 8.5} m/s (攻角 ${p.delta_theta ?? 42}°)`);
+      updateAttr('hs_spec', `外海有效波高：Hs ${p.hs_cwa ?? 1.35}m (Tp ${p.tp ?? 12.8}s)`);
+      updateAttr('hs_pier_spec', `港池消能波高：Hs,pier ${p.hs_pier ?? 1.35}m (消能 Kd=${p.kd ?? 1.0})`);
+      updateAttr('tide_spec', `即時潮位：+${p.eta_tide ?? 0.85}m (預留乾舷 ${p.fb_north ?? 0.15}m)`);
+
+      updateAttr('ncdr_item1', isVeto ? '• 龜山島管制：因長浪與越浪熔斷，全日禁止旅客登島' : '• 龜山島管制：全線開放通航，請遊客依船班時間登島');
+      updateAttr('ncdr_item2', isVeto ? '• 船舶作業：客輪全數進港停泊，禁止出海航行' : '• 船舶作業：客輪正常通航靠泊，嚴守限速指引');
+      updateAttr('ncdr_item3', `• 長浪衝擊：外海遠洋湧浪直撲，實測有效波高 Hs ${p.hs_cwa ?? 1.35}m, Tp ${p.tp ?? 12.8}s`);
+      updateAttr('ncdr_item4', `• 局域風場：東北季風風速 ${p.w_local ?? 8.5} m/s 疊加，攻角 ${p.delta_theta ?? 42}°`);
+      updateAttr('ncdr_item5', `• 潮位水文：即時潮位 +${p.eta_tide ?? 0.85}m，碼頭預留乾舷僅剩 ${p.fb_north ?? 0.15}m`);
+
+      updateAttr('ship_status', isVeto ? '● 靜止避風 (烏石港內港碼頭)' : '● 航行中', isVeto ? 'text-amber-400 font-bold' : 'text-emerald-400 font-bold');
+      updateAttr('ship_speed', isVeto ? '航速: 0.0 kts' : `航速: ${p.vessel_speed_kts ?? 11.5} kts`);
+      updateAttr('ship_squat', isVeto ? '動感蹲沉: 0.00 m' : `動感蹲沉: ${p.squat ?? 0.45} m`);
+      updateAttr('ship_heading', isVeto ? '航向: 烏石港錨泊區 (靜止避風)' : '航向: 245° WSW (直航烏石港)');
+      updateAttr('ship_title', isVeto ? '⚓ 凱鯨號 0.0kts (烏石港停泊)' : `🚢 凱鯨號 ${p.vessel_speed_kts ?? 11.5}kts`);
+
+      if (d.timestamp) {
+        updateAttr('ssot_timestamp', `系統數據版本: ${d.version || 'v43.0'} | SSOT同步: ${d.timestamp}`);
+      }
+
+      // 鎖定船舶 Marker 防止圖層撕裂
       if (window.shipMarker) {
         const wushiPort = [24.8700, 121.8390];
         if (!window.shipMarker.__gem_hooked) {
           window.shipMarker.__gem_hooked = true;
           const origSetLatLng = window.shipMarker.setLatLng.bind(window.shipMarker);
           window.shipMarker.setLatLng = function(latlng, options) {
-            if (window.__gem_isVeto) {
-              return origSetLatLng(wushiPort, options);
-            }
+            if (window.__gem_isVeto) return origSetLatLng(wushiPort, options);
             return origSetLatLng(latlng, options);
           };
         }
-        if (isVeto) {
-          window.shipMarker.setLatLng(wushiPort);
-          if (window.shipMarker.getPopup()) {
-            window.shipMarker.getPopup().setContent(`
-              <div style="font-size:12px; font-weight:bold; color:#f8fafc; padding:2px;">
-                ⚓ 凱鯨號雙體客輪 (TDX AIS)<br/>
-                <span style="color:#f43f5e;">狀態: 物理熔斷 / 烏石港靜止避風中</span><br/>
-                航速: 0.0 kts | 航向: 烏石港錨泊區
-              </div>
-            `);
-          }
-        }
+        if (isVeto) window.shipMarker.setLatLng(wushiPort);
       }
 
-      // 4. 雷達圖雙端同步重繪 (Chart.js 五維向量實時水合)
-      if (window.radarChart && d.physics_metrics) {
-        if (window.radarChart.data && window.radarChart.data.datasets) {
-          window.radarChart.data.datasets[0].data = [
-            p.hs_pier || 0,
-            p.w_eff || 0,
-            isVeto ? 0 : (p.squat || 0),
-            p.ukc_south || 0,
-            p.fb_north || 0
-          ];
-          window.radarChart.update();
-        }
+      // 4. 雷達圖安全更新
+      if (window.radarChart && window.radarChart.data && window.radarChart.data.datasets && window.radarChart.data.datasets.length > 0) {
+        window.radarChart.data.datasets[0].data = [
+          p.hs_pier || 0,
+          p.w_eff || 0,
+          isVeto ? 0 : (p.squat || 0),
+          p.ukc_south || 0,
+          p.fb_north || 0
+        ];
+        window.radarChart.update();
       }
-
-      if (typeof engine !== 'undefined' && engine.state) {
-        Object.assign(engine.state, d.physics_metrics);
-        if (typeof engine.dispatch === 'function') engine.dispatch();
-      }
-    } catch (err) {}
+    } catch (err) {
+      console.warn('SSOT Sync warning:', err);
+    }
   }
+
+  window.__gem_clock_timer = setInterval(updateClock, 1000);
+  updateClock();
 
   syncSSOT();
   window.__gem_ssot_timer = setInterval(syncSSOT, 2500);
 })();
 </script>
-
 </body>
 </html>
