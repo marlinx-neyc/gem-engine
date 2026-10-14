@@ -2765,9 +2765,9 @@ setInterval(syncLatestDecision, 3000);
 
 
 
+
 <script id="gem-ssot-hydration">
 (function() {
-  // 終止背景殘留舊定時器，避免多重渲染
   if (window.__gem_clock_timer) clearInterval(window.__gem_clock_timer);
   if (window.__gem_ssot_timer) clearInterval(window.__gem_ssot_timer);
 
@@ -2784,7 +2784,7 @@ setInterval(syncLatestDecision, 3000);
     });
   }
 
-  // 【SSOT 全面板持久標籤水合】使用 data-gem-ssot 屬性確保二次刷新不會因為關鍵字變更而失效
+  // 【SSOT 全面板持久標籤水合】使用 data-gem-ssot 屬性確保二次刷新不塌陷
   async function syncSSOT() {
     try {
       const res = await fetch('latest_decision.json?t=' + Date.now(), { cache: 'no-store' });
@@ -2882,7 +2882,7 @@ setInterval(syncLatestDecision, 3000);
         updateAttr('ssot_timestamp', `系統數據版本: ${d.version || 'v43.0'} | SSOT同步: ${d.timestamp}`);
       }
 
-      // 鎖定船舶 Marker 防止圖層撕裂
+      // 鎖定船舶 Marker 位置防止圖層撕裂
       if (window.shipMarker) {
         const wushiPort = [24.8700, 121.8390];
         if (!window.shipMarker.__gem_hooked) {
@@ -2893,10 +2893,21 @@ setInterval(syncLatestDecision, 3000);
             return origSetLatLng(latlng, options);
           };
         }
-        if (isVeto) window.shipMarker.setLatLng(wushiPort);
+        if (isVeto) {
+          window.shipMarker.setLatLng(wushiPort);
+          if (window.shipMarker.getPopup()) {
+            window.shipMarker.getPopup().setContent(`
+              <div style="font-size:12px; font-weight:bold; color:#f8fafc; padding:2px;">
+                ⚓ 凱鯨號雙體客輪 (TDX AIS)<br/>
+                <span style="color:#f43f5e;">狀態: 物理熔斷 / 烏石港靜止避風中</span><br/>
+                航速: 0.0 kts | 航向: 烏石港錨泊區
+              </div>
+            `);
+          }
+        }
       }
 
-      // 4. 雷達圖安全更新
+      // Chart.js 雷達圖更新
       if (window.radarChart && window.radarChart.data && window.radarChart.data.datasets && window.radarChart.data.datasets.length > 0) {
         window.radarChart.data.datasets[0].data = [
           p.hs_pier || 0,
