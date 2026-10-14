@@ -549,12 +549,30 @@
   <div class="bg-[#070d18] p-1.5 rounded border border-slate-800 text-center">
     <span class="text-slate-400 block text-[8.5px]">🤖 GEM 雙生模型判斷</span>
     <b id="txtModelVerdict" class="text-red-400 font-bold">🔴 0.0% 剛性熔斷</b>
-  <!-- 5. 關鍵數值檢核對比列 -->
+  </div>
+</div>
+
+<!-- 5. 關鍵數值檢核對比列 -->
 <div id="boxNumericalCheck" class="mt-1.5 pt-1.5 border-t border-slate-800/80 space-y-1 text-[9.5px] font-mono">
   <div class="text-[9px] text-slate-400 font-bold flex justify-between items-center px-1">
     <span>🔍 關鍵指標數值檢核</span>
     <span class="text-sky-400">官方 / 模型</span>
   </div>
+  <div class="grid grid-cols-3 gap-1 text-center">
+    <div class="bg-[#070d18] p-1 rounded border border-slate-800">
+      <span class="text-slate-400 block text-[8px]">波高 Hs</span>
+      <span id="numValHsOff" class="text-amber-300">1.2m</span> <span class="text-slate-600">/</span> <b id="numValHsMod" class="text-red-400">3.7m</b>
+    </div>
+    <div class="bg-[#070d18] p-1 rounded border border-slate-800">
+      <span class="text-slate-400 block text-[8px]">攻角風 Weff</span>
+      <span id="numValWOff" class="text-emerald-400">4.5m/s</span> <span class="text-slate-600">/</span> <b id="numValWMod" class="text-emerald-400">5.0m/s</b>
+    </div>
+    <div class="bg-[#070d18] p-1 rounded border border-slate-800">
+      <span class="text-slate-400 block text-[8px]">裕深 UKC</span>
+      <span id="numValUkcOff" class="text-emerald-400">1.8m</span> <span class="text-slate-600">/</span> <b id="numValUkcMod" class="text-red-400">0.4m</b>
+    </div>
+  </div>
+</div>
   <div class="grid grid-cols-3 gap-1 text-center">
     <div class="bg-[#070d18] p-1 rounded border border-slate-800">
       <span class="text-slate-400 block text-[8px]">波高 Hs</span>
