@@ -1346,5 +1346,71 @@
             });
         });
     </script>
+
+<script id="gem-ssot-hydration">
+(function() {
+  let liveClockDate = new Date();
+  setInterval(() => {
+    liveClockDate.setSeconds(liveClockDate.getSeconds() + 1);
+    const hh = String(liveClockDate.getHours()).padStart(2, '0');
+    const mm = String(liveClockDate.getMinutes()).padStart(2, '0');
+    const ss = String(liveClockDate.getSeconds()).padStart(2, '0');
+    const timeStr = `${hh}:${mm}:${ss} CST`;
+    document.querySelectorAll('*').forEach(el => {
+      if (el.children.length === 0 && (el.textContent.includes('CST') || /\d{2}:\d{2}:\d{2}/.test(el.textContent))) {
+        if (/\d{2}:\d{2}/.test(el.textContent)) el.textContent = timeStr;
+      }
+    });
+  }, 1000);
+
+  async function syncSSOT() {
+    try {
+      const res = await fetch('latest_decision.json?t=' + Date.now(), { cache: 'no-store' });
+      if (!res.ok) return;
+      const d = await res.json();
+      if (d.timestamp) {
+        liveClockDate = new Date(d.timestamp.replace(' CST', '').replace(/-/g, '/'));
+      }
+      document.querySelectorAll('*').forEach(el => {
+        if (el.children.length === 0) {
+          if (el.textContent.includes('物理熔斷') || el.textContent.includes('全線開放') || el.textContent.includes('游擊調撥')) {
+            el.textContent = d.decision;
+          }
+          if (el.textContent.includes('決斷坍縮') || el.textContent.includes('不要做') || el.textContent.includes('要做')) {
+            el.textContent = `決斷坍縮：${d.binary_collapse}`;
+          }
+          if (el.textContent.includes('E_crit') || el.textContent.includes('E_net')) {
+            el.textContent = `E_net: ${d.e_net.toFixed(2)} E_crit`;
+          }
+          if (el.textContent.includes('HARD VETO')) {
+            el.textContent = d.hard_veto_alert ? 'HARD VETO ACTIVE' : 'HARD VETO PASS';
+          }
+          if (el.textContent.includes('越浪熔斷') || el.textContent.includes('迎風超標') || el.textContent.includes('主泊位')) {
+            el.textContent = d.dock_status.north;
+          }
+          if (el.textContent.includes('淺水觸底') || el.textContent.includes('401掩蔽') || el.textContent.includes('備用泊位')) {
+            el.textContent = d.dock_status.south;
+          }
+          if (el.textContent.includes('p/m') || el.textContent.includes('p/min')) {
+            el.textContent = `${d.telemetry_metrics.cv_overtopping.toFixed(2)} p/m`;
+          }
+          if (/\d+\.\d{2}\s*m/.test(el.textContent) && el.parentElement && el.parentElement.textContent.includes('蹲沉')) {
+            el.textContent = `${d.telemetry_metrics.squat_m.toFixed(2)} m`;
+          }
+          if (/陽\s*\d+%/.test(el.textContent)) el.textContent = `陽 ${d.yang_ratio}%`;
+          if (/陰\s*\d+%/.test(el.textContent)) el.textContent = `陰 ${d.yin_ratio}%`;
+        }
+      });
+      if (typeof engine !== 'undefined' && engine.state) {
+        Object.assign(engine.state, d.physics_metrics);
+        if (typeof engine.dispatch === 'function') engine.dispatch();
+      }
+    } catch (err) {}
+  }
+  syncSSOT();
+  setInterval(syncSSOT, 2500);
+})();
+</script>
+
 </body>
 </html>
