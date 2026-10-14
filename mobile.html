@@ -1347,10 +1347,17 @@
         });
     </script>
 
+
+
+
 <script id="gem-ssot-hydration">
 (function() {
-  let liveClockDate = new Date();
+  let liveClockDate = null;
+  let lastTimestampStr = "";
+
+  // 1. 平滑時鐘累加器 (避免 2.5 秒輪詢重新歸位時間)
   setInterval(() => {
+    if (!liveClockDate) return;
     liveClockDate.setSeconds(liveClockDate.getSeconds() + 1);
     const hh = String(liveClockDate.getHours()).padStart(2, '0');
     const mm = String(liveClockDate.getMinutes()).padStart(2, '0');
@@ -1363,14 +1370,22 @@
     });
   }, 1000);
 
+  // 2. SSOT 全面板數據與地圖/圖表水合
   async function syncSSOT() {
     try {
       const res = await fetch('latest_decision.json?t=' + Date.now(), { cache: 'no-store' });
       if (!res.ok) return;
       const d = await res.json();
-      if (d.timestamp) {
+
+      // 僅在時間戳變更時更新時鐘基準，防止時間重置跳動
+      if (d.timestamp && d.timestamp !== lastTimestampStr) {
+        lastTimestampStr = d.timestamp;
         liveClockDate = new Date(d.timestamp.replace(' CST', '').replace(/-/g, '/'));
       }
+
+      const isVeto = d.hard_veto_alert || (d.decision && d.decision.includes('Q4'));
+
+      // 全面 DOM 數據覆寫
       document.querySelectorAll('*').forEach(el => {
         if (el.children.length === 0) {
           if (el.textContent.includes('物理熔斷') || el.textContent.includes('全線開放') || el.textContent.includes('游擊調撥')) {
@@ -1399,14 +1414,63 @@
           }
           if (/陽\s*\d+%/.test(el.textContent)) el.textContent = `陽 ${d.yang_ratio}%`;
           if (/陰\s*\d+%/.test(el.textContent)) el.textContent = `陰 ${d.yin_ratio}%`;
+
+          // AIS 船舶 UI 文字動態水合
+          if (el.textContent.includes('凱鯨號')) {
+            if (isVeto) {
+              el.textContent = '⚓ 凱鯨號 0.0kts (烏石港停泊)';
+            } else {
+              const spd = d.physics_metrics ? d.physics_metrics.vessel_speed_kts : 11.5;
+              el.textContent = `🚢 凱鯨號 ${spd}kts`;
+            }
+          }
+          if (el.textContent.includes('航速:') && el.parentElement && el.parentElement.textContent.includes('凱鯨號')) {
+            el.textContent = isVeto ? '航速: 0.0 kts (烏石港靠泊)' : `航速: ${d.physics_metrics?.vessel_speed_kts || 11.5} kts`;
+          }
+          if (el.textContent.includes('航向:') && el.parentElement && el.parentElement.textContent.includes('凱鯨號')) {
+            el.textContent = isVeto ? '航向: 烏石港錨泊區 (已入港避風)' : '航向: 245° WSW → 烏石港';
+          }
         }
       });
+
+      // 3. 地圖 AIS 船舶標點座標與彈窗資訊動態更新
+      if (window.shipMarker) {
+        if (isVeto) {
+          window.shipMarker.setLatLng([24.8700, 121.8390]); // 停泊於烏石港內
+          if (window.shipMarker.getPopup()) {
+            window.shipMarker.getPopup().setContent(`
+              <div style="font-size:12px; font-weight:bold; color:#f8fafc; padding:2px;">
+                ⚓ 凱鯨號雙體客輪 (TDX AIS)<br/>
+                <span style="color:#f43f5e;">狀態: 物理熔斷 / 烏石港避風停泊中</span><br/>
+                航速: 0.0 kts | 航向: 烏石港錨泊區
+              </div>
+            `);
+          }
+        }
+      }
+
+      // 4. 雷達圖 (Chart.js / Canvas) 同步重繪
+      if (window.radarChart && d.physics_metrics) {
+        const p = d.physics_metrics;
+        if (window.radarChart.data && window.radarChart.data.datasets) {
+          window.radarChart.data.datasets[0].data = [
+            p.hs_pier || 0,
+            p.w_eff || 0,
+            p.squat || 0,
+            p.ukc_south || 0,
+            p.fb_north || 0
+          ];
+          window.radarChart.update();
+        }
+      }
+
       if (typeof engine !== 'undefined' && engine.state) {
         Object.assign(engine.state, d.physics_metrics);
         if (typeof engine.dispatch === 'function') engine.dispatch();
       }
     } catch (err) {}
   }
+
   syncSSOT();
   setInterval(syncSSOT, 2500);
 })();
