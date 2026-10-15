@@ -1,6 +1,6 @@
 {
   "version": "v43.0 Master SSOT",
-  "timestamp": "2026-10-15 16:33:29 CST",
+  "timestamp": "2026-10-15 16:38:50 CST",
   "date_str": "2026-10-15 (四)",
   "decision_code": "Q4",
   "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)",
@@ -8,8 +8,8 @@
   "confidence_score": 100.0,
   "hard_veto_alert": true,
   "e_net": 2.6,
-  "yang_ratio": 32,
-  "yin_ratio": 68,
+  "yang_ratio": 70,
+  "yin_ratio": 30,
   "dock_status": {
     "north": "越浪熔斷 🔴",
     "south": "觸底熔斷 🔴"
@@ -26,8 +26,6 @@
     "ukc_south": 3.27,
     "fb_north": 0.15,
     "cv_rate": 1.31,
-    "kd": 1.0,
-    "vessel_speed_kts": 0.0,
     "hard_veto": true,
     "e_net": 2.6
   },
@@ -38,7 +36,7 @@
         "limit": "1.13m"
       },
       "Weff": {
-        "val": "6.3m/s",
+        "val": "6.06m/s",
         "limit": "10.2m/s"
       },
       "Tp": {
@@ -46,33 +44,7 @@
         "limit": "12.0s"
       },
       "UKC": {
-        "val": "0.42m",
-        "limit": "1.50m"
-      },
-      "FB": {
-        "val": "0.15m",
-        "limit": "0.50m"
-      },
-      "CV": {
-        "val": "1.31p/m",
-        "limit": "0.0"
-      }
-    },
-    "north": {
-      "Hs": {
-        "val": "1.35m",
-        "limit": "1.13m"
-      },
-      "Weff": {
-        "val": "6.3m/s",
-        "limit": "10.2m/s"
-      },
-      "Tp": {
-        "val": "12.8s",
-        "limit": "12.0s"
-      },
-      "UKC": {
-        "val": "1.12m",
+        "val": "3.27m",
         "limit": "1.50m"
       },
       "FB": {
