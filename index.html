@@ -2774,17 +2774,18 @@ setInterval(syncLatestDecision, 3000);
 
 
 
+
 <script id="gem-ssot-hydration">
 (function() {
   'use strict';
 
-  // [A] 清除背景舊定時器，防止競態
+  // [A] 清除背景舊定時器
   const highestIntervalId = setInterval(";");
   for (let i = 0; i < highestIntervalId; i++) {
     clearInterval(i);
   }
 
-  // [B] 純前端秒針時鐘 (精準更新您版面中的時鐘區塊)
+  // [B] 純前端秒針時鐘
   function tickLiveClock() {
     const now = new Date();
     const hh = String(now.getHours()).padStart(2, '0');
@@ -2798,7 +2799,52 @@ setInterval(syncLatestDecision, 3000);
   setInterval(tickLiveClock, 1000);
   tickLiveClock();
 
-  // [C] 自動水合：直接將數據寫入您現有的版面元件中
+  // [C] 數值過渡平滑 (Lerp Smooth Function)
+  const valCache = {};
+  function animateNumericValue(el, targetVal, formatFn) {
+    if (!el) return;
+    const key = el.id || el.getAttribute('data-ssot-key') || el.textContent;
+    const startVal = valCache[key] !== undefined ? valCache[key] : targetVal;
+    const duration = 500;
+    const startTime = performance.now();
+
+    function step(now) {
+      const progress = Math.min((now - startTime) / duration, 1);
+      const currentVal = startVal + (targetVal - startVal) * progress;
+      el.textContent = formatFn ? formatFn(currentVal) : currentVal.toFixed(2);
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        valCache[key] = targetVal;
+      }
+    }
+    requestAnimationFrame(step);
+  }
+
+  // [D] 雷達圖標籤動態覆寫 (自動標示 [實測值 / 標準門檻值])
+  function updateRadarLabels(p) {
+    const chart = window.myRadarChart || window.radarChart || (window.Chart && Chart.instances && Object.values(Chart.instances)[0]);
+    if (chart && chart.data && chart.data.labels) {
+      const hs = (p.hs_cwa ?? 1.35).toFixed(2);
+      const w = (p.w_local ?? 8.5).toFixed(1);
+      const tp = (p.tp ?? 12.8).toFixed(1);
+      const ukc = (p.ukc_south ?? 1.12).toFixed(2);
+      const fb = (p.fb_north ?? 0.15).toFixed(2);
+      const cv = (p.cv_rate ?? 1.31).toFixed(2);
+
+      chart.data.labels = [
+        `Hs 浪高 (${hs}m / 1.13m)`,
+        `Weff 風速 (${w}m/s / 10.2m/s)`,
+        `Tp 湧浪 (${tp}s / 12.0s)`,
+        `UKC 裕深 (${ukc}m / 1.50m)`,
+        `FB 乾舷 (${fb}m / 0.50m)`,
+        `CV 越浪 (${cv}p/m / 0.0)`
+      ];
+      chart.update('none'); // 無縫靜態重繪，不觸發重複動畫
+    }
+  }
+
+  // [E] 自動水合：更新數據與雷達圖頂點標籤
   async function syncSSOTData() {
     try {
       const res = await fetch('latest_decision.json?t=' + Date.now(), { cache: 'no-store' });
@@ -2808,7 +2854,6 @@ setInterval(syncLatestDecision, 3000);
       window.__gem_isVeto = isVeto;
       const p = d.physics_metrics || {};
 
-      // 安全寫入文字（保留您原本所有的 CSS 類別與排版）
       function safeSetTextByKeyword(keyword, text) {
         document.querySelectorAll('*').forEach(el => {
           if (el.children.length === 0 && el.textContent.includes(keyword)) {
@@ -2831,18 +2876,21 @@ setInterval(syncLatestDecision, 3000);
       const wLocal = (p.w_local ?? 8.5).toFixed(1);
       const delta = (p.delta_theta ?? 42).toFixed(0);
 
-      // 1. 優先更新已設定 key 的節點
+      // 1. 優先更新鍵值對應節點
       safeSetKey('decision', d.decision);
       safeSetKey('binary', `決斷坍縮：${d.binary_collapse}`);
       safeSetKey('enet', `E_net: ${Number(d.e_net || 0).toFixed(2)} E_crit`);
       safeSetKey('wind_spec', `實測風速：${wLocal} m/s (攻角 ${delta}°)`);
       safeSetKey('hs_spec', `外海有效波高：Hs ${hs}m (Tp ${tp}s)`);
 
-      // 2. 自動在您原有的卡片內容中替換對應數據（完全不改變容器與樣式）
+      // 2. 替換對應文字卡片數據
       safeSetTextByKeyword('實測風速：', `實測風速：${wLocal} m/s (攻角 ${delta}°)`);
       safeSetTextByKeyword('外海有效波高：', `外海有效波高：Hs ${hs}m (Tp ${tp}s)`);
       safeSetTextByKeyword('港池消能波高：', `港池消能波高：Hs,pier ${(p.hs_pier ?? 1.35).toFixed(2)}m (消能 Kd=${(p.kd ?? 1.0).toFixed(2)})`);
       safeSetTextByKeyword('即時潮位：', `即時潮位：+${(p.eta_tide ?? 0.85).toFixed(2)}m (預留乾舷 ${(p.fb_north ?? 0.15).toFixed(2)}m)`);
+
+      // 3. 觸發雷達圖頂點標籤對照更新
+      updateRadarLabels(p);
 
       if (window.shipMarker && isVeto) {
         window.shipMarker.setLatLng([24.8700, 121.8390]);
