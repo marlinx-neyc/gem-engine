@@ -7,15 +7,21 @@ on:
   repository_dispatch:
     types: [trigger_gem_engine]
 
+# 防止多個排程或觸發同時執行導致推送衝突
+concurrency:
+  group: ssot-push-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   run-engine:
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      # ...其餘步驟保持不變...
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 完整拉取歷史紀錄，避免拉取/Rebase 時發生淺層複製錯誤
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -47,5 +53,8 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action Bot"
           git add latest_decision.json || true
-          git diff-index --quiet HEAD || git commit -m "Auto-assimilate TDX & CWA data stream [skip ci]"
-          git push
+          if ! git diff-index --quiet HEAD; then
+            git commit -m "Auto-assimilate TDX & CWA data stream [skip ci]"
+            git pull --rebase origin main
+            git push origin main
+          fi
