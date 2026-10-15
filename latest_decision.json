@@ -1,6 +1,6 @@
 {
-  "version": "v45.0 Master SSOT Isolation Engine",
-  "timestamp": "2026-10-15 16:48:53 CST",
+  "version": "v45.1 Safe SSOT Engine",
+  "timestamp": "2026-10-15 17:14:03 CST",
   "date_str": "2026-10-15 (四)",
   "decision_code": "Q4",
   "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)",
@@ -22,7 +22,7 @@
     "eta_tide": 0.85,
     "squat": 0.82,
     "hs_pier": 3.71,
-    "w_eff": 6.32,
+    "w_eff": 5.03,
     "ukc_south": 0.42,
     "fb_north": 0.15,
     "cv_rate": 1.31,
