@@ -1389,140 +1389,84 @@
 
 
 
+
 <script id="gem-ssot-hydration">
 (function() {
   'use strict';
-  console.log('[GEM Engine v44.0] 精準點對點水合與平滑動態中樞啟動...');
+  console.log('[GEM Engine v45.0] 隔離防護水合中樞啟動...');
 
-  let heartbeatCount = 300;
-  let cachedSSOT = null;
+  let tickCount = 1;
 
-  // [A] 單調平滑計時器與時鐘 (無重繪閃爍)
-  function startPrecisionClock() {
-    heartbeatCount++;
+  // [A] 純淨秒時鐘推進
+  function tickClock() {
+    tickCount++;
     const now = new Date();
     const hh = String(now.getHours()).padStart(2, '0');
     const mm = String(now.getMinutes()).padStart(2, '0');
     const ss = String(now.getSeconds()).padStart(2, '0');
     const timeStr = `${hh}:${mm}:${ss} CST`;
 
-    const clockEls = document.querySelectorAll('#gem-live-clock, #liveClock, .live-clock, [data-gem-clock="live_time"]');
-    clockEls.forEach(el => { el.textContent = timeStr; });
+    document.querySelectorAll('#gem-live-clock, #liveClock, .live-clock, [data-gem-clock="live_time"]').forEach(el => {
+      el.textContent = timeStr;
+    });
 
-    // 定向更新心跳與日期，避免全域遍歷
     document.querySelectorAll('.heartbeat-tag, [data-ssot="heartbeat"]').forEach(el => {
-      el.textContent = `心跳：${heartbeatCount} 次`;
+      el.textContent = `心跳: ${tickCount} 次`;
     });
   }
-  window.setInterval(startPrecisionClock, 1000);
-  startPrecisionClock();
+  window.setInterval(tickClock, 1000);
+  tickClock();
 
-  // [B] 點對點 SSOT DOM 水合修復
-  function applyDirectDOMHydration(data) {
-    if (!data) return;
-    const p = data.physics_metrics || {};
-    const hs = (p.hs_cwa ?? 1.35).toFixed(2);
-    const w = (p.w_local ?? 4.50).toFixed(2);
-    const ukc = (p.ukc_south ?? 2.87).toFixed(2);
-
-    // 1. 指定文字更換 (專一針對純文字葉節點)
-    const replaceMap = [
-      { from: '2026-10-15 (三)', to: '2026-10-15 (四)' },
-      { from: '陽盛陰衰 (動能佔比 30%)', to: '陽盛陰衰 (動能佔比 70%)' },
-      { from: '陽 30%', to: '陽 70%' },
-      { from: '陰 70%', to: '陰 30%' },
-      { from: 'D+1 (10/14 三)', to: 'D+1 (10/16 五)' },
-      { from: 'D+2 (10/15 四)', to: 'D+2 (10/17 六)' },
-      { from: 'D+3 (10/16 五)', to: 'D+3 (10/18 日)' }
-    ];
-
-    document.querySelectorAll('span, div, p, h1, h2, h3, h4, td').forEach(el => {
-      if (el.children.length === 0) {
-        const text = el.textContent.trim();
-        replaceMap.forEach(rule => {
-          if (text.includes(rule.from)) {
-            el.textContent = text.replace(rule.from, rule.to);
-          }
-        });
-
-        // 模組 3 觸底危險修正
-        if (text.includes('UKC=2.87m') && text.includes('觸底危險')) {
-          el.textContent = '南岸備用 🟢 (UKC=2.87m 裕深安全)';
-        }
-
-        // 模組 4 比對表格點對點修復 (僅替換單純表格數據格)
-        if (el.tagName === 'TD' || el.tagName === 'SPAN') {
-          if (text === '3.7m') el.textContent = `${hs}m`;
-          if (text === '5.0m/s') el.textContent = `${w}m/s`;
-          if (text === '0.4m') el.textContent = `${ukc}m`;
-        }
-      }
-    });
-
-    // 2. 兩儀進度條寬度更新
-    document.querySelectorAll('.yang-bar, [data-gem-bar="yang"]').forEach(b => b.style.width = '70%');
-    document.querySelectorAll('.yin-bar, [data-gem-bar="yin"]').forEach(b => b.style.width = '30%');
-  }
-
-  // [C] 雷達圖端點動態對照標籤
-  function refreshRadarAxisLabels() {
-    if (!cachedSSOT) return;
-    const p = cachedSSOT.physics_metrics || {};
-    const hs = (p.hs_cwa ?? 1.35).toFixed(2);
-    const w = (p.w_local ?? 4.50).toFixed(1);
+  // [B] 雷達圖專屬動態頂點標籤 (隔離 DOM，僅修改 Canvas / 雷達專用 SVG 節點)
+  function updateRadarChartLabelsOnly(p) {
+    if (!p) return;
+    const hs = (p.hs_pier ?? 3.71).toFixed(2);
+    const w = (p.w_eff ?? 5.03).toFixed(1);
     const tp = (p.tp ?? 12.8).toFixed(1);
-    const ukc = (p.ukc_south ?? 2.87).toFixed(2);
+    const ukc = (p.ukc_south ?? 0.42).toFixed(2);
     const fb = (p.fb_north ?? 0.15).toFixed(2);
     const cv = (p.cv_rate ?? 1.31).toFixed(2);
 
-    const axes = [
-      { key: 'Hs',  text: `Hs 浪高 [${hs}m / 1.13m]` },
-      { key: 'Weff', text: `Weff 攻角風 [${w}m/s / 10.2m/s]` },
-      { key: 'Tp',  text: `Tp 湧浪 [${tp}s / 12.0s]` },
-      { key: 'UKC', text: `UKC 裕深 [${ukc}m / 1.50m]` },
-      { key: 'FB',  text: `FB 乾舷 [${fb}m / 0.50m]` },
-      { key: 'CV',  text: `CV 越浪 [${cv}p/m / 0.0]` }
+    const radarFullLabels = [
+      `Hs 浪高 [${hs}m / 1.13m]`,
+      `Weff 攻角風 [${w}m/s / 10.2m/s]`,
+      `Tp 湧浪 [${tp}s / 12.0s]`,
+      `UKC 裕深 [${ukc}m / 1.50m]`,
+      `FB 乾舷 [${fb}m / 0.50m]`,
+      `CV 越浪 [${cv}p/m / 0.0]`
     ];
 
-    document.querySelectorAll('text, tspan, span, div').forEach(el => {
-      if (el.children.length === 0) {
-        const raw = el.textContent.trim();
-        axes.forEach(axis => {
-          if ((raw.startsWith(axis.key) || raw.includes(axis.key + ' ')) && !raw.includes('[')) {
-            el.textContent = axis.text;
-          }
-        });
-      }
-    });
-
-    // Chart.js 實例更新
+    // 專一針對 Chart.js 實例更新
     document.querySelectorAll('canvas').forEach(cvs => {
       if (window.Chart) {
         const c = Chart.getChart ? Chart.getChart(cvs) : null;
         if (c && c.data && c.data.labels) {
-          c.data.labels = axes.map(a => a.text);
+          c.data.labels = radarFullLabels;
           c.update('none');
         }
       }
     });
-  }
 
-  // [D] SSOT JSON 遠端定期拉取
-  async function fetchSSOTStream() {
-    try {
-      const res = await fetch('latest_decision.json?t=' + Date.now(), { cache: 'no-store' });
-      if (!res.ok) return;
-      cachedSSOT = await res.json();
-      applyDirectDOMHydration(cachedSSOT);
-      refreshRadarAxisLabels();
-    } catch (err) {
-      console.warn('[GEM Engine] Sync warning:', err);
+    if (window.myRadarChart && window.myRadarChart.data) {
+      window.myRadarChart.data.labels = radarFullLabels;
+      window.myRadarChart.update('none');
     }
   }
 
-  window.setInterval(fetchSSOTStream, 2000);
-  window.setInterval(refreshRadarAxisLabels, 1000);
-  fetchSSOTStream();
+  // [C] 定期拉取 SSOT JSON 進行無縫更新
+  async function syncSSOTStream() {
+    try {
+      const res = await fetch('latest_decision.json?t=' + Date.now(), { cache: 'no-store' });
+      if (!res.ok) return;
+      const d = await res.json();
+      updateRadarChartLabelsOnly(d.physics_metrics);
+    } catch (err) {
+      console.warn('[GEM Engine] Sync warn:', err);
+    }
+  }
+
+  window.setInterval(syncSSOTStream, 2000);
+  syncSSOTStream();
 })();
 </script>
 </body>
