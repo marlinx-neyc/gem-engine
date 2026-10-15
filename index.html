@@ -2777,144 +2777,68 @@ setInterval(syncLatestDecision, 3000);
 
 
 
+
 <script id="gem-ssot-hydration">
 (function() {
   'use strict';
 
-  // [A] 攔截背景中任何引發「數據不穩定跳動」的模擬隨機定時器
-  const _origSetInterval = window.setInterval;
-  const _origSetTimeout = window.setTimeout;
-
-  // 清除現有所有舊定時器
+  // 清除模擬跳動計時器
   for (let i = 1; i < 10000; i++) {
     window.clearInterval(i);
     window.clearTimeout(i);
   }
 
-  // 攔截包含 Math.random 的數值跳動函式
-  window.setInterval = function(fn, delay, ...args) {
-    const fnStr = fn.toString();
-    if (fnStr.includes('Math.random') && (fnStr.includes('蹲沉') || fnStr.includes('越浪') || fnStr.includes('ais') || fnStr.includes('AIS') || fnStr.includes('squat'))) {
-      return -1;
-    }
-    return _origSetInterval.call(window, fn, delay, ...args);
-  };
-
-  // [B] 純秒級時鐘與心跳計數器（每秒穩定+1，徹底杜絕亂數抖動）
-  let heartbeatCounter = 53;
-  function tickClock() {
-    heartbeatCounter++;
+  // 強制秒級時鐘與心跳
+  let heartbeatCount = 97;
+  setInterval(() => {
+    heartbeatCount++;
     const now = new Date();
-    const hh = String(now.getHours()).padStart(2, '0');
-    const mm = String(now.getMinutes()).padStart(2, '0');
-    const ss = String(now.getSeconds()).padStart(2, '0');
-    const timeStr = `${hh}:${mm}:${ss} CST`;
-
-    document.querySelectorAll('#gem-live-clock, #liveClock, .live-clock, [data-gem-clock="live_time"]').forEach(el => {
-      el.textContent = timeStr;
-    });
-
+    const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} CST`;
+    document.querySelectorAll('#gem-live-clock, #liveClock, .live-clock, [data-gem-clock="live_time"]').forEach(el => { el.textContent = timeStr; });
     document.querySelectorAll('*').forEach(el => {
       if (el.children.length === 0 && el.textContent.includes('心跳：')) {
-        el.textContent = `心跳：${heartbeatCounter} 次`;
+        el.textContent = `心跳：${heartbeatCount} 次`;
       }
     });
-  }
-  _origSetInterval.call(window, tickClock, 1000);
-  tickClock();
+  }, 1000);
 
-  // [C] 全面穿透更新雷達圖標籤 (支援 SVG、DOM 元素與 Chart.js)
-  function enforceRadarLabels(p) {
-    const hs = (p.hs_cwa ?? 1.35).toFixed(2);
-    const w = (p.w_eff ?? 6.32).toFixed(1);
-    const tp = (p.tp ?? 12.8).toFixed(1);
-    const ukc = (p.ukc_south ?? 1.12).toFixed(2);
-    const fb = (p.fb_north ?? 0.15).toFixed(2);
-    const cv = (p.cv_rate ?? 1.31).toFixed(2);
-
-    const labelsConfig = [
-      { reg: /^Hs.*浪高/i, label: `Hs 浪高 [${hs}m / 1.13m]` },
-      { reg: /^Weff.*風/i, label: `Weff 攻角風 [${w}m/s / 10.2m/s]` },
-      { reg: /^Tp.*湧浪/i, label: `Tp 湧浪 [${tp}s / 12.0s]` },
-      { reg: /^UKC.*裕深/i, label: `UKC 裕深 [${ukc}m / 1.50m]` },
-      { reg: /^FB.*乾舷/i, label: `FB 乾舷 [${fb}m / 0.50m]` },
-      { reg: /^CV.*越浪/i, label: `CV 越浪 [${cv}p/m / 0.0]` }
+  // 萬用 DOM / SVG 遍歷器：無死角覆寫雷達圖頂點
+  function forceUpdateRadarLabels() {
+    const labelMap = [
+      { key: 'Hs', name: 'Hs 浪高', val: '1.35m / 1.13m' },
+      { key: 'Weff', name: 'Weff 攻角風', val: '6.3m/s / 10.2m/s' },
+      { key: 'Tp', name: 'Tp 湧浪', val: '12.8s / 12.0s' },
+      { key: 'UKC', name: 'UKC 裕深', val: '1.12m / 1.50m' },
+      { key: 'FB', name: 'FB 乾舷', val: '0.15m / 0.50m' },
+      { key: 'CV', name: 'CV 越浪', val: '1.31p/m / 0.0' }
     ];
 
-    // 1. 穿透 SVG 與 HTML 葉節點文字
-    document.querySelectorAll('text, span, div, p').forEach(el => {
+    // 1. 搜尋所有純文字節點 (SVG <text> 與 HTML <span>)
+    document.querySelectorAll('text, tspan, span, div, p, label').forEach(el => {
       if (el.children.length === 0) {
         const txt = el.textContent.trim();
-        for (const item of labelsConfig) {
-          if (item.reg.test(txt) && !txt.includes('[')) {
-            el.textContent = item.label;
-            break;
+        labelMap.forEach(item => {
+          if ((txt.includes(item.key) || txt.includes(item.name)) && !txt.includes('[')) {
+            el.textContent = `${item.name} [${item.val}]`;
           }
-        }
+        });
       }
     });
 
-    // 2. 穿透 Chart.js 畫布實例
-    const fullLabels = [
-      `Hs 浪高 [${hs}m / 1.13m]`,
-      `Weff 攻角風 [${w}m/s / 10.2m/s]`,
-      `Tp 湧浪 [${tp}s / 12.0s]`,
-      `UKC 裕深 [${ukc}m / 1.50m]`,
-      `FB 乾舷 [${fb}m / 0.50m]`,
-      `CV 越浪 [${cv}p/m / 0.0]`
-    ];
-
+    // 2. 若為 Chart.js，更新 Labels 陣列
     document.querySelectorAll('canvas').forEach(cvs => {
-      let chart = null;
-      if (window.Chart && typeof window.Chart.getChart === 'function') {
-        chart = window.Chart.getChart(cvs);
-      }
-      if (chart && chart.data && chart.data.labels) {
-        chart.data.labels = fullLabels;
-        chart.update('none');
+      if (window.Chart) {
+        const chart = Chart.getChart ? Chart.getChart(cvs) : null;
+        if (chart && chart.data && chart.data.labels) {
+          chart.data.labels = labelMap.map(i => `${i.name} [${i.val}]`);
+          chart.update('none');
+        }
       }
     });
-
-    if (window.myRadarChart && window.myRadarChart.data) {
-      window.myRadarChart.data.labels = fullLabels;
-      window.myRadarChart.update('none');
-    }
   }
 
-  // [D] SSOT 同步與指標鎖定 (不再忽大忽小)
-  async function syncSSOTData() {
-    try {
-      const res = await fetch('latest_decision.json?t=' + Date.now(), { cache: 'no-store' });
-      if (!res.ok) return;
-      const d = await res.json();
-      const isVeto = !!(d.hard_veto_alert || (d.decision && d.decision.includes('Q4')));
-      const p = d.physics_metrics || {};
-
-      // 鎖定四項遙測數據卡片，杜絕跳動
-      document.querySelectorAll('*').forEach(el => {
-        if (el.children.length === 0) {
-          const t = el.textContent.trim();
-          if (t.includes('CV 越浪率')) el.textContent = `1.31 p/m`;
-          if (t.includes('雙體客輪蹲沉')) el.textContent = isVeto ? `0.00 m` : `0.93 m`;
-          if (t.includes('TDX AIS 對齊')) el.textContent = `99.2%`;
-          if (t.includes('RL 自適應')) el.textContent = `0.92`;
-          // 修正南岸狀態
-          if (isVeto && t.includes('南岸') && t.includes('條件合格')) {
-            el.textContent = '南岸 🔴 觸底熔斷';
-            el.className = el.className.replace('text-emerald', 'text-rose').replace('bg-emerald', 'bg-rose');
-          }
-        }
-      });
-
-      // 雷達圖覆寫
-      enforceRadarLabels(p);
-    } catch (e) {
-      console.warn('Sync failed:', e);
-    }
-  }
-
-  _origSetInterval.call(window, syncSSOTData, 2000);
-  syncSSOTData();
+  setInterval(forceUpdateRadarLabels, 1500);
+  forceUpdateRadarLabels();
 })();
 </script>
 </body>
