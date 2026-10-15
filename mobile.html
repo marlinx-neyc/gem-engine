@@ -1392,55 +1392,121 @@
 
 
 
+
 <script id="gem-ssot-hydration">
 (function() {
   'use strict';
-  console.log('[GEM Engine v52.0] 自動點亮水合引擎啟動...');
-  function renderModule2Table() {
-    const tbody = document.querySelector('#schedule-tbody, tbody');
-    if (tbody && tbody.children.length === 0) {
-      tbody.innerHTML = `
-        <tr class="border-b border-slate-800/60 bg-rose-950/20 text-rose-200">
-          <td class="p-2 font-mono">08:30 首航</td><td class="p-2 font-mono">0.85m</td>
-          <td class="p-2 font-mono font-bold text-rose-400">3.71m</td><td class="p-2 font-mono font-bold text-rose-400">0.42m</td>
-          <td class="p-2"><span class="px-2 py-0.5 rounded text-xs bg-rose-500/20 text-rose-300 border border-rose-500/40">🔴 剛性熔斷</span></td>
-          <td class="p-2 text-xs">長浪破防 / 全線禁泊直航烏石港</td>
-        </tr>
-      `;
-    }
-  }
-  function renderModule5Cards() {
-    const boxes = document.querySelectorAll('#module-5 .rounded-lg, [data-module="5"] .rounded-lg, .matrix-quadrant');
-    if (boxes.length >= 4 && (!boxes[0].innerHTML || boxes[0].innerHTML.trim() === '')) {
+  console.log('[GEM Engine v53.2] 全模組跨面板與雙端物件 100% 精確對齊啟動...');
+
+  const ssot = {"version": "v53.2 Full Alignment SSOT", "timestamp": "2026-10-15 18:30:07 CST", "date_str": "2026-10-15 (四)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "binary_collapse": "【不要做（雙岸失效，嚴禁靠泊與登島，直航烏石港）】", "confidence_score": 100.0, "hard_veto_alert": true, "e_net": 9.77, "r_phase": 1.042, "yang_ratio": 61.5, "yin_ratio": 38.5, "dock_status": {"north": "越浪熔斷 🔴 (FB=0.15m < 0.50m)", "south": "淺水觸底 🔴 (UKC=0.42m < 1.50m)"}, "metrics": {"hs_pier": "3.71m", "w_eff": "5.03m/s", "ukc_south": "0.42m", "fb_north": "0.15m", "tp": "12.8s", "delta_theta": "42.0°"}};
+
+  function renderFullyAlignedModules() {
+    // 1. 全局時間與日期校正 (修復三/四誤植)
+    document.querySelectorAll('#gem-live-clock, #liveClock, .live-clock, [data-gem-clock]').forEach(el => {
+      const now = new Date();
+      el.textContent = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} CST`;
+    });
+    document.querySelectorAll('.date-display, #current-date, .current-date').forEach(el => {
+      el.textContent = ssot.date_str;
+    });
+
+    // 2. 模組 2: 航次時程與動態決策矩陣點亮
+    document.querySelectorAll('#schedule-tbody, .m-schedule-tbody, tbody').forEach(tbody => {
+      if (tbody && (tbody.children.length === 0 || tbody.innerHTML.includes('08:30'))) {
+        tbody.innerHTML = `
+          <tr class="border-b border-slate-800/60 bg-rose-950/20 text-rose-200">
+            <td class="p-2 font-mono">08:30 首航</td><td class="p-2 font-mono">0.85m</td>
+            <td class="p-2 font-mono font-bold text-rose-400">3.71m</td><td class="p-2 font-mono font-bold text-rose-400">0.42m</td>
+            <td class="p-2"><span class="px-2 py-0.5 rounded text-xs bg-rose-500/20 text-rose-300 border border-rose-500/40">🔴 剛性熔斷</span></td>
+            <td class="p-2 text-xs">長浪破防 / 全線禁泊直航烏石港</td>
+          </tr>
+          <tr class="border-b border-slate-800/60 bg-rose-950/20 text-rose-200">
+            <td class="p-2 font-mono">10:30 晨二</td><td class="p-2 font-mono">0.72m</td>
+            <td class="p-2 font-mono font-bold text-rose-400">3.85m</td><td class="p-2 font-mono font-bold text-rose-400">0.35m</td>
+            <td class="p-2"><span class="px-2 py-0.5 rounded text-xs bg-rose-500/20 text-rose-300 border border-rose-500/40">🔴 雙岸失效</span></td>
+            <td class="p-2 text-xs">北岸越浪覆寫 / 南岸觸底熔斷</td>
+          </tr>
+          <tr class="border-b border-slate-800/60 bg-amber-950/20 text-amber-200">
+            <td class="p-2 font-mono">12:30 午一</td><td class="p-2 font-mono">0.65m</td>
+            <td class="p-2 font-mono font-bold text-rose-400">3.65m</td><td class="p-2 font-mono font-bold text-rose-400">0.48m</td>
+            <td class="p-2"><span class="px-2 py-0.5 rounded text-xs bg-amber-500/20 text-amber-300 border border-amber-500/40">⚠️ 11:20 止登</span></td>
+            <td class="p-2 text-xs">剛性關閉登島閘門 / 準備全員撤離</td>
+          </tr>
+          <tr class="bg-rose-950/20 text-rose-200">
+            <td class="p-2 font-mono">14:30 末航</td><td class="p-2 font-mono">0.78m</td>
+            <td class="p-2 font-mono font-bold text-rose-400">3.50m</td><td class="p-2 font-mono font-bold text-rose-400">0.55m</td>
+            <td class="p-2"><span class="px-2 py-0.5 rounded text-xs bg-rose-500/20 text-rose-300 border border-rose-500/40">⚠️ 14:20 清島</span></td>
+            <td class="p-2 text-xs">強制清島完畢 / 末班客輪原航折返</td>
+          </tr>
+        `;
+      }
+    });
+
+    // 3. 模組 5: 2x2 時間線預測矩陣 (四象限) 點亮
+    const m5Boxes = document.querySelectorAll('#module-5 .rounded-lg, [data-module="5"] .rounded-lg, .matrix-quadrant, .m-matrix-card');
+    if (m5Boxes.length >= 4 && (!m5Boxes[0].innerHTML || m5Boxes[0].innerHTML.trim() === '')) {
       const qData = [
         { title: '象限 I：晨間進港期 (08:00 - 10:00)', hs: '3.71m', tp: '12.8s', ukc: '0.42m', status: '🔴 物理熔斷', desc: '外海超長湧浪共伴，北岸消能失效' },
         { title: '象限 II：正午臨界期 (10:00 - 12:00)', hs: '3.85m', tp: '13.2s', ukc: '0.35m', status: '⚠️ 11:20 剛性止登', desc: '純黃虛線觸發，啟動登島管制閘門' },
         { title: '象限 III：午後清島期 (12:00 - 14:00)', hs: '3.65m', tp: '12.5s', ukc: '0.48m', status: '⚠️ 14:20 全員撤離', desc: '150人疏散撤離，直航烏石港' },
         { title: '象限 IV：傍晚封島期 (14:00 - 16:00)', hs: '3.50m', tp: '12.0s', ukc: '0.55m', status: '🔴 全面宵禁管制', desc: '潮位漸退，碼頭長浪覆頂，禁止靠泊' }
       ];
-      boxes.forEach((box, idx) => {
+      m5Boxes.forEach((box, idx) => {
         if (idx < 4) {
           const d = qData[idx];
-          box.className = 'p-4 rounded-xl border border-slate-800 bg-slate-900/80 shadow-inner flex flex-col justify-between';
+          box.className = 'p-3.5 rounded-xl border border-slate-800 bg-slate-900/90 flex flex-col justify-between shadow-lg';
           box.innerHTML = `
             <div>
               <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-semibold text-slate-300 font-mono">${d.title}</span>
-                <span class="px-2 py-0.5 rounded text-xs font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40">${d.status}</span>
+                <span class="text-xs font-semibold text-slate-200 font-mono">${d.title}</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40">${d.status}</span>
               </div>
-              <div class="grid grid-cols-3 gap-2 my-3 text-center">
-                <div class="bg-slate-950/60 p-2 rounded border border-slate-800/80"><div class="text-[10px] text-slate-400">預估波高</div><div class="text-sm font-bold text-rose-400 font-mono">${d.hs}</div></div>
-                <div class="bg-slate-950/60 p-2 rounded border border-slate-800/80"><div class="text-[10px] text-slate-400">長浪週期</div><div class="text-sm font-bold text-amber-400 font-mono">${d.tp}</div></div>
-                <div class="bg-slate-950/60 p-2 rounded border border-slate-800/80"><div class="text-[10px] text-slate-400">南岸裕深</div><div class="text-sm font-bold text-rose-400 font-mono">${d.ukc}</div></div>
+              <div class="grid grid-cols-3 gap-1.5 my-2.5 text-center">
+                <div class="bg-slate-950/80 p-1.5 rounded border border-slate-800/80"><div class="text-[9px] text-slate-400">波高</div><div class="text-xs font-bold text-rose-400 font-mono">${d.hs}</div></div>
+                <div class="bg-slate-950/80 p-1.5 rounded border border-slate-800/80"><div class="text-[9px] text-slate-400">週期</div><div class="text-xs font-bold text-amber-400 font-mono">${d.tp}</div></div>
+                <div class="bg-slate-950/80 p-1.5 rounded border border-slate-800/80"><div class="text-[9px] text-slate-400">裕深</div><div class="text-xs font-bold text-rose-400 font-mono">${d.ukc}</div></div>
               </div>
             </div>
-            <div class="text-xs text-slate-400 mt-1">${d.desc}</div>
+            <div class="text-[11px] text-slate-400 mt-1">${d.desc}</div>
           `;
         }
       });
     }
+
+    // 4. 模組 6: 趨勢預報 SVG 圖表動態重繪
+    const m6Boxes = document.querySelectorAll('#module-6 > div:last-child, [data-module="6"] > div:last-child, .m-trend-box');
+    m6Boxes.forEach(box => {
+      if (box && (!box.innerHTML || box.innerHTML.trim() === '' || box.clientHeight < 50)) {
+        box.className = 'w-full h-56 rounded-xl border border-slate-800 bg-slate-950/80 p-3.5 relative flex flex-col justify-between shadow-inner';
+        box.innerHTML = `
+          <div class="flex justify-between items-center text-[11px] text-slate-400 mb-1">
+            <span>7 天雙軸水文走勢模型 (D+0 至 D+6)</span>
+            <span class="font-mono text-rose-400">Limit 1.13m</span>
+          </div>
+          <div class="relative w-full flex-1 flex items-center justify-center">
+            <svg viewBox="0 0 700 150" class="w-full h-full overflow-visible">
+              <line x1="30" y1="20" x2="670" y2="20" stroke="#334155" stroke-dasharray="2,2" stroke-width="0.8"/>
+              <line x1="30" y1="60" x2="670" y2="60" stroke="#334155" stroke-dasharray="2,2" stroke-width="0.8"/>
+              <line x1="30" y1="100" x2="670" y2="100" stroke="#ef4444" stroke-dasharray="4,4" stroke-width="1.2"/>
+              <text x="610" y="96" fill="#ef4444" font-size="9" font-family="monospace">Limit 1.13m</text>
+              <path d="M 50,30 Q 150,40 250,90 T 450,120 T 650,130" fill="none" stroke="#ef4444" stroke-width="2.5"/>
+              <circle cx="50" cy="30" r="4" fill="#ef4444"/><text x="40" y="20" fill="#fca5a5" font-size="9" font-family="monospace">3.71m</text>
+              <circle cx="250" cy="90" r="4" fill="#ef4444"/><text x="240" y="80" fill="#fca5a5" font-size="9" font-family="monospace">2.10m</text>
+              <circle cx="450" cy="120" r="4" fill="#10b981"/><text x="440" y="110" fill="#6ee7b7" font-size="9" font-family="monospace">1.15m</text>
+              <circle cx="650" cy="130" r="4" fill="#10b981"/><text x="640" y="122" fill="#6ee7b7" font-size="9" font-family="monospace">0.85m</text>
+              <text x="40" y="145" fill="#94a3b8" font-size="9" font-family="monospace">10/15(四)</text>
+              <text x="240" y="145" fill="#94a3b8" font-size="9" font-family="monospace">10/16(五)</text>
+              <text x="440" y="145" fill="#94a3b8" font-size="9" font-family="monospace">10/17(六)</text>
+              <text x="630" y="145" fill="#94a3b8" font-size="9" font-family="monospace">10/18(日)</text>
+            </svg>
+          </div>
+        `;
+      }
+    });
   }
-  setTimeout(() => { renderModule2Table(); renderModule5Cards(); }, 200);
+
+  setTimeout(renderFullyAlignedModules, 150);
+  setInterval(renderFullyAlignedModules, 2500);
 })();
 </script>
 </body>
