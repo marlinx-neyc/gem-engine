@@ -2773,17 +2773,18 @@ setInterval(syncLatestDecision, 3000);
 
 
 
+
 <script id="gem-ssot-hydration">
 (function() {
   'use strict';
 
-  // [A] 清理背景舊定時器
+  // [A] 清除背景舊定時器，防止競態
   const highestIntervalId = setInterval(";");
   for (let i = 0; i < highestIntervalId; i++) {
     clearInterval(i);
   }
 
-  // [B] 純前端動態時鐘
+  // [B] 純前端秒針時鐘 (精準更新您版面中的時鐘區塊)
   function tickLiveClock() {
     const now = new Date();
     const hh = String(now.getHours()).padStart(2, '0');
@@ -2797,7 +2798,7 @@ setInterval(syncLatestDecision, 3000);
   setInterval(tickLiveClock, 1000);
   tickLiveClock();
 
-  // [C] 全動態 SSOT 數據水合 (修正執行順序與 Key 對標)
+  // [C] 自動水合：直接將數據寫入您現有的版面元件中
   async function syncSSOTData() {
     try {
       const res = await fetch('latest_decision.json?t=' + Date.now(), { cache: 'no-store' });
@@ -2806,124 +2807,42 @@ setInterval(syncLatestDecision, 3000);
       const isVeto = !!(d.hard_veto_alert || (d.decision && d.decision.includes('Q4')));
       window.__gem_isVeto = isVeto;
       const p = d.physics_metrics || {};
-      const activeDate = d.timestamp ? d.timestamp.split(' ')[0] : '2026-10-15';
 
-      // 步驟 1：先進行 DOM 屬性標註 (確保 safeSetText 能找到節點)
-      document.querySelectorAll('*').forEach(el => {
-        if (el.children.length === 0 && !el.id && !el.getAttribute('data-ssot-key')) {
-          const txt = el.textContent.trim();
-          if (txt.includes('CST') || /^\d{2}:\d{2}:\d{2}/.test(txt)) return;
-
-          if (txt.includes('物理熔斷') || txt.includes('全線開放') || txt.includes('游擊調撥') || txt.includes('Q1') || txt.includes('Q4')) {
-            el.setAttribute('data-ssot-key', 'decision');
-          } else if (txt.includes('決斷坍縮') || txt.includes('不要做') || txt.includes('要做')) {
-            el.setAttribute('data-ssot-key', 'binary');
-          } else if (txt.includes('E_crit') || txt.includes('E_net')) {
-            el.setAttribute('data-ssot-key', 'enet');
-          } else if (txt.includes('HARD VETO')) {
-            el.setAttribute('data-ssot-key', 'veto_flag');
-          } else if (txt.includes('能量破防')) {
-            el.setAttribute('data-ssot-key', 'energy_text');
-          } else if (txt.includes('應變中心') || txt.includes('開設標準') || txt.includes('常態水文')) {
-            el.setAttribute('data-ssot-key', 'ncdr_status');
-          } else if (txt.includes('實測風速')) {
-            el.setAttribute('data-ssot-key', 'wind_spec');
-          } else if (txt.includes('外海有效波高')) {
-            el.setAttribute('data-ssot-key', 'hs_spec');
-          } else if (txt.includes('港池消能波高')) {
-            el.setAttribute('data-ssot-key', 'hs_pier_spec');
-          } else if (txt.includes('即時潮位')) {
-            el.setAttribute('data-ssot-key', 'tide_spec');
-          } else if (txt.includes('航行中') || txt.includes('靜止避風')) {
-            el.setAttribute('data-ssot-key', 'ship_status');
-          } else if (txt.startsWith('航速:')) {
-            el.setAttribute('data-ssot-key', 'ship_speed');
-          } else if (txt.includes('動感蹲沉')) {
-            el.setAttribute('data-ssot-key', 'ship_squat');
-          } else if (txt.startsWith('航向:')) {
-            el.setAttribute('data-ssot-key', 'ship_heading');
-          } else if (txt.includes('凱鯨號')) {
-            el.setAttribute('data-ssot-key', 'ship_title');
-          } else if (txt.includes('系統更新時間') || txt.includes('SSOT updated') || txt.includes('SSOT同步')) {
-            el.setAttribute('data-ssot-key', 'ssot_timestamp');
+      // 安全寫入文字（保留您原本所有的 CSS 類別與排版）
+      function safeSetTextByKeyword(keyword, text) {
+        document.querySelectorAll('*').forEach(el => {
+          if (el.children.length === 0 && el.textContent.includes(keyword)) {
+            if (el.id === 'gem-live-clock' || el.id === 'liveClock') return;
+            el.textContent = text;
           }
-        }
-      });
-
-      // 步驟 2：安全寫入文字函式
-      function safeSetText(selector, text, className) {
-        document.querySelectorAll(selector).forEach(el => {
-          if (el.id === 'gem-live-clock' || el.id === 'liveClock') return;
-          if (text !== undefined) el.textContent = text;
-          if (className !== undefined) el.className = className;
         });
       }
 
-      // 步驟 3：精確對標寫入數據
-      const currentSpeed = isVeto ? '0.0' : String(p.vessel_speed_kts ?? 11.5);
-      const currentSquat = isVeto ? '0.00' : String(p.squat ?? 0.45);
-      const currentHs = (p.hs_cwa ?? 1.35).toFixed(2);
-      const currentTp = (p.tp ?? 12.8).toFixed(1);
-      const currentWlocal = (p.w_local ?? 8.5).toFixed(1);
-      const currentDelta = (p.delta_theta ?? 42).toFixed(0);
-
-      safeSetText('[data-ssot-key="decision"]', d.decision);
-      safeSetText('[data-ssot-key="binary"]', `決斷坍縮：${d.binary_collapse}`);
-      safeSetText('[data-ssot-key="enet"]', `E_net: ${Number(d.e_net).toFixed(2)} E_crit`);
-      safeSetText('[data-ssot-key="veto_flag"]', d.hard_veto_alert ? 'HARD VETO ACTIVE' : 'HARD VETO PASS');
-      safeSetText('[data-ssot-key="energy_text"]', `能量破防：長浪越浪破防 (動能佔比 ${d.yang_ratio}%) 碼頭乾舷阻抗失效`);
-
-      safeSetText('[data-ssot-key="ncdr_status"]', 
-        isVeto ? '🔴 未達開設標準 (海象長浪管制)' : '🟢 常態水文監測 (通航無虞)',
-        isVeto ? 'bg-rose-950 text-rose-300 border border-rose-600/50 px-2 py-0.5 rounded text-xs font-bold' : 'bg-emerald-950 text-emerald-300 border border-emerald-600/50 px-2 py-0.5 rounded text-xs font-bold'
-      );
-
-      // 對齊面板遙測 Key
-      safeSetText('[data-ssot-key="wind_spec"]', `實測風速：${currentWlocal} m/s (攻角 ${currentDelta}°)`);
-      safeSetText('[data-ssot-key="hs_spec"]', `外海有效波高：Hs ${currentHs}m (Tp ${currentTp}s)`);
-      safeSetText('[data-ssot-key="hs_pier_spec"]', `港池消能波高：Hs,pier ${(p.hs_pier ?? 1.35).toFixed(2)}m (消能 Kd=${(p.kd ?? 1.0).toFixed(2)})`);
-      safeSetText('[data-ssot-key="tide_spec"]', `即時潮位：+${(p.eta_tide ?? 0.85).toFixed(2)}m (預留乾舷 ${(p.fb_north ?? 0.15).toFixed(2)}m)`);
-
-      safeSetText('[data-ssot-key="ship_status"]', isVeto ? '● 靜止避風 (烏石港內港碼頭)' : '● 航行中', isVeto ? 'text-amber-400 font-bold' : 'text-emerald-400 font-bold');
-      safeSetText('[data-ssot-key="ship_speed"]', `航速: ${currentSpeed} kts`);
-      safeSetText('[data-ssot-key="ship_squat"]', `動感蹲沉: ${currentSquat} m`);
-      safeSetText('[data-ssot-key="ship_heading"]', isVeto ? '航向: 烏石港錨泊區 (靜止避風)' : '航向: 245° WSW (直航烏石港)');
-      safeSetText('[data-ssot-key="ship_title"]', isVeto ? '⚓ 凱鯨號 0.0kts (烏石港停泊)' : `🚢 凱鯨號 ${currentSpeed}kts`);
-
-      if (d.timestamp) {
-        safeSetText('[data-ssot-key="ssot_timestamp"]', `系統數據版本: ${d.version || 'v43.0'} | SSOT同步: ${d.timestamp}`);
+      function safeSetKey(key, text) {
+        document.querySelectorAll(`[data-ssot-key="${key}"]`).forEach(el => {
+          el.textContent = text;
+        });
       }
 
-      // 重構「官方 vs GEM 雙生模型」獨立雙欄卡片
-      const compContainers = document.querySelectorAll('#boxOfficialComparison, #official-vs-model-comparison, [data-ssot-container="comparison"]');
-      compContainers.forEach(container => {
-        container.innerHTML = `
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 w-full p-3 bg-slate-900/90 rounded-xl border border-slate-700/80 text-xs shadow-lg">
-            <div class="flex flex-col gap-2 p-3 bg-slate-800/80 rounded-lg border border-amber-500/40">
-              <div class="flex items-center justify-between pb-2 border-b border-amber-500/30 font-extrabold text-amber-300">
-                <span>🏛️ 官方氣象署 CWA 判斷</span>
-                <span class="px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-500/50 text-[10px]">預警開放</span>
-              </div>
-              <div class="space-y-1.5 text-slate-300 font-mono">
-                <div class="flex justify-between items-center"><span>外海波高 Hs:</span> <span class="text-amber-300 font-bold text-sm">1.20 m</span></div>
-                <div class="flex justify-between items-center"><span>攻角風速 Weff:</span> <span class="text-amber-300 font-bold text-sm">4.50 m/s</span></div>
-                <div class="flex justify-between items-center"><span>水下裕深 UKC:</span> <span class="text-amber-300 font-bold text-sm">1.80 m</span></div>
-              </div>
-            </div>
-            <div class="flex flex-col gap-2 p-3 bg-slate-800/80 rounded-lg border ${isVeto ? 'border-rose-500/50' : 'border-emerald-500/50'}">
-              <div class="flex items-center justify-between pb-2 border-b ${isVeto ? 'border-rose-500/30 text-rose-300' : 'border-emerald-500/30 text-emerald-300'} font-extrabold">
-                <span>🤖 GEM 雙生 PINN 模型</span>
-                <span class="px-2 py-0.5 rounded ${isVeto ? 'bg-rose-950 text-rose-300 border border-rose-500/50' : 'bg-emerald-950 text-emerald-300 border border-emerald-500/50'} text-[10px]">${d.decision || (isVeto ? '0.0% 剛性熔斷' : '全線通航')}</span>
-              </div>
-              <div class="space-y-1.5 text-slate-300 font-mono">
-                <div class="flex justify-between items-center"><span>實測波高 Hs:</span> <span class="${isVeto ? 'text-rose-400' : 'text-emerald-400'} font-bold text-sm">${(p.hs_cwa ?? 1.35).toFixed(2)} m</span></div>
-                <div class="flex justify-between items-center"><span>攻角風速 Weff:</span> <span class="text-emerald-400 font-bold text-sm">${(p.w_eff ?? 4.5).toFixed(2)} m/s</span></div>
-                <div class="flex justify-between items-center"><span>動態裕深 UKC:</span> <span class="${isVeto ? 'text-amber-400' : 'text-emerald-400'} font-bold text-sm">${(p.ukc_south ?? 2.87).toFixed(2)} m</span></div>
-              </div>
-            </div>
-          </div>
-        `;
-      });
+      const speed = isVeto ? '0.0' : String(p.vessel_speed_kts ?? 11.5);
+      const squat = isVeto ? '0.00' : String(p.squat ?? 0.45);
+      const hs = (p.hs_cwa ?? 1.35).toFixed(2);
+      const tp = (p.tp ?? 12.8).toFixed(1);
+      const wLocal = (p.w_local ?? 8.5).toFixed(1);
+      const delta = (p.delta_theta ?? 42).toFixed(0);
+
+      // 1. 優先更新已設定 key 的節點
+      safeSetKey('decision', d.decision);
+      safeSetKey('binary', `決斷坍縮：${d.binary_collapse}`);
+      safeSetKey('enet', `E_net: ${Number(d.e_net || 0).toFixed(2)} E_crit`);
+      safeSetKey('wind_spec', `實測風速：${wLocal} m/s (攻角 ${delta}°)`);
+      safeSetKey('hs_spec', `外海有效波高：Hs ${hs}m (Tp ${tp}s)`);
+
+      // 2. 自動在您原有的卡片內容中替換對應數據（完全不改變容器與樣式）
+      safeSetTextByKeyword('實測風速：', `實測風速：${wLocal} m/s (攻角 ${delta}°)`);
+      safeSetTextByKeyword('外海有效波高：', `外海有效波高：Hs ${hs}m (Tp ${tp}s)`);
+      safeSetTextByKeyword('港池消能波高：', `港池消能波高：Hs,pier ${(p.hs_pier ?? 1.35).toFixed(2)}m (消能 Kd=${(p.kd ?? 1.0).toFixed(2)})`);
+      safeSetTextByKeyword('即時潮位：', `即時潮位：+${(p.eta_tide ?? 0.85).toFixed(2)}m (預留乾舷 ${(p.fb_north ?? 0.15).toFixed(2)}m)`);
 
       if (window.shipMarker && isVeto) {
         window.shipMarker.setLatLng([24.8700, 121.8390]);
