@@ -1408,17 +1408,18 @@
 
 
 
+
 <script id="gem-ssot-hydration">
 (function() {
   'use strict';
-  console.log('[GEM Engine v54.0] 雙端營運智慧與無縫告警水合中樞啟動...');
+  console.log('[GEM Engine v55.0] 安全隔離水合與陰陽佔比轉換中樞啟動...');
 
-  const ssot = {"version": "v54.0 Operational Intelligence SSOT", "timestamp": "2026-10-16 06:49:05 CST", "date_str": "2026-10-16 (五)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "binary_collapse": "【不要做（雙岸失效，嚴禁靠泊與登島，直航烏石港）】", "confidence_score": 100.0, "hard_veto_alert": true, "failover_active": false, "e_net": 9.77, "r_phase": 1.042, "yang_ratio": 61.5, "yin_ratio": 38.5, "metrics": {"hs_pier": "3.71m", "w_eff": "5.03m/s", "ukc_south": "0.42m", "fb_north": "0.15m", "tp": "12.8s", "delta_theta": "42.0°"}, "alert_info": {"level": "CRITICAL_RED", "title": "🔴【GEM Engine 災害即時警報】雙岸物理防線熔斷 / 建議全線封島", "formatted_msg": "**時間**: 2026-10-16 06:49:05 CST (2026-10-16 (五))\n**兩儀諧振能量 E_net**: `9.77` (陽/衝擊: 61.5% | 陰/阻抗: 38.5%)\n**預估波高**: `3.71m` | **南岸裕深**: `0.42m`\n**處置建議**: 嚴禁船舶靠泊與人員登島，末班客輪原航折返烏石港。", "webhook_payload": {"username": "GEM Engine Monitor", "embeds": [{"title": "🔴【GEM Engine 災害即時警報】雙岸物理防線熔斷 / 建議全線封島", "description": "**時間**: 2026-10-16 06:49:05 CST (2026-10-16 (五))\n**兩儀諧振能量 E_net**: `9.77` (陽/衝擊: 61.5% | 陰/阻抗: 38.5%)\n**預估波高**: `3.71m` | **南岸裕深**: `0.42m`\n**處置建議**: 嚴禁船舶靠泊與人員登島，末班客輪原航折返烏石港。", "color": 15158332, "footer": {"text": "GEM Engine v54.0 Operational Intelligence"}}]}}};
+  const ssot = {"version": "v55.0 Layout Repair & Yin-Yang Ratio SSOT", "timestamp": "2026-10-16 06:53:25 CST", "date_str": "2026-10-16 (五)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "confidence_score": 100.0, "hard_veto_alert": true, "e_net": 9.77, "r_phase": 1.042, "yang_ratio": 61.5, "yin_ratio": 38.5, "metrics": {"hs_pier": "3.71m", "w_eff": "5.03m/s", "ukc_south": "0.42m", "fb_north": "0.15m"}, "alert_info": {"title": "🔴【GEM Engine 災害即時警報】雙岸物理防線熔斷 / 建議全線封島"}};
 
-  // 1. 緊急頂部告警橫幅注入 (僅注入一次)
+  // A. 緊急頂部告警橫幅注入
   function injectEmergencyBanner() {
     let banner = document.getElementById('gem-emergency-banner');
-    if (!banner && (ssot.hard_veto_alert || ssot.e_net >= 1.0)) {
+    if (!banner && ssot.hard_veto_alert) {
       banner = document.createElement('div');
       banner.id = 'gem-emergency-banner';
       banner.className = 'w-full bg-rose-600 text-white font-mono text-xs py-2 px-4 flex justify-between items-center z-50 sticky top-0 shadow-lg animate-pulse';
@@ -1433,11 +1434,10 @@
     }
   }
 
-  // 2. 獨立時間更新函數 (每秒僅修改文字，不觸發 DOM 重繪)
+  // B. 時間更新 (僅修改文字，零畫面閃爍)
   function updateClockOnly() {
     const now = new Date();
     const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} CST`;
-    
     document.querySelectorAll('#gem-live-clock, #liveClock, .live-clock, [data-gem-clock]').forEach(el => {
       if (el.textContent !== timeStr) el.textContent = timeStr;
     });
@@ -1446,88 +1446,70 @@
     });
   }
 
-  // 3. 一次性 DOM 水合 (避免重複重寫造成閃爍)
-  function hydrateDOMOnce() {
-    if (window.__gem_hydrated) return; // 已水合過則跳過
-
-    injectEmergencyBanner();
-
-    // 模組 2 航次表水合
-    document.querySelectorAll('#schedule-tbody, .m-schedule-tbody, tbody').forEach(tbody => {
-      if (tbody && tbody.children.length === 0) {
-        tbody.innerHTML = `
-          <tr class="border-b border-slate-800/60 bg-rose-950/20 text-rose-200">
-            <td class="p-2 font-mono">08:30 首航</td><td class="p-2 font-mono">0.85m</td>
-            <td class="p-2 font-mono font-bold text-rose-400">3.71m</td><td class="p-2 font-mono font-bold text-rose-400">0.42m</td>
-            <td class="p-2"><span class="px-2 py-0.5 rounded text-xs bg-rose-500/20 text-rose-300 border border-rose-500/40">🔴 剛性熔斷</span></td>
-            <td class="p-2 text-xs">長浪破防 / 全線禁泊直航烏石港</td>
-          </tr>
-          <tr class="border-b border-slate-800/60 bg-rose-950/20 text-rose-200">
-            <td class="p-2 font-mono">10:30 晨二</td><td class="p-2 font-mono">0.72m</td>
-            <td class="p-2 font-mono font-bold text-rose-400">3.85m</td><td class="p-2 font-mono font-bold text-rose-400">0.35m</td>
-            <td class="p-2"><span class="px-2 py-0.5 rounded text-xs bg-rose-500/20 text-rose-300 border border-rose-500/40">🔴 雙岸失效</span></td>
-            <td class="p-2 text-xs">北岸越浪覆寫 / 南岸觸底熔斷</td>
-          </tr>
-          <tr class="border-b border-slate-800/60 bg-amber-950/20 text-amber-200">
-            <td class="p-2 font-mono">12:30 午一</td><td class="p-2 font-mono">0.65m</td>
-            <td class="p-2 font-mono font-bold text-rose-400">3.65m</td><td class="p-2 font-mono font-bold text-rose-400">0.48m</td>
-            <td class="p-2"><span class="px-2 py-0.5 rounded text-xs bg-amber-500/20 text-amber-300 border border-amber-500/40">⚠️ 11:20 止登</span></td>
-            <td class="p-2 text-xs">剛性關閉登島閘門 / 準備全員撤離</td>
-          </tr>
-          <tr class="bg-rose-950/20 text-rose-200">
-            <td class="p-2 font-mono">14:30 末航</td><td class="p-2 font-mono">0.78m</td>
-            <td class="p-2 font-mono font-bold text-rose-400">3.50m</td><td class="p-2 font-mono font-bold text-rose-400">0.55m</td>
-            <td class="p-2"><span class="px-2 py-0.5 rounded text-xs bg-rose-500/20 text-rose-300 border border-rose-500/40">⚠️ 14:20 清島</span></td>
-            <td class="p-2 text-xs">強制清島完畢 / 末班客輪原航折返</td>
-          </tr>
-        `;
-      }
+  // C. 手機版兩儀「陰、陽佔比圖」轉換與點亮
+  function renderYinYangRatioChart() {
+    const ratioBoxes = document.querySelectorAll('#m-ratio-box, .m-ratio-container, [data-gem-ratio]');
+    ratioBoxes.forEach(container => {
+      container.innerHTML = `
+        <div class="p-3.5 rounded-xl border border-slate-800 bg-slate-900/90 shadow-md">
+          <div class="flex justify-between items-center text-xs mb-2">
+            <span class="font-bold text-amber-400 flex items-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span> 陽動能 (衝擊): ${ssot.yang_ratio}%
+            </span>
+            <span class="font-bold text-cyan-400 flex items-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-cyan-400"></span> 陰阻抗 (防禦): ${ssot.yin_ratio}%
+            </span>
+          </div>
+          <!-- 雙向陰陽動態雙色條 -->
+          <div class="w-full h-3.5 rounded-full bg-slate-950 flex overflow-hidden p-0.5 border border-slate-800">
+            <div class="h-full bg-gradient-to-r from-amber-500 to-rose-500 rounded-l-full transition-all duration-500" style="width: ${ssot.yang_ratio}%"></div>
+            <div class="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-r-full transition-all duration-500" style="width: ${ssot.yin_ratio}%"></div>
+          </div>
+          <div class="flex justify-between items-center text-[10px] text-slate-400 mt-1.5 font-mono">
+            <span>水流動能 Flux (K)</span>
+            <span>兩儀諧振 E_net = ${ssot.e_net}</span>
+            <span>物理阻抗 Capacity (V)</span>
+          </div>
+        </div>
+      `;
     });
 
-    // 模組 5 象限卡片水合
-    const m5Boxes = document.querySelectorAll('#module-5 .rounded-lg, [data-module="5"] .rounded-lg, .matrix-quadrant, .m-matrix-card');
-    if (m5Boxes.length >= 4 && (!m5Boxes[0].innerHTML || m5Boxes[0].innerHTML.trim() === '')) {
-      const qData = [
-        { title: '象限 I：晨間進港期 (08:00 - 10:00)', hs: '3.71m', tp: '12.8s', ukc: '0.42m', status: '🔴 物理熔斷', desc: '外海超長湧浪共伴，北岸消能失效' },
-        { title: '象限 II：正午臨界期 (10:00 - 12:00)', hs: '3.85m', tp: '13.2s', ukc: '0.35m', status: '⚠️ 11:20 剛性止登', desc: '純黃虛線觸發，啟動登島管制閘門' },
-        { title: '象限 III：午後清島期 (12:00 - 14:00)', hs: '3.65m', tp: '12.5s', ukc: '0.48m', status: '⚠️ 14:20 全員撤離', desc: '150人疏散撤離，直航烏石港' },
-        { title: '象限 IV：傍晚封島期 (14:00 - 16:00)', hs: '3.50m', tp: '12.0s', ukc: '0.55m', status: '🔴 全面宵禁管制', desc: '潮位漸退，碼頭長浪覆頂，禁止靠泊' }
-      ];
-      m5Boxes.forEach((box, idx) => {
-        if (idx < 4) {
-          const d = qData[idx];
-          box.className = 'p-3.5 rounded-xl border border-slate-800 bg-slate-900/90 flex flex-col justify-between shadow-lg';
-          box.innerHTML = `
-            <div>
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-semibold text-slate-200 font-mono">${d.title}</span>
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40">${d.status}</span>
-              </div>
-              <div class="grid grid-cols-3 gap-1.5 my-2.5 text-center">
-                <div class="bg-slate-950/80 p-1.5 rounded border border-slate-800/80"><div class="text-[9px] text-slate-400">波高</div><div class="text-xs font-bold text-rose-400 font-mono">${d.hs}</div></div>
-                <div class="bg-slate-950/80 p-1.5 rounded border border-slate-800/80"><div class="text-[9px] text-slate-400">週期</div><div class="text-xs font-bold text-amber-400 font-mono">${d.tp}</div></div>
-                <div class="bg-slate-950/80 p-1.5 rounded border border-slate-800/80"><div class="text-[9px] text-slate-400">裕深</div><div class="text-xs font-bold text-rose-400 font-mono">${d.ukc}</div></div>
-              </div>
-            </div>
-            <div class="text-[11px] text-slate-400 mt-1">${d.desc}</div>
-          `;
-        }
-      });
-    }
-
-    window.__gem_hydrated = true;
+    // 全局替換手機版舊有「物理與奇門」標籤
+    document.body.innerHTML = document.body.innerHTML
+      .replace(/物理與奇門/g, '兩儀陰陽')
+      .replace(/物理佔比/g, '陽動能')
+      .replace(/奇門佔比/g, '陰阻抗');
   }
 
-  // 執行首次 DOM 補全與時鐘鎖定
-  document.addEventListener('DOMContentLoaded', () => {
+  // D. 一次性 DOM 補全 (僅點亮指定特異 ID，徹底保護第一頁 Module 1)
+  function hydrateDOMOnce() {
+    if (window.__gem_v55_hydrated) return;
+
+    injectEmergencyBanner();
+    renderYinYangRatioChart();
+
+    const schedTbody = document.getElementById('schedule-tbody');
+    if (schedTbody && schedTbody.children.length === 0) {
+      schedTbody.innerHTML = `
+        <tr class="border-b border-slate-800/60 bg-rose-950/20 text-rose-200">
+          <td class="p-2 font-mono">08:30 首航</td><td class="p-2 font-mono">0.85m</td>
+          <td class="p-2 font-mono font-bold text-rose-400">3.71m</td><td class="p-2 font-mono font-bold text-rose-400">0.42m</td>
+          <td class="p-2"><span class="px-2 py-0.5 rounded text-xs bg-rose-500/20 text-rose-300 border border-rose-500/40">🔴 剛性熔斷</span></td>
+          <td class="p-2 text-xs">長浪破防 / 全線禁泊直航烏石港</td>
+        </tr>
+      `;
+    }
+
+    window.__gem_v55_hydrated = true;
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => { hydrateDOMOnce(); updateClockOnly(); });
+  } else {
     hydrateDOMOnce();
     updateClockOnly();
-  });
-  
-  hydrateDOMOnce();
-  updateClockOnly();
+  }
 
-  // 僅針對時間文字進行 1 秒週期更新（零畫面閃爍）
   setInterval(updateClockOnly, 1000);
 })();
 </script>
