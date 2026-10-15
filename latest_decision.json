@@ -1,31 +1,26 @@
 {
-  "version": "v52.0 Master SSOT",
-  "timestamp": "2026-10-15 20:08:28 CST",
+  "version": "v53.2 Full Alignment SSOT",
+  "timestamp": "2026-10-15 20:08:32 CST",
   "date_str": "2026-10-15 (四)",
   "decision_code": "Q4",
   "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)",
   "binary_collapse": "【不要做（雙岸失效，嚴禁靠泊與登島，直航烏石港）】",
   "confidence_score": 100.0,
   "hard_veto_alert": true,
-  "e_net": 13.72,
-  "yang_ratio": 41.9,
-  "yin_ratio": 58.1,
+  "e_net": 9.77,
+  "r_phase": 1.042,
+  "yang_ratio": 61.5,
+  "yin_ratio": 38.5,
   "dock_status": {
-    "north": "越浪熔斷 🔴",
-    "south": "淺水觸底 🔴"
+    "north": "越浪熔斷 🔴 (FB=0.15m < 0.50m)",
+    "south": "淺水觸底 🔴 (UKC=0.42m < 1.50m)"
   },
-  "physics_metrics": {
-    "hs_cwa": 3.5,
-    "w_local": 8.5,
-    "tp": 12.8,
-    "delta_theta": 42.0,
-    "eta_tide": 0.85,
-    "hs_pier": 3.74,
-    "w_eff": 6.32,
-    "ukc_south": 0.12,
-    "fb_north": 0.15,
-    "e_net": 13.72,
-    "fuzzy_risk": 1.0,
-    "alpha": 0.9834
+  "metrics": {
+    "hs_pier": "3.71m",
+    "w_eff": "5.03m/s",
+    "ukc_south": "0.42m",
+    "fb_north": "0.15m",
+    "tp": "12.8s",
+    "delta_theta": "42.0°"
   }
 }
