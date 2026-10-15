@@ -1400,110 +1400,159 @@
 
 
 
+
 <script id="gem-ssot-hydration">
 (function() {
   'use strict';
-  console.log('[GEM Engine v54.0] 雙端營運智慧與緊急告警水合中樞啟動...');
+  console.log('[GEM Engine v59.0] 剖面圖與動態互動雷達圖點亮啟動...');
 
-  const ssot = {"version": "v54.0 Operational Intelligence SSOT", "timestamp": "2026-10-15 20:08:41 CST", "date_str": "2026-10-15 (四)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "binary_collapse": "【不要做（雙岸失效，嚴禁靠泊與登島，直航烏石港）】", "confidence_score": 100.0, "hard_veto_alert": true, "failover_active": false, "e_net": 9.77, "r_phase": 1.042, "yang_ratio": 61.5, "yin_ratio": 38.5, "metrics": {"hs_pier": "3.71m", "w_eff": "5.03m/s", "ukc_south": "0.42m", "fb_north": "0.15m", "tp": "12.8s", "delta_theta": "42.0°"}, "alert_info": {"level": "CRITICAL_RED", "title": "🔴【GEM Engine 災害即時警報】雙岸物理防線熔斷 / 建議全線封島", "formatted_msg": "**時間**: 2026-10-15 20:08:41 CST (2026-10-15 (四))\n**兩儀諧振能量 E_net**: `9.77` (陽/衝擊: 61.5% | 陰/阻抗: 38.5%)\n**預估波高**: `3.71m` | **南岸裕深**: `0.42m`\n**處置建議**: 嚴禁船舶靠泊與人員登島，末班客輪原航折返烏石港。", "webhook_payload": {"username": "GEM Engine Monitor", "embeds": [{"title": "🔴【GEM Engine 災害即時警報】雙岸物理防線熔斷 / 建議全線封島", "description": "**時間**: 2026-10-15 20:08:41 CST (2026-10-15 (四))\n**兩儀諧振能量 E_net**: `9.77` (陽/衝擊: 61.5% | 陰/阻抗: 38.5%)\n**預估波高**: `3.71m` | **南岸裕深**: `0.42m`\n**處置建議**: 嚴禁船舶靠泊與人員登島，末班客輪原航折返烏石港。", "color": 15158332, "footer": {"text": "GEM Engine v54.0 Operational Intelligence"}}]}}};
+  const ssot = {"version": "v59.0 Interactive Profile & Radar SSOT", "timestamp": "2026-10-15 20:24:11 CST", "date_str": "2026-10-15 (四)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "confidence_score": 100.0, "hard_veto_alert": true, "e_net": 13.72, "yang_ratio": 41.9, "yin_ratio": 58.1, "metrics": {"hs_pier": "3.71m", "w_eff": "5.03m/s", "ukc_south": "0.42m", "fb_north": "0.15m", "squat": "0.82m", "tide": "0.85m", "tp": "12.8s", "delta_theta": "42.0°"}};
 
-  // 1. 緊急頂部告警橫幅 (Emergency Banner) 注入
-  function injectEmergencyBanner() {
-    let banner = document.getElementById('gem-emergency-banner');
-    if (!banner && (ssot.hard_veto_alert || ssot.e_net >= 1.0)) {
-      banner = document.createElement('div');
-      banner.id = 'gem-emergency-banner';
-      banner.className = 'w-full bg-rose-600 text-white font-mono text-xs py-2 px-4 flex justify-between items-center z-50 sticky top-0 shadow-lg animate-pulse';
-      banner.innerHTML = `
-        <div class="flex items-center space-x-2">
-          <span class="font-bold bg-white text-rose-700 px-1.5 py-0.5 rounded text-[10px]">極限熔斷</span>
-          <span>${ssot.alert_info.title}</span>
-        </div>
-        <div class="font-bold text-[11px]">E_net: ${ssot.e_net}</div>
-      `;
-      document.body.prepend(banner);
+  // 1. 在手機版與桌面版底部注入「南北岸動態剖面圖卡片」
+  function renderCrossSectionProfiles() {
+    let container = document.getElementById('gem-cross-sections-container');
+    if (!container) {
+      const anchor = document.querySelector('main, body > div:last-child');
+      container = document.createElement('div');
+      container.id = 'gem-cross-sections-container';
+      container.className = 'w-full max-w-5xl mx-auto my-4 p-3 grid grid-cols-1 md:grid-cols-2 gap-3 font-mono';
+      if (anchor) anchor.appendChild(container);
     }
+
+    container.innerHTML = `
+      <!-- 北岸主要泊位剖面圖 -->
+      <div class="p-3.5 rounded-xl border border-rose-900/60 bg-slate-950/90 shadow-xl flex flex-col justify-between">
+        <div class="flex justify-between items-center pb-2 border-b border-slate-800 mb-2">
+          <span class="text-xs font-bold text-rose-300">⚓ 北岸主要泊位 (水面乾舷與越浪剖面)</span>
+          <span class="px-2 py-0.5 rounded text-[10px] bg-rose-500/20 text-rose-400 border border-rose-500/40">🔴 越浪覆頂</span>
+        </div>
+        <div class="relative w-full h-32 bg-slate-900/80 rounded-lg overflow-hidden border border-slate-800 p-2 flex flex-col justify-between">
+          <div class="text-[10px] text-slate-400 flex justify-between">
+            <span>碼頭頂高: +3.20m</span>
+            <span>即時潮位: +${ssot.metrics.tide}</span>
+          </div>
+          <!-- 越浪模擬 SVG -->
+          <svg viewBox="0 0 300 80" class="w-full h-20 overflow-visible">
+            <rect x="0" y="45" width="120" height="35" fill="#1e293b" stroke="#475569" stroke-width="1"/>
+            <text x="10" y="65" fill="#94a3b8" font-size="9">北岸碼頭牆體</text>
+            <!-- 海浪水體 -->
+            <path d="M 120,30 Q 180,10 240,35 T 300,30 L 300,80 L 120,80 Z" fill="#0284c7" fill-opacity="0.4" stroke="#38bdf8" stroke-width="1.5"/>
+            <!-- 浪高線 Hs=3.71m -->
+            <line x1="120" y1="15" x2="300" y2="15" stroke="#ef4444" stroke-dasharray="3,3" stroke-width="1.5"/>
+            <text x="130" y="10" fill="#fca5a5" font-size="8">Hs 3.71m 浪高</text>
+            <!-- 乾舷 FB=0.15m -->
+            <line x1="120" y1="42" x2="120" y2="45" stroke="#f59e0b" stroke-width="2"/>
+            <text x="60" y="38" fill="#fcd34d" font-size="8">FB 0.15m</text>
+          </svg>
+        </div>
+        <div class="text-[11px] text-slate-400 mt-2">北岸消能瓦解，長浪直擊覆頂，嚴禁客輪靠泊。</div>
+      </div>
+
+      <!-- 南岸備用泊位剖面圖 -->
+      <div class="p-3.5 rounded-xl border border-rose-900/60 bg-slate-950/90 shadow-xl flex flex-col justify-between">
+        <div class="flex justify-between items-center pb-2 border-b border-slate-800 mb-2">
+          <span class="text-xs font-bold text-amber-300">⚓ 南岸備用泊位 (水下水深與蹲沉剖面)</span>
+          <span class="px-2 py-0.5 rounded text-[10px] bg-rose-500/20 text-rose-400 border border-rose-500/40">🔴 淺水觸底</span>
+        </div>
+        <div class="relative w-full h-32 bg-slate-900/80 rounded-lg overflow-hidden border border-slate-800 p-2 flex flex-col justify-between">
+          <div class="text-[10px] text-slate-400 flex justify-between">
+            <span>水深: 6.35m</span>
+            <span>船體吃水: 1.20m + 蹲沉 0.82m</span>
+          </div>
+          <!-- 蹲沉與裕深 SVG -->
+          <svg viewBox="0 0 300 80" class="w-full h-20 overflow-visible">
+            <!-- 海床界線 -->
+            <line x1="0" y1="70" x2="300" y2="70" stroke="#78350f" stroke-width="2"/>
+            <rect x="0" y="70" width="300" height="10" fill="#451a03"/>
+            <text x="220" y="65" fill="#d97706" font-size="8">海床底質 (水深 6.35m)</text>
+            <!-- 船體姿態 -->
+            <rect x="50" y="20" width="120" height="25" rx="3" fill="#334155" stroke="#94a3b8" stroke-width="1.5"/>
+            <text x="75" y="36" fill="#e2e8f0" font-size="9">客輪 (蹲沉 0.82m)</text>
+            <!-- 動態裕深 UKC=0.42m -->
+            <line x1="110" y1="45" x2="110" y2="70" stroke="#ef4444" stroke-width="2"/>
+            <text x="118" y="60" fill="#fca5a5" font-size="8">UKC 0.42m (< 1.50m limit)</text>
+          </svg>
+        </div>
+        <div class="text-[11px] text-slate-400 mt-2">退潮與巡航蹲沉共伴，南岸龍骨極易坐灘觸底。</div>
+      </div>
+    `;
   }
 
-  // 2. 模組水合與全對齊
-  function renderAll() {
-    injectEmergencyBanner();
-
-    // 時鐘與日期校正
-    document.querySelectorAll('#gem-live-clock, #liveClock, .live-clock, [data-gem-clock]').forEach(el => {
-      const now = new Date();
-      el.textContent = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} CST`;
-    });
-    document.querySelectorAll('.date-display, #current-date, .current-date').forEach(el => {
-      el.textContent = ssot.date_str;
-    });
-
-    // 模組 2 航次表水合
-    document.querySelectorAll('#schedule-tbody, .m-schedule-tbody, tbody').forEach(tbody => {
-      if (tbody && (tbody.children.length === 0 || tbody.innerHTML.includes('08:30'))) {
-        tbody.innerHTML = `
-          <tr class="border-b border-slate-800/60 bg-rose-950/20 text-rose-200">
-            <td class="p-2 font-mono">08:30 首航</td><td class="p-2 font-mono">0.85m</td>
-            <td class="p-2 font-mono font-bold text-rose-400">3.71m</td><td class="p-2 font-mono font-bold text-rose-400">0.42m</td>
-            <td class="p-2"><span class="px-2 py-0.5 rounded text-xs bg-rose-500/20 text-rose-300 border border-rose-500/40">🔴 剛性熔斷</span></td>
-            <td class="p-2 text-xs">長浪破防 / 全線禁泊直航烏石港</td>
-          </tr>
-          <tr class="border-b border-slate-800/60 bg-rose-950/20 text-rose-200">
-            <td class="p-2 font-mono">10:30 晨二</td><td class="p-2 font-mono">0.72m</td>
-            <td class="p-2 font-mono font-bold text-rose-400">3.85m</td><td class="p-2 font-mono font-bold text-rose-400">0.35m</td>
-            <td class="p-2"><span class="px-2 py-0.5 rounded text-xs bg-rose-500/20 text-rose-300 border border-rose-500/40">🔴 雙岸失效</span></td>
-            <td class="p-2 text-xs">北岸越浪覆寫 / 南岸觸底熔斷</td>
-          </tr>
-          <tr class="border-b border-slate-800/60 bg-amber-950/20 text-amber-200">
-            <td class="p-2 font-mono">12:30 午一</td><td class="p-2 font-mono">0.65m</td>
-            <td class="p-2 font-mono font-bold text-rose-400">3.65m</td><td class="p-2 font-mono font-bold text-rose-400">0.48m</td>
-            <td class="p-2"><span class="px-2 py-0.5 rounded text-xs bg-amber-500/20 text-amber-300 border border-amber-500/40">⚠️ 11:20 止登</span></td>
-            <td class="p-2 text-xs">剛性關閉登島閘門 / 準備全員撤離</td>
-          </tr>
-          <tr class="bg-rose-950/20 text-rose-200">
-            <td class="p-2 font-mono">14:30 末航</td><td class="p-2 font-mono">0.78m</td>
-            <td class="p-2 font-mono font-bold text-rose-400">3.50m</td><td class="p-2 font-mono font-bold text-rose-400">0.55m</td>
-            <td class="p-2"><span class="px-2 py-0.5 rounded text-xs bg-rose-500/20 text-rose-300 border border-rose-500/40">⚠️ 14:20 清島</span></td>
-            <td class="p-2 text-xs">強制清島完畢 / 末班客輪原航折返</td>
-          </tr>
-        `;
+  // 2. 渲染並綁定「動態互動雷達圖」
+  function renderInteractiveRadarChart() {
+    let radarBox = document.getElementById('gem-interactive-radar-box');
+    if (!radarBox) {
+      const target = document.querySelector('#module-1, [data-module="1"], .m-radar-card');
+      if (target) {
+        radarBox = document.createElement('div');
+        radarBox.id = 'gem-interactive-radar-box';
+        radarBox.className = 'w-full p-3.5 rounded-xl border border-slate-800 bg-slate-950/90 my-3 relative font-mono';
+        target.appendChild(radarBox);
       }
-    });
+    }
 
-    // 模組 5 象限卡片水合
-    const m5Boxes = document.querySelectorAll('#module-5 .rounded-lg, [data-module="5"] .rounded-lg, .matrix-quadrant, .m-matrix-card');
-    if (m5Boxes.length >= 4 && (!m5Boxes[0].innerHTML || m5Boxes[0].innerHTML.trim() === '')) {
-      const qData = [
-        { title: '象限 I：晨間進港期 (08:00 - 10:00)', hs: '3.71m', tp: '12.8s', ukc: '0.42m', status: '🔴 物理熔斷', desc: '外海超長湧浪共伴，北岸消能失效' },
-        { title: '象限 II：正午臨界期 (10:00 - 12:00)', hs: '3.85m', tp: '13.2s', ukc: '0.35m', status: '⚠️ 11:20 剛性止登', desc: '純黃虛線觸發，啟動登島管制閘門' },
-        { title: '象限 III：午後清島期 (12:00 - 14:00)', hs: '3.65m', tp: '12.5s', ukc: '0.48m', status: '⚠️ 14:20 全員撤離', desc: '150人疏散撤離，直航烏石港' },
-        { title: '象限 IV：傍晚封島期 (14:00 - 16:00)', hs: '3.50m', tp: '12.0s', ukc: '0.55m', status: '🔴 全面宵禁管制', desc: '潮位漸退，碼頭長浪覆頂，禁止靠泊' }
-      ];
-      m5Boxes.forEach((box, idx) => {
-        if (idx < 4) {
-          const d = qData[idx];
-          box.className = 'p-3.5 rounded-xl border border-slate-800 bg-slate-900/90 flex flex-col justify-between shadow-lg';
-          box.innerHTML = `
-            <div>
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-semibold text-slate-200 font-mono">${d.title}</span>
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40">${d.status}</span>
-              </div>
-              <div class="grid grid-cols-3 gap-1.5 my-2.5 text-center">
-                <div class="bg-slate-950/80 p-1.5 rounded border border-slate-800/80"><div class="text-[9px] text-slate-400">波高</div><div class="text-xs font-bold text-rose-400 font-mono">${d.hs}</div></div>
-                <div class="bg-slate-950/80 p-1.5 rounded border border-slate-800/80"><div class="text-[9px] text-slate-400">週期</div><div class="text-xs font-bold text-amber-400 font-mono">${d.tp}</div></div>
-                <div class="bg-slate-950/80 p-1.5 rounded border border-slate-800/80"><div class="text-[9px] text-slate-400">裕深</div><div class="text-xs font-bold text-rose-400 font-mono">${d.ukc}</div></div>
-              </div>
-            </div>
-            <div class="text-[11px] text-slate-400 mt-1">${d.desc}</div>
-          `;
-        }
+    if (radarBox && !document.getElementById('gem-radar-canvas')) {
+      radarBox.innerHTML = `
+        <div class="flex justify-between items-center text-xs mb-2">
+          <span class="font-bold text-slate-200">🎯 多維水動力物理特徵向量雷達圖 (點擊點位查看詳情)</span>
+          <span class="text-[10px] text-rose-400">紅色虛線: 剛性安全極限</span>
+        </div>
+        <div class="relative w-full h-56 flex items-center justify-center">
+          <svg id="gem-radar-svg" viewBox="0 0 200 200" class="w-full h-full overflow-visible">
+            <!-- 雷達底網 (5軸) -->
+            <polygon points="100,20 176,75 147,165 53,165 24,75" fill="none" stroke="#334155" stroke-width="0.8"/>
+            <polygon points="100,45 151,82 131,142 69,142 49,82" fill="none" stroke="#1e293b" stroke-width="0.8"/>
+            <polygon points="100,70 125,88 115,118 85,118 75,88" fill="none" stroke="#1e293b" stroke-width="0.8"/>
+
+            <!-- 剛性安全極限包落線 (Red Limit Overlay) -->
+            <polygon points="100,35 160,78 140,150 60,150 40,78" fill="none" stroke="#ef4444" stroke-dasharray="3,3" stroke-width="1.2"/>
+
+            <!-- 實測特徵數據網形 (Gradient Area) -->
+            <polygon points="100,10 185,70 165,175 35,175 15,70" fill="#ef4444" fill-opacity="0.35" stroke="#f87171" stroke-width="2"/>
+
+            <!-- 互動頂點 (Interactive Points with Click/Touch Tooltips) -->
+            <circle cx="100" cy="10" r="5" fill="#ef4444" class="radar-node cursor-pointer" data-info="預估波高 Hs: 3.71m (極限 1.13m | 超標 228%)"/>
+            <circle cx="185" cy="70" r="5" fill="#ef4444" class="radar-node cursor-pointer" data-info="攻角風速 Weff: 5.03m/s (極限 10.17m/s | 安全)"/>
+            <circle cx="165" cy="175" r="5" fill="#ef4444" class="radar-node cursor-pointer" data-info="動態裕深 UKC: 0.42m (極限 1.50m | 破防)"/>
+            <circle cx="35" cy="175" r="5" fill="#ef4444" class="radar-node cursor-pointer" data-info="乾舷高度 FB: 0.15m (極限 0.50m | 破防)"/>
+            <circle cx="15" cy="70" r="5" fill="#f59e0b" class="radar-node cursor-pointer" data-info="湧浪週期 Tp: 12.8s (長浪共振)"/>
+
+            <!-- 軸線標籤 -->
+            <text x="100" y="5" fill="#cbd5e1" font-size="8" text-anchor="middle">波高 Hs</text>
+            <text x="192" y="73" fill="#cbd5e1" font-size="8">風速 W</text>
+            <text x="172" y="185" fill="#cbd5e1" font-size="8">裕深 UKC</text>
+            <text x="25" y="185" fill="#cbd5e1" font-size="8">乾舷 FB</text>
+            <text x="5" y="73" fill="#cbd5e1" font-size="8">週期 Tp</text>
+          </svg>
+
+          <!-- 動態 Tooltip 浮動氣泡 -->
+          <div id="gem-radar-tooltip" class="absolute top-2 left-2 bg-slate-900/95 text-rose-300 border border-rose-500/50 rounded px-2.5 py-1 text-[11px] shadow-2xl hidden transition-all"></div>
+        </div>
+      `;
+
+      // 綁定觸控與滑鼠互動事件
+      const tooltip = document.getElementById('gem-radar-tooltip');
+      document.querySelectorAll('.radar-node').forEach(node => {
+        const showTooltip = (e) => {
+          const info = node.getAttribute('data-info');
+          tooltip.textContent = info;
+          tooltip.classList.remove('hidden');
+        };
+        node.addEventListener('mouseenter', showTooltip);
+        node.addEventListener('touchstart', (e) => { e.preventDefault(); showTooltip(e); });
       });
     }
   }
 
-  setTimeout(renderAll, 150);
-  setInterval(renderAll, 2500);
+  setTimeout(() => {
+    renderCrossSectionProfiles();
+    renderInteractiveRadarChart();
+  }, 200);
+
+  setInterval(() => {
+    renderCrossSectionProfiles();
+    renderInteractiveRadarChart();
+  }, 3000);
 })();
 </script>
 </body>
