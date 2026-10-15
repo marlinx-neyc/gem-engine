@@ -1061,23 +1061,25 @@
 
 
 
+
 <script id="gem-ssot-hydration">
 (function() {
   'use strict';
-  console.log('[GEM Safe Engine] 圖表保護型水合腳本已掛載');
+  console.log('[GEM Engine v46.0 Master] 無損水合與圖表保護中樞掛載成功');
 
-  function syncLiveTime() {
+  function syncClock() {
     const now = new Date();
     const hh = String(now.getHours()).padStart(2, '0');
     const mm = String(now.getMinutes()).padStart(2, '0');
     const ss = String(now.getSeconds()).padStart(2, '0');
     const timeStr = `${hh}:${mm}:${ss} CST`;
+
     document.querySelectorAll('#gem-live-clock, #liveClock, .live-clock').forEach(el => {
       el.textContent = timeStr;
     });
   }
-  setInterval(syncLiveTime, 1000);
-  syncLiveTime();
+  setInterval(syncClock, 1000);
+  syncClock();
 })();
 </script>
 </body>
