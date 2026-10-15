@@ -2799,14 +2799,21 @@ setInterval(syncLatestDecision, 3000);
 
 
 
+
 <script id="gem-ssot-hydration">
 (function() {
   'use strict';
-  console.log('[GEM Engine v56.0] 全時區/動態航態/日期鏈終極同步中樞啟動...');
+  console.log('[GEM Engine v57.0] 全局舊計時器清場與單一時鐘鎖定啟動...');
 
-  const ssot = {"version": "v56.0 Full Time-Sync SSOT", "timestamp": "2026-10-16 06:58:16 CST", "date_str": "2026-10-16 (五)", "d1_str": "10/17 (六)", "d2_str": "10/18 (日)", "d3_str": "10/19 (一)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "confidence_score": 100.0, "hard_veto_alert": true, "e_net": 9.77, "yang_ratio": 61.5, "yin_ratio": 38.5, "alert_info": {"title": "🔴【GEM Engine 災害即時警報】雙岸物理防線熔斷 / 建議全線封島"}};
+  // A. 強制清除背景所有舊的 setInterval (解決多重計時器競爭閃爍問題)
+  const highestIntervalId = setInterval(() => {}, 1000);
+  for (let i = 1; i <= highestIntervalId; i++) {
+    clearInterval(i);
+  }
 
-  // A. 強制使用 Asia/Taipei (UTC+8) 標準時區更新即時時鐘
+  const ssot = {"version": "v57.0 Stable Clock SSOT", "timestamp": "2026-10-16 07:03:10 CST", "date_str": "2026-10-16 (五)", "d1_str": "10/17 (六)", "d2_str": "10/18 (日)", "d3_str": "10/19 (一)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "confidence_score": 100.0, "hard_veto_alert": true, "e_net": 9.77, "yang_ratio": 61.5, "yin_ratio": 38.5, "alert_info": {"title": "🔴【GEM Engine 災害即時警報】雙岸物理防線熔斷 / 建議全線封島"}};
+
+  // B. Asia/Taipei 時區標準時鐘更新 (精準控制 textContent)
   function updateClockOnly() {
     const now = new Date();
     const formatter = new Intl.DateTimeFormat('zh-TW', {
@@ -2826,7 +2833,7 @@ setInterval(syncLatestDecision, 3000);
     });
   }
 
-  // B. 動態同步 D+1 ~ D+3 未來三天日期標籤
+  // C. 未來三天日期標籤動態對齊
   function syncForecastDates() {
     const dateSpans = document.querySelectorAll('#module-6 span, [data-module="6"] span, .m-trend-box span');
     dateSpans.forEach(el => {
@@ -2836,9 +2843,9 @@ setInterval(syncLatestDecision, 3000);
     });
   }
 
-  // C. 頁面組件水合
+  // D. 一次性 UI 水合
   function hydrateUIOnce() {
-    if (window.__gem_v56_hydrated) return;
+    if (window.__gem_v57_hydrated) return;
 
     // 1. 緊急告警頂部橫幅
     let banner = document.getElementById('gem-emergency-banner');
@@ -2856,7 +2863,7 @@ setInterval(syncLatestDecision, 3000);
       document.body.prepend(banner);
     }
 
-    // 2. 手機版兩儀陰陽圖表轉換
+    // 2. 手機版陰陽佔比圖
     const ratioBoxes = document.querySelectorAll('#m-ratio-box, .m-ratio-container, [data-gem-ratio]');
     ratioBoxes.forEach(container => {
       container.innerHTML = `
@@ -2878,7 +2885,7 @@ setInterval(syncLatestDecision, 3000);
     });
 
     syncForecastDates();
-    window.__gem_v56_hydrated = true;
+    window.__gem_v57_hydrated = true;
   }
 
   if (document.readyState === 'loading') {
@@ -2888,6 +2895,7 @@ setInterval(syncLatestDecision, 3000);
     updateClockOnly();
   }
 
+  // 全域唯一的秒針定時器
   setInterval(updateClockOnly, 1000);
 })();
 </script>
