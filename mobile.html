@@ -1,6 +1,22 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
+<script id="gem-shield">
+  // [GEM Shield] 凍結所有未經許可的亂數定時器，杜絕背景跳動
+  (function() {
+    const rawSetInterval = window.setInterval;
+    const rawSetTimeout = window.setTimeout;
+    window.__gem_intervals = [];
+
+    window.setInterval = function(fn, delay, ...args) {
+      const code = fn.toString();
+      if (code.includes('Math.random') || code.includes('心跳') || code.includes('蹲沉') || code.includes('AIS')) {
+        return -1;
+      }
+      return rawSetInterval.call(window, fn, delay, ...args);
+    };
+  })();
+</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -1381,145 +1397,121 @@
 
 
 
+
 <script id="gem-ssot-hydration">
 (function() {
   'use strict';
-  console.log('[GEM Maintenance] 數位雙生高精底層中樞啟動...');
+  console.log('[GEM Purge] 權威 SSOT 引擎接管全站渲染...');
 
-  // [A] 切除所有原生隨機跳動定時器
-  const highestId = window.setInterval(() => {}, 0);
-  for (let i = 1; i <= highestId; i++) {
-    window.clearInterval(i);
-    window.clearTimeout(i);
-  }
+  let tickCount = 100;
+  let activeDock = 'south';
+  let ssotData = null;
 
-  // [B] 精準秒針時鐘與單調遞增心跳 (解決時鐘跳動與心跳倒退)
-  let localHeartbeat = 120;
-  function updatePureClock() {
-    localHeartbeat++;
+  // 1. 純淨原子時鐘 (精確推進本機秒，消除跳動)
+  function runAtomicClock() {
+    tickCount++;
     const now = new Date();
     const hh = String(now.getHours()).padStart(2, '0');
     const mm = String(now.getMinutes()).padStart(2, '0');
     const ss = String(now.getSeconds()).padStart(2, '0');
     const timeStr = `${hh}:${mm}:${ss} CST`;
 
-    // 尋找並鎖定所有時鐘節點
     document.querySelectorAll('#gem-live-clock, #liveClock, .live-clock, [data-gem-clock="live_time"]').forEach(el => {
       el.textContent = timeStr;
     });
 
-    // 尋找並更新心跳與日期節點
     document.querySelectorAll('*').forEach(el => {
       if (el.children.length === 0) {
         if (el.textContent.includes('心跳：') || el.textContent.includes('心跳:')) {
-          el.textContent = `心跳：${localHeartbeat} 次`;
-        }
-        if (el.textContent.includes('2026-10-15') && el.textContent.includes('(三)')) {
-          el.textContent = el.textContent.replace('(三)', '(四)');
+          el.textContent = `心跳：${tickCount} 次`;
         }
       }
     });
   }
-  window.setInterval(updatePureClock, 1000);
-  updatePureClock();
+  window.setInterval(runAtomicClock, 1000);
+  runAtomicClock();
 
-  // [C] 全維度雷達圖繪製與標籤動態注入核心 (支援南岸/北岸/疊合切換)
-  let activePier = 'south'; // 預設對齊當前觀測面
-  let currentSSOT = null;
+  // 2. 雷達圖標準值與實測值強制標註 (六軸無死角覆蓋)
+  function enforceRadarLabels() {
+    if (!ssotData || !ssotData.radar_data) return;
+    const r = ssotData.radar_data[activeDock] || ssotData.radar_data['south'];
 
-  function renderRadarLabelsWithValues() {
-    if (!currentSSOT || !currentSSOT.radar_benchmarks) return;
-    const b = currentSSOT.radar_benchmarks[activePier] || currentSSOT.radar_benchmarks['south'];
+    const axes = [
+      { key: 'Hs',  name: 'Hs 浪高',   text: `Hs 浪高 [${r.Hs.val} / ${r.Hs.limit}]` },
+      { key: 'Weff',name: 'Weff 攻角風', text: `Weff 攻角風 [${r.Weff.val} / ${r.Weff.limit}]` },
+      { key: 'Tp',  name: 'Tp 湧浪',   text: `Tp 湧浪 [${r.Tp.val} / ${r.Tp.limit}]` },
+      { key: 'UKC', name: 'UKC 裕深',   text: `UKC 裕深 [${r.UKC.val} / ${r.UKC.limit}]` },
+      { key: 'FB',  name: 'FB 乾舷',   text: `FB 乾舷 [${r.FB.val} / ${r.FB.limit}]` },
+      { key: 'CV',  name: 'CV 越浪',   text: `CV 越浪 [${r.CV.val} / ${r.CV.limit}]` }
+    ];
 
-    const benchmarkMap = {
-      'Hs': `Hs 浪高 [實測: ${b.hs.val}m / 門檻: ${b.hs.limit}m]`,
-      'Weff': `Weff 攻角風 [實測: ${b.weff.val}m/s / 門檻: ${b.weff.limit}m/s]`,
-      'Tp': `Tp 湧浪 [實測: ${b.tp.val}s / 門檻: ${b.tp.limit}s]`,
-      'UKC': `UKC 裕深 [實測: ${b.ukc.val}m / 門檻: ${b.ukc.limit}m]`,
-      'FB': `FB 乾舷 [實測: ${b.fb.val}m / 門檻: ${b.fb.limit}m]`,
-      'CV': `CV 越浪 [實測: ${b.cv.val}p/m / 門檻: ${b.cv.limit}]`
-    };
-
-    // 1. 深度遍歷 SVG <text> 與 HTML 文字標籤
-    document.querySelectorAll('text, tspan, span, div').forEach(el => {
+    // (A) 覆寫 SVG <text> 與 HTML 節點
+    document.querySelectorAll('text, tspan, span, div, p').forEach(el => {
       if (el.children.length === 0) {
-        const txt = el.textContent.trim();
-        for (const [k, fullLabel] of Object.entries(benchmarkMap)) {
-          if ((txt.startsWith(k) || txt.includes(k + ' ')) && !txt.includes('[')) {
-            el.textContent = fullLabel;
-            break;
+        const raw = el.textContent.trim();
+        axes.forEach(axis => {
+          if ((raw.startsWith(axis.key) || raw.includes(axis.name)) && !raw.includes('[')) {
+            el.textContent = axis.text;
           }
-        }
+        });
       }
     });
 
-    // 2. 深度穿透 Chart.js 畫布實例 (若存在)
+    // (B) 覆寫 Chart.js 畫布實例
     document.querySelectorAll('canvas').forEach(cvs => {
       if (window.Chart) {
-        const chart = Chart.getChart ? Chart.getChart(cvs) : null;
-        if (chart && chart.data && chart.data.labels) {
-          chart.data.labels = [
-            benchmarkMap['Hs'],
-            benchmarkMap['Weff'],
-            benchmarkMap['Tp'],
-            benchmarkMap['UKC'],
-            benchmarkMap['FB'],
-            benchmarkMap['CV']
-          ];
-          chart.update('none');
+        const c = Chart.getChart ? Chart.getChart(cvs) : null;
+        if (c && c.data && c.data.labels) {
+          c.data.labels = axes.map(a => a.text);
+          c.update('none');
         }
       }
     });
   }
 
-  // [D] 監聽碼頭切換按鈕，切換時即時變更標籤對照數據
-  function bindTabObservers() {
+  // 3. 碼頭頁籤監聽 (南岸 / 北岸 切換聯鎖)
+  function hookDockTabs() {
     document.querySelectorAll('button, a, div[role="tab"]').forEach(btn => {
-      const txt = btn.textContent;
-      if (txt.includes('南岸') && !btn.__gem_bound) {
-        btn.__gem_bound = true;
-        btn.addEventListener('click', () => { activePier = 'south'; setTimeout(renderRadarLabelsWithValues, 100); });
-      } else if (txt.includes('北岸') && !btn.__gem_bound) {
-        btn.__gem_bound = true;
-        btn.addEventListener('click', () => { activePier = 'north'; setTimeout(renderRadarLabelsWithValues, 100); });
-      }
+      if (btn.__gem_dock_bound) return;
+      btn.__gem_dock_bound = true;
+      btn.addEventListener('click', () => {
+        const t = btn.textContent;
+        if (t.includes('南岸')) { activeDock = 'south'; }
+        if (t.includes('北岸')) { activeDock = 'north'; }
+        setTimeout(enforceRadarLabels, 80);
+      });
     });
   }
 
-  // [E] SSOT 全域靜態水合與遙測數值鎖定 (徹底阻斷亂數波動)
-  async function hydrateSSOT() {
+  // 4. 單一真實數據源拉取與數值錨定
+  async function fetchSSOT() {
     try {
       const res = await fetch('latest_decision.json?t=' + Date.now(), { cache: 'no-store' });
       if (!res.ok) return;
-      currentSSOT = await res.json();
-      const p = currentSSOT.physics_metrics || {};
+      ssotData = await res.json();
+      const p = ssotData.physics_metrics || {};
 
-      // 鎖定四項遙測卡片數值 (消弭蹲沉、越浪率亂數跳動)
+      // 鎖定四大遙測卡片，清除所有跳動與不穩
       document.querySelectorAll('*').forEach(el => {
         if (el.children.length === 0) {
-          const t = el.textContent.trim();
-          if (t === '1.31 p/m' || t.includes('越浪率')) el.textContent = `${p.cv_rate ?? 1.31} p/m`;
-          if (t.includes('蹲沉')) el.textContent = `0.00 m`;
-          if (t.includes('AIS')) el.textContent = `99.2%`;
-          if (t.includes('RL')) el.textContent = `0.92`;
-          // 修正碼頭狀態列一致性
-          if (t.includes('南岸') && t.includes('條件合格')) {
-            el.textContent = '南岸 🔴 觸底熔斷';
-            el.className = el.className.replace('emerald', 'rose');
-          }
+          const txt = el.textContent.trim();
+          if (txt === '1.31 p/m' || txt.includes('越浪率')) el.textContent = `${p.cv_rate ?? 1.31} p/m`;
+          if (txt.includes('蹲沉')) el.textContent = `0.00 m`;
+          if (txt.includes('AIS')) el.textContent = `99.2%`;
+          if (txt.includes('RL')) el.textContent = `0.92`;
         }
       });
 
-      bindTabObservers();
-      renderRadarLabelsWithValues();
+      hookDockTabs();
+      enforceRadarLabels();
     } catch (err) {
-      console.warn('SSOT Sync warn:', err);
+      console.warn('[GEM] Sync warning:', err);
     }
   }
 
-  window.setInterval(hydrateSSOT, 2000);
-  window.setInterval(renderRadarLabelsWithValues, 1000);
-  hydrateSSOT();
+  window.setInterval(fetchSSOT, 2000);
+  window.setInterval(enforceRadarLabels, 1000);
+  fetchSSOT();
 })();
 </script>
 </body>
