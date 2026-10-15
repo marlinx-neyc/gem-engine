@@ -1,22 +1,48 @@
 {
-  "version": "v60.1 Dynamic Linkage Fixed SSOT",
-  "timestamp": "2026-10-15 20:43:12 CST",
+  "version": "v61.0 Master Ultimate Unified SSOT",
+  "timestamp": "2026-10-15 20:51:48 CST",
   "date_str": "2026-10-15 (四)",
   "decision_code": "Q4",
   "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)",
+  "binary_collapse": "【不要做（雙岸失效，嚴禁靠泊與登島，直航頭城烏石港）】",
   "confidence_score": 100.0,
   "hard_veto_alert": true,
-  "e_net": 13.72,
-  "yang_ratio": 41.9,
-  "yin_ratio": 58.1,
+  "failover_active": false,
+  "e_net": 15.61,
+  "p_veto": 1.0,
+  "r_phase": 1.042,
+  "yang_ratio": 31.7,
+  "yin_ratio": 68.3,
+  "q_consensus": 89.14,
+  "alpha_tune": 0.653,
+  "attention_weights": "100% 微觀物理場 (拓撲未達門檻)",
+  "historical_match": {
+    "best_case": "KB_20260904_ESE_OVERTOPPING",
+    "similarity": 1.0
+  },
+  "dock_status": {
+    "north": "越浪熔斷 🔴 (FB=0.15m < 0.50m)",
+    "south": "淺水觸底 🔴 (UKC=0.42m < 1.50m)"
+  },
   "metrics": {
-    "hs_pier": "3.71m",
-    "w_eff": "5.03m/s",
-    "ukc_south": "0.42m",
+    "hs_pier": "3.55m",
+    "w_eff": "6.32m/s",
+    "ukc_south": "0.08m",
     "fb_north": "0.15m",
     "squat": "0.82m",
     "tide": "0.85m",
     "tp": "12.8s",
     "delta_theta": "42.0°"
+  },
+  "tactical_guidance": {
+    "speed_limit_kts": 0.0,
+    "evacuation_time_minutes": 25,
+    "evacuation_bearing": "245° WSW 直航頭城烏石港避風塢 (10.8浬)",
+    "milk_sea_curfew": "滿潮後 2.0 至 5.0 小時強酸擴散期全域禁絕水上活動"
+  },
+  "alert_info": {
+    "level": "CRITICAL_RED",
+    "title": "🔴【GEM Engine 災害即時警報】雙岸物理防線熔斷 / 建議全線封島",
+    "description": "**時間**: 2026-10-15 20:51:48 CST (2026-10-15 (四))\n**兩儀淨能量場 E_net**: `15.61` (陽動能: 31.7% | 陰阻抗: 68.3%)\n**預估波高**: `3.55m` | **南岸裕深**: `0.08m`\n**處置指引**: 嚴禁船舶靠泊與人員登島，末班客輪原航折返頭城烏石港避風塢。"
   }
 }
