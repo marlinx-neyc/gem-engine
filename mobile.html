@@ -1390,83 +1390,24 @@
 
 
 
+
 <script id="gem-ssot-hydration">
 (function() {
   'use strict';
-  console.log('[GEM Engine v45.0] 隔離防護水合中樞啟動...');
+  console.log('[GEM Safe Engine] 圖表保護型水合腳本已掛載');
 
-  let tickCount = 1;
-
-  // [A] 純淨秒時鐘推進
-  function tickClock() {
-    tickCount++;
+  function syncLiveTime() {
     const now = new Date();
     const hh = String(now.getHours()).padStart(2, '0');
     const mm = String(now.getMinutes()).padStart(2, '0');
     const ss = String(now.getSeconds()).padStart(2, '0');
     const timeStr = `${hh}:${mm}:${ss} CST`;
-
-    document.querySelectorAll('#gem-live-clock, #liveClock, .live-clock, [data-gem-clock="live_time"]').forEach(el => {
+    document.querySelectorAll('#gem-live-clock, #liveClock, .live-clock').forEach(el => {
       el.textContent = timeStr;
     });
-
-    document.querySelectorAll('.heartbeat-tag, [data-ssot="heartbeat"]').forEach(el => {
-      el.textContent = `心跳: ${tickCount} 次`;
-    });
   }
-  window.setInterval(tickClock, 1000);
-  tickClock();
-
-  // [B] 雷達圖專屬動態頂點標籤 (隔離 DOM，僅修改 Canvas / 雷達專用 SVG 節點)
-  function updateRadarChartLabelsOnly(p) {
-    if (!p) return;
-    const hs = (p.hs_pier ?? 3.71).toFixed(2);
-    const w = (p.w_eff ?? 5.03).toFixed(1);
-    const tp = (p.tp ?? 12.8).toFixed(1);
-    const ukc = (p.ukc_south ?? 0.42).toFixed(2);
-    const fb = (p.fb_north ?? 0.15).toFixed(2);
-    const cv = (p.cv_rate ?? 1.31).toFixed(2);
-
-    const radarFullLabels = [
-      `Hs 浪高 [${hs}m / 1.13m]`,
-      `Weff 攻角風 [${w}m/s / 10.2m/s]`,
-      `Tp 湧浪 [${tp}s / 12.0s]`,
-      `UKC 裕深 [${ukc}m / 1.50m]`,
-      `FB 乾舷 [${fb}m / 0.50m]`,
-      `CV 越浪 [${cv}p/m / 0.0]`
-    ];
-
-    // 專一針對 Chart.js 實例更新
-    document.querySelectorAll('canvas').forEach(cvs => {
-      if (window.Chart) {
-        const c = Chart.getChart ? Chart.getChart(cvs) : null;
-        if (c && c.data && c.data.labels) {
-          c.data.labels = radarFullLabels;
-          c.update('none');
-        }
-      }
-    });
-
-    if (window.myRadarChart && window.myRadarChart.data) {
-      window.myRadarChart.data.labels = radarFullLabels;
-      window.myRadarChart.update('none');
-    }
-  }
-
-  // [C] 定期拉取 SSOT JSON 進行無縫更新
-  async function syncSSOTStream() {
-    try {
-      const res = await fetch('latest_decision.json?t=' + Date.now(), { cache: 'no-store' });
-      if (!res.ok) return;
-      const d = await res.json();
-      updateRadarChartLabelsOnly(d.physics_metrics);
-    } catch (err) {
-      console.warn('[GEM Engine] Sync warn:', err);
-    }
-  }
-
-  window.setInterval(syncSSOTStream, 2000);
-  syncSSOTStream();
+  setInterval(syncLiveTime, 1000);
+  syncLiveTime();
 })();
 </script>
 </body>
