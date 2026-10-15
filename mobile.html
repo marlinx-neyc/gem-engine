@@ -1374,17 +1374,18 @@
 
 
 
+
 <script id="gem-ssot-hydration">
 (function() {
   'use strict';
 
-  // [A] 強制清理背景舊定時器
+  // [A] 清理背景舊定時器
   const highestIntervalId = setInterval(";");
   for (let i = 0; i < highestIntervalId; i++) {
     clearInterval(i);
   }
 
-  // [B] 純前端動態時鐘：點對點更新指定 ID 節點，100% 絕緣不跳動
+  // [B] 純前端動態時鐘
   function tickLiveClock() {
     const now = new Date();
     const hh = String(now.getHours()).padStart(2, '0');
@@ -1393,15 +1394,12 @@
     const timeStr = `${hh}:${mm}:${ss} CST`;
 
     const clockEls = document.querySelectorAll('#gem-live-clock, #liveClock, .live-clock, [data-gem-clock="live_time"]');
-    clockEls.forEach(el => {
-      el.textContent = timeStr;
-    });
+    clockEls.forEach(el => { el.textContent = timeStr; });
   }
-
   setInterval(tickLiveClock, 1000);
   tickLiveClock();
 
-  // [C] 全動態 SSOT 數據水合 (徹底排除時間節點寫入，無競態搶載)
+  // [C] 全動態 SSOT 數據水合 (修正執行順序與 Key 對標)
   async function syncSSOTData() {
     try {
       const res = await fetch('latest_decision.json?t=' + Date.now(), { cache: 'no-store' });
@@ -1412,67 +1410,7 @@
       const p = d.physics_metrics || {};
       const activeDate = d.timestamp ? d.timestamp.split(' ')[0] : '2026-10-15';
 
-      // 當日船班檢核標題動態對齊
-      document.querySelectorAll('h1, h2, h3, h4, div, span, p').forEach(el => {
-        if (el.children.length === 0 && el.textContent.includes('當日船班航次檢核')) {
-          el.textContent = `2. 當日船班航次檢核 (${activeDate})`;
-        }
-      });
-
-      function safeSetText(selector, text, className) {
-        document.querySelectorAll(selector).forEach(el => {
-          if (el.id === 'gem-live-clock' || el.id === 'liveClock') return;
-          if (text !== undefined) el.textContent = text;
-          if (className !== undefined) el.className = className;
-        });
-      }
-
-      // 遙測數據點對點同步
-      const currentSpeed = isVeto ? '0.0' : String(p.vessel_speed_kts ?? 11.5);
-      const currentSquat = isVeto ? '0.00' : String(p.squat ?? 0.45);
-      const currentHs = (p.hs_cwa ?? 1.35).toFixed(2);
-      const currentTp = (p.tp ?? 12.8).toFixed(1);
-      const currentWlocal = (p.w_local ?? 8.5).toFixed(1);
-      const currentDelta = (p.delta_theta ?? 42).toFixed(0);
-
-      safeSetText('[data-ssot-key="map_hs"]', `Hs ${currentHs}m / Tp ${currentTp}s`);
-      safeSetText('[data-ssot-key="map_wind"]', `局域風場：東北季風風速 ${currentWlocal} m/s (攻角 ${currentDelta}°)`);
-      safeSetText('[data-ssot-key="map_ship_speed"]', `航速: ${currentSpeed} kts`);
-      safeSetText('[data-ssot-key="map_ship_squat"]', `動感蹲沉: ${currentSquat} m`);
-      safeSetText('[data-ssot-key="map_ship_status"]', isVeto ? '⚓ 凱鯨號 0.0kts (烏石港靜止避風中)' : `🚢 凱鯨號 ${currentSpeed}kts (通航中)`);
-
-      // 重構「官方 vs GEM 雙生模型」為獨立左右雙欄卡片
-      const compContainers = document.querySelectorAll('#boxOfficialComparison, #official-vs-model-comparison, [data-ssot-container="comparison"]');
-      compContainers.forEach(container => {
-        container.innerHTML = `
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 w-full p-3 bg-slate-900/90 rounded-xl border border-slate-700/80 text-xs shadow-lg">
-            <div class="flex flex-col gap-2 p-3 bg-slate-800/80 rounded-lg border border-amber-500/40">
-              <div class="flex items-center justify-between pb-2 border-b border-amber-500/30 font-extrabold text-amber-300">
-                <span>🏛️ 官方氣象署 CWA 判斷</span>
-                <span class="px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-500/50 text-[10px]">預警開放</span>
-              </div>
-              <div class="space-y-1.5 text-slate-300 font-mono">
-                <div class="flex justify-between items-center"><span>外海波高 Hs:</span> <span class="text-amber-300 font-bold text-sm">1.20 m</span></div>
-                <div class="flex justify-between items-center"><span>攻角風速 Weff:</span> <span class="text-amber-300 font-bold text-sm">4.50 m/s</span></div>
-                <div class="flex justify-between items-center"><span>水下裕深 UKC:</span> <span class="text-amber-300 font-bold text-sm">1.80 m</span></div>
-              </div>
-            </div>
-            <div class="flex flex-col gap-2 p-3 bg-slate-800/80 rounded-lg border ${isVeto ? 'border-rose-500/50' : 'border-emerald-500/50'}">
-              <div class="flex items-center justify-between pb-2 border-b ${isVeto ? 'border-rose-500/30 text-rose-300' : 'border-emerald-500/30 text-emerald-300'} font-extrabold">
-                <span>🤖 GEM 雙生 PINN 模型</span>
-                <span class="px-2 py-0.5 rounded ${isVeto ? 'bg-rose-950 text-rose-300 border border-rose-500/50' : 'bg-emerald-950 text-emerald-300 border border-emerald-500/50'} text-[10px]">${d.decision || (isVeto ? '0.0% 剛性熔斷' : '全線通航')}</span>
-              </div>
-              <div class="space-y-1.5 text-slate-300 font-mono">
-                <div class="flex justify-between items-center"><span>實測波高 Hs:</span> <span class="${isVeto ? 'text-rose-400' : 'text-emerald-400'} font-bold text-sm">${(p.hs_cwa ?? 1.35).toFixed(2)} m</span></div>
-                <div class="flex justify-between items-center"><span>攻角風速 Weff:</span> <span class="text-emerald-400 font-bold text-sm">${(p.w_eff ?? 4.5).toFixed(2)} m/s</span></div>
-                <div class="flex justify-between items-center"><span>動態裕深 UKC:</span> <span class="${isVeto ? 'text-amber-400' : 'text-emerald-400'} font-bold text-sm">${(p.ukc_south ?? 2.87).toFixed(2)} m</span></div>
-              </div>
-            </div>
-          </div>
-        `;
-      });
-
-      // 數據標籤點對點標記 (排除時間字串)
+      // 步驟 1：先進行 DOM 屬性標註 (確保 safeSetText 能找到節點)
       document.querySelectorAll('*').forEach(el => {
         if (el.children.length === 0 && !el.id && !el.getAttribute('data-ssot-key')) {
           const txt = el.textContent.trim();
@@ -1514,6 +1452,23 @@
         }
       });
 
+      // 步驟 2：安全寫入文字函式
+      function safeSetText(selector, text, className) {
+        document.querySelectorAll(selector).forEach(el => {
+          if (el.id === 'gem-live-clock' || el.id === 'liveClock') return;
+          if (text !== undefined) el.textContent = text;
+          if (className !== undefined) el.className = className;
+        });
+      }
+
+      // 步驟 3：精確對標寫入數據
+      const currentSpeed = isVeto ? '0.0' : String(p.vessel_speed_kts ?? 11.5);
+      const currentSquat = isVeto ? '0.00' : String(p.squat ?? 0.45);
+      const currentHs = (p.hs_cwa ?? 1.35).toFixed(2);
+      const currentTp = (p.tp ?? 12.8).toFixed(1);
+      const currentWlocal = (p.w_local ?? 8.5).toFixed(1);
+      const currentDelta = (p.delta_theta ?? 42).toFixed(0);
+
       safeSetText('[data-ssot-key="decision"]', d.decision);
       safeSetText('[data-ssot-key="binary"]', `決斷坍縮：${d.binary_collapse}`);
       safeSetText('[data-ssot-key="enet"]', `E_net: ${Number(d.e_net).toFixed(2)} E_crit`);
@@ -1524,6 +1479,8 @@
         isVeto ? '🔴 未達開設標準 (海象長浪管制)' : '🟢 常態水文監測 (通航無虞)',
         isVeto ? 'bg-rose-950 text-rose-300 border border-rose-600/50 px-2 py-0.5 rounded text-xs font-bold' : 'bg-emerald-950 text-emerald-300 border border-emerald-600/50 px-2 py-0.5 rounded text-xs font-bold'
       );
+
+      // 對齊面板遙測 Key
       safeSetText('[data-ssot-key="wind_spec"]', `實測風速：${currentWlocal} m/s (攻角 ${currentDelta}°)`);
       safeSetText('[data-ssot-key="hs_spec"]', `外海有效波高：Hs ${currentHs}m (Tp ${currentTp}s)`);
       safeSetText('[data-ssot-key="hs_pier_spec"]', `港池消能波高：Hs,pier ${(p.hs_pier ?? 1.35).toFixed(2)}m (消能 Kd=${(p.kd ?? 1.0).toFixed(2)})`);
@@ -1538,6 +1495,37 @@
       if (d.timestamp) {
         safeSetText('[data-ssot-key="ssot_timestamp"]', `系統數據版本: ${d.version || 'v43.0'} | SSOT同步: ${d.timestamp}`);
       }
+
+      // 重構「官方 vs GEM 雙生模型」獨立雙欄卡片
+      const compContainers = document.querySelectorAll('#boxOfficialComparison, #official-vs-model-comparison, [data-ssot-container="comparison"]');
+      compContainers.forEach(container => {
+        container.innerHTML = `
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 w-full p-3 bg-slate-900/90 rounded-xl border border-slate-700/80 text-xs shadow-lg">
+            <div class="flex flex-col gap-2 p-3 bg-slate-800/80 rounded-lg border border-amber-500/40">
+              <div class="flex items-center justify-between pb-2 border-b border-amber-500/30 font-extrabold text-amber-300">
+                <span>🏛️ 官方氣象署 CWA 判斷</span>
+                <span class="px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-500/50 text-[10px]">預警開放</span>
+              </div>
+              <div class="space-y-1.5 text-slate-300 font-mono">
+                <div class="flex justify-between items-center"><span>外海波高 Hs:</span> <span class="text-amber-300 font-bold text-sm">1.20 m</span></div>
+                <div class="flex justify-between items-center"><span>攻角風速 Weff:</span> <span class="text-amber-300 font-bold text-sm">4.50 m/s</span></div>
+                <div class="flex justify-between items-center"><span>水下裕深 UKC:</span> <span class="text-amber-300 font-bold text-sm">1.80 m</span></div>
+              </div>
+            </div>
+            <div class="flex flex-col gap-2 p-3 bg-slate-800/80 rounded-lg border ${isVeto ? 'border-rose-500/50' : 'border-emerald-500/50'}">
+              <div class="flex items-center justify-between pb-2 border-b ${isVeto ? 'border-rose-500/30 text-rose-300' : 'border-emerald-500/30 text-emerald-300'} font-extrabold">
+                <span>🤖 GEM 雙生 PINN 模型</span>
+                <span class="px-2 py-0.5 rounded ${isVeto ? 'bg-rose-950 text-rose-300 border border-rose-500/50' : 'bg-emerald-950 text-emerald-300 border border-emerald-500/50'} text-[10px]">${d.decision || (isVeto ? '0.0% 剛性熔斷' : '全線通航')}</span>
+              </div>
+              <div class="space-y-1.5 text-slate-300 font-mono">
+                <div class="flex justify-between items-center"><span>實測波高 Hs:</span> <span class="${isVeto ? 'text-rose-400' : 'text-emerald-400'} font-bold text-sm">${(p.hs_cwa ?? 1.35).toFixed(2)} m</span></div>
+                <div class="flex justify-between items-center"><span>攻角風速 Weff:</span> <span class="text-emerald-400 font-bold text-sm">${(p.w_eff ?? 4.5).toFixed(2)} m/s</span></div>
+                <div class="flex justify-between items-center"><span>動態裕深 UKC:</span> <span class="${isVeto ? 'text-amber-400' : 'text-emerald-400'} font-bold text-sm">${(p.ukc_south ?? 2.87).toFixed(2)} m</span></div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
 
       if (window.shipMarker && isVeto) {
         window.shipMarker.setLatLng([24.8700, 121.8390]);
