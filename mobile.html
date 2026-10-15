@@ -1411,70 +1411,162 @@
 
 
 
-<script id="gem-ssot-hydration">
+
+<script id="gem-master-single-engine">
 (function() {
   'use strict';
-  console.log('[GEM Engine v57.0] 全局舊計時器清場與單一時鐘鎖定啟動...');
 
-  // A. 強制清除背景所有舊的 setInterval (解決多重計時器競爭閃爍問題)
-  const highestIntervalId = setInterval(() => {}, 1000);
-  for (let i = 1; i <= highestIntervalId; i++) {
+  // A. 全局舊計時器與背景輪詢強制清場
+  const maxTimerId = setTimeout(() => {}, 0);
+  for (let i = 0; i <= maxTimerId; i++) {
     clearInterval(i);
+    clearTimeout(i);
   }
 
-  const ssot = {"version": "v57.0 Stable Clock SSOT", "timestamp": "2026-10-16 07:03:10 CST", "date_str": "2026-10-16 (五)", "d1_str": "10/17 (六)", "d2_str": "10/18 (日)", "d3_str": "10/19 (一)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "confidence_score": 100.0, "hard_veto_alert": true, "e_net": 9.77, "yang_ratio": 61.5, "yin_ratio": 38.5, "alert_info": {"title": "🔴【GEM Engine 災害即時警報】雙岸物理防線熔斷 / 建議全線封島"}};
+  console.log('[GEM Engine v62.0] 全模組化架構水合與防抖動單一時鐘啟動');
 
-  // B. Asia/Taipei 時區標準時鐘更新 (精準控制 textContent)
+  const ssot = {"version": "v62.0 Modular Architecture SSOT", "timestamp": "2026-10-16 07:12:53 CST", "date_str": "2026-10-16 (五)", "d1_str": "10/17 (六)", "d2_str": "10/18 (日)", "d3_str": "10/19 (一)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "e_net": 9.77, "yang_ratio": 61.5, "yin_ratio": 38.5, "module1": {"north": {"hs": "3.71m", "ukc": "1.8m", "fb": "0.15m", "status": "🔴 越浪覆頂熔斷"}, "south": {"hs": "3.71m", "ukc": "0.42m", "fb": "1.85m", "status": "🔴 淺水觸底熔斷"}}, "alert_info": {"title": "🔴【GEM Engine 災害即時警報】雙岸物理防線熔斷 / 建議全線封島"}};
+
+  // B. 時鐘模組 (Header Module): 防抖動等寬樣式 + 獨占秒針更新
   function updateClockOnly() {
     const now = new Date();
     const formatter = new Intl.DateTimeFormat('zh-TW', {
       timeZone: 'Asia/Taipei',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
       hour12: false
     });
-    const timeStr = formatter.format(now) + ' CST';
+    const timeText = formatter.format(now) + ' CST';
 
     document.querySelectorAll('#gem-live-clock, #liveClock, .live-clock, [data-gem-clock]').forEach(el => {
-      if (el.textContent !== timeStr) el.textContent = timeStr;
+      el.style.fontFamily = 'monospace, ui-monospace, SFMono-Regular';
+      el.style.display = 'inline-block';
+      el.style.width = '125px';
+      el.style.textAlign = 'center';
+      if (el.textContent !== timeText) el.textContent = timeText;
     });
+
     document.querySelectorAll('.date-display, #current-date, .current-date').forEach(el => {
       if (el.textContent !== ssot.date_str) el.textContent = ssot.date_str;
     });
   }
 
-  // C. 未來三天日期標籤動態對齊
-  function syncForecastDates() {
-    const dateSpans = document.querySelectorAll('#module-6 span, [data-module="6"] span, .m-trend-box span');
-    dateSpans.forEach(el => {
-      if (el.textContent.includes('D+1')) el.textContent = `D+1 (${ssot.d1_str})`;
-      if (el.textContent.includes('D+2')) el.textContent = `D+2 (${ssot.d2_str})`;
-      if (el.textContent.includes('D+3')) el.textContent = `D+3 (${ssot.d3_str})`;
+  // C. Module 1水合: PINN 雙岸數據對齊與表格標籤修正
+  function hydrateModule1() {
+    document.querySelectorAll('[data-metric="ukc-north"]').forEach(el => el.textContent = ssot.module1.north.ukc);
+    document.querySelectorAll('[data-metric="ukc-south"]').forEach(el => el.textContent = ssot.module1.south.ukc);
+    document.querySelectorAll('[data-metric="fb-north"]').forEach(el => el.textContent = ssot.module1.north.fb);
+    document.querySelectorAll('[data-metric="fb-south"]').forEach(el => el.textContent = ssot.module1.south.fb);
+
+    // 校正桌面版右側南岸卡片文案與Kd係數
+    if (document.body.innerHTML.includes('FB 0.15m (越浪覆寫)')) {
+      document.body.innerHTML = document.body.innerHTML
+        .replace(/FB 0.15m \(越浪覆寫\)/g, 'FB 1.85m (乾舷安全)')
+        .replace(/觸底與越浪雙重熔斷/g, '淺水觸底單一熔斷')
+        .replace(/Kd=1.00/g, 'Kd=1.06');
+    }
+
+    // 補全關鍵指標表格列標籤
+    const tables = document.querySelectorAll('table');
+    tables.forEach(tbl => {
+      const rows = tbl.querySelectorAll('tr');
+      if (rows.length >= 2) {
+        if (rows[0].cells[0] && !rows[0].cells[0].textContent.includes('【北岸】')) {
+          rows[0].cells[0].innerHTML = '<span class="text-xs font-bold text-cyan-400">【北岸】</span> ' + rows[0].cells[0].innerHTML;
+        }
+        if (rows[1].cells[0] && !rows[1].cells[0].textContent.includes('【南岸】')) {
+          rows[1].cells[0].innerHTML = '<span class="text-xs font-bold text-amber-400">【南岸】</span> ' + rows[1].cells[0].innerHTML;
+        }
+      }
     });
   }
 
-  // D. 一次性 UI 水合
-  function hydrateUIOnce() {
-    if (window.__gem_v57_hydrated) return;
+  // D. Module 4 水合: 桌面版六軸態勢雷達圖 (Canvas Engine)
+  function hydrateModule4Radar() {
+    const containers = document.querySelectorAll('#radar-container, .radar-box, #radarCanvas, [data-radar]');
+    containers.forEach(container => {
+      let canvas = container.tagName === 'CANVAS' ? container : container.querySelector('canvas');
+      if (!canvas) {
+        canvas = document.createElement('canvas');
+        canvas.id = 'gem-canvas-radar';
+        canvas.className = 'w-full h-full min-h-[280px]';
+        container.innerHTML = '';
+        container.appendChild(canvas);
+      }
 
-    // 1. 緊急告警頂部橫幅
-    let banner = document.getElementById('gem-emergency-banner');
-    if (!banner && ssot.hard_veto_alert) {
-      banner = document.createElement('div');
-      banner.id = 'gem-emergency-banner';
-      banner.className = 'w-full bg-rose-600 text-white font-mono text-xs py-2 px-4 flex justify-between items-center z-50 sticky top-0 shadow-lg animate-pulse';
-      banner.innerHTML = `
-        <div class="flex items-center space-x-2">
-          <span class="font-bold bg-white text-rose-700 px-1.5 py-0.5 rounded text-[10px]">極限熔斷</span>
-          <span>${ssot.alert_info.title}</span>
-        </div>
-        <div class="font-bold text-[11px]">E_net: ${ssot.e_net}</div>
-      `;
-      document.body.prepend(banner);
-    }
+      const rect = container.getBoundingClientRect();
+      const w = rect.width || 420;
+      const h = rect.height || 280;
+      canvas.width = w;
+      canvas.height = h;
 
-    // 2. 手機版陰陽佔比圖
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      ctx.clearRect(0, 0, w, h);
+      const cx = w / 2;
+      const cy = h / 2 + 10;
+      const radius = Math.min(cx, cy) - 45;
+      const axes = ['Hs波高 (3.71m)', 'Weff風速 (5.03m/s)', 'UKC裕深 (0.42m)', 'FB乾舷 (0.15m)', 'Tp週期 (12.8s)', '攻角 Δθ (42°)'];
+      const normValues = [2.2, 0.5, 2.5, 2.8, 1.1, 0.8]; // 1.0 為剛性門檻線
+
+      // 繪製六角網格 (黃色 100% 剛性安全界限)
+      for (let lvl = 1; lvl <= 4; lvl++) {
+        const r = (radius / 4) * lvl;
+        ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+          const a = (Math.PI / 3) * i - Math.PI / 2;
+          const x = cx + r * Math.cos(a);
+          const y = cy + r * Math.sin(a);
+          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.strokeStyle = lvl === 3 ? '#f59e0b' : '#334155';
+        ctx.setLineDash(lvl === 3 ? [4, 4] : []);
+        ctx.lineWidth = lvl === 3 ? 1.8 : 0.8;
+        ctx.stroke();
+      }
+
+      // 軸線與標籤
+      ctx.setLineDash([]);
+      for (let i = 0; i < 6; i++) {
+        const a = (Math.PI / 3) * i - Math.PI / 2;
+        const x = cx + radius * Math.cos(a);
+        const y = cy + radius * Math.sin(a);
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(x, y);
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        const lx = cx + (radius + 24) * Math.cos(a);
+        const ly = cy + (radius + 14) * Math.sin(a);
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '10px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(axes[i], lx, ly);
+      }
+
+      // 超標風險多邊形
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const a = (Math.PI / 3) * i - Math.PI / 2;
+        const r = Math.min(radius * 1.15, (radius / 3) * normValues[i]);
+        const x = cx + r * Math.cos(a);
+        const y = cy + r * Math.sin(a);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(239, 68, 68, 0.35)';
+      ctx.fill();
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    });
+  }
+
+  // E. Module 4 手機版水合: 兩儀陰陽動態雙色圖表
+  function hydrateMobileYinYang() {
     const ratioBoxes = document.querySelectorAll('#m-ratio-box, .m-ratio-container, [data-gem-ratio]');
     ratioBoxes.forEach(container => {
       container.innerHTML = `
@@ -1491,23 +1583,35 @@
             <div class="h-full bg-gradient-to-r from-amber-500 to-rose-500 rounded-l-full" style="width: ${ssot.yang_ratio}%"></div>
             <div class="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-r-full" style="width: ${ssot.yin_ratio}%"></div>
           </div>
+          <div class="flex justify-between items-center text-[10px] text-slate-400 mt-1.5 font-mono">
+            <span>水流動能 Flux (K)</span>
+            <span>兩儀諧振 E_net = ${ssot.e_net}</span>
+            <span>物理阻抗 Capacity (V)</span>
+          </div>
         </div>
       `;
     });
-
-    syncForecastDates();
-    window.__gem_v57_hydrated = true;
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => { hydrateUIOnce(); updateClockOnly(); });
-  } else {
-    hydrateUIOnce();
-    updateClockOnly();
+  // F. Module 6 水合: 動態對齊未來的 D+1 ~ D+3 日期標籤
+  function hydrateModule6Dates() {
+    const dateSpans = document.querySelectorAll('#module-6 span, [data-module="6"] span, .m-trend-box span');
+    dateSpans.forEach(el => {
+      if (el.textContent.includes('D+1')) el.textContent = `D+1 (${ssot.d1_str})`;
+      if (el.textContent.includes('D+2')) el.textContent = `D+2 (${ssot.d2_str})`;
+      if (el.textContent.includes('D+3')) el.textContent = `D+3 (${ssot.d3_str})`;
+    });
   }
 
-  // 全域唯一的秒針定時器
-  setInterval(updateClockOnly, 1000);
+  // 執行一次性模組水合
+  hydrateModule1();
+  hydrateModule4Radar();
+  hydrateMobileYinYang();
+  hydrateModule6Dates();
+  updateClockOnly();
+
+  // 獨占單一秒針定時器
+  window.__gem_single_timer = setInterval(updateClockOnly, 1000);
 })();
 </script>
 </body>
