@@ -1393,15 +1393,37 @@
 
 
 
+
 <script id="gem-ssot-hydration">
 (function() {
   'use strict';
-  console.log('[GEM Engine v53.2] 全模組跨面板與雙端物件 100% 精確對齊啟動...');
+  console.log('[GEM Engine v54.0] 雙端營運智慧與緊急告警水合中樞啟動...');
 
-  const ssot = {"version": "v53.2 Full Alignment SSOT", "timestamp": "2026-10-15 18:30:07 CST", "date_str": "2026-10-15 (四)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "binary_collapse": "【不要做（雙岸失效，嚴禁靠泊與登島，直航烏石港）】", "confidence_score": 100.0, "hard_veto_alert": true, "e_net": 9.77, "r_phase": 1.042, "yang_ratio": 61.5, "yin_ratio": 38.5, "dock_status": {"north": "越浪熔斷 🔴 (FB=0.15m < 0.50m)", "south": "淺水觸底 🔴 (UKC=0.42m < 1.50m)"}, "metrics": {"hs_pier": "3.71m", "w_eff": "5.03m/s", "ukc_south": "0.42m", "fb_north": "0.15m", "tp": "12.8s", "delta_theta": "42.0°"}};
+  const ssot = {"version": "v54.0 Operational Intelligence SSOT", "timestamp": "2026-10-15 18:34:48 CST", "date_str": "2026-10-15 (四)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "binary_collapse": "【不要做（雙岸失效，嚴禁靠泊與登島，直航烏石港）】", "confidence_score": 100.0, "hard_veto_alert": true, "failover_active": false, "e_net": 9.77, "r_phase": 1.042, "yang_ratio": 61.5, "yin_ratio": 38.5, "metrics": {"hs_pier": "3.71m", "w_eff": "5.03m/s", "ukc_south": "0.42m", "fb_north": "0.15m", "tp": "12.8s", "delta_theta": "42.0°"}, "alert_info": {"level": "CRITICAL_RED", "title": "🔴【GEM Engine 災害即時警報】雙岸物理防線熔斷 / 建議全線封島", "formatted_msg": "**時間**: 2026-10-15 18:34:48 CST (2026-10-15 (四))\n**兩儀諧振能量 E_net**: `9.77` (陽/衝擊: 61.5% | 陰/阻抗: 38.5%)\n**預估波高**: `3.71m` | **南岸裕深**: `0.42m`\n**處置建議**: 嚴禁船舶靠泊與人員登島，末班客輪原航折返烏石港。", "webhook_payload": {"username": "GEM Engine Monitor", "embeds": [{"title": "🔴【GEM Engine 災害即時警報】雙岸物理防線熔斷 / 建議全線封島", "description": "**時間**: 2026-10-15 18:34:48 CST (2026-10-15 (四))\n**兩儀諧振能量 E_net**: `9.77` (陽/衝擊: 61.5% | 陰/阻抗: 38.5%)\n**預估波高**: `3.71m` | **南岸裕深**: `0.42m`\n**處置建議**: 嚴禁船舶靠泊與人員登島，末班客輪原航折返烏石港。", "color": 15158332, "footer": {"text": "GEM Engine v54.0 Operational Intelligence"}}]}}};
 
-  function renderFullyAlignedModules() {
-    // 1. 全局時間與日期校正 (修復三/四誤植)
+  // 1. 緊急頂部告警橫幅 (Emergency Banner) 注入
+  function injectEmergencyBanner() {
+    let banner = document.getElementById('gem-emergency-banner');
+    if (!banner && (ssot.hard_veto_alert || ssot.e_net >= 1.0)) {
+      banner = document.createElement('div');
+      banner.id = 'gem-emergency-banner';
+      banner.className = 'w-full bg-rose-600 text-white font-mono text-xs py-2 px-4 flex justify-between items-center z-50 sticky top-0 shadow-lg animate-pulse';
+      banner.innerHTML = `
+        <div class="flex items-center space-x-2">
+          <span class="font-bold bg-white text-rose-700 px-1.5 py-0.5 rounded text-[10px]">極限熔斷</span>
+          <span>${ssot.alert_info.title}</span>
+        </div>
+        <div class="font-bold text-[11px]">E_net: ${ssot.e_net}</div>
+      `;
+      document.body.prepend(banner);
+    }
+  }
+
+  // 2. 模組水合與全對齊
+  function renderAll() {
+    injectEmergencyBanner();
+
+    // 時鐘與日期校正
     document.querySelectorAll('#gem-live-clock, #liveClock, .live-clock, [data-gem-clock]').forEach(el => {
       const now = new Date();
       el.textContent = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} CST`;
@@ -1410,7 +1432,7 @@
       el.textContent = ssot.date_str;
     });
 
-    // 2. 模組 2: 航次時程與動態決策矩陣點亮
+    // 模組 2 航次表水合
     document.querySelectorAll('#schedule-tbody, .m-schedule-tbody, tbody').forEach(tbody => {
       if (tbody && (tbody.children.length === 0 || tbody.innerHTML.includes('08:30'))) {
         tbody.innerHTML = `
@@ -1442,7 +1464,7 @@
       }
     });
 
-    // 3. 模組 5: 2x2 時間線預測矩陣 (四象限) 點亮
+    // 模組 5 象限卡片水合
     const m5Boxes = document.querySelectorAll('#module-5 .rounded-lg, [data-module="5"] .rounded-lg, .matrix-quadrant, .m-matrix-card');
     if (m5Boxes.length >= 4 && (!m5Boxes[0].innerHTML || m5Boxes[0].innerHTML.trim() === '')) {
       const qData = [
@@ -1472,41 +1494,10 @@
         }
       });
     }
-
-    // 4. 模組 6: 趨勢預報 SVG 圖表動態重繪
-    const m6Boxes = document.querySelectorAll('#module-6 > div:last-child, [data-module="6"] > div:last-child, .m-trend-box');
-    m6Boxes.forEach(box => {
-      if (box && (!box.innerHTML || box.innerHTML.trim() === '' || box.clientHeight < 50)) {
-        box.className = 'w-full h-56 rounded-xl border border-slate-800 bg-slate-950/80 p-3.5 relative flex flex-col justify-between shadow-inner';
-        box.innerHTML = `
-          <div class="flex justify-between items-center text-[11px] text-slate-400 mb-1">
-            <span>7 天雙軸水文走勢模型 (D+0 至 D+6)</span>
-            <span class="font-mono text-rose-400">Limit 1.13m</span>
-          </div>
-          <div class="relative w-full flex-1 flex items-center justify-center">
-            <svg viewBox="0 0 700 150" class="w-full h-full overflow-visible">
-              <line x1="30" y1="20" x2="670" y2="20" stroke="#334155" stroke-dasharray="2,2" stroke-width="0.8"/>
-              <line x1="30" y1="60" x2="670" y2="60" stroke="#334155" stroke-dasharray="2,2" stroke-width="0.8"/>
-              <line x1="30" y1="100" x2="670" y2="100" stroke="#ef4444" stroke-dasharray="4,4" stroke-width="1.2"/>
-              <text x="610" y="96" fill="#ef4444" font-size="9" font-family="monospace">Limit 1.13m</text>
-              <path d="M 50,30 Q 150,40 250,90 T 450,120 T 650,130" fill="none" stroke="#ef4444" stroke-width="2.5"/>
-              <circle cx="50" cy="30" r="4" fill="#ef4444"/><text x="40" y="20" fill="#fca5a5" font-size="9" font-family="monospace">3.71m</text>
-              <circle cx="250" cy="90" r="4" fill="#ef4444"/><text x="240" y="80" fill="#fca5a5" font-size="9" font-family="monospace">2.10m</text>
-              <circle cx="450" cy="120" r="4" fill="#10b981"/><text x="440" y="110" fill="#6ee7b7" font-size="9" font-family="monospace">1.15m</text>
-              <circle cx="650" cy="130" r="4" fill="#10b981"/><text x="640" y="122" fill="#6ee7b7" font-size="9" font-family="monospace">0.85m</text>
-              <text x="40" y="145" fill="#94a3b8" font-size="9" font-family="monospace">10/15(四)</text>
-              <text x="240" y="145" fill="#94a3b8" font-size="9" font-family="monospace">10/16(五)</text>
-              <text x="440" y="145" fill="#94a3b8" font-size="9" font-family="monospace">10/17(六)</text>
-              <text x="630" y="145" fill="#94a3b8" font-size="9" font-family="monospace">10/18(日)</text>
-            </svg>
-          </div>
-        `;
-      }
-    });
   }
 
-  setTimeout(renderFullyAlignedModules, 150);
-  setInterval(renderFullyAlignedModules, 2500);
+  setTimeout(renderAll, 150);
+  setInterval(renderAll, 2500);
 })();
 </script>
 </body>
