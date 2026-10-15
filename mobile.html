@@ -198,7 +198,7 @@
         </div>
         <div class="text-[10px] text-[#cbd5e1] mt-1.5 flex flex-wrap gap-1.5 items-center">
             <span>時間：<b id="liveClock" class="font-mono text-white bg-white/10 px-1 py-0.5 rounded text-[10.5px]">--:--:--</b></span>
-            <span>| 日期：<b id="liveDate" class="font-mono text-emerald-300 bg-emerald-950/60 border border-emerald-500/40 px-1.5 py-0.5 rounded text-[10.5px]">2026-10-14 (二)</b></span>
+            <span>| 日期：<b id="liveDate" class="font-mono text-emerald-300 bg-emerald-950/60 border border-emerald-500/40 px-1.5 py-0.5 rounded text-[10.5px]">2026-10-15 (二)</b></span>
             <span>| 心跳：<b id="heartbeatCounter" class="text-[#38bdf8] text-[10.5px]">12</b></span>
             <span>| 裁決：<b id="ssotDecisionBadge" class="text-[#ef4444] font-bold text-[10.5px]">0.0% 熔斷</b></span>
         </div>
@@ -1372,20 +1372,18 @@
 
 
 
+
 <script id="gem-ssot-hydration">
 (function() {
   'use strict';
 
-  // [A] 清理全頁殘留定時器
-  function killAllIntervals() {
-    const highestId = setTimeout(";");
-    for (let i = 0; i < highestId; i++) {
-      clearInterval(i);
-    }
+  // [A] 強制清理背景舊定時器
+  const highestIntervalId = setInterval(";");
+  for (let i = 0; i < highestIntervalId; i++) {
+    clearInterval(i);
   }
-  killAllIntervals();
 
-  // [B] 純前端極簡單點時鐘 (唯一更新 gem-live-clock，100% 絕緣不閃爍)
+  // [B] 純前端動態時鐘：點對點更新指定 ID 節點，100% 絕緣不跳動
   function tickLiveClock() {
     const now = new Date();
     const hh = String(now.getHours()).padStart(2, '0');
@@ -1393,29 +1391,27 @@
     const ss = String(now.getSeconds()).padStart(2, '0');
     const timeStr = `${hh}:${mm}:${ss} CST`;
 
-    const clockEl = document.getElementById('gem-live-clock');
-    if (clockEl) clockEl.textContent = timeStr;
+    const clockEls = document.querySelectorAll('#gem-live-clock, #liveClock, .live-clock, [data-gem-clock="live_time"]');
+    clockEls.forEach(el => {
+      el.textContent = timeStr;
+    });
   }
 
   setInterval(tickLiveClock, 1000);
   tickLiveClock();
 
-  // [C] 全動態 SSOT 水合
+  // [C] 全動態 SSOT 數據水合 (徹底排除時間節點寫入，無競態搶載)
   async function syncSSOTData() {
     try {
-      killAllIntervals();
-      setInterval(tickLiveClock, 1000);
-
       const res = await fetch('latest_decision.json?t=' + Date.now(), { cache: 'no-store' });
       if (!res.ok) return;
       const d = await res.json();
       const isVeto = !!(d.hard_veto_alert || (d.decision && d.decision.includes('Q4')));
       window.__gem_isVeto = isVeto;
       const p = d.physics_metrics || {};
+      const activeDate = d.timestamp ? d.timestamp.split(' ')[0] : '2026-10-15';
 
-      const activeDate = d.timestamp ? d.timestamp.split(' ')[0] : '2026-10-14';
-
-      // 強制同步當日船班航次檢核標題日期
+      // 當日船班檢核標題動態對齊
       document.querySelectorAll('h1, h2, h3, h4, div, span, p').forEach(el => {
         if (el.children.length === 0 && el.textContent.includes('當日船班航次檢核')) {
           el.textContent = `2. 當日船班航次檢核 (${activeDate})`;
@@ -1424,13 +1420,13 @@
 
       function safeSetText(selector, text, className) {
         document.querySelectorAll(selector).forEach(el => {
-          if (el.id === 'gem-live-clock') return;
+          if (el.id === 'gem-live-clock' || el.id === 'liveClock') return;
           if (text !== undefined) el.textContent = text;
           if (className !== undefined) el.className = className;
         });
       }
 
-      // 颱風與海象遙測同化
+      // 遙測數據點對點同步
       const currentSpeed = isVeto ? '0.0' : String(p.vessel_speed_kts ?? 11.5);
       const currentSquat = isVeto ? '0.00' : String(p.squat ?? 0.45);
       const currentHs = (p.hs_cwa ?? 1.35).toFixed(2);
@@ -1444,38 +1440,38 @@
       safeSetText('[data-ssot-key="map_ship_squat"]', `動感蹲沉: ${currentSquat} m`);
       safeSetText('[data-ssot-key="map_ship_status"]', isVeto ? '⚓ 凱鯨號 0.0kts (烏石港靜止避風中)' : `🚢 凱鯨號 ${currentSpeed}kts (通航中)`);
 
-      // 獨立雙欄比較結構
-      const compContainer = document.querySelector('#official-vs-model-comparison, [data-ssot-container="comparison"]');
-      if (compContainer) {
-        compContainer.innerHTML = `
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full p-3 bg-slate-900/80 rounded-lg border border-slate-700/60 text-xs">
-            <div class="flex flex-col gap-2 p-3 bg-slate-800/60 rounded border border-amber-500/30">
-              <div class="flex items-center justify-between pb-2 border-b border-amber-500/20 font-bold text-amber-300">
+      // 重構「官方 vs GEM 雙生模型」為獨立左右雙欄卡片
+      const compContainers = document.querySelectorAll('#boxOfficialComparison, #official-vs-model-comparison, [data-ssot-container="comparison"]');
+      compContainers.forEach(container => {
+        container.innerHTML = `
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 w-full p-3 bg-slate-900/90 rounded-xl border border-slate-700/80 text-xs shadow-lg">
+            <div class="flex flex-col gap-2 p-3 bg-slate-800/80 rounded-lg border border-amber-500/40">
+              <div class="flex items-center justify-between pb-2 border-b border-amber-500/30 font-extrabold text-amber-300">
                 <span>🏛️ 官方氣象署 CWA 判斷</span>
-                <span class="px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-500/50">預警開放</span>
+                <span class="px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-500/50 text-[10px]">預警開放</span>
               </div>
-              <div class="space-y-2 text-slate-300">
-                <div class="flex justify-between items-center"><span>波高 Hs:</span> <span class="font-mono text-amber-300 font-bold text-sm">1.20 m</span></div>
-                <div class="flex justify-between items-center"><span>攻角風速 Weff:</span> <span class="font-mono text-amber-300 font-bold text-sm">4.50 m/s</span></div>
-                <div class="flex justify-between items-center"><span>水下裕深 UKC:</span> <span class="font-mono text-amber-300 font-bold text-sm">1.80 m</span></div>
+              <div class="space-y-1.5 text-slate-300 font-mono">
+                <div class="flex justify-between items-center"><span>外海波高 Hs:</span> <span class="text-amber-300 font-bold text-sm">1.20 m</span></div>
+                <div class="flex justify-between items-center"><span>攻角風速 Weff:</span> <span class="text-amber-300 font-bold text-sm">4.50 m/s</span></div>
+                <div class="flex justify-between items-center"><span>水下裕深 UKC:</span> <span class="text-amber-300 font-bold text-sm">1.80 m</span></div>
               </div>
             </div>
-            <div class="flex flex-col gap-2 p-3 bg-slate-800/60 rounded border ${isVeto ? 'border-rose-500/30' : 'border-emerald-500/30'}">
-              <div class="flex items-center justify-between pb-2 border-b ${isVeto ? 'border-rose-500/20 text-rose-300' : 'border-emerald-500/20 text-emerald-300'} font-bold">
-                <span>🤖 GEM 雙生模型判斷</span>
-                <span class="px-2 py-0.5 rounded ${isVeto ? 'bg-rose-950 text-rose-300 border border-rose-500/50' : 'bg-emerald-950 text-emerald-300 border border-emerald-500/50'}">${d.decision || (isVeto ? '0.0% 剛性熔斷' : '全線通航')}</span>
+            <div class="flex flex-col gap-2 p-3 bg-slate-800/80 rounded-lg border ${isVeto ? 'border-rose-500/50' : 'border-emerald-500/50'}">
+              <div class="flex items-center justify-between pb-2 border-b ${isVeto ? 'border-rose-500/30 text-rose-300' : 'border-emerald-500/30 text-emerald-300'} font-extrabold">
+                <span>🤖 GEM 雙生 PINN 模型</span>
+                <span class="px-2 py-0.5 rounded ${isVeto ? 'bg-rose-950 text-rose-300 border border-rose-500/50' : 'bg-emerald-950 text-emerald-300 border border-emerald-500/50'} text-[10px]">${d.decision || (isVeto ? '0.0% 剛性熔斷' : '全線通航')}</span>
               </div>
-              <div class="space-y-2 text-slate-300">
-                <div class="flex justify-between items-center"><span>波高 Hs:</span> <span class="font-mono ${isVeto ? 'text-rose-400' : 'text-emerald-400'} font-bold text-sm">${(p.hs_cwa ?? 1.35).toFixed(2)} m</span></div>
-                <div class="flex justify-between items-center"><span>攻角風速 Weff:</span> <span class="font-mono text-emerald-400 font-bold text-sm">${(p.w_eff ?? 4.5).toFixed(2)} m/s</span></div>
-                <div class="flex justify-between items-center"><span>水下裕深 UKC:</span> <span class="font-mono ${isVeto ? 'text-amber-400' : 'text-emerald-400'} font-bold text-sm">${(p.ukc_south ?? 2.87).toFixed(2)} m</span></div>
+              <div class="space-y-1.5 text-slate-300 font-mono">
+                <div class="flex justify-between items-center"><span>實測波高 Hs:</span> <span class="${isVeto ? 'text-rose-400' : 'text-emerald-400'} font-bold text-sm">${(p.hs_cwa ?? 1.35).toFixed(2)} m</span></div>
+                <div class="flex justify-between items-center"><span>攻角風速 Weff:</span> <span class="text-emerald-400 font-bold text-sm">${(p.w_eff ?? 4.5).toFixed(2)} m/s</span></div>
+                <div class="flex justify-between items-center"><span>動態裕深 UKC:</span> <span class="${isVeto ? 'text-amber-400' : 'text-emerald-400'} font-bold text-sm">${(p.ukc_south ?? 2.87).toFixed(2)} m</span></div>
               </div>
             </div>
           </div>
         `;
-      }
+      });
 
-      // 數據節點點對點標記
+      // 數據標籤點對點標記 (排除時間字串)
       document.querySelectorAll('*').forEach(el => {
         if (el.children.length === 0 && !el.id && !el.getAttribute('data-ssot-key')) {
           const txt = el.textContent.trim();
@@ -1542,19 +1538,8 @@
         safeSetText('[data-ssot-key="ssot_timestamp"]', `系統數據版本: ${d.version || 'v43.0'} | SSOT同步: ${d.timestamp}`);
       }
 
-      if (window.shipMarker) {
-        const wushiPort = [24.8700, 121.8390];
-        if (isVeto) window.shipMarker.setLatLng(wushiPort);
-      }
-      if (window.radarChart && window.radarChart.data && window.radarChart.data.datasets && window.radarChart.data.datasets.length > 0) {
-        window.radarChart.data.datasets[0].data = [
-          p.hs_pier || 0,
-          p.w_eff || 0,
-          isVeto ? 0 : (p.squat || 0),
-          p.ukc_south || 0,
-          p.fb_north || 0
-        ];
-        window.radarChart.update();
+      if (window.shipMarker && isVeto) {
+        window.shipMarker.setLatLng([24.8700, 121.8390]);
       }
     } catch (err) {
       console.warn('SSOT Sync warning:', err);
