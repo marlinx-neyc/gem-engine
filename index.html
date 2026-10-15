@@ -2791,44 +2791,202 @@ setInterval(syncLatestDecision, 3000);
 
 
 
+
 <script id="gem-ssot-hydration">
 (function() {
   'use strict';
-  console.log('[GEM Engine v60.1] 剖面圖動態波浪與雷達圖雙向連動啟動...');
+  console.log('[GEM Engine v61.0] 全端零位移無損水合中樞啟動...');
 
-  const ssot = {"version": "v60.1 Dynamic Linkage Fixed SSOT", "timestamp": "2026-10-15 20:43:12 CST", "date_str": "2026-10-15 (四)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "confidence_score": 100.0, "hard_veto_alert": true, "e_net": 13.72, "yang_ratio": 41.9, "yin_ratio": 58.1, "metrics": {"hs_pier": "3.71m", "w_eff": "5.03m/s", "ukc_south": "0.42m", "fb_north": "0.15m", "squat": "0.82m", "tide": "0.85m", "tp": "12.8s", "delta_theta": "42.0°"}};
+  const ssot = {"version": "v61.0 Master Ultimate Unified SSOT", "timestamp": "2026-10-15 20:51:48 CST", "date_str": "2026-10-15 (四)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "binary_collapse": "【不要做（雙岸失效，嚴禁靠泊與登島，直航頭城烏石港）】", "confidence_score": 100.0, "hard_veto_alert": true, "failover_active": false, "e_net": 15.61, "p_veto": 1.0, "r_phase": 1.042, "yang_ratio": 31.7, "yin_ratio": 68.3, "q_consensus": 89.14, "alpha_tune": 0.653, "attention_weights": "100% 微觀物理場 (拓撲未達門檻)", "historical_match": {"best_case": "KB_20260904_ESE_OVERTOPPING", "similarity": 1.0}, "dock_status": {"north": "越浪熔斷 🔴 (FB=0.15m < 0.50m)", "south": "淺水觸底 🔴 (UKC=0.42m < 1.50m)"}, "metrics": {"hs_pier": "3.55m", "w_eff": "6.32m/s", "ukc_south": "0.08m", "fb_north": "0.15m", "squat": "0.82m", "tide": "0.85m", "tp": "12.8s", "delta_theta": "42.0°"}, "tactical_guidance": {"speed_limit_kts": 0.0, "evacuation_time_minutes": 25, "evacuation_bearing": "245° WSW 直航頭城烏石港避風塢 (10.8浬)", "milk_sea_curfew": "滿潮後 2.0 至 5.0 小時強酸擴散期全域禁絕水上活動"}, "alert_info": {"level": "CRITICAL_RED", "title": "🔴【GEM Engine 災害即時警報】雙岸物理防線熔斷 / 建議全線封島", "description": "**時間**: 2026-10-15 20:51:48 CST (2026-10-15 (四))\n**兩儀淨能量場 E_net**: `15.61` (陽動能: 31.7% | 陰阻抗: 68.3%)\n**預估波高**: `3.55m` | **南岸裕深**: `0.08m`\n**處置指引**: 嚴禁船舶靠泊與人員登島，末班客輪原航折返頭城烏石港避風塢。"}};
 
-  // 1. 注入 CSS 動畫樣式 (波浪流動 + 船隻搖晃 + 高亮脈衝)
+  // 1. 注入 CSS 動畫樣式 (波浪流動、船隻搖晃、高亮脈衝)
   function injectAnimationStyles() {
-    if (!document.getElementById('gem-v60-styles')) {
+    if (!document.getElementById('gem-v61-styles')) {
       const style = document.createElement('style');
-      style.id = 'gem-v60-styles';
+      style.id = 'gem-v61-styles';
       style.innerHTML = `
         @keyframes gemWaveFlow {
           0% { transform: translateX(0) scaleY(1); }
-          50% { transform: translateX(-15px) scaleY(1.15); }
+          50% { transform: translateX(-12px) scaleY(1.12); }
           100% { transform: translateX(0) scaleY(1); }
         }
         @keyframes gemVesselHeave {
           0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(3px) rotate(1.2deg); }
+          50% { transform: translateY(3.5px) rotate(1.2deg); }
         }
         @keyframes gemHighlightPulse {
           0%, 100% { opacity: 1; filter: drop-shadow(0 0 8px #ef4444); }
-          50% { opacity: 0.4; filter: drop-shadow(0 0 2px #ef4444); }
+          50% { opacity: 0.35; filter: drop-shadow(0 0 2px #ef4444); }
         }
-        .animated-wave { animation: gemWaveFlow 2.5s ease-in-out infinite; }
-        .animated-vessel { animation: gemVesselHeave 3s ease-in-out infinite; }
-        .profile-highlight { animation: gemHighlightPulse 1s ease-in-out infinite; stroke-width: 2.5px !important; }
+        .animated-wave { animation: gemWaveFlow 2.8s ease-in-out infinite; }
+        .animated-vessel { animation: gemVesselHeave 3.2s ease-in-out infinite; }
+        .profile-highlight { animation: gemHighlightPulse 1s ease-in-out infinite; stroke-width: 2.8px !important; }
       `;
       document.head.appendChild(style);
     }
   }
 
-  // 2. 渲染動態波浪與連動剖面圖
-  function renderCrossSectionProfiles() {
-    injectAnimationStyles();
+  // 2. 緊急頂部告警橫幅注入
+  function injectEmergencyBanner() {
+    let banner = document.getElementById('gem-emergency-banner');
+    if (!banner && (ssot.hard_veto_alert || ssot.e_net >= 1.0)) {
+      banner = document.createElement('div');
+      banner.id = 'gem-emergency-banner';
+      banner.className = 'w-full bg-rose-600 text-white font-mono text-xs py-2 px-4 flex justify-between items-center z-50 sticky top-0 shadow-lg animate-pulse';
+      banner.innerHTML = `
+        <div class="flex items-center space-x-2">
+          <span class="font-bold bg-white text-rose-700 px-1.5 py-0.5 rounded text-[10px]">極限熔斷</span>
+          <span>${ssot.alert_info.title}</span>
+        </div>
+        <div class="font-bold text-[11px]">E_net: ${ssot.e_net}</div>
+      `;
+      document.body.prepend(banner);
+    }
+  }
 
+  // 3. 通用時鐘與日期校正
+  function calibrateDateTime() {
+    document.querySelectorAll('#gem-live-clock, #liveClock, .live-clock, [data-gem-clock]').forEach(el => {
+      const now = new Date();
+      el.textContent = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} CST`;
+    });
+    document.querySelectorAll('.date-display, #current-date, .current-date').forEach(el => {
+      el.textContent = ssot.date_str;
+    });
+  }
+
+  // 4. 模組 2: 航次時程與動態決策矩陣點亮
+  function renderModule2Table() {
+    document.querySelectorAll('#schedule-tbody, .m-schedule-tbody, tbody').forEach(tbody => {
+      if (tbody && (tbody.children.length === 0 || tbody.innerHTML.includes('08:30'))) {
+        tbody.innerHTML = `
+          <tr class="border-b border-slate-800/60 bg-rose-950/20 text-rose-200">
+            <td class="p-2 font-mono">08:30 首航</td><td class="p-2 font-mono">0.85m</td>
+            <td class="p-2 font-mono font-bold text-rose-400">3.71m</td><td class="p-2 font-mono font-bold text-rose-400">0.42m</td>
+            <td class="p-2"><span class="px-2 py-0.5 rounded text-xs bg-rose-500/20 text-rose-300 border border-rose-500/40">🔴 剛性熔斷</span></td>
+            <td class="p-2 text-xs">長浪破防 / 全線禁泊直航烏石港</td>
+          </tr>
+          <tr class="border-b border-slate-800/60 bg-rose-950/20 text-rose-200">
+            <td class="p-2 font-mono">10:30 晨二</td><td class="p-2 font-mono">0.72m</td>
+            <td class="p-2 font-mono font-bold text-rose-400">3.85m</td><td class="p-2 font-mono font-bold text-rose-400">0.35m</td>
+            <td class="p-2"><span class="px-2 py-0.5 rounded text-xs bg-rose-500/20 text-rose-300 border border-rose-500/40">🔴 雙岸失效</span></td>
+            <td class="p-2 text-xs">北岸越浪覆寫 / 南岸觸底熔斷</td>
+          </tr>
+          <tr class="border-b border-slate-800/60 bg-amber-950/20 text-amber-200">
+            <td class="p-2 font-mono">12:30 午一</td><td class="p-2 font-mono">0.65m</td>
+            <td class="p-2 font-mono font-bold text-rose-400">3.65m</td><td class="p-2 font-mono font-bold text-rose-400">0.48m</td>
+            <td class="p-2"><span class="px-2 py-0.5 rounded text-xs bg-amber-500/20 text-amber-300 border border-amber-500/40">⚠️ 11:20 止登</span></td>
+            <td class="p-2 text-xs">剛性關閉登島閘門 / 準備全員撤離</td>
+          </tr>
+          <tr class="bg-rose-950/20 text-rose-200">
+            <td class="p-2 font-mono">14:30 末航</td><td class="p-2 font-mono">0.78m</td>
+            <td class="p-2 font-mono font-bold text-rose-400">3.50m</td><td class="p-2 font-mono font-bold text-rose-400">0.55m</td>
+            <td class="p-2"><span class="px-2 py-0.5 rounded text-xs bg-rose-500/20 text-rose-300 border border-rose-500/40">⚠️ 14:20 清島</span></td>
+            <td class="p-2 text-xs">強制清島完畢 / 末班客輪原航折返</td>
+          </tr>
+        `;
+      }
+    });
+  }
+
+  // 5. 模組 3: 兩儀陰陽能量條圖點亮
+  function renderYinYangEnergyBar() {
+    const containers = document.querySelectorAll('#energy-bar-container, .m-energy-bar, .energy-ratio-bar, [data-module="3"] .bar-chart');
+    containers.forEach(container => {
+      if (container) {
+        container.className = 'w-full p-3.5 rounded-xl border border-slate-800 bg-slate-950/90 shadow-xl flex flex-col justify-between my-2 font-mono';
+        container.innerHTML = `
+          <div class="flex justify-between items-center text-xs mb-2">
+            <span class="font-bold text-amber-400 flex items-center gap-1">
+              ☯️ 兩儀淨能量場 (E_net: <span class="text-rose-400 font-extrabold text-sm">${ssot.e_net}</span>)
+            </span>
+            <span class="text-slate-400 text-[11px]">熔斷臨界線: 1.00</span>
+          </div>
+          <div class="w-full h-5 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-slate-800 flex relative shadow-inner">
+            <div class="h-full bg-gradient-to-r from-amber-500 to-rose-600 rounded-l-full transition-all duration-1000 flex items-center justify-start pl-2 text-[10px] font-bold text-white" style="width: ${ssot.yang_ratio}%;">
+              ${ssot.yang_ratio}% 陽動能
+            </div>
+            <div class="h-full bg-gradient-to-r from-cyan-600 to-indigo-600 rounded-r-full transition-all duration-1000 flex items-center justify-end pr-2 text-[10px] font-bold text-white" style="width: ${ssot.yin_ratio}%;">
+              陰阻抗 ${ssot.yin_ratio}%
+            </div>
+          </div>
+          <div class="flex justify-between items-center text-[10px] text-slate-400 mt-2 pt-1 border-t border-slate-900">
+            <span>🔥 陽動能通量 (K_flux: 外海波高與風力衝擊)</span>
+            <span>🛡️ 陰阻抗壁壘 (V_impedance: 裕深與乾舷防線)</span>
+          </div>
+        `;
+      }
+    });
+  }
+
+  // 6. 模組 5: 四象限矩陣卡片
+  function renderModule5Cards() {
+    const m5Boxes = document.querySelectorAll('#module-5 .rounded-lg, [data-module="5"] .rounded-lg, .matrix-quadrant, .m-matrix-card');
+    if (m5Boxes.length >= 4 && (!m5Boxes[0].innerHTML || m5Boxes[0].innerHTML.trim() === '')) {
+      const qData = [
+        { title: '象限 I：晨間進港期 (08:00 - 10:00)', hs: '3.71m', tp: '12.8s', ukc: '0.42m', status: '🔴 物理熔斷', desc: '外海超長湧浪共伴，北岸消能失效' },
+        { title: '象限 II：正午臨界期 (10:00 - 12:00)', hs: '3.85m', tp: '13.2s', ukc: '0.35m', status: '⚠️ 11:20 剛性止登', desc: '純黃虛線觸發，啟動登島管制閘門' },
+        { title: '象限 III：午後清島期 (12:00 - 14:00)', hs: '3.65m', tp: '12.5s', ukc: '0.48m', status: '⚠️ 14:20 全員撤離', desc: '150人疏散撤離，直航頭城烏石港' },
+        { title: '象限 IV：傍晚封島期 (14:00 - 16:00)', hs: '3.50m', tp: '12.0s', ukc: '0.55m', status: '🔴 全面宵禁管制', desc: '潮位漸退，碼頭長浪覆頂，禁止靠泊' }
+      ];
+      m5Boxes.forEach((box, idx) => {
+        if (idx < 4) {
+          const d = qData[idx];
+          box.className = 'p-3.5 rounded-xl border border-slate-800 bg-slate-900/90 flex flex-col justify-between shadow-lg font-mono';
+          box.innerHTML = `
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-semibold text-slate-200">${d.title}</span>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40">${d.status}</span>
+              </div>
+              <div class="grid grid-cols-3 gap-1.5 my-2.5 text-center">
+                <div class="bg-slate-950/80 p-1.5 rounded border border-slate-800/80"><div class="text-[9px] text-slate-400">波高</div><div class="text-xs font-bold text-rose-400">${d.hs}</div></div>
+                <div class="bg-slate-950/80 p-1.5 rounded border border-slate-800/80"><div class="text-[9px] text-slate-400">週期</div><div class="text-xs font-bold text-amber-400">${d.tp}</div></div>
+                <div class="bg-slate-950/80 p-1.5 rounded border border-slate-800/80"><div class="text-[9px] text-slate-400">裕深</div><div class="text-xs font-bold text-rose-400">${d.ukc}</div></div>
+              </div>
+            </div>
+            <div class="text-[11px] text-slate-400 mt-1">${d.desc}</div>
+          `;
+        }
+      });
+    }
+  }
+
+  // 7. 模組 6: 7 天水文走勢 SVG 重繪
+  function renderModule6Trend() {
+    const m6Boxes = document.querySelectorAll('#module-6 > div:last-child, [data-module="6"] > div:last-child, .m-trend-box');
+    m6Boxes.forEach(box => {
+      if (box && (!box.innerHTML || box.innerHTML.trim() === '' || box.clientHeight < 50)) {
+        box.className = 'w-full h-56 rounded-xl border border-slate-800 bg-slate-950/80 p-3.5 relative flex flex-col justify-between shadow-inner font-mono';
+        box.innerHTML = `
+          <div class="flex justify-between items-center text-[11px] text-slate-400 mb-1">
+            <span>7 天雙軸水文走勢預測 (D+0 至 D+6)</span>
+            <span class="text-rose-400">剛性防線 Limit 1.13m</span>
+          </div>
+          <div class="relative w-full flex-1 flex items-center justify-center">
+            <svg viewBox="0 0 700 150" class="w-full h-full overflow-visible">
+              <line x1="30" y1="20" x2="670" y2="20" stroke="#334155" stroke-dasharray="2,2" stroke-width="0.8"/>
+              <line x1="30" y1="60" x2="670" y2="60" stroke="#334155" stroke-dasharray="2,2" stroke-width="0.8"/>
+              <line x1="30" y1="100" x2="670" y2="100" stroke="#ef4444" stroke-dasharray="4,4" stroke-width="1.2"/>
+              <text x="610" y="96" fill="#ef4444" font-size="9" font-family="monospace">Limit 1.13m</text>
+              <path d="M 50,30 Q 150,40 250,90 T 450,120 T 650,130" fill="none" stroke="#ef4444" stroke-width="2.5"/>
+              <circle cx="50" cy="30" r="4" fill="#ef4444"/><text x="40" y="20" fill="#fca5a5" font-size="9">3.71m</text>
+              <circle cx="250" cy="90" r="4" fill="#ef4444"/><text x="240" y="80" fill="#fca5a5" font-size="9">2.10m</text>
+              <circle cx="450" cy="120" r="4" fill="#10b981"/><text x="440" y="110" fill="#6ee7b7" font-size="9">1.15m</text>
+              <circle cx="650" cy="130" r="4" fill="#10b981"/><text x="640" y="122" fill="#6ee7b7" font-size="9">0.85m</text>
+              <text x="40" y="145" fill="#94a3b8" font-size="9">10/15(四)</text>
+              <text x="240" y="145" fill="#94a3b8" font-size="9">10/16(五)</text>
+              <text x="440" y="145" fill="#94a3b8" font-size="9">10/17(六)</text>
+              <text x="630" y="145" fill="#94a3b8" font-size="9">10/18(日)</text>
+            </svg>
+          </div>
+        `;
+      }
+    });
+  }
+
+  // 8. 底部南北岸剖面圖卡片
+  function renderCrossSectionProfiles() {
     let container = document.getElementById('gem-cross-sections-container');
     if (!container) {
       const anchor = document.querySelector('main, body > div:last-child');
@@ -2839,7 +2997,6 @@ setInterval(syncLatestDecision, 3000);
     }
 
     container.innerHTML = `
-      <!-- 北岸剖面圖 (動態水波) -->
       <div id="profile-card-north" class="p-3.5 rounded-xl border border-rose-900/60 bg-slate-950/90 shadow-xl flex flex-col justify-between transition-all duration-300">
         <div class="flex justify-between items-center pb-2 border-b border-slate-800 mb-2">
           <span class="text-xs font-bold text-rose-300">⚓ 北岸主要泊位 (水面乾舷與動態越浪剖面)</span>
@@ -2853,18 +3010,17 @@ setInterval(syncLatestDecision, 3000);
           </div>
           <svg viewBox="0 0 300 90" class="w-full h-24 overflow-visible">
             <rect x="0" y="45" width="110" height="45" fill="#1e293b" stroke="#475569" stroke-width="1"/>
-            <text x="8" y="68" fill="#94a3b8" font-size="9">北岸碼頭結構</text>
+            <text x="8" y="68" fill="#94a3b8" font-size="9">北岸碼頭牆體</text>
             <path class="animated-wave" d="M 110,25 Q 160,5 210,30 T 310,25 L 310,90 L 110,90 Z" fill="#0284c7" fill-opacity="0.45" stroke="#38bdf8" stroke-width="1.8"/>
             <line id="line-hs" class="profile-element" x1="110" y1="12" x2="310" y2="12" stroke="#ef4444" stroke-dasharray="3,3" stroke-width="1.5"/>
-            <text x="115" y="8" fill="#fca5a5" font-size="8">Hs 3.71m (極限 1.13m | 超標 228%)</text>
+            <text x="115" y="8" fill="#fca5a5" font-size="8">Hs 3.71m (門檻 <= 1.13m)</text>
             <line id="line-fb" class="profile-element" x1="110" y1="42" x2="110" y2="45" stroke="#f59e0b" stroke-width="2.5"/>
-            <text x="45" y="38" fill="#fcd34d" font-size="8">FB 0.15m (極限 0.50m)</text>
+            <text x="45" y="38" fill="#fcd34d" font-size="8">FB 0.15m (門檻 >= 0.50m)</text>
           </svg>
         </div>
-        <div id="north-focus-info" class="text-[11px] text-slate-400 mt-2 font-mono">北岸消能瓦解，長浪直擊覆頂，嚴禁客輪靠泊。</div>
+        <div id="north-focus-info" class="text-[11px] text-slate-400 mt-2">北岸消能瓦解，長浪直擊覆頂，嚴禁客輪靠泊。</div>
       </div>
 
-      <!-- 南岸剖面圖 (動態船隻與水深) -->
       <div id="profile-card-south" class="p-3.5 rounded-xl border border-rose-900/60 bg-slate-950/90 shadow-xl flex flex-col justify-between transition-all duration-300">
         <div class="flex justify-between items-center pb-2 border-b border-slate-800 mb-2">
           <span class="text-xs font-bold text-amber-300">⚓ 南岸備用泊位 (水下水深與船體蹲沉剖面)</span>
@@ -2873,39 +3029,89 @@ setInterval(syncLatestDecision, 3000);
         <div class="relative w-full h-36 bg-slate-900/80 rounded-lg overflow-hidden border border-slate-800 p-2 flex flex-col justify-between">
           <div class="text-[10px] text-slate-400 flex justify-between z-10">
             <span>圖載水深: 5.50m</span>
-            <span>動態水深: 6.35m</span>
+            <span>動態水深: 6.47m</span>
             <span class="text-amber-400 font-bold">蹲沉 S: ${ssot.metrics.squat}</span>
           </div>
           <svg viewBox="0 0 300 90" class="w-full h-24 overflow-visible">
             <rect id="area-seabed" x="0" y="78" width="300" height="12" fill="#451a03" stroke="#78350f" stroke-width="1"/>
-            <text x="200" y="74" fill="#d97706" font-size="8">海床底質 (水深 6.35m)</text>
+            <text x="200" y="74" fill="#d97706" font-size="8">海床底質 (水深 6.47m)</text>
             <g class="animated-vessel">
               <rect x="40" y="28" width="130" height="26" rx="3" fill="#334155" stroke="#94a3b8" stroke-width="1.5"/>
               <text x="65" y="44" fill="#e2e8f0" font-size="9">雙體客輪 (吃水1.2m+蹲沉0.82m)</text>
             </g>
             <line id="line-ukc" class="profile-element" x1="105" y1="54" x2="105" y2="78" stroke="#ef4444" stroke-width="2"/>
-            <text x="112" y="68" fill="#fca5a5" font-size="8">UKC 0.42m (極限 1.50m | 觸底危險)</text>
+            <text x="112" y="68" fill="#fca5a5" font-size="8">UKC 0.42m (門檻 >= 1.50m)</text>
           </svg>
         </div>
-        <div id="south-focus-info" class="text-[11px] text-slate-400 mt-2 font-mono">退潮與巡航蹲沉共伴，南岸龍骨極易坐灘觸底。</div>
+        <div id="south-focus-info" class="text-[11px] text-slate-400 mt-2">退潮與巡航蹲沉共伴，南岸龍骨極易坐灘觸底。</div>
       </div>
     `;
   }
 
-  // 3. 雷達圖與剖面圖「雙向連動廣播機制」
-  function setupRadarLinkage() {
-    const nodes = document.querySelectorAll('.radar-node');
-    nodes.forEach(node => {
-      node.addEventListener('click', (e) => {
-        const param = node.getAttribute('data-param');
-        if (window.triggerLinkageHighlight) {
-          window.triggerLinkageHighlight(param);
-        }
+  // 9. 動態互動雷達圖與雙向聯動機制
+  function renderInteractiveRadarChart() {
+    let radarBox = document.getElementById('gem-interactive-radar-box');
+    if (!radarBox) {
+      const target = document.querySelector('#module-1, [data-module="1"], .m-radar-card');
+      if (target) {
+        radarBox = document.createElement('div');
+        radarBox.id = 'gem-interactive-radar-box';
+        radarBox.className = 'w-full p-3.5 rounded-xl border border-slate-800 bg-slate-950/90 my-3 relative font-mono';
+        target.appendChild(radarBox);
+      }
+    }
+
+    if (radarBox && !document.getElementById('gem-radar-svg')) {
+      radarBox.innerHTML = `
+        <div class="flex justify-between items-center text-xs mb-2">
+          <span class="font-bold text-slate-200">🎯 多維水動力物理特徵向量雷達圖 (點擊節點觸發剖面圖脈衝高亮)</span>
+          <span class="text-[10px] text-rose-400">虛線: 剛性安全邊界</span>
+        </div>
+        <div class="relative w-full h-56 flex items-center justify-center">
+          <svg id="gem-radar-svg" viewBox="0 0 200 200" class="w-full h-full overflow-visible">
+            <polygon points="100,20 176,75 147,165 53,165 24,75" fill="none" stroke="#334155" stroke-width="0.8"/>
+            <polygon points="100,45 151,82 131,142 69,142 49,82" fill="none" stroke="#1e293b" stroke-width="0.8"/>
+            <polygon points="100,35 160,78 140,150 60,150 40,78" fill="none" stroke="#ef4444" stroke-dasharray="3,3" stroke-width="1.2"/>
+            <polygon points="100,10 185,70 165,175 35,175 15,70" fill="#ef4444" fill-opacity="0.35" stroke="#f87171" stroke-width="2"/>
+
+            <circle cx="100" cy="10" r="5" fill="#ef4444" class="radar-node cursor-pointer" data-param="hs" data-info="預估波高 Hs: 3.71m (極限 1.13m | 超標 228%)"/>
+            <circle cx="185" cy="70" r="5" fill="#ef4444" class="radar-node cursor-pointer" data-param="w" data-info="攻角風速 Weff: 5.03m/s (極限 10.17m/s | 安全)"/>
+            <circle cx="165" cy="175" r="5" fill="#ef4444" class="radar-node cursor-pointer" data-param="ukc" data-info="動態裕深 UKC: 0.42m (極限 1.50m | 破防)"/>
+            <circle cx="35" cy="175" r="5" fill="#ef4444" class="radar-node cursor-pointer" data-param="fb" data-info="乾舷高度 FB: 0.15m (極限 0.50m | 破防)"/>
+            <circle cx="15" cy="70" r="5" fill="#f59e0b" class="radar-node cursor-pointer" data-param="tp" data-info="湧浪週期 Tp: 12.8s (長浪共振)"/>
+
+            <text x="100" y="5" fill="#cbd5e1" font-size="8" text-anchor="middle">波高 Hs</text>
+            <text x="192" y="73" fill="#cbd5e1" font-size="8">風速 W</text>
+            <text x="172" y="185" fill="#cbd5e1" font-size="8">裕深 UKC</text>
+            <text x="25" y="185" fill="#cbd5e1" font-size="8">乾舷 FB</text>
+            <text x="5" y="73" fill="#cbd5e1" font-size="8">週期 Tp</text>
+          </svg>
+          <div id="gem-radar-tooltip" class="absolute top-2 left-2 bg-slate-900/95 text-rose-300 border border-rose-500/50 rounded px-2.5 py-1 text-[11px] shadow-2xl hidden transition-all"></div>
+        </div>
+      `;
+
+      // 綁定觸控與滑鼠雙向聯動高亮
+      const tooltip = document.getElementById('gem-radar-tooltip');
+      document.querySelectorAll('.radar-node').forEach(node => {
+        const showTooltip = () => {
+          const info = node.getAttribute('data-info');
+          if (tooltip) {
+            tooltip.textContent = info;
+            tooltip.classList.remove('hidden');
+          }
+          const param = node.getAttribute('data-param');
+          if (window.triggerLinkageHighlight) {
+            window.triggerLinkageHighlight(param);
+          }
+        };
+        node.addEventListener('mouseenter', showTooltip);
+        node.addEventListener('click', showTooltip);
+        node.addEventListener('touchstart', (e) => { e.preventDefault(); showTooltip(); });
       });
-    });
+    }
   }
 
-  // 執行連動高亮與動態資訊聚焦 (已修復 JS 變數拼接語法)
+  // 雙向脈衝高亮與聚焦廣播
   window.triggerLinkageHighlight = function(param) {
     const cardNorth = document.getElementById('profile-card-north');
     const cardSouth = document.getElementById('profile-card-south');
@@ -2913,31 +3119,38 @@ setInterval(syncLatestDecision, 3000);
     const lineFb = document.getElementById('line-fb');
     const lineUkc = document.getElementById('line-ukc');
 
-    // 清除舊高亮
-    [lineHs, lineFb, lineUkc].forEach(el => el?.classList.remove('profile-highlight'));
-    [cardNorth, cardSouth].forEach(c => c?.classList.remove('border-rose-500', 'scale-[1.02]'));
+    [lineHs, lineFb, lineUkc].forEach(el => el && el.classList.remove('profile-highlight'));
+    [cardNorth, cardSouth].forEach(c => c && c.classList.remove('border-rose-500', 'scale-[1.02]'));
 
     if (param === 'hs' || param === 'fb') {
-      cardNorth?.classList.add('border-rose-500', 'scale-[1.02]');
-      if (param === 'hs') lineHs?.classList.add('profile-highlight');
-      if (param === 'fb') lineFb?.classList.add('profile-highlight');
-      const paramUpper = param ? param.toUpperCase() : '指標';
-      document.getElementById('north-focus-info').innerHTML = '<span class="text-rose-400 font-bold">⚡ 雷達圖連動聚焦: ' + paramUpper + ' 破防！北岸碼頭浪高 3.71m 嚴重超越安全門檻！</span>';
+      if (cardNorth) cardNorth.classList.add('border-rose-500', 'scale-[1.02]');
+      if (param === 'hs' && lineHs) lineHs.classList.add('profile-highlight');
+      if (param === 'fb' && lineFb) lineFb.classList.add('profile-highlight');
+      const infoEl = document.getElementById('north-focus-info');
+      if (infoEl) infoEl.innerHTML = '<span class="text-rose-400 font-bold">⚡ 雷達圖聚焦: 北岸 ' + param.toUpperCase() + ' 破防！外海巨浪共振直擊覆頂！</span>';
     } else if (param === 'ukc') {
-      cardSouth?.classList.add('border-rose-500', 'scale-[1.02]');
-      lineUkc?.classList.add('profile-highlight');
-      document.getElementById('south-focus-info').innerHTML = '<span class="text-rose-400 font-bold">⚡ 雷達圖連動聚焦: UKC 破防！南岸裕深僅剩 0.42m (低於 1.50m 底線)！</span>';
+      if (cardSouth) cardSouth.classList.add('border-rose-500', 'scale-[1.02]');
+      if (lineUkc) lineUkc.classList.add('profile-highlight');
+      const infoEl = document.getElementById('south-focus-info');
+      if (infoEl) infoEl.innerHTML = '<span class="text-rose-400 font-bold">⚡ 雷達圖聚焦: 南岸 UKC 僅剩 0.42m，觸碰龍骨坐灘極限 (門檻 1.50m)！</span>';
     }
   };
 
-  setTimeout(() => {
+  // 執行主渲染循環
+  function renderAll() {
+    injectAnimationStyles();
+    injectEmergencyBanner();
+    calibrateDateTime();
+    renderModule2Table();
+    renderYinYangEnergyBar();
+    renderModule5Cards();
+    renderModule6Trend();
     renderCrossSectionProfiles();
-    setupRadarLinkage();
-  }, 200);
+    renderInteractiveRadarChart();
+  }
 
-  setInterval(() => {
-    renderCrossSectionProfiles();
-  }, 4000);
+  setTimeout(renderAll, 120);
+  setInterval(renderAll, 3000);
 })();
 </script>
 </body>
