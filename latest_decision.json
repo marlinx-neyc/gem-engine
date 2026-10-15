@@ -1,41 +1,20 @@
 {
-  "version": "v54.0 Operational Intelligence SSOT",
-  "timestamp": "2026-10-15 20:08:36 CST",
+  "version": "v55.0 CMDP & Qimen 64D SSOT",
+  "timestamp": "2026-10-15 20:08:40 CST",
   "date_str": "2026-10-15 (四)",
   "decision_code": "Q4",
   "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)",
-  "binary_collapse": "【不要做（雙岸失效，嚴禁靠泊與登島，直航烏石港）】",
   "confidence_score": 100.0,
   "hard_veto_alert": true,
-  "failover_active": false,
-  "e_net": 9.77,
-  "r_phase": 1.042,
-  "yang_ratio": 61.5,
-  "yin_ratio": 38.5,
+  "s_cos": 0.9999,
+  "q_consensus": 12.28,
+  "alpha_tune": 0.65,
   "metrics": {
-    "hs_pier": "3.71m",
-    "w_eff": "5.03m/s",
-    "ukc_south": "0.42m",
+    "hs_pier": "3.55m",
+    "w_eff": "4.93m/s",
+    "ukc_south": "0.9m",
     "fb_north": "0.15m",
     "tp": "12.8s",
     "delta_theta": "42.0°"
-  },
-  "alert_info": {
-    "level": "CRITICAL_RED",
-    "title": "🔴【GEM Engine 災害即時警報】雙岸物理防線熔斷 / 建議全線封島",
-    "formatted_msg": "**時間**: 2026-10-15 20:08:36 CST (2026-10-15 (四))\n**兩儀諧振能量 E_net**: `9.77` (陽/衝擊: 61.5% | 陰/阻抗: 38.5%)\n**預估波高**: `3.71m` | **南岸裕深**: `0.42m`\n**處置建議**: 嚴禁船舶靠泊與人員登島，末班客輪原航折返烏石港。",
-    "webhook_payload": {
-      "username": "GEM Engine Monitor",
-      "embeds": [
-        {
-          "title": "🔴【GEM Engine 災害即時警報】雙岸物理防線熔斷 / 建議全線封島",
-          "description": "**時間**: 2026-10-15 20:08:36 CST (2026-10-15 (四))\n**兩儀諧振能量 E_net**: `9.77` (陽/衝擊: 61.5% | 陰/阻抗: 38.5%)\n**預估波高**: `3.71m` | **南岸裕深**: `0.42m`\n**處置建議**: 嚴禁船舶靠泊與人員登島，末班客輪原航折返烏石港。",
-          "color": 15158332,
-          "footer": {
-            "text": "GEM Engine v54.0 Operational Intelligence"
-          }
-        }
-      ]
-    }
   }
 }
