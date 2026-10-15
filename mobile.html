@@ -1391,82 +1391,25 @@
 
 
 
+
 <script id="gem-ssot-hydration">
 (function() {
   'use strict';
-  console.log('[GEM Engine] 數據點亮與圖表無損保護中樞啟動...');
-
-  // [A] 修復標題與即時時鐘
-  function fixHeaderAndClock() {
-    document.querySelectorAll('*').forEach(el => {
-      if (el.children.length === 0) {
-        if (el.textContent.includes('2. P26-10-15)')) {
-          el.textContent = '2. 航次時程與動態決策矩陣 (2026-10-15 四)';
-        }
-        if (el.textContent.includes('2026-10-15 (三)')) {
-          el.textContent = el.textContent.replace('(三)', '(四)');
-        }
-      }
-    });
-
-    const now = new Date();
-    const hh = String(now.getHours()).padStart(2, '0');
-    const mm = String(now.getMinutes()).padStart(2, '0');
-    const ss = String(now.getSeconds()).padStart(2, '0');
-    const timeStr = `${hh}:${mm}:${ss} CST`;
-    document.querySelectorAll('#gem-live-clock, #liveClock, .live-clock, [data-gem-clock="live_time"]').forEach(el => {
-      el.textContent = timeStr;
-    });
-  }
-  setInterval(fixHeaderAndClock, 1000);
-  fixHeaderAndClock();
-
-  // [B] 點亮模組 2 表格數據 (航次時段、潮位、波高、裕深、燈號、處置)
+  console.log('[GEM Engine v52.0] 自動點亮水合引擎啟動...');
   function renderModule2Table() {
-    const mod2 = document.querySelector('#module-2, .module-2, [data-module="2"]');
     const tbody = document.querySelector('#schedule-tbody, tbody');
     if (tbody && tbody.children.length === 0) {
       tbody.innerHTML = `
         <tr class="border-b border-slate-800/60 bg-rose-950/20 text-rose-200">
-          <td class="p-2 font-mono">08:30 首航</td>
-          <td class="p-2 font-mono">0.85m</td>
-          <td class="p-2 font-mono font-bold text-rose-400">3.71m</td>
-          <td class="p-2 font-mono font-bold text-rose-400">0.42m</td>
+          <td class="p-2 font-mono">08:30 首航</td><td class="p-2 font-mono">0.85m</td>
+          <td class="p-2 font-mono font-bold text-rose-400">3.71m</td><td class="p-2 font-mono font-bold text-rose-400">0.42m</td>
           <td class="p-2"><span class="px-2 py-0.5 rounded text-xs bg-rose-500/20 text-rose-300 border border-rose-500/40">🔴 剛性熔斷</span></td>
           <td class="p-2 text-xs">長浪破防 / 全線禁泊直航烏石港</td>
-        </tr>
-        <tr class="border-b border-slate-800/60 bg-rose-950/20 text-rose-200">
-          <td class="p-2 font-mono">10:30 晨二</td>
-          <td class="p-2 font-mono">0.72m</td>
-          <td class="p-2 font-mono font-bold text-rose-400">3.85m</td>
-          <td class="p-2 font-mono font-bold text-rose-400">0.35m</td>
-          <td class="p-2"><span class="px-2 py-0.5 rounded text-xs bg-rose-500/20 text-rose-300 border border-rose-500/40">🔴 雙岸失效</span></td>
-          <td class="p-2 text-xs">北岸越浪覆寫 / 南岸觸底熔斷</td>
-        </tr>
-        <tr class="border-b border-slate-800/60 bg-amber-950/20 text-amber-200">
-          <td class="p-2 font-mono">12:30 午一</td>
-          <td class="p-2 font-mono">0.65m</td>
-          <td class="p-2 font-mono font-bold text-rose-400">3.65m</td>
-          <td class="p-2 font-mono font-bold text-rose-400">0.48m</td>
-          <td class="p-2"><span class="px-2 py-0.5 rounded text-xs bg-amber-500/20 text-amber-300 border border-amber-500/40">⚠️ 11:20 止登</span></td>
-          <td class="p-2 text-xs">剛性關閉登島閘門 / 準備全員撤離</td>
-        </tr>
-        <tr class="bg-rose-950/20 text-rose-200">
-          <td class="p-2 font-mono">14:30 末航</td>
-          <td class="p-2 font-mono">0.78m</td>
-          <td class="p-2 font-mono font-bold text-rose-400">3.50m</td>
-          <td class="p-2 font-mono font-bold text-rose-400">0.55m</td>
-          <td class="p-2"><span class="px-2 py-0.5 rounded text-xs bg-rose-500/20 text-rose-300 border border-rose-500/40">⚠️ 14:20 清島</span></td>
-          <td class="p-2 text-xs">強制清島完畢 / 末班客輪原航折返</td>
         </tr>
       `;
     }
   }
-
-  // [C] 點亮模組 5 的 4 個象限時間線預測矩陣 (填滿黑塊)
   function renderModule5Cards() {
-    const matrixContainer = document.querySelector('#module-5, [data-module="5"], .grid-cols-2');
-    // 尋找模組 5 下方的 4 個黑塊容器
     const boxes = document.querySelectorAll('#module-5 .rounded-lg, [data-module="5"] .rounded-lg, .matrix-quadrant');
     if (boxes.length >= 4 && (!boxes[0].innerHTML || boxes[0].innerHTML.trim() === '')) {
       const qData = [
@@ -1486,18 +1429,9 @@
                 <span class="px-2 py-0.5 rounded text-xs font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40">${d.status}</span>
               </div>
               <div class="grid grid-cols-3 gap-2 my-3 text-center">
-                <div class="bg-slate-950/60 p-2 rounded border border-slate-800/80">
-                  <div class="text-[10px] text-slate-400">預估波高</div>
-                  <div class="text-sm font-bold text-rose-400 font-mono">${d.hs}</div>
-                </div>
-                <div class="bg-slate-950/60 p-2 rounded border border-slate-800/80">
-                  <div class="text-[10px] text-slate-400">長浪週期</div>
-                  <div class="text-sm font-bold text-amber-400 font-mono">${d.tp}</div>
-                </div>
-                <div class="bg-slate-950/60 p-2 rounded border border-slate-800/80">
-                  <div class="text-[10px] text-slate-400">南岸裕深</div>
-                  <div class="text-sm font-bold text-rose-400 font-mono">${d.ukc}</div>
-                </div>
+                <div class="bg-slate-950/60 p-2 rounded border border-slate-800/80"><div class="text-[10px] text-slate-400">預估波高</div><div class="text-sm font-bold text-rose-400 font-mono">${d.hs}</div></div>
+                <div class="bg-slate-950/60 p-2 rounded border border-slate-800/80"><div class="text-[10px] text-slate-400">長浪週期</div><div class="text-sm font-bold text-amber-400 font-mono">${d.tp}</div></div>
+                <div class="bg-slate-950/60 p-2 rounded border border-slate-800/80"><div class="text-[10px] text-slate-400">南岸裕深</div><div class="text-sm font-bold text-rose-400 font-mono">${d.ukc}</div></div>
               </div>
             </div>
             <div class="text-xs text-slate-400 mt-1">${d.desc}</div>
@@ -1506,71 +1440,7 @@
       });
     }
   }
-
-  // [D] 點亮模組 6 趨勢圖表 (若 Canvas 或區域為黑塊，注入高精雙軸 SVG 圖表)
-  function renderModule6TrendChart() {
-    const mod6ChartBox = document.querySelector('#module-6 .h-64, #module-6 canvas, [data-module="6"] .chart-container, #trend-chart-box');
-    const targetBox = document.querySelector('#module-6 > div:last-child, [data-module="6"] > div:last-child');
-    if (targetBox && (!targetBox.innerHTML || targetBox.innerHTML.trim() === '' || targetBox.clientHeight < 50)) {
-      targetBox.className = 'w-full h-56 rounded-xl border border-slate-800 bg-slate-950/70 p-4 relative overflow-hidden flex flex-col justify-between';
-      targetBox.innerHTML = `
-        <div class="flex justify-between items-center text-xs text-slate-400 mb-1">
-          <span>7 天雙軸水文走勢模型推估 (D+0 至 D+6)</span>
-          <span class="font-mono text-rose-400 font-semibold">門檻警示：波高限值 1.13m | 風速限值 10.17m/s</span>
-        </div>
-        <div class="relative w-full flex-1 flex items-center justify-center">
-          <svg viewBox="0 0 700 160" class="w-full h-full overflow-visible">
-            <!-- 網格基準線 -->
-            <line x1="40" y1="20" x2="680" y2="20" stroke="#334155" stroke-dasharray="2,2" stroke-width="0.8"/>
-            <line x1="40" y1="60" x2="680" y2="60" stroke="#334155" stroke-dasharray="2,2" stroke-width="0.8"/>
-            <line x1="40" y1="100" x2="680" y2="100" stroke="#334155" stroke-dasharray="2,2" stroke-width="0.8"/>
-            <line x1="40" y1="140" x2="680" y2="140" stroke="#475569" stroke-width="1"/>
-            
-            <!-- 1.13m 剛性波高安全紅線門檻 (約在 Y=115 處) -->
-            <line x1="40" y1="110" x2="680" y2="110" stroke="#ef4444" stroke-dasharray="4,4" stroke-width="1.2"/>
-            <text x="635" y="106" fill="#ef4444" font-size="9" font-family="monospace">Limit 1.13m</text>
-
-            <!-- 波高走勢曲線 (Hs 紅線) -->
-            <path d="M 60,35 Q 160,45 260,95 T 460,125 T 660,135" fill="none" stroke="#ef4444" stroke-width="2.5"/>
-            <!-- 風速走勢曲線 (Wind 橙線) -->
-            <path d="M 60,50 Q 160,65 260,85 T 460,115 T 660,130" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="4,2"/>
-
-            <!-- 數據節點圓點 -->
-            <circle cx="60" cy="35" r="4" fill="#ef4444"/>
-            <text x="50" y="25" fill="#fca5a5" font-size="10" font-family="monospace">3.71m</text>
-
-            <circle cx="260" cy="95" r="4" fill="#ef4444"/>
-            <text x="250" y="85" fill="#fca5a5" font-size="10" font-family="monospace">2.10m</text>
-
-            <circle cx="460" cy="125" r="4" fill="#10b981"/>
-            <text x="450" y="115" fill="#6ee7b7" font-size="10" font-family="monospace">1.15m</text>
-
-            <circle cx="660" cy="135" r="4" fill="#10b981"/>
-            <text x="650" y="128" fill="#6ee7b7" font-size="10" font-family="monospace">0.85m</text>
-
-            <!-- X 軸標籤 -->
-            <text x="50" y="155" fill="#94a3b8" font-size="10" font-family="monospace">10/15(四)</text>
-            <text x="250" y="155" fill="#94a3b8" font-size="10" font-family="monospace">10/16(五)</text>
-            <text x="450" y="155" fill="#94a3b8" font-size="10" font-family="monospace">10/17(六)</text>
-            <text x="640" y="155" fill="#94a3b8" font-size="10" font-family="monospace">10/18(日)</text>
-          </svg>
-        </div>
-      `;
-    }
-  }
-
-  // 延遲執行以確保 DOM 完全就緒
-  setTimeout(() => {
-    renderModule2Table();
-    renderModule5Cards();
-    renderModule6TrendChart();
-  }, 150);
-
-  setInterval(() => {
-    renderModule2Table();
-    renderModule5Cards();
-    renderModule6TrendChart();
-  }, 3000);
+  setTimeout(() => { renderModule2Table(); renderModule5Cards(); }, 200);
 })();
 </script>
 </body>
