@@ -1,6 +1,6 @@
 {
-  "version": "v63.5-MultiMaaS SSOT Engine",
-  "timestamp": "2026-10-17 18:57:40 CST",
+  "version": "v63.5-MultiMaaS SSOT Engine (24h/48h Swell Extended)",
+  "timestamp": "2026-10-17 19:00:51 CST",
   "date_str": "2026-10-17 (六)",
   "decision_code": "Q4",
   "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)",
@@ -55,8 +55,27 @@
       "lon": 121.842
     }
   ],
+  "forecast_swell": {
+    "forecast_24h": {
+      "hs_m": 2.85,
+      "tp_s": 14.2,
+      "dir_deg": 105.0,
+      "swell_warning": true,
+      "e_net_est": 0.88,
+      "status": "⚠️ 24h 後長浪前鋒抵達 (Tp=14.2s)"
+    },
+    "forecast_48h": {
+      "hs_m": 3.6,
+      "tp_s": 15.5,
+      "dir_deg": 110.0,
+      "swell_warning": true,
+      "e_net_est": 1.25,
+      "status": "🔴 48h 後港池劇烈諧振 (E_net>1.0 預計封島)"
+    },
+    "lead_time_window": "24h~48h 滾動鎖窗中"
+  },
   "alert_info": {
     "title": "🔴【GEM Engine 災害即時警報】雙岸物理防線熔斷 / 建議全線封島",
-    "formatted_msg": "**時間**: 2026-10-17 18:57:40 CST (2026-10-17 (六))\n**兩儀諧振能量 E_net**: `7.78`\n**預估波高**: `3.5m` | **南岸裕深**: `4.11m`\n**處置建議**: 嚴禁船舶靠泊與人員登島，末班客輪原航折返烏石港。"
+    "formatted_msg": "**時間**: 2026-10-17 19:00:51 CST (2026-10-17 (六))\n**兩儀諧振能量 E_net**: `7.78`\n**預估波高**: `3.5m` | **南岸裕深**: `4.11m`\n**🔮 24h/48h 前瞻長浪鎖窗**: 24h~48h 滾動鎖窗中\n**處置建議**: 嚴禁船舶靠泊與人員登島，末班客輪原航折返烏石港。"
   }
 }
