@@ -1,6 +1,6 @@
 {
-  "version": "v63.5-MultiMaaS SSOT Engine (RL Evacuation Extended)",
-  "timestamp": "2026-10-17 19:03:45 CST",
+  "version": "v63.5-MultiMaaS SSOT Engine",
+  "timestamp": "2026-10-17 19:08:02 CST",
   "date_str": "2026-10-17 (六)",
   "decision_code": "Q4",
   "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)",
@@ -62,7 +62,7 @@
       "dir_deg": 105.0,
       "swell_warning": true,
       "e_net_est": 0.88,
-      "status": "⚠️ 24h 後長浪前鋒抵達 (Tp=14.2s)"
+      "status": "⚠️ 24h 後長浪抵達 (Tp=14.2s)"
     },
     "forecast_48h": {
       "hs_m": 3.6,
@@ -70,21 +70,21 @@
       "dir_deg": 110.0,
       "swell_warning": true,
       "e_net_est": 1.25,
-      "status": "🔴 48h 後港池劇烈諧振 (E_net>1.0 預計封島)"
+      "status": "🔴 48h 後港池諧振 (E_net>1.0 預計封島)"
     },
     "lead_time_window": "24h~48h 滾動鎖窗中"
   },
   "evacuation_routing": {
     "opt_heading_deg": 252.0,
-    "opt_heading_str": "252.0° WSW (偏航修正)",
+    "opt_heading_str": "252.0° WSW",
     "recommended_speed_kts": 10.3,
     "bus_shuttle_needed": 12,
     "sea_evac_minutes": 15,
     "total_evac_chain_minutes": 30,
-    "shuttle_directive": "備妥 12 班次國道客運至烏石港轉運站接駁"
+    "shuttle_directive": "備妥 12 班客運至烏石港接駁"
   },
   "alert_info": {
     "title": "🔴【GEM Engine 災害即時警報】雙岸物理防線熔斷 / 建議全線封島",
-    "formatted_msg": "**時間**: 2026-10-17 19:03:45 CST (2026-10-17 (六))\n**兩儀諧振能量 E_net**: `7.78`\n**預估波高**: `3.5m` | **南岸裕深**: `4.11m`\n**🧭 RL 最佳避航角**: `252.0° WSW (偏航修正)` (建議航速: `10.3` kts)\n**🚌 烏石港轉運需求**: `備妥 12 班次國道客運至烏石港轉運站接駁` (海陸總耗時: `30` 分鐘)\n**處置建議**: 嚴禁船舶靠泊與人員登島，末班客輪原航折返烏石港。"
+    "formatted_msg": "**時間**: 2026-10-17 19:08:02 CST (2026-10-17 (六))\n**兩儀諧振能量 E_net**: `7.78`\n**預估波高**: `3.5m` | **南岸裕深**: `4.11m`\n**🧭 RL 最佳避航角**: `252.0° WSW` (建議航速: `10.3` kts)\n**🚌 烏石港轉運需求**: `備妥 12 班客運至烏石港接駁` (海陸總耗時: `30` 分鐘)\n**處置建議**: 嚴禁船舶靠泊與人員登島，末班客輪原航折返烏石港。"
   }
 }
