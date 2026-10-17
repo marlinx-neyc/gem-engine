@@ -1,6 +1,6 @@
 {
-  "version": "v63.5-MaaS Master SSOT Production Engine",
-  "timestamp": "2026-10-17 16:46:35 CST",
+  "version": "v63.5-MultiMaaS SSOT Engine",
+  "timestamp": "2026-10-17 16:50:19 CST",
   "date_str": "2026-10-17 (六)",
   "d1_str": "10/18 (日)",
   "d2_str": "10/19 (一)",
@@ -16,7 +16,7 @@
     "hs_pier": "3.5m",
     "w_eff": "6.32m/s",
     "squat": "0.15m",
-    "evac_time": "20min"
+    "evac_time": "30min"
   },
   "module1": {
     "north": {
@@ -57,10 +57,11 @@
   "alert_info": {
     "title": "🔴【GEM Engine 災害即時警報】雙岸物理防線熔斷 / 建議全線封島",
     "directive": "11:20 止登駛離 / 14:20 全員撤離直航烏石港",
-    "formatted_msg": "**時間**: 2026-10-17 16:46:35 CST (2026-10-17 (六))\n**兩儀諧振能量 E_net**: `7.77`\n**預估波高**: `3.5m` | **南岸裕深**: `4.2m`\n**處置建議**: 嚴禁船舶靠泊與人員登島，末班客輪原航折返烏石港。",
+    "formatted_msg": "**時間**: 2026-10-17 16:50:19 CST (2026-10-17 (六))\n**兩儀諧振能量 E_net**: `7.77`\n**預估波高**: `3.5m` | **南岸裕深**: `4.2m`\n**處置建議**: 嚴禁船舶靠泊與人員登島，末班客輪原航折返烏石港。",
     "maas_control": {
       "gate_interlock": "🔒 售票/驗票閘門強制鎖死",
-      "evacuation_time": "20 分鐘"
+      "evacuation_time": "30 分鐘",
+      "land_delay": "+10.0 分鐘"
     }
   }
 }
