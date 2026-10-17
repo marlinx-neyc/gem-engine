@@ -199,7 +199,7 @@
         </div>
         <div class="text-[10px] text-[#cbd5e1] mt-1.5 flex flex-wrap gap-1.5 items-center">
             <span>時間：<b id="liveClock" class="font-mono text-white bg-white/10 px-1 py-0.5 rounded text-[10.5px]">--:--:--</b></span>
-            <span>| 日期：<b id="liveDate" class="font-mono text-emerald-300 bg-emerald-950/60 border border-emerald-500/40 px-1.5 py-0.5 rounded text-[10.5px]">2026-10-16 (五)</b></span>
+            <span>| 日期：<b id="liveDate" class="font-mono text-emerald-300 bg-emerald-950/60 border border-emerald-500/40 px-1.5 py-0.5 rounded text-[10.5px]">2026-10-17 (六)</b></span>
             <span>| 心跳：<b id="heartbeatCounter" class="text-[#38bdf8] text-[10.5px]">12</b></span>
             <span>| 裁決：<b id="ssotDecisionBadge" class="text-[#ef4444] font-bold text-[10.5px]">0.0% 熔斷</b></span>
         </div>
@@ -1416,6 +1416,7 @@
 
 
 
+
 <script id="gem-ssot-hydration">
 (function() {
   'use strict';
@@ -1428,7 +1429,7 @@
   }
   console.log('[GEM Engine v63.5] 舊計時器已全數清場，啟動獨立純渲染中樞');
 
-  const ssot = {"version": "v63.5 Master SSOT Production Engine", "timestamp": "2026-10-16 08:11:48 CST", "date_str": "2026-10-16 (五)", "d1_str": "10/17 (六)", "d2_str": "10/18 (日)", "d3_str": "10/19 (一)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "hard_veto_alert": true, "failover_active": false, "e_net": 9.77, "yang_ratio": 61.5, "yin_ratio": 38.5, "global_metrics": {"hs_pier": "3.71m", "w_eff": "5.03m/s", "tp": "12.8s", "delta_theta": "42.0°"}, "module1": {"north": {"hs": "3.71m", "ukc": "1.8m", "fb": "0.15m", "weff": "5.03m/s", "status": "🔴 越浪覆頂熔斷", "status_class": "danger"}, "south": {"hs": "3.71m", "ukc": "0.42m", "fb": "1.85m", "weff": "6.42m/s", "status": "🔴 淺水觸底熔斷", "status_class": "danger"}}, "alert_info": {"title": "🔴【GEM Engine 災害即時警報】雙岸物理防線熔斷 / 建議全線封島", "directive": "11:20 止登駛離 / 14:20 全員撤離直航烏石港", "formatted_msg": "**時間**: 2026-10-16 08:11:48 CST (2026-10-16 (五))\n**兩儀諧振能量 E_net**: `9.77`\n**預估波高**: `3.71m` | **南岸裕深**: `0.42m`\n**處置建議**: 嚴禁船舶靠泊與人員登島，末班客輪原航折返烏石港。"}};
+  const ssot = {"version": "v63.5 Master SSOT Production Engine", "timestamp": "2026-10-17 16:42:35 CST", "date_str": "2026-10-17 (六)", "d1_str": "10/18 (日)", "d2_str": "10/19 (一)", "d3_str": "10/20 (二)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "hard_veto_alert": true, "failover_active": false, "e_net": 9.77, "yang_ratio": 61.5, "yin_ratio": 38.5, "global_metrics": {"hs_pier": "3.71m", "w_eff": "5.03m/s", "tp": "12.8s", "delta_theta": "42.0°"}, "module1": {"north": {"hs": "3.71m", "ukc": "1.8m", "fb": "0.15m", "weff": "5.03m/s", "status": "🔴 越浪覆頂熔斷", "status_class": "danger"}, "south": {"hs": "3.71m", "ukc": "0.42m", "fb": "1.85m", "weff": "6.42m/s", "status": "🔴 淺水觸底熔斷", "status_class": "danger"}}, "alert_info": {"title": "🔴【GEM Engine 災害即時警報】雙岸物理防線熔斷 / 建議全線封島", "directive": "11:20 止登駛離 / 14:20 全員撤離直航烏石港", "formatted_msg": "**時間**: 2026-10-17 16:42:35 CST (2026-10-17 (六))\n**兩儀諧振能量 E_net**: `9.77`\n**預估波高**: `3.71m` | **南岸裕深**: `0.42m`\n**處置建議**: 嚴禁船舶靠泊與人員登島，末班客輪原航折返烏石港。"}};
 
   // 2. 獨立時鐘模組：使用 Asia/Taipei 時區標準，防抖動等寬樣式
   function updateClockOnly() {
