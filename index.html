@@ -2812,11 +2812,154 @@ setInterval(syncLatestDecision, 3000);
 
 
 
+
 <script id="gem-ssot-hydration">
 (function() {
   'use strict';
-  const ssot = {"version": "v63.5-MultiMaaS SSOT Engine", "timestamp": "2026-10-17 17:09:26 CST", "date_str": "2026-10-17 (六)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "hard_veto_alert": true, "failover_active": false, "e_net": 7.78, "yang_ratio": 73.0, "yin_ratio": 27.0, "global_metrics": {"hs_pier": "3.5m", "w_eff": "6.32m/s", "squat": "0.23m", "evac_time": "30min"}, "module1": {"north": {"hs": "3.5m", "ukc": "5.49m", "fb": "0.15m", "status": "🔴 越浪覆頂熔斷"}, "south": {"hs": "3.5m", "ukc": "4.11m", "fb": "1.85m", "status": "🟢 正常"}}, "vessels": [{"name": "凱鯨號", "mmsi": "416000001", "speed": 12.5, "status": "UNDERWAY", "lat": 24.865, "lon": 121.856}, {"name": "新福豐168號", "mmsi": "416000002", "speed": 0.0, "status": "MOORED", "lat": 24.868, "lon": 121.831}, {"name": "宏棋號", "mmsi": "416000003", "speed": 8.2, "status": "UNDERWAY", "lat": 24.858, "lon": 121.842}], "alert_info": {"title": "🔴【GEM Engine 災害即時警報】雙岸物理防線熔斷 / 建議全線封島", "directive": "11:20 止登駛離 / 14:20 全員撤離直航烏石港", "formatted_msg": "**時間**: 2026-10-17 17:09:26 CST (2026-10-17 (六))\n**兩儀諧振能量 E_net**: `7.78`\n**預估波高**: `3.5m` | **南岸裕深**: `4.11m`\n**處置建議**: 嚴禁船舶靠泊與人員登島，末班客輪原航折返烏石港。"}};
-  console.log('[GEM Engine v63.5] 前端綁定中樞啟動');
+  const ssot = {"version": "v63.5-MultiMaaS SSOT Engine", "timestamp": "2026-10-17 17:18:13 CST", "date_str": "2026-10-17 (六)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "hard_veto_alert": true, "failover_active": false, "e_net": 7.78, "yang_ratio": 73.0, "yin_ratio": 27.0, "global_metrics": {"hs_pier": "3.5m", "w_eff": "6.32m/s", "squat": "0.23m", "evac_time": "30min"}, "module1": {"north": {"hs": "3.5m", "ukc": "5.49m", "fb": "0.15m", "status": "🔴 越浪覆頂熔斷"}, "south": {"hs": "3.5m", "ukc": "4.11m", "fb": "1.85m", "status": "🟢 正常"}}, "vessels": [{"name": "凱鯨號", "mmsi": "416000001", "speed": 12.5, "status": "UNDERWAY", "lat": 24.865, "lon": 121.856}, {"name": "新福豐168號", "mmsi": "416000002", "speed": 0.0, "status": "MOORED", "lat": 24.868, "lon": 121.831}, {"name": "宏棋號", "mmsi": "416000003", "speed": 8.2, "status": "UNDERWAY", "lat": 24.858, "lon": 121.842}], "alert_info": {"title": "🔴【GEM Engine 災害即時警報】雙岸物理防線熔斷 / 建議全線封島", "directive": "11:20 止登駛離 / 14:20 全員撤離直航烏石港", "formatted_msg": "**時間**: 2026-10-17 17:18:13 CST (2026-10-17 (六))\n**兩儀諧振能量 E_net**: `7.78`\n**預估波高**: `3.5m` | **南岸裕深**: `4.11m`\n**處置建議**: 嚴禁船舶靠泊與人員登島，末班客輪原航折返烏石港。"}};
+  console.log('[GEM Engine v63.5-MultiMaaS] 完整純渲染中樞啟動');
+
+  function updateClockOnly() {
+    const now = new Date();
+    const formatter = new Intl.DateTimeFormat('zh-TW', {
+      timeZone: 'Asia/Taipei',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+    });
+    const timeText = formatter.format(now) + ' CST';
+    document.querySelectorAll('#gem-live-clock, #liveClock, .live-clock, [data-gem-clock]').forEach(el => {
+      el.style.fontFamily = 'monospace, ui-monospace, SFMono-Regular';
+      el.style.display = 'inline-block';
+      el.style.width = '125px';
+      el.style.textAlign = 'center';
+      if (el.textContent !== timeText) el.textContent = timeText;
+    });
+    document.querySelectorAll('.date-display, #current-date, .current-date').forEach(el => {
+      if (el.textContent !== ssot.date_str) el.textContent = ssot.date_str;
+    });
+  }
+
+  // 1. 動態重繪 Leaflet 海圖上的所有船隻標籤
+  function updateLeafletFleetMap() {
+    if (!window.L) return;
+    let mapInstance = null;
+    for (let key in window) {
+      try {
+        if (window[key] && window[key] instanceof L.Map) {
+          mapInstance = window[key];
+          break;
+        }
+      } catch(e) {}
+    }
+
+    const vessels = ssot.vessels || [];
+    if (!mapInstance || vessels.length === 0) return;
+
+    if (!window.__gem_ship_markers) window.__gem_ship_markers = [];
+    window.__gem_ship_markers.forEach(m => mapInstance.removeLayer(m));
+    window.__gem_ship_markers = [];
+
+    // 移除原本寫死的單一凱鯨號 Marker
+    mapInstance.eachLayer(layer => {
+      if (layer instanceof L.Marker) {
+        const popup = layer.getPopup();
+        if (popup && popup.getContent() && popup.getContent().includes('凱鯨號')) {
+          mapInstance.removeLayer(layer);
+        }
+      }
+    });
+
+    // 重新繪製 SSOT 陣列中的所有船隻 Marker
+    vessels.forEach((v, index) => {
+      const lat = v.lat || (24.865 + (index * 0.003));
+      const lon = v.lon || (121.856 - (index * 0.005));
+      const isMoving = v.speed > 0.5 && !ssot.hard_veto_alert;
+      const statusText = isMoving ? `航行中 (${v.speed} kts)` : `🛑 停靠避風 (0.0 kts)`;
+
+      const marker = L.marker([lat, lon]).addTo(mapInstance);
+      marker.bindPopup(`
+        <div style="font-family: monospace; font-size: 12px; min-width: 160px;">
+          <b style="color: #0284c7;">🚢 ${v.name} (TDX AIS)</b><br>
+          航速: <b>${v.speed} kts</b><br>
+          狀態: ${statusText}
+        </div>
+      `);
+      if (index === 0) marker.openPopup();
+      window.__gem_ship_markers.push(marker);
+    });
+  }
+
+  // 2. 綁定第四頁 Module 4 多船動態卡片列表
+  function bindModule4Fleet() {
+    const mod4 = document.querySelector('#module-4, [data-module="4"], .ship-tracker-container');
+    if (!mod4) return;
+
+    if (ssot.hard_veto_alert) {
+      mod4.querySelectorAll('.ship-moving, .animate-bounce, .animate-pulse-ship').forEach(el => {
+        el.style.animation = 'none';
+        el.classList.remove('ship-moving', 'animate-bounce');
+      });
+    }
+
+    const vessels = ssot.vessels || [];
+    let fleetContainer = mod4.querySelector('[data-fleet-list]');
+    if (!fleetContainer) {
+      fleetContainer = document.createElement('div');
+      fleetContainer.setAttribute('data-fleet-list', 'true');
+      fleetContainer.className = 'grid grid-cols-1 md:grid-cols-3 gap-2 mt-3 font-mono text-xs';
+      mod4.appendChild(fleetContainer);
+    }
+
+    if (vessels.length > 0) {
+      let html = '';
+      vessels.forEach(v => {
+        const isMoving = v.speed > 0.5 && !ssot.hard_veto_alert;
+        const statusBadge = isMoving 
+          ? `<span class="text-emerald-400 font-bold">⚓ 航行中 (${v.speed} kts)</span>`
+          : `<span class="text-slate-400">🛑 停靠/避風 (0.0 kts)</span>`;
+        const borderStyle = isMoving ? 'border-emerald-500/40 bg-emerald-950/20' : 'border-slate-800 bg-slate-900/60';
+        
+        html += `
+          <div class="p-2.5 rounded-lg border ${borderStyle} flex justify-between items-center shadow-sm">
+            <div>
+              <div class="font-bold text-slate-200 text-xs">${v.name}</div>
+              <div class="text-[10px] text-slate-400">MMSI: ${v.mmsi}</div>
+            </div>
+            <div class="text-right text-[11px]">${statusBadge}</div>
+          </div>
+        `;
+      });
+      fleetContainer.innerHTML = html;
+    }
+  }
+
+  function bindSSOTData() {
+    let banner = document.getElementById('gem-emergency-banner');
+    if (!banner && ssot.hard_veto_alert) {
+      banner = document.createElement('div');
+      banner.id = 'gem-emergency-banner';
+      banner.className = 'w-full bg-rose-600 text-white font-mono text-xs py-2 px-4 flex justify-between items-center z-50 sticky top-0 shadow-lg animate-pulse';
+      banner.innerHTML = `
+        <div class="flex items-center space-x-2">
+          <span class="font-bold bg-white text-rose-700 px-1.5 py-0.5 rounded text-[10px]">極限熔斷</span>
+          <span>${ssot.alert_info.title}</span>
+        </div>
+        <div class="font-bold text-[11px]">E_net: ${ssot.e_net} | 避難: ${ssot.global_metrics.evac_time}</div>
+      `;
+      document.body.prepend(banner);
+    }
+
+    document.querySelectorAll('[data-metric="ukc-north"]').forEach(el => el.textContent = ssot.module1.north.ukc);
+    document.querySelectorAll('[data-metric="ukc-south"]').forEach(el => el.textContent = ssot.module1.south.ukc);
+    document.querySelectorAll('[data-metric="fb-north"]').forEach(el => el.textContent = ssot.module1.north.fb);
+    document.querySelectorAll('[data-metric="fb-south"]').forEach(el => el.textContent = ssot.module1.south.fb);
+
+    bindModule4Fleet();
+    setTimeout(updateLeafletFleetMap, 800);
+  }
+
+  bindSSOTData();
+  updateClockOnly();
+  window.__gem_single_timer = setInterval(updateClockOnly, 1000);
 })();
 </script>
 </body>
