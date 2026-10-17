@@ -1,31 +1,32 @@
 {
   "version": "v63.5-MultiMaaS SSOT Engine",
-  "timestamp": "2026-10-17 17:42:59 CST",
+  "timestamp": "2026-10-17 18:49:50 CST",
   "date_str": "2026-10-17 (六)",
   "decision_code": "Q4",
   "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)",
   "hard_veto_alert": true,
+  "failover_active": false,
   "e_net": 7.78,
-  "yang_ratio": 68.5,
-  "yin_ratio": 31.5,
+  "yang_ratio": 73.0,
+  "yin_ratio": 27.0,
   "global_metrics": {
-    "hs_pier": "3.10m",
-    "w_eff": "9.5m/s",
-    "squat": "0.45m",
-    "evac_time": "45min"
+    "hs_pier": "3.5m",
+    "w_eff": "6.32m/s",
+    "squat": "0.23m",
+    "evac_time": "30min"
   },
   "module1": {
     "north": {
-      "hs": "3.10m",
-      "ukc": "1.80m",
+      "hs": "3.5m",
+      "ukc": "5.49m",
       "fb": "0.15m",
       "status": "🔴 越浪覆頂熔斷"
     },
     "south": {
-      "hs": "3.10m",
-      "ukc": "0.42m",
+      "hs": "3.5m",
+      "ukc": "4.11m",
       "fb": "1.85m",
-      "status": "🔴 淺水觸底熔斷"
+      "status": "🟢 正常"
     }
   },
   "vessels": [
@@ -56,6 +57,6 @@
   ],
   "alert_info": {
     "title": "🔴【GEM Engine 災害即時警報】雙岸物理防線熔斷 / 建議全線封島",
-    "formatted_msg": "**時間**: 2026-10-17 17:42:59 CST\n**兩儀諧振能量 E_net**: `7.78`\n**預估波高**: `3.10m` | **南岸裕深**: `0.42m`"
+    "formatted_msg": "**時間**: 2026-10-17 18:49:50 CST (2026-10-17 (六))\n**兩儀諧振能量 E_net**: `7.78`\n**預估波高**: `3.5m` | **南岸裕深**: `4.11m`\n**處置建議**: 嚴禁船舶靠泊與人員登島，末班客輪原航折返烏石港。"
   }
 }
