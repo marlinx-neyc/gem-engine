@@ -1,42 +1,45 @@
 {
-  "version": "v63.5-MultiMaaS SSOT Engine (V43 Aligned)",
-  "timestamp": "2026-10-17 21:42:34 CST",
+  "version": "v63.5-Vision PINN CMDP SSOT Master Engine",
+  "timestamp": "2026-10-17 23:30:02 CST",
   "date_str": "2026-10-17 (六)",
   "decision_code": "Q4",
   "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)",
+  "cmdp_reward": 100.0,
   "hard_veto_alert": true,
-  "failover_active": false,
-  "e_net": 10.85,
-  "yang_ratio": 54.8,
-  "yin_ratio": 45.2,
-  "global_metrics": {
-    "hs_pier": "3.71m",
-    "w_eff": "5.03m/s",
-    "squat": "0.85m",
-    "evac_time": "35min"
-  },
+  "e_net": 7.22,
+  "s_cos": 0.999,
+  "alpha_tune": 0.7,
   "physics_metrics": {
     "hs_cwa": 3.71,
     "w_cwa": 9.5,
     "tp_s": 15.5,
     "delta_theta_deg": 58.0,
     "tide_eta_m": 0.65,
-    "hs_pier_m": 3.71,
+    "hs_pier_m": 3.74,
     "w_eff_ms": 5.03,
-    "ukc_m": 0.26,
-    "fb_pier_m": 0.15,
+    "squat_m": 0.09,
+    "ukc_south_m": 1.12,
+    "ukc_north_m": -1.37,
+    "fb_north_m": 0.15,
+    "fb_south_m": 1.85,
     "has_veto": true
+  },
+  "global_metrics": {
+    "hs_pier": "3.74m",
+    "w_eff": "5.03m/s",
+    "squat": "0.09m",
+    "evac_time": "35min"
   },
   "module1": {
     "north": {
       "hs": "3.93m",
-      "ukc": "-2.26m",
+      "ukc": "-1.37m",
       "fb": "0.15m",
       "status": "🔴 越浪覆頂熔斷"
     },
     "south": {
-      "hs": "3.71m",
-      "ukc": "0.26m",
+      "hs": "3.74m",
+      "ukc": "1.12m",
       "fb": "1.85m",
       "status": "🔴 淺水觸底熔斷"
     }
@@ -67,25 +70,6 @@
       "lon": 121.842
     }
   ],
-  "forecast_swell": {
-    "forecast_24h": {
-      "hs_m": 2.85,
-      "tp_s": 14.2,
-      "dir_deg": 105.0,
-      "swell_warning": true,
-      "e_net_est": 0.88,
-      "status": "⚠️ 24h 後長浪抵達 (Tp=14.2s)"
-    },
-    "forecast_48h": {
-      "hs_m": 3.6,
-      "tp_s": 15.5,
-      "dir_deg": 110.0,
-      "swell_warning": true,
-      "e_net_est": 1.25,
-      "status": "🔴 48h 後港池諧振 (E_net>1.0 預計封島)"
-    },
-    "lead_time_window": "24h~48h 滾動鎖窗中"
-  },
   "evacuation_routing": {
     "opt_heading_deg": 252.0,
     "opt_heading_str": "252.0° WSW",
@@ -94,9 +78,5 @@
     "sea_evac_minutes": 20,
     "total_evac_chain_minutes": 35,
     "shuttle_directive": "備妥 4 班客運至烏石港接駁"
-  },
-  "alert_info": {
-    "title": "🔴【GEM Engine 災害即時警報】雙岸物理防線熔斷 / 建議全線封島",
-    "formatted_msg": "**時間**: 2026-10-17 21:42:34 CST (2026-10-17 (六))\n**兩儀諧振能量 E_net**: `10.85`\n**預估波高**: `3.71m` | **南岸裕深**: `0.26m`\n**🧭 RL 最佳避航角**: `252.0° WSW` (建議航速: `10.3` kts)\n**🚌 烏石港轉運需求**: `備妥 4 班客運至烏石港接駁` (海陸總耗時: `35` 分鐘)\n**處置建議**: 嚴禁船舶靠泊與人員登島，末班客輪原航折返烏石港。"
   }
 }
