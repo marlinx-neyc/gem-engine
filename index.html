@@ -2828,13 +2828,13 @@ setInterval(syncLatestDecision, 3000);
 
 
 
+
 <script id="gem-ssot-hydration">
 (function() {
   'use strict';
-  const ssot = {"version": "v63.5-MultiMaaS SSOT Engine (V43 Aligned)", "timestamp": "2026-10-17 21:42:34 CST", "date_str": "2026-10-17 (六)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "hard_veto_alert": true, "failover_active": false, "e_net": 10.85, "yang_ratio": 54.8, "yin_ratio": 45.2, "global_metrics": {"hs_pier": "3.71m", "w_eff": "5.03m/s", "squat": "0.85m", "evac_time": "35min"}, "physics_metrics": {"hs_cwa": 3.71, "w_cwa": 9.5, "tp_s": 15.5, "delta_theta_deg": 58.0, "tide_eta_m": 0.65, "hs_pier_m": 3.71, "w_eff_ms": 5.03, "ukc_m": 0.26, "fb_pier_m": 0.15, "has_veto": true}, "module1": {"north": {"hs": "3.93m", "ukc": "-2.26m", "fb": "0.15m", "status": "🔴 越浪覆頂熔斷"}, "south": {"hs": "3.71m", "ukc": "0.26m", "fb": "1.85m", "status": "🔴 淺水觸底熔斷"}}, "vessels": [{"name": "凱鯨號", "mmsi": "416000001", "speed": 12.5, "status": "UNDERWAY", "lat": 24.865, "lon": 121.856}, {"name": "新福豐168號", "mmsi": "416000002", "speed": 0.0, "status": "MOORED", "lat": 24.868, "lon": 121.831}, {"name": "宏棋號", "mmsi": "416000003", "speed": 8.2, "status": "UNDERWAY", "lat": 24.858, "lon": 121.842}], "forecast_swell": {"forecast_24h": {"hs_m": 2.85, "tp_s": 14.2, "dir_deg": 105.0, "swell_warning": true, "e_net_est": 0.88, "status": "⚠️ 24h 後長浪抵達 (Tp=14.2s)"}, "forecast_48h": {"hs_m": 3.6, "tp_s": 15.5, "dir_deg": 110.0, "swell_warning": true, "e_net_est": 1.25, "status": "🔴 48h 後港池諧振 (E_net>1.0 預計封島)"}, "lead_time_window": "24h~48h 滾動鎖窗中"}, "evacuation_routing": {"opt_heading_deg": 252.0, "opt_heading_str": "252.0° WSW", "recommended_speed_kts": 10.3, "bus_shuttle_needed": 4, "sea_evac_minutes": 20, "total_evac_chain_minutes": 35, "shuttle_directive": "備妥 4 班客運至烏石港接駁"}, "alert_info": {"title": "🔴【GEM Engine 災害即時警報】雙岸物理防線熔斷 / 建議全線封島", "formatted_msg": "**時間**: 2026-10-17 21:42:34 CST (2026-10-17 (六))\n**兩儀諧振能量 E_net**: `10.85`\n**預估波高**: `3.71m` | **南岸裕深**: `0.26m`\n**🧭 RL 最佳避航角**: `252.0° WSW` (建議航速: `10.3` kts)\n**🚌 烏石港轉運需求**: `備妥 4 班客運至烏石港接駁` (海陸總耗時: `35` 分鐘)\n**處置建議**: 嚴禁船舶靠泊與人員登島，末班客輪原航折返烏石港。"}};
-  console.log('[GEM Engine v63.5] 大成一統全端水合中樞啟動', ssot);
+  const ssot = {"version": "v63.5-Vision PINN CMDP Master SSOT Engine", "timestamp": "2026-10-17 23:33:41 CST", "date_str": "2026-10-17 (六)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "cmdp_reward": 100.0, "hard_veto_alert": true, "e_net": 7.22, "s_cos": 0.999, "alpha_tune": 0.7, "physics_metrics": {"hs_cwa": 3.71, "w_cwa": 9.5, "tp_s": 15.5, "delta_theta_deg": 58.0, "tide_eta_m": 0.65, "hs_pier_m": 3.74, "w_eff_ms": 5.03, "squat_m": 0.09, "ukc_south_m": 1.12, "ukc_north_m": -1.37, "fb_north_m": 0.15, "fb_south_m": 1.85, "has_veto": true}, "global_metrics": {"hs_pier": "3.74m", "w_eff": "5.03m/s", "squat": "0.09m", "evac_time": "35min"}, "module1": {"north": {"hs": "3.93m", "ukc": "-1.37m", "fb": "0.15m", "status": "🔴 越浪覆頂熔斷"}, "south": {"hs": "3.74m", "ukc": "1.12m", "fb": "1.85m", "status": "🔴 淺水觸底熔斷"}}, "vessels": [{"name": "凱鯨號", "mmsi": "416000001", "speed": 12.5, "status": "UNDERWAY", "lat": 24.865, "lon": 121.856}, {"name": "新福豐168號", "mmsi": "416000002", "speed": 0.0, "status": "MOORED", "lat": 24.868, "lon": 121.831}, {"name": "宏棋號", "mmsi": "416000003", "speed": 8.2, "status": "UNDERWAY", "lat": 24.858, "lon": 121.842}], "evacuation_routing": {"opt_heading_deg": 252.0, "opt_heading_str": "252.0° WSW", "recommended_speed_kts": 10.3, "bus_shuttle_needed": 4, "sea_evac_minutes": 20, "total_evac_chain_minutes": 35, "shuttle_directive": "備妥 4 班客運至烏石港接駁"}};
+  console.log('[GEM Engine v63.5] 全端水合與抗快取黑洞修復啟動', ssot);
 
-  // 1. 動態注入安全 CSS，消除 Leaflet 地圖塌陷與左側黑洞
   function injectFixCSS() {
     if (document.getElementById('gem-layout-fix-css')) return;
     const style = document.createElement('style');
@@ -2857,215 +2857,36 @@ setInterval(syncLatestDecision, 3000);
     document.head.appendChild(style);
   }
 
-  // 2. 全頁面 DOM 走訪替換歷史日期
-  function safeReplaceHistoricalDates(node) {
-    if (node.nodeType === Node.TEXT_NODE) {
-      let val = node.nodeValue;
-      if (val.includes('2026-10-15')) {
-        node.nodeValue = val.replace(/2026-10-15/g, ssot.date_str.split(' ')[0]);
-      }
-      if (val.includes('v43.0 Master SSOT')) {
-        node.nodeValue = val.replace(/v43\.0 Master SSOT/g, ssot.version);
-      }
-      if (val.includes('E_net: 9.80') || val.includes('E_net:9.80')) {
-        node.nodeValue = val.replace(/E_net:\s*9\.80/g, 'E_net: ' + ssot.e_net);
-      }
-    } else {
-      for (let child of node.childNodes) {
-        safeReplaceHistoricalDates(child);
-      }
-    }
+  function bindMetrics() {
+    const pm = ssot.physics_metrics || {};
+    document.querySelectorAll('[data-metric="ukc-north"]').forEach(el => el.textContent = pm.ukc_north_m + ' m');
+    document.querySelectorAll('[data-metric="ukc-south"]').forEach(el => el.textContent = pm.ukc_south_m + ' m');
+    document.querySelectorAll('[data-metric="fb-north"]').forEach(el => el.textContent = pm.fb_north_m + ' m');
+    document.querySelectorAll('[data-metric="fb-south"]').forEach(el => el.textContent = pm.fb_south_m + ' m');
+    document.querySelectorAll('[data-metric="enet"]').forEach(el => el.textContent = ssot.e_net);
   }
 
-  // 3. 單一真實時間源 (Single Live Clock)
-  function updateLiveClock() {
-    const now = new Date();
-    const formatter = new Intl.DateTimeFormat('zh-TW', {
-      timeZone: 'Asia/Taipei', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-    });
-    const timeText = formatter.format(now) + ' CST';
-    document.querySelectorAll('#gem-live-clock, #liveClock, .live-clock, [data-gem-clock]').forEach(el => {
-      el.textContent = timeText;
-    });
-    document.querySelectorAll('.date-display, #current-date, .current-date, #liveDate').forEach(el => {
-      el.textContent = ssot.date_str;
-    });
-  }
-
-  // 4. 跨裝置差別化面板渲染
-  function bindDeviceSpecificTacticalDashboard() {
-    let card = document.getElementById('gem-tactical-dashboard-card');
-    if (card) card.remove();
-
-    card = document.createElement('div');
-    card.id = 'gem-tactical-dashboard-card';
-
-    const fc24 = (ssot.forecast_swell && ssot.forecast_swell.forecast_24h) || {};
-    const fc48 = (ssot.forecast_swell && ssot.forecast_swell.forecast_48h) || {};
-    const rl = ssot.evacuation_routing || {};
-
-    const isMobilePage = window.location.pathname.includes('mobile.html') || window.innerWidth < 768;
-
-    if (isMobilePage) {
-      document.body.classList.add('gem-mobile-view');
-      const existingNav = document.querySelector('.bottom-nav, nav.fixed-bottom, footer.fixed');
-      const bottomOffset = existingNav ? existingNav.clientHeight + 'px' : '0px';
-
-      card.className = 'fixed left-0 right-0 z-40 bg-slate-900/95 border-t border-slate-700/80 p-2.5 font-mono text-xs shadow-2xl backdrop-blur transition-all duration-300';
-      card.style.bottom = bottomOffset;
-      
-      card.innerHTML = `
-        <div class="flex justify-between items-center cursor-pointer select-none" id="gem-tactical-header">
-          <div class="flex items-center space-x-1.5">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span class="font-bold text-xs text-slate-100">🔮 預警與避航調度中樞</span>
-            <span class="bg-indigo-950 text-indigo-300 px-1.5 py-0.5 rounded text-[9px]">24h/48h</span>
-          </div>
-          <button id="gem-tactical-toggle-btn" class="bg-indigo-900/80 hover:bg-indigo-800 text-indigo-200 font-bold px-2 py-0.5 rounded border border-indigo-700/60 text-[10px]">
-            <span id="gem-toggle-text">▼ 展開</span>
-          </button>
-        </div>
-        <div id="gem-tactical-drawer" class="hidden mt-2 pt-2 border-t border-slate-800 max-h-[50vh] overflow-y-auto space-y-2">
-          <div class="p-2 rounded bg-slate-950/80 border border-amber-500/30 flex justify-between items-center">
-            <span class="text-amber-400 font-bold">🌊 24h 長浪</span>
-            <span class="text-slate-300 text-[11px]">${fc24.status || '無預警'}</span>
-          </div>
-          <div class="p-2 rounded bg-slate-950/80 border border-rose-500/30 flex justify-between items-center">
-            <span class="text-rose-400 font-bold">🚨 48h 極限</span>
-            <span class="text-slate-300 text-[11px]">${fc48.status || '無預警'}</span>
-          </div>
-          <div class="p-2 rounded bg-slate-950/80 border border-emerald-500/30 flex justify-between items-center">
-            <span class="text-emerald-400 font-bold">🧭 避航航向</span>
-            <span class="text-emerald-300 font-bold text-[11px]">${rl.opt_heading_str || '252.0° WSW'} (${rl.recommended_speed_kts || '10.3'}kts)</span>
-          </div>
-          <div class="p-2 rounded bg-slate-950/80 border border-cyan-500/30 flex justify-between items-center">
-            <span class="text-cyan-400 font-bold">🚌 客運調度</span>
-            <span class="text-cyan-300 font-bold text-[11px]">${rl.bus_shuttle_needed || '12'} 輛巴士 (${rl.total_evac_chain_minutes || '30'}m)</span>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(card);
-    } else {
-      card.className = 'w-full bg-slate-900/90 border border-slate-700/60 rounded-xl p-3 mb-3 font-mono text-xs shadow-xl backdrop-blur';
-      card.style.gridColumn = '1 / -1';
-      card.innerHTML = `
-        <div class="flex justify-between items-center cursor-pointer select-none" id="gem-tactical-header">
-          <div class="flex items-center space-x-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span class="font-bold text-sm text-slate-100">🔮 GEM Engine 前瞻預警與智慧避航調度中樞</span>
-            <div id="gem-collapsed-summary" class="flex items-center space-x-2 text-[10px] ml-3">
-              <span class="bg-amber-950 text-amber-300 px-2 py-0.5 rounded border border-amber-800/50">🌊 24h/48h 預警</span>
-              <span class="bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-800/50">🧭 ${rl.opt_heading_str || '252.0° WSW'}</span>
-              <span class="bg-cyan-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-800/50">🚌 ${rl.bus_shuttle_needed || '12'} 輛客運</span>
-            </div>
-          </div>
-          <button id="gem-tactical-toggle-btn" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-2.5 py-1 rounded border border-slate-600 text-[11px]">
-            <span id="gem-toggle-text">▼ 展開中樞</span>
-          </button>
-        </div>
-        <div id="gem-tactical-drawer" class="hidden mt-3 pt-3 border-t border-slate-800 grid grid-cols-4 gap-3">
-          <div class="p-2.5 rounded bg-slate-950/70 border border-amber-500/30">
-            <div class="text-[10px] text-amber-400 font-bold mb-1">🌊 24h 長浪預報</div>
-            <div class="text-slate-200 text-[11px]">${fc24.status || '無長浪預警'}</div>
-          </div>
-          <div class="p-2.5 rounded bg-slate-950/70 border border-rose-500/30">
-            <div class="text-[10px] text-rose-400 font-bold mb-1">🚨 48h 極限預警</div>
-            <div class="text-slate-200 text-[11px]">${fc48.status || '無極限預警'}</div>
-          </div>
-          <div class="p-2.5 rounded bg-slate-950/70 border border-emerald-500/30">
-            <div class="text-[10px] text-emerald-400 font-bold mb-1">🧭 RL 最佳避航航向</div>
-            <div class="text-emerald-300 font-bold text-sm">${rl.opt_heading_str || '252.0° WSW'}</div>
-            <div class="text-[10px] text-slate-400 mt-1">建議航速: ${rl.recommended_speed_kts || '10.3'} kts</div>
-          </div>
-          <div class="p-2.5 rounded bg-slate-950/70 border border-cyan-500/30">
-            <div class="text-[10px] text-cyan-400 font-bold mb-1">🚌 烏石港客運調度</div>
-            <div class="text-cyan-300 font-bold text-sm">${rl.bus_shuttle_needed || '12'} 輛巴士</div>
-            <div class="text-[10px] text-slate-400 mt-1">海陸總耗時: ${rl.total_evac_chain_minutes || '30'} 分鐘</div>
-          </div>
-        </div>
-      `;
-
-      const mainContainer = document.querySelector('#module-1, [data-module="1"], main, .container');
-      if (mainContainer) {
-        mainContainer.prepend(card);
-      } else {
-        document.body.prepend(card);
-      }
-    }
-
-    const headerDiv = card.querySelector('#gem-tactical-header');
-    const drawerDiv = card.querySelector('#gem-tactical-drawer');
-    const summaryDiv = card.querySelector('#gem-collapsed-summary');
-    const toggleBtn = card.querySelector('#gem-tactical-toggle-btn');
-    const toggleText = card.querySelector('#gem-toggle-text');
-
-    function toggleDrawer(e) {
-      e.stopPropagation();
-      const isHidden = drawerDiv.classList.contains('hidden');
-      if (isHidden) {
-        drawerDiv.classList.remove('hidden');
-        if (summaryDiv) summaryDiv.classList.add('hidden');
-        toggleText.textContent = '▲ 收合中樞';
-        toggleBtn.classList.replace('bg-slate-800', 'bg-indigo-900');
-      } else {
-        drawerDiv.classList.add('hidden');
-        if (summaryDiv) summaryDiv.classList.remove('hidden');
-        toggleText.textContent = '▼ 展開中樞';
-        toggleBtn.classList.replace('bg-indigo-900', 'bg-slate-800');
-      }
-      triggerMapInvalidate();
-    }
-
-    if (headerDiv) headerDiv.addEventListener('click', toggleDrawer);
-    if (toggleBtn) toggleBtn.addEventListener('click', toggleDrawer);
-  }
-
-  // 5. 採用 ResizeObserver 消滅地圖黑洞
   function setupMapResizeObserver() {
     if (!window.L) return;
     let mapInstance = null;
     for (let k in window) {
-      try {
-        if (window[k] && window[k] instanceof L.Map) {
-          mapInstance = window[k];
-          break;
-        }
-      } catch(e) {}
+      try { if (window[k] && window[k] instanceof L.Map) { mapInstance = window[k]; break; } } catch(e) {}
     }
-
     const mapContainers = document.querySelectorAll('#map, #leaflet-map, #osmMapContainer, .leaflet-container, [data-map-container]');
     mapContainers.forEach(container => {
       if (container && !container.__gem_observed) {
         container.__gem_observed = true;
-        const observer = new ResizeObserver(() => {
-          if (mapInstance) {
-            try { mapInstance.invalidateSize(); } catch(e) {}
-          }
-        });
-        observer.observe(container);
+        new ResizeObserver(() => {
+          if (mapInstance) try { mapInstance.invalidateSize(); } catch(e) {}
+        }).observe(container);
       }
     });
-
-    triggerMapInvalidate();
-  }
-
-  function triggerMapInvalidate() {
-    if (!window.L) return;
-    for (let k in window) {
-      try {
-        if (window[k] && window[k] instanceof L.Map) {
-          window[k].invalidateSize();
-        }
-      } catch(e) {}
-    }
   }
 
   function initHydration() {
-    try { injectFixCSS(); } catch(e) { console.error(e); }
-    try { safeReplaceHistoricalDates(document.body); } catch(e) { console.error(e); }
-    try { updateLiveClock(); } catch(e) { console.error(e); }
-    try { bindDeviceSpecificTacticalDashboard(); } catch(e) { console.error(e); }
-    try { setupMapResizeObserver(); } catch(e) { console.error(e); }
+    injectFixCSS();
+    bindMetrics();
+    setupMapResizeObserver();
   }
 
   if (document.readyState === 'loading') {
@@ -3073,11 +2894,7 @@ setInterval(syncLatestDecision, 3000);
   } else {
     initHydration();
   }
-  setTimeout(initHydration, 300);
-  setTimeout(initHydration, 1000);
-  if (!window.__gem_single_timer) {
-    window.__gem_single_timer = setInterval(updateLiveClock, 1000);
-  }
+  setTimeout(initHydration, 500);
 })();
 </script>
 </body>
