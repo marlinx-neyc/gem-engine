@@ -2825,13 +2825,14 @@ setInterval(syncLatestDecision, 3000);
 
 
 
+
 <script id="gem-ssot-hydration">
 (function() {
   'use strict';
-  const ssot = {"version": "v63.5-MultiMaaS SSOT Engine", "timestamp": "2026-10-17 19:31:33 CST", "date_str": "2026-10-17 (六)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "hard_veto_alert": true, "failover_active": false, "e_net": 7.78, "yang_ratio": 73.0, "yin_ratio": 27.0, "global_metrics": {"hs_pier": "3.5m", "w_eff": "6.32m/s", "squat": "0.23m", "evac_time": "30min"}, "module1": {"north": {"hs": "3.5m", "ukc": "5.49m", "fb": "0.15m", "status": "🔴 越浪覆頂熔斷"}, "south": {"hs": "3.5m", "ukc": "4.11m", "fb": "1.85m", "status": "🟢 正常"}}, "vessels": [{"name": "凱鯨號", "mmsi": "416000001", "speed": 12.5, "status": "UNDERWAY", "lat": 24.865, "lon": 121.856}, {"name": "新福豐168號", "mmsi": "416000002", "speed": 0.0, "status": "MOORED", "lat": 24.868, "lon": 121.831}, {"name": "宏棋號", "mmsi": "416000003", "speed": 8.2, "status": "UNDERWAY", "lat": 24.858, "lon": 121.842}], "forecast_swell": {"forecast_24h": {"hs_m": 2.85, "tp_s": 14.2, "dir_deg": 105.0, "swell_warning": true, "e_net_est": 0.88, "status": "⚠️ 24h 後長浪抵達 (Tp=14.2s)"}, "forecast_48h": {"hs_m": 3.6, "tp_s": 15.5, "dir_deg": 110.0, "swell_warning": true, "e_net_est": 1.25, "status": "🔴 48h 後港池諧振 (E_net>1.0 預計封島)"}, "lead_time_window": "24h~48h 滾動鎖窗中"}, "evacuation_routing": {"opt_heading_deg": 252.0, "opt_heading_str": "252.0° WSW", "recommended_speed_kts": 10.3, "bus_shuttle_needed": 12, "sea_evac_minutes": 15, "total_evac_chain_minutes": 30, "shuttle_directive": "備妥 12 班客運至烏石港接駁"}, "alert_info": {"title": "🔴【GEM Engine 災害即時警報】雙岸物理防線熔斷 / 建議全線封島", "formatted_msg": "**時間**: 2026-10-17 19:31:33 CST (2026-10-17 (六))\n**兩儀諧振能量 E_net**: `7.78`\n**預估波高**: `3.5m` | **南岸裕深**: `4.11m`\n**🧭 RL 最佳避航角**: `252.0° WSW` (建議航速: `10.3` kts)\n**🚌 烏石港轉運需求**: `備妥 12 班客運至烏石港接駁` (海陸總耗時: `30` 分鐘)\n**處置建議**: 嚴禁船舶靠泊與人員登島，末班客輪原航折返烏石港。"}};
-  console.log('[GEM Engine v63.5] 全域版面黑洞修復與時間校正中樞啟動', ssot);
+  const ssot = {"version": "v63.5-MultiMaaS SSOT Engine", "timestamp": "2026-10-17 21:22:19 CST", "date_str": "2026-10-17 (六)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "hard_veto_alert": true, "failover_active": false, "e_net": 7.78, "yang_ratio": 73.0, "yin_ratio": 27.0, "global_metrics": {"hs_pier": "3.5m", "w_eff": "6.32m/s", "squat": "0.23m", "evac_time": "30min"}, "module1": {"north": {"hs": "3.5m", "ukc": "5.49m", "fb": "0.15m", "status": "🔴 越浪覆頂熔斷"}, "south": {"hs": "3.5m", "ukc": "4.11m", "fb": "1.85m", "status": "🟢 正常"}}, "vessels": [{"name": "凱鯨號", "mmsi": "416000001", "speed": 12.5, "status": "UNDERWAY", "lat": 24.865, "lon": 121.856}, {"name": "新福豐168號", "mmsi": "416000002", "speed": 0.0, "status": "MOORED", "lat": 24.868, "lon": 121.831}, {"name": "宏棋號", "mmsi": "416000003", "speed": 8.2, "status": "UNDERWAY", "lat": 24.858, "lon": 121.842}], "forecast_swell": {"forecast_24h": {"hs_m": 2.85, "tp_s": 14.2, "dir_deg": 105.0, "swell_warning": true, "e_net_est": 0.88, "status": "⚠️ 24h 後長浪抵達 (Tp=14.2s)"}, "forecast_48h": {"hs_m": 3.6, "tp_s": 15.5, "dir_deg": 110.0, "swell_warning": true, "e_net_est": 1.25, "status": "🔴 48h 後港池諧振 (E_net>1.0 預計封島)"}, "lead_time_window": "24h~48h 滾動鎖窗中"}, "evacuation_routing": {"opt_heading_deg": 252.0, "opt_heading_str": "252.0° WSW", "recommended_speed_kts": 10.3, "bus_shuttle_needed": 12, "sea_evac_minutes": 15, "total_evac_chain_minutes": 30, "shuttle_directive": "備妥 12 班客運至烏石港接駁"}, "alert_info": {"title": "🔴【GEM Engine 災害即時警報】雙岸物理防線熔斷 / 建議全線封島", "formatted_msg": "**時間**: 2026-10-17 21:22:19 CST (2026-10-17 (六))\n**兩儀諧振能量 E_net**: `7.78`\n**預估波高**: `3.5m` | **南岸裕深**: `4.11m`\n**🧭 RL 最佳避航角**: `252.0° WSW` (建議航速: `10.3` kts)\n**🚌 烏石港轉運需求**: `備妥 12 班客運至烏石港接駁` (海陸總耗時: `30` 分鐘)\n**處置建議**: 嚴禁船舶靠泊與人員登島，末班客輪原航折返烏石港。"}};
+  console.log('[GEM Engine v63.5] 全域版面黑洞修復與時間水合中樞啟動', ssot);
 
-  // 1. 全頁面走訪替換舊日期 (消滅 2026-10-15 等靜態殘留字串)
+  // 1. 全頁面走訪替換舊日期字串
   function safeReplaceHistoricalDates(node) {
     if (node.nodeType === Node.TEXT_NODE) {
       let val = node.nodeValue;
@@ -2891,7 +2892,6 @@ setInterval(syncLatestDecision, 3000);
     const isMobilePage = window.location.pathname.includes('mobile.html') || window.innerWidth < 768;
 
     if (isMobilePage) {
-      // 【手機版】：固定懸浮於最底部 (Sticky Bottom Drawer)，完全不遮擋主畫面與地圖
       card.className = 'fixed bottom-0 left-0 right-0 z-50 bg-slate-900/95 border-t border-slate-700/80 p-3 font-mono text-xs shadow-2xl backdrop-blur transition-all duration-300';
       card.innerHTML = `
         <div class="flex justify-between items-center cursor-pointer select-none" id="gem-tactical-header">
@@ -2925,7 +2925,6 @@ setInterval(syncLatestDecision, 3000);
       `;
       document.body.appendChild(card);
     } else {
-      // 【桌面版】：頂部全寬度內聯 Bar (Full-Width Collapsible Inline Bar)，防止卡片擠壓造成的左側黑色黑洞
       card.className = 'w-full bg-slate-900/90 border border-slate-700/60 rounded-xl p-3 mb-3 font-mono text-xs shadow-xl backdrop-blur';
       card.style.gridColumn = '1 / -1';
       card.innerHTML = `
@@ -3000,7 +2999,7 @@ setInterval(syncLatestDecision, 3000);
     if (toggleBtn) toggleBtn.addEventListener('click', toggleDrawer);
   }
 
-  // 4. 地圖自動重繪與消除左側黑洞
+  // 4. 地圖尺寸校正與圖磚重繪
   function updateLeafletMapSize() {
     if (!window.L) return;
     let mapInstance = null;
