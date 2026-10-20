@@ -1,12 +1,13 @@
 {
-  "version": "v63.5-Vision PINN CMDP Master SSOT Engine",
-  "timestamp": "2026-10-17 23:33:41 CST",
-  "date_str": "2026-10-17 (六)",
+  "version": "v64.0-Live API Assimilation Master SSOT Engine",
+  "timestamp": "2026-10-20 08:19:52 CST",
+  "date_str": "2026-10-20 (二)",
   "decision_code": "Q4",
   "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)",
   "cmdp_reward": 100.0,
   "hard_veto_alert": true,
   "e_net": 7.22,
+  "p_veto": 1.0,
   "s_cos": 0.999,
   "alpha_tune": 0.7,
   "physics_metrics": {
@@ -29,20 +30,6 @@
     "w_eff": "5.03m/s",
     "squat": "0.09m",
     "evac_time": "35min"
-  },
-  "module1": {
-    "north": {
-      "hs": "3.93m",
-      "ukc": "-1.37m",
-      "fb": "0.15m",
-      "status": "🔴 越浪覆頂熔斷"
-    },
-    "south": {
-      "hs": "3.74m",
-      "ukc": "1.12m",
-      "fb": "1.85m",
-      "status": "🔴 淺水觸底熔斷"
-    }
   },
   "vessels": [
     {
