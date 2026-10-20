@@ -1440,11 +1440,12 @@
 
 
 
+
 <script id="gem-ssot-hydration">
 (function() {
   'use strict';
-  const ssot = {"version": "v63.5-Vision PINN CMDP Master SSOT Engine", "timestamp": "2026-10-17 23:33:41 CST", "date_str": "2026-10-17 (六)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "cmdp_reward": 100.0, "hard_veto_alert": true, "e_net": 7.22, "s_cos": 0.999, "alpha_tune": 0.7, "physics_metrics": {"hs_cwa": 3.71, "w_cwa": 9.5, "tp_s": 15.5, "delta_theta_deg": 58.0, "tide_eta_m": 0.65, "hs_pier_m": 3.74, "w_eff_ms": 5.03, "squat_m": 0.09, "ukc_south_m": 1.12, "ukc_north_m": -1.37, "fb_north_m": 0.15, "fb_south_m": 1.85, "has_veto": true}, "global_metrics": {"hs_pier": "3.74m", "w_eff": "5.03m/s", "squat": "0.09m", "evac_time": "35min"}, "module1": {"north": {"hs": "3.93m", "ukc": "-1.37m", "fb": "0.15m", "status": "🔴 越浪覆頂熔斷"}, "south": {"hs": "3.74m", "ukc": "1.12m", "fb": "1.85m", "status": "🔴 淺水觸底熔斷"}}, "vessels": [{"name": "凱鯨號", "mmsi": "416000001", "speed": 12.5, "status": "UNDERWAY", "lat": 24.865, "lon": 121.856}, {"name": "新福豐168號", "mmsi": "416000002", "speed": 0.0, "status": "MOORED", "lat": 24.868, "lon": 121.831}, {"name": "宏棋號", "mmsi": "416000003", "speed": 8.2, "status": "UNDERWAY", "lat": 24.858, "lon": 121.842}], "evacuation_routing": {"opt_heading_deg": 252.0, "opt_heading_str": "252.0° WSW", "recommended_speed_kts": 10.3, "bus_shuttle_needed": 4, "sea_evac_minutes": 20, "total_evac_chain_minutes": 35, "shuttle_directive": "備妥 4 班客運至烏石港接駁"}};
-  console.log('[GEM Engine v63.5] 全端水合與抗快取黑洞修復啟動', ssot);
+  const ssot = {"version": "v64.0-Live API Assimilation Master SSOT Engine", "timestamp": "2026-10-20 08:19:52 CST", "date_str": "2026-10-20 (二)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "cmdp_reward": 100.0, "hard_veto_alert": true, "e_net": 7.22, "p_veto": 1.0, "s_cos": 0.999, "alpha_tune": 0.7, "physics_metrics": {"hs_cwa": 3.71, "w_cwa": 9.5, "tp_s": 15.5, "delta_theta_deg": 58.0, "tide_eta_m": 0.65, "hs_pier_m": 3.74, "w_eff_ms": 5.03, "squat_m": 0.09, "ukc_south_m": 1.12, "ukc_north_m": -1.37, "fb_north_m": 0.15, "fb_south_m": 1.85, "has_veto": true}, "global_metrics": {"hs_pier": "3.74m", "w_eff": "5.03m/s", "squat": "0.09m", "evac_time": "35min"}, "vessels": [{"name": "凱鯨號", "mmsi": "416000001", "speed": 12.5, "status": "UNDERWAY", "lat": 24.865, "lon": 121.856}, {"name": "新福豐168號", "mmsi": "416000002", "speed": 0.0, "status": "MOORED", "lat": 24.868, "lon": 121.831}, {"name": "宏棋號", "mmsi": "416000003", "speed": 8.2, "status": "UNDERWAY", "lat": 24.858, "lon": 121.842}], "evacuation_routing": {"opt_heading_deg": 252.0, "opt_heading_str": "252.0° WSW", "recommended_speed_kts": 10.3, "bus_shuttle_needed": 4, "sea_evac_minutes": 20, "total_evac_chain_minutes": 35, "shuttle_directive": "備妥 4 班客運至烏石港接駁"}};
+  console.log('[GEM Engine v64.0] 全端水合與抗快取黑洞修復啟動', ssot);
 
   function injectFixCSS() {
     if (document.getElementById('gem-layout-fix-css')) return;
@@ -1475,6 +1476,7 @@
     document.querySelectorAll('[data-metric="fb-north"]').forEach(el => el.textContent = pm.fb_north_m + ' m');
     document.querySelectorAll('[data-metric="fb-south"]').forEach(el => el.textContent = pm.fb_south_m + ' m');
     document.querySelectorAll('[data-metric="enet"]').forEach(el => el.textContent = ssot.e_net);
+    document.querySelectorAll('[data-metric="pveto"]').forEach(el => el.textContent = ssot.p_veto);
   }
 
   function setupMapResizeObserver() {
