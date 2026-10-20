@@ -1,6 +1,6 @@
 {
-  "version": "v64.3-Mobile Profile & Radar Accordion Engine",
-  "timestamp": "2026-10-20 08:33:43 CST",
+  "version": "v64.5-Mobile Dual Accordions (Typhoon + Stacked Profiles) SSOT Engine",
+  "timestamp": "2026-10-20 08:45:38 CST",
   "date_str": "2026-10-20 (二)",
   "decision_code": "Q4",
   "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)",
@@ -20,6 +20,7 @@
     "hs_north_m": 3.93,
     "w_eff_ms": 5.03,
     "squat_m": 0.09,
+    "d_draft_m": 1.201,
     "ukc_south_m": 1.12,
     "ukc_north_m": -1.37,
     "fb_north_m": 0.15,
