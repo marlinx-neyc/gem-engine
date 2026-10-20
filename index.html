@@ -2846,17 +2846,28 @@ setInterval(syncLatestDecision, 3000);
 
 
 
+
 <script id="gem-ssot-hydration">
 (function() {
   'use strict';
-  const ssot = {"version": "v65.1-Mobile Typhoon EOC & Profiles Restored SSOT Engine", "timestamp": "2026-10-20 15:04:23 CST", "date_str": "2026-10-20 (二)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "cmdp_reward": 100.0, "hard_veto_alert": true, "e_net": 7.22, "p_veto": 1.0, "s_cos": 0.999, "alpha_tune": 0.7, "physics_metrics": {"hs_cwa": 3.71, "w_cwa": 9.5, "tp_s": 15.5, "delta_theta_deg": 58.0, "tide_eta_m": 0.65, "hs_pier_m": 3.74, "hs_north_m": 3.93, "limit_hs_effective_m": 0.79, "w_eff_ms": 5.03, "squat_m": 0.09, "d_draft_m": 1.201, "ukc_south_m": 1.12, "ukc_north_m": -1.37, "fb_north_m": 0.15, "fb_south_m": 1.85, "has_veto": true}, "typhoon_eoc_zone": {"typhoon_params": {"name": "秋季氣旋 / 長浪潛勢颱風", "center_pressure_hpa": 965, "max_wind_ms": 38.0, "radius_7_km": 180, "move_direction_speed": "西北西 每小時 18 公里", "brief_path": "掠過臺灣東北部海域 ➔ 往琉球南方海面移動", "impact_assessment": "外海湧浪 Hs=3.71m, Tp=15.5s 擊穿消能機制，港池呈現共振波陡現象，碼頭預留乾舷不足，靠泊風險極高。", "future_trend": "未來 24 小時長浪能量持續傳播，D+2 預報週期波高將維持在 1.5m 以上，建議全線維持警戒熔斷。"}, "eoc_administrative_status": {"agency": "中央災害應變中心 (CEOC) / 國家海洋研究院海事支援中樞", "activation_level": "🔴 一級開設 (加強警戒與動員)", "directive": "龜山島周邊海域實施全線封島管制，各港口客輪強制繫纜避風，海岸線禁止遊憩登島。"}}, "global_metrics": {"hs_pier": "3.74m", "w_eff": "5.03m/s", "squat": "0.09m", "evac_time": "35min"}, "vessels": [{"name": "凱鯨號", "mmsi": "416000001", "speed": 12.5, "status": "UNDERWAY", "lat": 24.865, "lon": 121.856}, {"name": "新福豐168號", "mmsi": "416000002", "speed": 0.0, "status": "MOORED", "lat": 24.868, "lon": 121.831}, {"name": "宏棋號", "mmsi": "416000003", "speed": 8.2, "status": "UNDERWAY", "lat": 24.858, "lon": 121.842}], "evacuation_routing": {"opt_heading_deg": 252.0, "opt_heading_str": "252.0° WSW", "recommended_speed_kts": 10.3, "bus_shuttle_needed": 4, "sea_evac_minutes": 20, "total_evac_chain_minutes": 35, "shuttle_directive": "備妥 4 班客運至烏石港接駁"}};
-  console.log('[GEM Engine v65.1] 手機端颱風專區與南北岸剖面卡片恢復水合啟動', ssot);
+  const ssot = {"version": "v65.2-Mobile Typhoon & Profile Cards Precision Anchored SSOT Engine", "timestamp": "2026-10-20 16:58:02 CST", "date_str": "2026-10-20 (二)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "cmdp_reward": 100.0, "hard_veto_alert": true, "e_net": 7.22, "p_veto": 1.0, "s_cos": 0.999, "alpha_tune": 0.7, "physics_metrics": {"hs_cwa": 3.71, "w_cwa": 9.5, "tp_s": 15.5, "delta_theta_deg": 58.0, "tide_eta_m": 0.65, "hs_pier_m": 3.74, "hs_north_m": 3.93, "limit_hs_effective_m": 0.79, "w_eff_ms": 5.03, "squat_m": 0.09, "d_draft_m": 1.201, "ukc_south_m": 1.12, "ukc_north_m": -1.37, "fb_north_m": 0.15, "fb_south_m": 1.85, "has_veto": true}, "typhoon_eoc_zone": {"typhoon_params": {"name": "秋季氣旋 / 長浪潛勢颱風", "center_pressure_hpa": 965, "max_wind_ms": 38.0, "radius_7_km": 180, "move_direction_speed": "西北西 每小時 18 公里", "brief_path": "掠過臺灣東北部海域 ➔ 往琉球南方海面移動", "impact_assessment": "外海湧浪 Hs=3.71m, Tp=15.5s 擊穿消能機制，港池呈現共振波陡現象，碼頭預留乾舷不足，靠泊風險極高。", "future_trend": "未來 24 小時長浪能量持續傳播，D+2 預報週期波高將維持在 1.5m 以上，建議全線維持警戒熔斷。"}, "eoc_administrative_status": {"agency": "中央災害應變中心 (CEOC) / 國家海洋研究院海事支援中樞", "activation_level": "🔴 一級開設 (加強警戒與動員)", "directive": "龜山島周邊海域實施全線封島管制，各港口客輪強制繫纜避風，海岸線禁止遊憩登島。"}}, "global_metrics": {"hs_pier": "3.74m", "w_eff": "5.03m/s", "squat": "0.09m", "evac_time": "35min"}, "vessels": [{"name": "凱鯨號", "mmsi": "416000001", "speed": 12.5, "status": "UNDERWAY", "lat": 24.865, "lon": 121.856}, {"name": "新福豐168號", "mmsi": "416000002", "speed": 0.0, "status": "MOORED", "lat": 24.868, "lon": 121.831}, {"name": "宏棋號", "mmsi": "416000003", "speed": 8.2, "status": "UNDERWAY", "lat": 24.858, "lon": 121.842}], "evacuation_routing": {"opt_heading_deg": 252.0, "opt_heading_str": "252.0° WSW", "recommended_speed_kts": 10.3, "bus_shuttle_needed": 4, "sea_evac_minutes": 20, "total_evac_chain_minutes": 35, "shuttle_directive": "備妥 4 班客運至烏石港接駁"}};
+  console.log('[GEM Engine v65.2] 颱風專區與南北岸剖面精準 DOM 錨定水合啟動', ssot);
 
   const isMobilePage = window.location.pathname.includes('mobile.html') || 
                        document.body.classList.contains('gem-mobile-view') || 
                        window.innerWidth <= 768;
 
-  // 1. 全域日期與時間精準校正模組
+  // 0. 通用 DOM 錨點搜尋器 (優先插於決策卡片後方，絕不塞至頁尾)
+  function getTargetAnchorElement() {
+    return document.getElementById('decision-card') || 
+           document.querySelector('.decision-banner') || 
+           document.getElementById('gem-meteo-hydro-timeline-card') ||
+           document.querySelector('.gem-mobile-container') || 
+           document.querySelector('main') || 
+           document.body;
+  }
+
+  // 1. 全域日期與時間精準校正模組 (修正錯字 2026-10-20 三 ➔ 2026-10-20 二)
   function syncDateTimeAllViews() {
     const tsStr = ssot.timestamp;
     const dateStr = ssot.date_str;
@@ -2872,11 +2883,12 @@ setInterval(syncLatestDecision, 3000);
     );
     dateTargets.forEach(el => el.textContent = dateStr);
 
+    // 強制同構清洗舊字串
     document.querySelectorAll('h1, h2, h3, h4, h5, .card-title, legend, summary, span, div, caption').forEach(el => {
-      if (el.children.length === 0 && el.textContent.includes('2026-10-15')) {
-        el.textContent = el.textContent.replace(/2026-10-15( \([一二三四五六日]\))?/, dateStr);
-      } else if (el.innerHTML.includes('2026-10-15')) {
-        el.innerHTML = el.innerHTML.replace(/2026-10-15( \([一二三四五六日]\))?/, dateStr);
+      if (el.children.length === 0 && (el.textContent.includes('2026-10-15') || el.textContent.includes('2026-10-20'))) {
+        el.textContent = el.textContent.replace(/2026-10-(15|20)( \([一二三四五六日]\))?/, dateStr);
+      } else if (el.innerHTML.includes('2026-10-15') || el.innerHTML.includes('2026-10-20')) {
+        el.innerHTML = el.innerHTML.replace(/2026-10-(15|20)( \([一二三四五六日]\))?/, dateStr);
       }
       if (el.textContent.includes('航次時程與動態決策矩陣')) {
         el.innerHTML = el.innerHTML.replace(/\(\d{4}-\d{2}-\d{2}[^)]*\)/, '(' + dateStr + ')');
@@ -2907,16 +2919,16 @@ setInterval(syncLatestDecision, 3000);
     }
   }
 
-  // 2. 手機版專用卡片 A：颱風監測與 EOC 防災應變收折卡片
+  // 2. 颱風監測與 EOC 防災應變收折卡片 (精準插入)
   function injectTyphoonEOCCard() {
-    let container = document.querySelector('.gem-mobile-container') || document.querySelector('main') || document.body;
+    let anchor = getTargetAnchorElement();
     let card = document.getElementById('gem-typhoon-eoc-card');
 
     if (!card) {
       card = document.createElement('div');
       card.id = 'gem-typhoon-eoc-card';
       card.style.cssText = `
-        margin: 15px auto;
+        margin: 14px auto;
         padding: 0;
         background: #111827;
         border: 1px solid #374151;
@@ -2926,8 +2938,14 @@ setInterval(syncLatestDecision, 3000);
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace, sans-serif;
         box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         overflow: hidden;
+        width: 100%;
       `;
-      container.appendChild(card);
+      
+      if (anchor && anchor.parentNode && anchor !== document.body) {
+        anchor.parentNode.insertBefore(card, anchor.nextSibling);
+      } else {
+        document.body.appendChild(card);
+      }
     }
 
     const tz = ssot.typhoon_eoc_zone || {};
@@ -2993,16 +3011,17 @@ setInterval(syncLatestDecision, 3000);
     `;
   }
 
-  // 3. 手機版專用卡片 B：南/北岸水體剖面 (燈號置於數值正下方) 收折卡片
+  // 3. 南/北岸水體剖面 (燈號置於數值正下方) 收折卡片 (精準插入)
   function injectMobileBottomProfileCard() {
-    let container = document.querySelector('.gem-mobile-container') || document.querySelector('main') || document.body;
+    let typhoonCard = document.getElementById('gem-typhoon-eoc-card');
+    let anchor = typhoonCard || getTargetAnchorElement();
     let card = document.getElementById('gem-mobile-profile-card');
 
     if (!card) {
       card = document.createElement('div');
       card.id = 'gem-mobile-profile-card';
       card.style.cssText = `
-        margin: 15px auto;
+        margin: 14px auto;
         padding: 0;
         background: #111827;
         border: 1px solid #374151;
@@ -3012,8 +3031,14 @@ setInterval(syncLatestDecision, 3000);
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace, sans-serif;
         box-shadow: 0 4px 14px rgba(0,0,0,0.6);
         overflow: hidden;
+        width: 100%;
       `;
-      container.appendChild(card);
+
+      if (anchor && anchor.parentNode && anchor !== document.body) {
+        anchor.parentNode.insertBefore(card, anchor.nextSibling);
+      } else {
+        document.body.appendChild(card);
+      }
     }
 
     const pm = ssot.physics_metrics || {};
@@ -3057,6 +3082,7 @@ setInterval(syncLatestDecision, 3000);
             <text x="130" y="22" fill="${colorHs}" font-size="11" font-weight="bold" font-family="monospace">波高 Hs = ${hs}m</text>
           </svg>
 
+          <!-- 關鍵燈號位於數值正下方 -->
           <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:4px; font-size:0.80rem; text-align:center; margin-top:8px; background:#111827; padding:8px 6px; border-radius:5px; border:1px solid #374151;">
             <div>
               <span style="color:#9ca3af; display:block; font-size:0.70rem; margin-bottom:2px;">吃水/蹲沉</span>
@@ -3116,7 +3142,7 @@ setInterval(syncLatestDecision, 3000);
     `;
   }
 
-  // 4. 桌面版專用：當日時序「風、浪、流、汐」趨勢圖與游標對齊 Tooltip
+  // 4. 桌面版專用：當日時序「風、浪、流、汐」趨勢圖與 Crosshair Hover
   function renderTodayMeteoHydroTimelineCard() {
     let container = document.querySelector('.gem-desktop-fullwidth') || document.querySelector('main') || document.body;
     let card = document.getElementById('gem-meteo-hydro-timeline-card');
@@ -3365,11 +3391,6 @@ setInterval(syncLatestDecision, 3000);
         }
       }
     });
-
-    const redundantCard = document.getElementById('gem-mobile-profile-card');
-    if (redundantCard) redundantCard.remove();
-    const redundantTyphoon = document.getElementById('gem-typhoon-eoc-card');
-    if (redundantTyphoon) redundantTyphoon.remove();
   }
 
   function injectFixCSS() {
@@ -3420,18 +3441,18 @@ setInterval(syncLatestDecision, 3000);
     });
   }
 
-  // 7. 核心水合進入點：依據 isMobilePage 精準執行兩端靈魂卡片渲染
+  // 7. 核心水合進入點：全端注入颱風與南北岸剖面卡片，並提供桌面時序圖
   function initHydration() {
     injectFixCSS();
     bindMetrics();
     syncDateTimeAllViews();
 
-    if (isMobilePage) {
-      // 📱 手機端：顯示颱風應變專區與南北岸剖面卡片
-      injectTyphoonEOCCard();
-      injectMobileBottomProfileCard();
-    } else {
-      // 💻 桌面端：顯示第一頁風浪流汐四軌時序圖與30天宏觀圖，並精簡排版
+    // 📱/💻 雙端均呈現颱風與南北岸雙剖面收折卡片 (精準 DOM 錨定)
+    injectTyphoonEOCCard();
+    injectMobileBottomProfileCard();
+
+    if (!isMobilePage) {
+      // 💻 桌面端額外渲染第一頁風浪流汐四軌時序圖與30天宏觀圖
       renderTodayMeteoHydroTimelineCard();
       render30DayMacroTrendChart();
       refactorDesktopLayout();
