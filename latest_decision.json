@@ -1,6 +1,6 @@
 {
-  "version": "v64.0-Live API Assimilation Master SSOT Engine",
-  "timestamp": "2026-10-20 08:21:18 CST",
+  "version": "v64.2-Typhoon Accordion Master SSOT Engine",
+  "timestamp": "2026-10-20 08:27:01 CST",
   "date_str": "2026-10-20 (二)",
   "decision_code": "Q4",
   "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)",
@@ -24,6 +24,25 @@
     "fb_north_m": 0.15,
     "fb_south_m": 1.85,
     "has_veto": true
+  },
+  "typhoon_eoc_zone": {
+    "typhoon_params": {
+      "name": "秋季氣旋 / 長浪潛勢颱風",
+      "center_pressure_hpa": 965,
+      "max_wind_ms": 38.0,
+      "radius_7_km": 180,
+      "move_direction_speed": "西北西 每小時 18 公里",
+      "brief_path": "掠過臺灣東北部海域 ➔ 往琉球南方海面移動",
+      "impact_assessment": "外海湧浪 Hs=3.71m, Tp=15.5s 擊穿消能機制，港池呈現共振波陡現象，碼頭預留乾舷不足，靠泊風險極高。",
+      "future_trend": "未來 24 小時長浪能量持續傳播，D+2 預報週期波高將維持在 1.5m 以上，建議全線維持警戒熔斷。"
+    },
+    "eoc_administrative_status": {
+      "agency": "中央災害應變中心 (CEOC) / 國家海洋研究院海事支援中樞",
+      "activation_level": "🔴 一級開設 (加強警戒與動員)",
+      "status_code": "EOC-LV1",
+      "directive": "龜山島周邊海域實施全線封島管制，各港口客輪強制繫纜避風，海岸線禁止遊憩登島。",
+      "last_updated": "2026-10-20 08:27:01 CST"
+    }
   },
   "global_metrics": {
     "hs_pier": "3.74m",
