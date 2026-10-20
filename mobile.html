@@ -1443,11 +1443,12 @@
 
 
 
+
 <script id="gem-ssot-hydration">
 (function() {
   'use strict';
-  const ssot = {"version": "v64.2-Typhoon Accordion Master SSOT Engine", "timestamp": "2026-10-20 08:27:01 CST", "date_str": "2026-10-20 (二)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "cmdp_reward": 100.0, "hard_veto_alert": true, "e_net": 7.22, "p_veto": 1.0, "s_cos": 0.999, "alpha_tune": 0.7, "physics_metrics": {"hs_cwa": 3.71, "w_cwa": 9.5, "tp_s": 15.5, "delta_theta_deg": 58.0, "tide_eta_m": 0.65, "hs_pier_m": 3.74, "w_eff_ms": 5.03, "squat_m": 0.09, "ukc_south_m": 1.12, "ukc_north_m": -1.37, "fb_north_m": 0.15, "fb_south_m": 1.85, "has_veto": true}, "typhoon_eoc_zone": {"typhoon_params": {"name": "秋季氣旋 / 長浪潛勢颱風", "center_pressure_hpa": 965, "max_wind_ms": 38.0, "radius_7_km": 180, "move_direction_speed": "西北西 每小時 18 公里", "brief_path": "掠過臺灣東北部海域 ➔ 往琉球南方海面移動", "impact_assessment": "外海湧浪 Hs=3.71m, Tp=15.5s 擊穿消能機制，港池呈現共振波陡現象，碼頭預留乾舷不足，靠泊風險極高。", "future_trend": "未來 24 小時長浪能量持續傳播，D+2 預報週期波高將維持在 1.5m 以上，建議全線維持警戒熔斷。"}, "eoc_administrative_status": {"agency": "中央災害應變中心 (CEOC) / 國家海洋研究院海事支援中樞", "activation_level": "🔴 一級開設 (加強警戒與動員)", "status_code": "EOC-LV1", "directive": "龜山島周邊海域實施全線封島管制，各港口客輪強制繫纜避風，海岸線禁止遊憩登島。", "last_updated": "2026-10-20 08:27:01 CST"}}, "global_metrics": {"hs_pier": "3.74m", "w_eff": "5.03m/s", "squat": "0.09m", "evac_time": "35min"}, "vessels": [{"name": "凱鯨號", "mmsi": "416000001", "speed": 12.5, "status": "UNDERWAY", "lat": 24.865, "lon": 121.856}, {"name": "新福豐168號", "mmsi": "416000002", "speed": 0.0, "status": "MOORED", "lat": 24.868, "lon": 121.831}, {"name": "宏棋號", "mmsi": "416000003", "speed": 8.2, "status": "UNDERWAY", "lat": 24.858, "lon": 121.842}], "evacuation_routing": {"opt_heading_deg": 252.0, "opt_heading_str": "252.0° WSW", "recommended_speed_kts": 10.3, "bus_shuttle_needed": 4, "sea_evac_minutes": 20, "total_evac_chain_minutes": 35, "shuttle_directive": "備妥 4 班客運至烏石港接駁"}};
-  console.log('[GEM Engine v64.2] 手機版颱風 EOC 可收折卡片 (Accordion) 水合啟動', ssot);
+  const ssot = {"version": "v64.3-Mobile Profile & Radar Accordion Engine", "timestamp": "2026-10-20 08:33:43 CST", "date_str": "2026-10-20 (二)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "cmdp_reward": 100.0, "hard_veto_alert": true, "e_net": 7.22, "p_veto": 1.0, "s_cos": 0.999, "alpha_tune": 0.7, "physics_metrics": {"hs_cwa": 3.71, "w_cwa": 9.5, "tp_s": 15.5, "delta_theta_deg": 58.0, "tide_eta_m": 0.65, "hs_pier_m": 3.74, "hs_north_m": 3.93, "w_eff_ms": 5.03, "squat_m": 0.09, "ukc_south_m": 1.12, "ukc_north_m": -1.37, "fb_north_m": 0.15, "fb_south_m": 1.85, "has_veto": true}, "typhoon_eoc_zone": {"typhoon_params": {"name": "秋季氣旋 / 長浪潛勢颱風", "center_pressure_hpa": 965, "max_wind_ms": 38.0, "radius_7_km": 180, "move_direction_speed": "西北西 每小時 18 公里", "brief_path": "掠過臺灣東北部海域 ➔ 往琉球南方海面移動", "impact_assessment": "外海湧浪 Hs=3.71m, Tp=15.5s 擊穿消能機制，港池呈現共振波陡現象，碼頭預留乾舷不足，靠泊風險極高。", "future_trend": "未來 24 小時長浪能量持續傳播，D+2 預報週期波高將維持在 1.5m 以上，建議全線維持警戒熔斷。"}, "eoc_administrative_status": {"agency": "中央災害應變中心 (CEOC) / 國家海洋研究院海事支援中樞", "activation_level": "🔴 一級開設 (加強警戒與動員)", "directive": "龜山島周邊海域實施全線封島管制，各港口客輪強制繫纜避風，海岸線禁止遊憩登島。"}}, "global_metrics": {"hs_pier": "3.74m", "w_eff": "5.03m/s", "squat": "0.09m", "evac_time": "35min"}, "vessels": [{"name": "凱鯨號", "mmsi": "416000001", "speed": 12.5, "status": "UNDERWAY", "lat": 24.865, "lon": 121.856}, {"name": "新福豐168號", "mmsi": "416000002", "speed": 0.0, "status": "MOORED", "lat": 24.868, "lon": 121.831}, {"name": "宏棋號", "mmsi": "416000003", "speed": 8.2, "status": "UNDERWAY", "lat": 24.858, "lon": 121.842}], "evacuation_routing": {"opt_heading_deg": 252.0, "opt_heading_str": "252.0° WSW", "recommended_speed_kts": 10.3, "bus_shuttle_needed": 4, "sea_evac_minutes": 20, "total_evac_chain_minutes": 35, "shuttle_directive": "備妥 4 班客運至烏石港接駁"}};
+  console.log('[GEM Engine v64.3] 手機版剖面圖與雷達圖時序同步水合啟動', ssot);
 
   function injectFixCSS() {
     if (document.getElementById('gem-layout-fix-css')) return;
@@ -1455,19 +1456,15 @@
     style.id = 'gem-layout-fix-css';
     style.textContent = `
       #map, #leaflet-map, #osmMapContainer, .leaflet-container, [data-map-container] {
-        min-height: 450px !important;
+        min-height: 420px !important;
         width: 100% !important;
         flex: 1 1 auto !important;
         display: block !important;
       }
-      #gem-tactical-dashboard-card {
-        grid-column: 1 / -1 !important;
-        width: 100% !important;
-      }
       body.gem-mobile-view {
-        padding-bottom: 90px !important;
+        padding-bottom: 100px !important;
       }
-      details#gem-typhoon-details summary::-webkit-details-marker {
+      details.gem-accordion-card summary::-webkit-details-marker {
         display: none !important;
       }
     `;
@@ -1484,20 +1481,19 @@
     document.querySelectorAll('[data-metric="pveto"]').forEach(el => el.textContent = ssot.p_veto);
   }
 
-  function injectTyphoonEOCCard() {
-    // 確保插入至手機版容器最底部
+  function injectMobileBottomProfileRadarCard() {
     let container = document.querySelector('.gem-mobile-container') || document.querySelector('main') || document.body;
-    let card = document.getElementById('gem-typhoon-eoc-card');
+    let card = document.getElementById('gem-mobile-profile-radar-card');
 
     if (!card) {
       card = document.createElement('div');
-      card.id = 'gem-typhoon-eoc-card';
+      card.id = 'gem-mobile-profile-radar-card';
       card.style.cssText = `
         margin: 15px auto;
         padding: 0;
         background: #111827;
         border: 1px solid #374151;
-        border-left: 4px solid #ef4444;
+        border-left: 4px solid #3b82f6;
         border-radius: 8px;
         color: #f3f4f6;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace, sans-serif;
@@ -1507,13 +1503,78 @@
       container.appendChild(card);
     }
 
-    const tz = ssot.typhoon_eoc_zone || {};
-    const tp = tz.typhoon_params || {};
-    const eoc = tz.eoc_administrative_status || {};
+    const pm = ssot.physics_metrics || {};
 
-    // 使用原生 HTML5 <details> & <summary> 打造零套件、可收折 (Accordion) 介面
+    // 極簡兩岸水體 SVG 剖面圖生成器
+    const renderProfileSVG = (title, cdDepth, ukc, fb, hs, isSouth) => {
+      const colorUKC = ukc >= 1.50 ? '#10b981' : '#ef4444';
+      const colorFB = fb >= 0.50 ? '#60a5fa' : '#f59e0b';
+      return `
+        <div style="flex:1; min-width: 140px; background:#1f2937; padding:8px; border-radius:6px; border:1px solid #374151;">
+          <div style="font-weight:bold; font-size:0.78rem; color:#f3f4f6; margin-bottom:4px;">${title}</div>
+          <svg viewBox="0 0 160 85" style="width:100%; height:auto; background:#0f172a; border-radius:4px;">
+            <!-- 碼頭陸地 -->
+            <rect x="0" y="20" width="45" height="65" fill="#334155"/>
+            <!-- 海水水體 -->
+            <rect x="45" y="32" width="115" height="43" fill="#1e3a8a" opacity="0.6"/>
+            <!-- 海平面動態線 -->
+            <line x1="45" y1="32" x2="160" y2="32" stroke="#38bdf8" stroke-width="2" stroke-dasharray="3,2"/>
+            <!-- 水下海床 (CD 標高) -->
+            <line x1="45" y1="75" x2="160" y2="75" stroke="#64748b" stroke-width="2"/>
+            <!-- 船體簡圖 -->
+            <rect x="70" y="28" width="45" height="12" rx="2" fill="#f87171"/>
+            <!-- UKC 水下裕深示意 -->
+            <line x1="92" y1="40" x2="92" y2="75" stroke="${colorUKC}" stroke-width="2"/>
+            <!-- 文字標記 -->
+            <text x="10" y="15" fill="#94a3b8" font-size="8" font-family="monospace">${cdDepth}</text>
+            <text x="96" y="58" fill="${colorUKC}" font-size="8" font-weight="bold">UKC ${ukc}m</text>
+            <text x="5" y="45" fill="${colorFB}" font-size="8">FB ${fb}m</text>
+            <text x="100" y="25" fill="#facc15" font-size="8">Hs ${hs}m</text>
+          </svg>
+        </div>
+      `;
+    };
+
+    // 極簡 5 軸正交雷達圖 SVG 生成器
+    const renderRadarSVG = () => {
+      const pVeto = ssot.p_veto || 0.5;
+      const rEnet = Math.min(1.0, (ssot.e_net || 1.0) / 10.0);
+      const rHs = Math.min(1.0, (pm.hs_pier_m || 1.0) / 2.5);
+      const rWeff = Math.min(1.0, (pm.w_eff_ms || 5.0) / 15.0);
+      const rSquat = Math.min(1.0, (pm.squat_m || 0.1) / 0.5);
+
+      // 簡化雷達多邊形點算
+      const points = `80,${80 - 50*rHs} ${80 + 47*rWeff},${80 - 15*rWeff} ${80 + 29*rSquat},${80 + 40*rSquat} ${80 - 29*pVeto},${80 + 40*pVeto} ${80 - 47*rEnet},${80 - 15*rEnet}`;
+
+      return `
+        <div style="flex:1; min-width: 140px; background:#1f2937; padding:8px; border-radius:6px; border:1px solid #374151; text-align:center;">
+          <div style="font-weight:bold; font-size:0.78rem; color:#f3f4f6; margin-bottom:4px;">🎯 5維能量雷達 (態勢同步)</div>
+          <svg viewBox="0 0 160 140" style="width:100%; max-width:140px; height:auto; margin:0 auto;">
+            <!-- 背景網格五邊形 -->
+            <polygon points="80,30 127,65 109,120 51,120 33,65" fill="none" stroke="#334155" stroke-width="1"/>
+            <polygon points="80,55 103,72 94,100 66,100 57,72" fill="none" stroke="#1e293b" stroke-width="1"/>
+            <!-- 軸線 -->
+            <line x1="80" y1="80" x2="80" y2="30" stroke="#475569"/>
+            <line x1="80" y1="80" x2="127" y2="65" stroke="#475569"/>
+            <line x1="80" y1="80" x2="109" y2="120" stroke="#475569"/>
+            <line x1="80" y1="80" x2="51" y2="120" stroke="#475569"/>
+            <line x1="80" y1="80" x2="33" y2="65" stroke="#475569"/>
+            <!-- 動態數據多邊形 -->
+            <polygon points="${points}" fill="rgba(239,68,68,0.4)" stroke="#ef4444" stroke-width="2"/>
+            <!-- 軸標籤 -->
+            <text x="80" y="24" fill="#94a3b8" font-size="7" text-anchor="middle">波能</text>
+            <text x="133" y="67" fill="#94a3b8" font-size="7">風速</text>
+            <text x="112" y="128" fill="#94a3b8" font-size="7">蹲沉</text>
+            <text x="30" y="128" fill="#94a3b8" font-size="7">P_veto</text>
+            <text x="12" y="67" fill="#94a3b8" font-size="7">E_net</text>
+          </svg>
+        </div>
+      `;
+    };
+
+    // 使用 HTML5 收折卡片呈現
     card.innerHTML = `
-      <details id="gem-typhoon-details" style="width: 100%;">
+      <details class="gem-accordion-card" id="gem-profile-radar-details" style="width: 100%;">
         <summary style="
           padding: 12px 14px;
           background: #1f2937;
@@ -1525,49 +1586,26 @@
           user-select: none;
           font-weight: bold;
         ">
-          <div style="display: flex; align-items: center; gap: 8px; font-size: 0.92rem; color: #f87171;">
-            <span>🌀 颱風監測與 EOC 防災應變</span>
-            <span style="font-size: 0.75rem; background: #991b1b; color: #fef2f2; padding: 2px 6px; border-radius: 4px;">${eoc.activation_level || '一級開設'}</span>
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: #60a5fa;">
+            <span>📐 南/北岸水體剖面與雷達圖 (時序連動)</span>
           </div>
-          <span style="font-size: 0.8rem; color: #9ca3af; font-family: monospace;">展開/收折 🔻</span>
+          <span style="font-size: 0.78rem; color: #9ca3af; font-family: monospace;">展開/收折 🔻</span>
         </summary>
 
-        <div style="padding: 14px; border-top: 1px solid #374151; background: #111827; font-family: monospace;">
-          <!-- 防災中心行政設開資訊 -->
-          <div style="background: #1f2937; padding: 10px; border-radius: 6px; margin-bottom: 12px; font-size: 0.85rem; border: 1px solid #374151;">
-            <div style="color: #60a5fa; font-weight: bold; margin-bottom: 4px;">🏛️ 行政設開單位：${eoc.agency || '中央災害應變中心'}</div>
-            <div style="color: #fcd34d;">📋 指揮官指令：${eoc.directive || '全線管制通航'}</div>
+        <div style="padding: 10px; background: #111827; font-family: monospace;">
+          <!-- 兩岸簡剖面圖與雷達圖組合列 -->
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
+            ${renderProfileSVG('南岸剖面 (-5.5m CD)', '-5.5m', pm.ukc_south_m, pm.fb_south_m, pm.hs_pier_m, true)}
+            ${renderProfileSVG('北岸剖面 (-3.2m CD)', '-3.2m', pm.ukc_north_m, pm.fb_north_m, pm.hs_north_m, false)}
+            ${renderRadarSVG()}
           </div>
 
-          <!-- 颱風動態特徵矩陣 -->
-          <div style="font-size: 0.82rem; margin-bottom: 12px;">
-            <div style="color: #9ca3af; font-size: 0.75rem; margin-bottom: 6px; font-weight: bold;">颱風動態特徵張量</div>
-            <table style="width: 100%; border-collapse: collapse; color: #d1d5db;">
-              <tr style="border-bottom: 1px solid #1f2937;">
-                <td style="padding: 5px 0; color: #9ca3af;">颱風名稱 / 標記</td>
-                <td style="padding: 5px 0; text-align: right; font-weight: bold; color: #ffffff;">${tp.name || '長浪潛勢氣旋'}</td>
-              </tr>
-              <tr style="border-bottom: 1px solid #1f2937;">
-                <td style="padding: 5px 0; color: #9ca3af;">中心氣壓 / 最強風速</td>
-                <td style="padding: 5px 0; text-align: right; color: #60a5fa;">${tp.center_pressure_hpa || 965} hPa | ${tp.max_wind_ms || 38} m/s</td>
-              </tr>
-              <tr style="border-bottom: 1px solid #1f2937;">
-                <td style="padding: 5px 0; color: #9ca3af;">7級暴風半徑 / 移動速度</td>
-                <td style="padding: 5px 0; text-align: right;">${tp.radius_7_km || 180} km | ${tp.move_direction_speed || 'NW 18km/h'}</td>
-              </tr>
-              <tr>
-                <td style="padding: 5px 0; color: #9ca3af;">簡要預測路徑</td>
-                <td style="padding: 5px 0; text-align: right; color: #34d399;">${tp.brief_path || '掠過東北部海域'}</td>
-              </tr>
-            </table>
-          </div>
-
-          <!-- 衝擊評估與趨勢 -->
-          <div style="font-size: 0.8rem; line-height: 1.4; background: #1f2937; border: 1px solid #374151; padding: 10px; border-radius: 6px;">
-            <div style="color: #f87171; font-weight: bold; margin-bottom: 4px;">💥 龜山島碼頭海象衝擊推估：</div>
-            <div style="color: #e5e7eb; margin-bottom: 8px;">${tp.impact_assessment || '長浪衝擊，港池消能崩潰'}</div>
-            <div style="color: #fbbf24; font-weight: bold; margin-bottom: 4px;">📈 未來趨勢展望：</div>
-            <div style="color: #d1d5db;">${tp.future_trend || '維持長浪警戒，建議管制靠泊'}</div>
+          <!-- 時序狀態極簡列 -->
+          <div style="font-size:0.75rem; color:#9ca3af; background:#1f2937; padding:6px 8px; border-radius:4px; display:flex; justify-content:space-between; align-items:center;">
+            <span>潮位: <strong style="color:#38bdf8;">${pm.tide_eta_m}m</strong></span>
+            <span>蹲沉: <strong style="color:#f87171;">${pm.squat_m}m</strong></span>
+            <span>E_net: <strong style="color:#facc15;">${ssot.e_net}</strong></span>
+            <span>P_veto: <strong style="color:#ef4444;">${ssot.p_veto}</strong></span>
           </div>
         </div>
       </details>
@@ -1594,7 +1632,7 @@
   function initHydration() {
     injectFixCSS();
     bindMetrics();
-    injectTyphoonEOCCard();
+    injectMobileBottomProfileRadarCard();
     setupMapResizeObserver();
   }
 
