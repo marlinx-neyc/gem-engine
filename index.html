@@ -2835,11 +2835,12 @@ setInterval(syncLatestDecision, 3000);
 
 
 
+
 <script id="gem-ssot-hydration">
 (function() {
   'use strict';
-  const ssot = {"version": "v64.6-Minimalist Status Lights & Time-series Profiles SSOT Engine", "timestamp": "2026-10-20 08:57:49 CST", "date_str": "2026-10-20 (二)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "cmdp_reward": 100.0, "hard_veto_alert": true, "e_net": 7.22, "p_veto": 1.0, "s_cos": 0.999, "alpha_tune": 0.7, "physics_metrics": {"hs_cwa": 3.71, "w_cwa": 9.5, "tp_s": 15.5, "delta_theta_deg": 58.0, "tide_eta_m": 0.65, "hs_pier_m": 3.74, "hs_north_m": 3.93, "limit_hs_effective_m": 0.79, "w_eff_ms": 5.03, "squat_m": 0.09, "d_draft_m": 1.201, "ukc_south_m": 1.12, "ukc_north_m": -1.37, "fb_north_m": 0.15, "fb_south_m": 1.85, "has_veto": true}, "typhoon_eoc_zone": {"typhoon_params": {"name": "秋季氣旋 / 長浪潛勢颱風", "center_pressure_hpa": 965, "max_wind_ms": 38.0, "radius_7_km": 180, "move_direction_speed": "西北西 每小時 18 公里", "brief_path": "掠過臺灣東北部海域 ➔ 往琉球南方海面移動", "impact_assessment": "外海湧浪 Hs=3.71m, Tp=15.5s 擊穿消能機制，港池呈現共振波陡現象，碼頭預留乾舷不足，靠泊風險極高。", "future_trend": "未來 24 小時長浪能量持續傳播，D+2 預報週期波高將維持在 1.5m 以上，建議全線維持警戒熔斷。"}, "eoc_administrative_status": {"agency": "中央災害應變中心 (CEOC) / 國家海洋研究院海事支援中樞", "activation_level": "🔴 一級開設 (加強警戒與動員)", "directive": "龜山島周邊海域實施全線封島管制，各港口客輪強制繫纜避風，海岸線禁止遊憩登島。"}}, "global_metrics": {"hs_pier": "3.74m", "w_eff": "5.03m/s", "squat": "0.09m", "evac_time": "35min"}, "vessels": [{"name": "凱鯨號", "mmsi": "416000001", "speed": 12.5, "status": "UNDERWAY", "lat": 24.865, "lon": 121.856}, {"name": "新福豐168號", "mmsi": "416000002", "speed": 0.0, "status": "MOORED", "lat": 24.868, "lon": 121.831}, {"name": "宏棋號", "mmsi": "416000003", "speed": 8.2, "status": "UNDERWAY", "lat": 24.858, "lon": 121.842}], "evacuation_routing": {"opt_heading_deg": 252.0, "opt_heading_str": "252.0° WSW", "recommended_speed_kts": 10.3, "bus_shuttle_needed": 4, "sea_evac_minutes": 20, "total_evac_chain_minutes": 35, "shuttle_directive": "備妥 4 班客運至烏石港接駁"}};
-  console.log('[GEM Engine v64.6] 極簡標題與門檻檢核燈號水合啟動', ssot);
+  const ssot = {"version": "v64.7-Minimalist Clean Titles & Vertical Status Lights SSOT Engine", "timestamp": "2026-10-20 09:05:27 CST", "date_str": "2026-10-20 (二)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "cmdp_reward": 100.0, "hard_veto_alert": true, "e_net": 7.22, "p_veto": 1.0, "s_cos": 0.999, "alpha_tune": 0.7, "physics_metrics": {"hs_cwa": 3.71, "w_cwa": 9.5, "tp_s": 15.5, "delta_theta_deg": 58.0, "tide_eta_m": 0.65, "hs_pier_m": 3.74, "hs_north_m": 3.93, "limit_hs_effective_m": 0.79, "w_eff_ms": 5.03, "squat_m": 0.09, "d_draft_m": 1.201, "ukc_south_m": 1.12, "ukc_north_m": -1.37, "fb_north_m": 0.15, "fb_south_m": 1.85, "has_veto": true}, "typhoon_eoc_zone": {"typhoon_params": {"name": "秋季氣旋 / 長浪潛勢颱風", "center_pressure_hpa": 965, "max_wind_ms": 38.0, "radius_7_km": 180, "move_direction_speed": "西北西 每小時 18 公里", "brief_path": "掠過臺灣東北部海域 ➔ 往琉球南方海面移動", "impact_assessment": "外海湧浪 Hs=3.71m, Tp=15.5s 擊穿消能機制，港池呈現共振波陡現象，碼頭預留乾舷不足，靠泊風險極高。", "future_trend": "未來 24 小時長浪能量持續傳播，D+2 預報週期波高將維持在 1.5m 以上，建議全線維持警戒熔斷。"}, "eoc_administrative_status": {"agency": "中央災害應變中心 (CEOC) / 國家海洋研究院海事支援中樞", "activation_level": "🔴 一級開設 (加強警戒與動員)", "directive": "龜山島周邊海域實施全線封島管制，各港口客輪強制繫纜避風，海岸線禁止遊憩登島。"}}, "global_metrics": {"hs_pier": "3.74m", "w_eff": "5.03m/s", "squat": "0.09m", "evac_time": "35min"}, "vessels": [{"name": "凱鯨號", "mmsi": "416000001", "speed": 12.5, "status": "UNDERWAY", "lat": 24.865, "lon": 121.856}, {"name": "新福豐168號", "mmsi": "416000002", "speed": 0.0, "status": "MOORED", "lat": 24.868, "lon": 121.831}, {"name": "宏棋號", "mmsi": "416000003", "speed": 8.2, "status": "UNDERWAY", "lat": 24.858, "lon": 121.842}], "evacuation_routing": {"opt_heading_deg": 252.0, "opt_heading_str": "252.0° WSW", "recommended_speed_kts": 10.3, "bus_shuttle_needed": 4, "sea_evac_minutes": 20, "total_evac_chain_minutes": 35, "shuttle_directive": "備妥 4 班客運至烏石港接駁"}};
+  console.log('[GEM Engine v64.7] 極簡標題與燈號置底水合啟動', ssot);
 
   function injectFixCSS() {
     if (document.getElementById('gem-layout-fix-css')) return;
@@ -2958,7 +2959,7 @@ setInterval(syncLatestDecision, 3000);
     `;
   }
 
-  // 2. 南/北岸水體剖面圖 (極簡標題 + 檢核燈號 + 上下配置) 收折卡片
+  // 2. 南/北岸水體剖面圖 (極簡純淨標題 + 燈號位在數值正下方) 收折卡片
   function injectMobileBottomProfileCard() {
     let container = document.querySelector('.gem-mobile-container') || document.querySelector('main') || document.body;
     let card = document.getElementById('gem-mobile-profile-card');
@@ -2984,7 +2985,7 @@ setInterval(syncLatestDecision, 3000);
     const pm = ssot.physics_metrics || {};
     const limitHs = pm.limit_hs_effective_m || 1.13;
 
-    // 大字體極簡單欄 SVG 剖面與門檻檢核燈號生成器
+    // 大字體極簡單欄 SVG 剖面與門檻檢核燈號生成器 (燈號置於數值正下方)
     const renderProfileSVG = (title, cdDepth, ukc, fb, hs, draft, squat, tide) => {
       const isUkcPass = ukc >= 1.50;
       const isFbPass = fb >= 0.50;
@@ -2992,8 +2993,8 @@ setInterval(syncLatestDecision, 3000);
       const isProfilePass = isUkcPass && isFbPass && isHsPass;
 
       const statusBadge = isProfilePass 
-        ? '<span style="background:#065f46; color:#34d399; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:0.75rem;">🟢 PASS (符合門檻)</span>'
-        : '<span style="background:#991b1b; color:#fef2f2; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:0.75rem;">🔴 VETO (越界熔斷)</span>';
+        ? '<span style="background:#065f46; color:#34d399; padding:2px 8px; border-radius:4px; font-weight:bold; font-size:0.75rem;">🟢 PASS</span>'
+        : '<span style="background:#991b1b; color:#fef2f2; padding:2px 8px; border-radius:4px; font-weight:bold; font-size:0.75rem;">🔴 VETO</span>';
 
       const colorUKC = isUkcPass ? '#10b981' : '#ef4444';
       const colorFB = isFbPass ? '#38bdf8' : '#ef4444';
@@ -3001,6 +3002,7 @@ setInterval(syncLatestDecision, 3000);
 
       return `
         <div style="background:#1f2937; padding:12px; border-radius:8px; border:1px solid #374151; margin-bottom:12px;">
+          <!-- 標頭列：極簡標題 + 右側整體評定燈號 -->
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
             <span style="font-weight:bold; font-size:0.95rem; color:#f3f4f6;">${title}</span>
             ${statusBadge}
@@ -3036,12 +3038,28 @@ setInterval(syncLatestDecision, 3000);
             <text x="130" y="22" fill="${colorHs}" font-size="11" font-weight="bold" font-family="monospace">波高 Hs = ${hs}m</text>
           </svg>
 
-          <!-- 4 欄極簡關鍵數值與門檻檢核明細列 -->
+          <!-- 4 欄極簡關鍵數值與門檻檢核明細列 (【修正重點】：獨立燈號位於數值正下方) -->
           <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:4px; font-size:0.80rem; text-align:center; margin-top:8px; background:#111827; padding:8px 6px; border-radius:5px; border:1px solid #374151;">
-            <div><span style="color:#9ca3af; display:block; font-size:0.72rem;">吃水/蹲沉</span><strong style="color:#f3f4f6;">${draft}m / ${squat}m</strong></div>
-            <div><span style="color:#9ca3af; display:block; font-size:0.72rem;">裕深 (≥1.5m)</span><strong style="color:${colorUKC};">${ukc}m ${isUkcPass ? '🟢' : '🔴'}</strong></div>
-            <div><span style="color:#9ca3af; display:block; font-size:0.72rem;">乾舷 (≥0.5m)</span><strong style="color:${colorFB};">${fb}m ${isFbPass ? '🟢' : '🔴'}</strong></div>
-            <div><span style="color:#9ca3af; display:block; font-size:0.72rem;">波高 (≤${limitHs}m)</span><strong style="color:${colorHs};">${hs}m ${isHsPass ? '🟢' : '🔴'}</strong></div>
+            <div>
+              <span style="color:#9ca3af; display:block; font-size:0.70rem; margin-bottom:2px;">吃水/蹲沉</span>
+              <strong style="color:#f3f4f6; display:block; font-size:0.82rem;">${draft}m / ${squat}m</strong>
+              <span style="display:block; font-size:0.75rem; margin-top:3px; color:#9ca3af;">ℹ️ 姿態</span>
+            </div>
+            <div>
+              <span style="color:#9ca3af; display:block; font-size:0.70rem; margin-bottom:2px;">裕深 (≥1.5m)</span>
+              <strong style="color:${colorUKC}; display:block; font-size:0.85rem;">${ukc}m</strong>
+              <span style="display:block; font-size:0.85rem; margin-top:2px;">${isUkcPass ? '🟢' : '🔴'}</span>
+            </div>
+            <div>
+              <span style="color:#9ca3af; display:block; font-size:0.70rem; margin-bottom:2px;">乾舷 (≥0.5m)</span>
+              <strong style="color:${colorFB}; display:block; font-size:0.85rem;">${fb}m</strong>
+              <span style="display:block; font-size:0.85rem; margin-top:2px;">${isFbPass ? '🟢' : '🔴'}</span>
+            </div>
+            <div>
+              <span style="color:#9ca3af; display:block; font-size:0.70rem; margin-bottom:2px;">波高 (≤${limitHs}m)</span>
+              <strong style="color:${colorHs}; display:block; font-size:0.85rem;">${hs}m</strong>
+              <span style="display:block; font-size:0.85rem; margin-top:2px;">${isHsPass ? '🟢' : '🔴'}</span>
+            </div>
           </div>
         </div>
       `;
@@ -3067,10 +3085,10 @@ setInterval(syncLatestDecision, 3000);
         </summary>
 
         <div style="padding: 12px; background: #111827; font-family: monospace;">
-          <!-- 1. 南岸水體剖面 (移除 -5.5mCD 冗餘標題) -->
-          ${renderProfileSVG('南岸水體剖面 (浚挖區)', '-5.50m CD', pm.ukc_south_m, pm.fb_south_m, pm.hs_pier_m, pm.d_draft_m, pm.squat_m, pm.tide_eta_m)}
-          <!-- 2. 北岸水體剖面 (移除 -3.2mCD 冗餘標題) -->
-          ${renderProfileSVG('北岸水體剖面 (拋石區)', '-3.20m CD', pm.ukc_north_m, pm.fb_north_m, pm.hs_north_m, pm.d_draft_m, pm.squat_m, pm.tide_eta_m)}
+          <!-- 1. 南岸水體剖面 (純淨極簡標題) -->
+          ${renderProfileSVG('南岸水體剖面', '-5.50m CD', pm.ukc_south_m, pm.fb_south_m, pm.hs_pier_m, pm.d_draft_m, pm.squat_m, pm.tide_eta_m)}
+          <!-- 2. 北岸水體剖面 (純淨極簡標題) -->
+          ${renderProfileSVG('北岸水體剖面', '-3.20m CD', pm.ukc_north_m, pm.fb_north_m, pm.hs_north_m, pm.d_draft_m, pm.squat_m, pm.tide_eta_m)}
 
           <div style="font-size:0.8rem; color:#9ca3af; background:#1f2937; padding:8px 12px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; border:1px solid #374151;">
             <span>即時潮位: <strong style="color:#38bdf8;">${pm.tide_eta_m}m</strong></span>
