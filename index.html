@@ -2845,11 +2845,12 @@ setInterval(syncLatestDecision, 3000);
 
 
 
+
 <script id="gem-ssot-hydration">
 (function() {
   'use strict';
-  const ssot = {"version": "v64.9-30-Day Trend Chart Restored SSOT Engine", "timestamp": "2026-10-20 14:58:11 CST", "date_str": "2026-10-20 (二)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "cmdp_reward": 100.0, "hard_veto_alert": true, "e_net": 7.22, "p_veto": 1.0, "s_cos": 0.999, "alpha_tune": 0.7, "physics_metrics": {"hs_cwa": 3.71, "w_cwa": 9.5, "tp_s": 15.5, "delta_theta_deg": 58.0, "tide_eta_m": 0.65, "hs_pier_m": 3.74, "hs_north_m": 3.93, "limit_hs_effective_m": 0.79, "w_eff_ms": 5.03, "squat_m": 0.09, "d_draft_m": 1.201, "ukc_south_m": 1.12, "ukc_north_m": -1.37, "fb_north_m": 0.15, "fb_south_m": 1.85, "has_veto": true}, "typhoon_eoc_zone": {"typhoon_params": {"name": "秋季氣旋 / 長浪潛勢颱風", "center_pressure_hpa": 965, "max_wind_ms": 38.0, "radius_7_km": 180, "move_direction_speed": "西北西 每小時 18 公里", "brief_path": "掠過臺灣東北部海域 ➔ 往琉球南方海面移動", "impact_assessment": "外海湧浪 Hs=3.71m, Tp=15.5s 擊穿消能機制，港池呈現共振波陡現象，碼頭預留乾舷不足，靠泊風險極高。", "future_trend": "未來 24 小時長浪能量持續傳播，D+2 預報週期波高將維持在 1.5m 以上，建議全線維持警戒熔斷。"}, "eoc_administrative_status": {"agency": "中央災害應變中心 (CEOC) / 國家海洋研究院海事支援中樞", "activation_level": "🔴 一級開設 (加強警戒與動員)", "directive": "龜山島周邊海域實施全線封島管制，各港口客輪強制繫纜避風，海岸線禁止遊憩登島。"}}, "global_metrics": {"hs_pier": "3.74m", "w_eff": "5.03m/s", "squat": "0.09m", "evac_time": "35min"}, "vessels": [{"name": "凱鯨號", "mmsi": "416000001", "speed": 12.5, "status": "UNDERWAY", "lat": 24.865, "lon": 121.856}, {"name": "新福豐168號", "mmsi": "416000002", "speed": 0.0, "status": "MOORED", "lat": 24.868, "lon": 121.831}, {"name": "宏棋號", "mmsi": "416000003", "speed": 8.2, "status": "UNDERWAY", "lat": 24.858, "lon": 121.842}], "evacuation_routing": {"opt_heading_deg": 252.0, "opt_heading_str": "252.0° WSW", "recommended_speed_kts": 10.3, "bus_shuttle_needed": 4, "sea_evac_minutes": 20, "total_evac_chain_minutes": 35, "shuttle_directive": "備妥 4 班客運至烏石港接駁"}};
-  console.log('[GEM Engine v64.9] 30天月度宏觀趨勢圖修復與水合啟動', ssot);
+  const ssot = {"version": "v65.1-Mobile Typhoon EOC & Profiles Restored SSOT Engine", "timestamp": "2026-10-20 15:04:23 CST", "date_str": "2026-10-20 (二)", "decision_code": "Q4", "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)", "cmdp_reward": 100.0, "hard_veto_alert": true, "e_net": 7.22, "p_veto": 1.0, "s_cos": 0.999, "alpha_tune": 0.7, "physics_metrics": {"hs_cwa": 3.71, "w_cwa": 9.5, "tp_s": 15.5, "delta_theta_deg": 58.0, "tide_eta_m": 0.65, "hs_pier_m": 3.74, "hs_north_m": 3.93, "limit_hs_effective_m": 0.79, "w_eff_ms": 5.03, "squat_m": 0.09, "d_draft_m": 1.201, "ukc_south_m": 1.12, "ukc_north_m": -1.37, "fb_north_m": 0.15, "fb_south_m": 1.85, "has_veto": true}, "typhoon_eoc_zone": {"typhoon_params": {"name": "秋季氣旋 / 長浪潛勢颱風", "center_pressure_hpa": 965, "max_wind_ms": 38.0, "radius_7_km": 180, "move_direction_speed": "西北西 每小時 18 公里", "brief_path": "掠過臺灣東北部海域 ➔ 往琉球南方海面移動", "impact_assessment": "外海湧浪 Hs=3.71m, Tp=15.5s 擊穿消能機制，港池呈現共振波陡現象，碼頭預留乾舷不足，靠泊風險極高。", "future_trend": "未來 24 小時長浪能量持續傳播，D+2 預報週期波高將維持在 1.5m 以上，建議全線維持警戒熔斷。"}, "eoc_administrative_status": {"agency": "中央災害應變中心 (CEOC) / 國家海洋研究院海事支援中樞", "activation_level": "🔴 一級開設 (加強警戒與動員)", "directive": "龜山島周邊海域實施全線封島管制，各港口客輪強制繫纜避風，海岸線禁止遊憩登島。"}}, "global_metrics": {"hs_pier": "3.74m", "w_eff": "5.03m/s", "squat": "0.09m", "evac_time": "35min"}, "vessels": [{"name": "凱鯨號", "mmsi": "416000001", "speed": 12.5, "status": "UNDERWAY", "lat": 24.865, "lon": 121.856}, {"name": "新福豐168號", "mmsi": "416000002", "speed": 0.0, "status": "MOORED", "lat": 24.868, "lon": 121.831}, {"name": "宏棋號", "mmsi": "416000003", "speed": 8.2, "status": "UNDERWAY", "lat": 24.858, "lon": 121.842}], "evacuation_routing": {"opt_heading_deg": 252.0, "opt_heading_str": "252.0° WSW", "recommended_speed_kts": 10.3, "bus_shuttle_needed": 4, "sea_evac_minutes": 20, "total_evac_chain_minutes": 35, "shuttle_directive": "備妥 4 班客運至烏石港接駁"}};
+  console.log('[GEM Engine v65.1] 手機端颱風專區與南北岸剖面卡片恢復水合啟動', ssot);
 
   const isMobilePage = window.location.pathname.includes('mobile.html') || 
                        document.body.classList.contains('gem-mobile-view') || 
@@ -2906,7 +2907,350 @@ setInterval(syncLatestDecision, 3000);
     }
   }
 
-  // 2. 核心修復：30天月度宏觀全域能量走勢大圖 SVG/動態趨勢渲染器
+  // 2. 手機版專用卡片 A：颱風監測與 EOC 防災應變收折卡片
+  function injectTyphoonEOCCard() {
+    let container = document.querySelector('.gem-mobile-container') || document.querySelector('main') || document.body;
+    let card = document.getElementById('gem-typhoon-eoc-card');
+
+    if (!card) {
+      card = document.createElement('div');
+      card.id = 'gem-typhoon-eoc-card';
+      card.style.cssText = `
+        margin: 15px auto;
+        padding: 0;
+        background: #111827;
+        border: 1px solid #374151;
+        border-left: 4px solid #ef4444;
+        border-radius: 8px;
+        color: #f3f4f6;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace, sans-serif;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        overflow: hidden;
+      `;
+      container.appendChild(card);
+    }
+
+    const tz = ssot.typhoon_eoc_zone || {};
+    const tp = tz.typhoon_params || {};
+    const eoc = tz.eoc_administrative_status || {};
+
+    card.innerHTML = `
+      <details class="gem-accordion-card" id="gem-typhoon-details" style="width: 100%;" open>
+        <summary style="
+          padding: 12px 14px;
+          background: #1f2937;
+          cursor: pointer;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          list-style: none;
+          user-select: none;
+          font-weight: bold;
+        ">
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 0.92rem; color: #f87171;">
+            <span>🌀 颱風監測與 EOC 防災應變</span>
+            <span style="font-size: 0.75rem; background: #991b1b; color: #fef2f2; padding: 2px 6px; border-radius: 4px;">${eoc.activation_level || '一級開設'}</span>
+          </div>
+          <span style="font-size: 0.8rem; color: #9ca3af; font-family: monospace;">展開/收折 🔻</span>
+        </summary>
+
+        <div style="padding: 14px; border-top: 1px solid #374151; background: #111827; font-family: monospace;">
+          <div style="background: #1f2937; padding: 10px; border-radius: 6px; margin-bottom: 12px; font-size: 0.85rem; border: 1px solid #374151;">
+            <div style="color: #60a5fa; font-weight: bold; margin-bottom: 4px;">🏛️ 行政設開單位：${eoc.agency || '中央災害應變中心'}</div>
+            <div style="color: #fcd34d;">📋 指揮官指令：${eoc.directive || '全線管制通航'}</div>
+          </div>
+
+          <div style="font-size: 0.82rem; margin-bottom: 12px;">
+            <div style="color: #9ca3af; font-size: 0.75rem; margin-bottom: 6px; font-weight: bold;">颱風動態特徵張量</div>
+            <table style="width: 100%; border-collapse: collapse; color: #d1d5db;">
+              <tr style="border-bottom: 1px solid #1f2937;">
+                <td style="padding: 5px 0; color: #9ca3af;">颱風名稱 / 標記</td>
+                <td style="padding: 5px 0; text-align: right; font-weight: bold; color: #ffffff;">${tp.name || '長浪潛勢氣旋'}</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #1f2937;">
+                <td style="padding: 5px 0; color: #9ca3af;">中心氣壓 / 最強風速</td>
+                <td style="padding: 5px 0; text-align: right; color: #60a5fa;">${tp.center_pressure_hpa || 965} hPa | ${tp.max_wind_ms || 38} m/s</td>
+              </tr>
+              <tr style="border-bottom: 1px solid #1f2937;">
+                <td style="padding: 5px 0; color: #9ca3af;">7級暴風半徑 / 移動速度</td>
+                <td style="padding: 5px 0; text-align: right;">${tp.radius_7_km || 180} km | ${tp.move_direction_speed || 'NW 18km/h'}</td>
+              </tr>
+              <tr>
+                <td style="padding: 5px 0; color: #9ca3af;">簡要預測路徑</td>
+                <td style="padding: 5px 0; text-align: right; color: #34d399;">${tp.brief_path || '掠過臺灣東北部海域'}</td>
+              </tr>
+            </table>
+          </div>
+
+          <div style="font-size: 0.8rem; line-height: 1.4; background: #1f2937; border: 1px solid #374151; padding: 10px; border-radius: 6px;">
+            <div style="color: #f87171; font-weight: bold; margin-bottom: 4px;">💥 龜山島碼頭海象衝擊推估：</div>
+            <div style="color: #e5e7eb; margin-bottom: 8px;">${tp.impact_assessment || '長浪衝擊，港池消能崩潰'}</div>
+            <div style="color: #fbbf24; font-weight: bold; margin-bottom: 4px;">📈 未來趨勢展望：</div>
+            <div style="color: #d1d5db;">${tp.future_trend || '維持長浪警戒，建議管制靠泊'}</div>
+          </div>
+        </div>
+      </details>
+    `;
+  }
+
+  // 3. 手機版專用卡片 B：南/北岸水體剖面 (燈號置於數值正下方) 收折卡片
+  function injectMobileBottomProfileCard() {
+    let container = document.querySelector('.gem-mobile-container') || document.querySelector('main') || document.body;
+    let card = document.getElementById('gem-mobile-profile-card');
+
+    if (!card) {
+      card = document.createElement('div');
+      card.id = 'gem-mobile-profile-card';
+      card.style.cssText = `
+        margin: 15px auto;
+        padding: 0;
+        background: #111827;
+        border: 1px solid #374151;
+        border-left: 4px solid #3b82f6;
+        border-radius: 8px;
+        color: #f3f4f6;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace, sans-serif;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.6);
+        overflow: hidden;
+      `;
+      container.appendChild(card);
+    }
+
+    const pm = ssot.physics_metrics || {};
+    const limitHs = pm.limit_hs_effective_m || 1.13;
+
+    const renderProfileSVG = (title, cdDepth, ukc, fb, hs, draft, squat, tide) => {
+      const isUkcPass = ukc >= 1.50;
+      const isFbPass = fb >= 0.50;
+      const isHsPass = hs <= limitHs;
+      const isProfilePass = isUkcPass && isFbPass && isHsPass;
+
+      const statusBadge = isProfilePass 
+        ? '<span style="background:#065f46; color:#34d399; padding:2px 8px; border-radius:4px; font-weight:bold; font-size:0.75rem;">🟢 PASS</span>'
+        : '<span style="background:#991b1b; color:#fef2f2; padding:2px 8px; border-radius:4px; font-weight:bold; font-size:0.75rem;">🔴 VETO</span>';
+
+      const colorUKC = isUkcPass ? '#10b981' : '#ef4444';
+      const colorFB = isFbPass ? '#38bdf8' : '#ef4444';
+      const colorHs = isHsPass ? '#facc15' : '#ef4444';
+
+      return `
+        <div style="background:#1f2937; padding:12px; border-radius:8px; border:1px solid #374151; margin-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <span style="font-weight:bold; font-size:0.95rem; color:#f3f4f6;">${title}</span>
+            ${statusBadge}
+          </div>
+
+          <svg viewBox="0 0 320 120" style="width:100%; height:auto; background:#0f172a; border-radius:6px; border:1px solid #1e293b;">
+            <rect x="0" y="30" width="80" height="90" fill="#334155"/>
+            <text x="14" y="70" fill="#cbd5e1" font-size="12" font-weight="bold" font-family="monospace">碼頭壁</text>
+            <rect x="80" y="42" width="240" height="78" fill="#1e3a8a" opacity="0.65"/>
+            <line x1="80" y1="42" x2="320" y2="42" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="6,3"/>
+            <text x="205" y="34" fill="#38bdf8" font-size="11" font-weight="bold" font-family="monospace">潮位 η = ${tide}m</text>
+            <line x1="80" y1="110" x2="320" y2="110" stroke="#64748b" stroke-width="3"/>
+            <text x="215" y="104" fill="#94a3b8" font-size="11" font-family="monospace">海床 (${cdDepth})</text>
+            <rect x="125" y="36" width="95" height="28" rx="4" fill="#f87171" stroke="#ef4444" stroke-width="1.5"/>
+            <text x="135" y="54" fill="#ffffff" font-size="11" font-weight="bold" font-family="monospace">客輪 (d+Squat)</text>
+            <line x1="172" y1="64" x2="172" y2="110" stroke="${colorUKC}" stroke-width="2.5" stroke-dasharray="3,2"/>
+            <rect x="178" y="74" width="105" height="22" rx="3" fill="#111827" opacity="0.9"/>
+            <text x="183" y="89" fill="${colorUKC}" font-size="12" font-weight="bold" font-family="monospace">UKC = ${ukc}m</text>
+            <text x="10" y="22" fill="${colorFB}" font-size="11" font-weight="bold" font-family="monospace">乾舷 FB = ${fb}m</text>
+            <text x="130" y="22" fill="${colorHs}" font-size="11" font-weight="bold" font-family="monospace">波高 Hs = ${hs}m</text>
+          </svg>
+
+          <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:4px; font-size:0.80rem; text-align:center; margin-top:8px; background:#111827; padding:8px 6px; border-radius:5px; border:1px solid #374151;">
+            <div>
+              <span style="color:#9ca3af; display:block; font-size:0.70rem; margin-bottom:2px;">吃水/蹲沉</span>
+              <strong style="color:#f3f4f6; display:block; font-size:0.82rem;">${draft}m / ${squat}m</strong>
+              <span style="display:block; font-size:0.75rem; margin-top:3px; color:#9ca3af;">ℹ️ 姿態</span>
+            </div>
+            <div>
+              <span style="color:#9ca3af; display:block; font-size:0.70rem; margin-bottom:2px;">裕深 (≥1.5m)</span>
+              <strong style="color:${colorUKC}; display:block; font-size:0.85rem;">${ukc}m</strong>
+              <span style="display:block; font-size:0.85rem; margin-top:2px;">${isUkcPass ? '🟢' : '🔴'}</span>
+            </div>
+            <div>
+              <span style="color:#9ca3af; display:block; font-size:0.70rem; margin-bottom:2px;">乾舷 (≥0.5m)</span>
+              <strong style="color:${colorFB}; display:block; font-size:0.85rem;">${fb}m</strong>
+              <span style="display:block; font-size:0.85rem; margin-top:2px;">${isFbPass ? '🟢' : '🔴'}</span>
+            </div>
+            <div>
+              <span style="color:#9ca3af; display:block; font-size:0.70rem; margin-bottom:2px;">波高 (≤${limitHs}m)</span>
+              <strong style="color:${colorHs}; display:block; font-size:0.85rem;">${hs}m</strong>
+              <span style="display:block; font-size:0.85rem; margin-top:2px;">${isHsPass ? '🟢' : '🔴'}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    };
+
+    card.innerHTML = `
+      <details class="gem-accordion-card" id="gem-profile-details" style="width: 100%;" open>
+        <summary style="
+          padding: 13px 15px;
+          background: #1f2937;
+          cursor: pointer;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          list-style: none;
+          user-select: none;
+          font-weight: bold;
+        ">
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 0.95rem; color: #60a5fa;">
+            <span>📐 南/北岸水體剖面 (上下垂直對比 / 門檻檢核)</span>
+          </div>
+          <span style="font-size: 0.82rem; color: #9ca3af; font-family: monospace;">展開/收折 🔻</span>
+        </summary>
+
+        <div style="padding: 12px; background: #111827; font-family: monospace;">
+          ${renderProfileSVG('南岸水體剖面', '-5.50m CD', pm.ukc_south_m, pm.fb_south_m, pm.hs_pier_m, pm.d_draft_m, pm.squat_m, pm.tide_eta_m)}
+          ${renderProfileSVG('北岸水體剖面', '-3.20m CD', pm.ukc_north_m, pm.fb_north_m, pm.hs_north_m, pm.d_draft_m, pm.squat_m, pm.tide_eta_m)}
+
+          <div style="font-size:0.8rem; color:#9ca3af; background:#1f2937; padding:8px 12px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; border:1px solid #374151;">
+            <span>即時潮位: <strong style="color:#38bdf8;">${pm.tide_eta_m}m</strong></span>
+            <span>能量 E_net: <strong style="color:#facc15;">${ssot.e_net}</strong></span>
+            <span>風險 P_veto: <strong style="color:#ef4444;">${ssot.p_veto}</strong></span>
+          </div>
+        </div>
+      </details>
+    `;
+  }
+
+  // 4. 桌面版專用：當日時序「風、浪、流、汐」趨勢圖與游標對齊 Tooltip
+  function renderTodayMeteoHydroTimelineCard() {
+    let container = document.querySelector('.gem-desktop-fullwidth') || document.querySelector('main') || document.body;
+    let card = document.getElementById('gem-meteo-hydro-timeline-card');
+
+    if (!card) {
+      card = document.createElement('div');
+      card.id = 'gem-meteo-hydro-timeline-card';
+      card.style.cssText = `
+        margin: 16px auto;
+        padding: 16px;
+        background: #0f172a;
+        border: 1px solid #1e293b;
+        border-top: 4px solid #38bdf8;
+        border-radius: 8px;
+        color: #f8fafc;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace, sans-serif;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      `;
+
+      if (container.firstChild) {
+        container.insertBefore(card, container.firstChild);
+      } else {
+        container.appendChild(card);
+      }
+    }
+
+    const pm = ssot.physics_metrics || {};
+    const hours = ['08:00 首班', '10:00 滿潮', '11:20 止登', '12:00 風變', '14:20 撤離', '16:00 末班'];
+    const waves = [3.52, 3.90, pm.hs_pier_m || 3.71, 3.78, 3.64, 3.26];
+    const winds = [7.2, 8.5, pm.w_eff_ms || 9.50, 10.2, 9.8, 8.1];
+    const currents = [1.2, 1.8, 2.1, 2.4, 2.0, 1.5];
+    const tides = [0.25, 1.35, 1.10, 0.85, pm.tide_eta_m || 0.65, -0.35];
+
+    card.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #1e293b; padding-bottom:8px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:1.05rem; font-weight:bold; color:#38bdf8;">📊 當日時序海氣象特徵總覽 (風、浪、流、汐 實時趨勢與警戒驗證)</span>
+          <span style="font-size:0.75rem; background:#1e293b; color:#94a3b8; padding:2px 8px; border-radius:4px; border:1px solid #334155;">${ssot.date_str}</span>
+        </div>
+        <div style="font-size:0.80rem; display:flex; gap:14px; color:#cbd5e1; font-family:monospace;">
+          <span style="color:#ef4444;">🔴 浪波警戒: ${pm.limit_hs_effective_m || 1.13}m</span>
+          <span style="color:#f59e0b;">🟡 風速警戒: 10.17m/s</span>
+          <span style="color:#10b981;">🟢 裕深門檻: 1.50m</span>
+        </div>
+      </div>
+
+      <div id="timelineHoverTooltip" style="
+        display:none; position:absolute; z-index:100; background:#111827; border:1px solid #38bdf8; 
+        padding:8px 12px; border-radius:6px; font-size:0.78rem; font-family:monospace; color:#f3f4f6;
+        pointer-events:none; box-shadow:0 4px 12px rgba(0,0,0,0.8);
+      "></div>
+
+      <div style="position:relative; width:100%; height:220px; background:#0b0f19; border-radius:6px; border:1px solid #1e293b;" id="interactiveTimelineBox">
+        <svg viewBox="0 0 1000 220" style="width:100%; height:100%; display:block;" preserveAspectRatio="none" id="timelineSvg">
+          ${hours.map((h, i) => {
+            const x = 70 + i * (900 - 80) / (hours.length - 1);
+            return `
+              <line x1="${x}" y1="20" x2="${x}" y2="180" stroke="#1f2937" stroke-width="1" stroke-dasharray="3,3"/>
+              <text x="${x}" y="202" fill="#94a3b8" font-size="11" text-anchor="middle" font-family="monospace">${h}</text>
+            `;
+          }).join('')}
+
+          <path d="${waves.map((v, i) => `${i===0?'M':'L'} ${70 + i * (900 - 80) / (hours.length - 1)}${180 - (v/4.5)*150}`).join(' ')}" 
+                fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round"/>
+
+          <path d="${winds.map((v, i) => `${i===0?'M':'L'} ${70 + i * (900 - 80) / (hours.length - 1)}${180 - (v/12.0)*150}`).join(' ')}" 
+                fill="none" stroke="#38bdf8" stroke-width="2" stroke-dasharray="5,3"/>
+
+          <path d="${tides.map((v, i) => `${i===0?'M':'L'} ${70 + i * (900 - 80) / (hours.length - 1)}${180 - ((v+0.5)/2.0)*150}`).join(' ')}" 
+                fill="none" stroke="#10b981" stroke-width="2"/>
+
+          <line x1="50" y1="${180 - (1.13/4.5)*150}" x2="930" y2="${180 - (1.13/4.5)*150}" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4,4"/>
+          <text x="935" y="${184 - (1.13/4.5)*150}" fill="#ef4444" font-size="10" font-family="monospace">Hs 1.13m</text>
+
+          <line id="timelineCrosshair" x1="-100" y1="20" x2="-100" y2="180" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="2,2"/>
+        </svg>
+      </div>
+
+      <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; margin-top:10px; font-size:0.78rem; text-align:center;">
+        <div style="background:#1e2937; padding:6px; border-radius:4px; border-left:3px solid #ef4444;">
+          <span style="color:#9ca3af;">🌊 波高 (浪 Hs)</span>
+          <strong style="color:#ef4444; display:block;">${pm.hs_pier_m} m (超標)</strong>
+        </div>
+        <div style="background:#1e2937; padding:6px; border-radius:4px; border-left:3px solid #38bdf8;">
+          <span style="color:#9ca3af;">💨 風速 (風 Weff)</span>
+          <strong style="color:#38bdf8; display:block;">${pm.w_eff_ms} m/s</strong>
+        </div>
+        <div style="background:#1e2937; padding:6px; border-radius:4px; border-left:3px solid #f59e0b;">
+          <span style="color:#9ca3af;">🧭 避航流速 (流)</span>
+          <strong style="color:#f59e0b; display:block;">2.1 kts / WSW</strong>
+        </div>
+        <div style="background:#1e2937; padding:6px; border-radius:4px; border-left:3px solid #10b981;">
+          <span style="color:#9ca3af;">🌙 天文潮位 (汐 η)</span>
+          <strong style="color:#10b981; display:block;">${pm.tide_eta_m} m CD</strong>
+        </div>
+      </div>
+    `;
+
+    const box = card.querySelector('#interactiveTimelineBox');
+    const crosshair = card.querySelector('#timelineCrosshair');
+    const tooltip = card.querySelector('#timelineHoverTooltip');
+
+    if (box && crosshair && tooltip) {
+      box.addEventListener('mousemove', (e) => {
+        const rect = box.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const percent = Math.max(0, Math.min(1, (mouseX - 40) / (rect.width - 80)));
+        const idx = Math.min(hours.length - 1, Math.floor(percent * hours.length));
+
+        const targetX = 70 + idx * (900 - 80) / (hours.length - 1);
+        crosshair.setAttribute('x1', targetX);
+        crosshair.setAttribute('x2', targetX);
+
+        tooltip.style.display = 'block';
+        tooltip.style.left = (e.clientX - rect.left + 15) + 'px';
+        tooltip.style.top = (e.clientY - rect.top - 10) + 'px';
+        tooltip.innerHTML = `
+          <div style="color:#38bdf8; font-weight:bold; margin-bottom:2px;">⏱️ ${hours[idx]}</div>
+          <div>🌊 浪高 Hs: <span style="color:#ef4444;">${waves[idx]}m</span></div>
+          <div>💨 風速 Weff: <span style="color:#38bdf8;">${winds[idx]}m/s</span></div>
+          <div>🧭 流速 Current: <span style="color:#f59e0b;">${currents[idx]}kts</span></div>
+          <div>🌙 潮位 Tide: <span style="color:#10b981;">${tides[idx]}m</span></div>
+        `;
+      });
+
+      box.addEventListener('mouseleave', () => {
+        crosshair.setAttribute('x1', -100);
+        crosshair.setAttribute('x2', -100);
+        tooltip.style.display = 'none';
+      });
+    }
+  }
+
+  // 5. 30天月度宏觀全域能量走勢圖
   function render30DayMacroTrendChart() {
     const containers = document.querySelectorAll('div, section, .card');
     containers.forEach(container => {
@@ -2917,7 +3261,6 @@ setInterval(syncLatestDecision, 3000);
           svgDiv.id = 'macroTrendSvgBox';
           svgDiv.style.cssText = 'width: 100%; height: 280px; margin: 12px 0; background: #0b0f19; border-radius: 8px; border: 1px solid #1f2937; padding: 12px; box-sizing: border-box; position: relative; overflow: hidden;';
 
-          // 30 天 E_net 時序模擬動態張量
           const points = [
             0.65, 0.72, 0.88, 1.35, 1.42, 0.82, 0.75, 0.62, 0.58, 0.71,
             0.92, 1.12, 1.15, 0.88, 0.76, 1.32, 1.48, 1.29, 0.96, 0.82,
@@ -2951,24 +3294,20 @@ setInterval(syncLatestDecision, 3000);
                 </linearGradient>
               </defs>
 
-              <!-- 背景縱向日期格線 -->
               ${points.map((_, idx) => {
                 const x = 40 + idx * (w - 70) / (points.length - 1);
                 return `<line x1="${x}" y1="10" x2="${x}" y2="${h - 30}" stroke="#1f2937" stroke-width="1" stroke-dasharray="2,4"/>`;
               }).join('')}
 
-              <!-- 關鍵門檻基準線 (1.25 熔斷線 & 1.00 常規通航線) -->
               <line x1="40" y1="${(h - 30) - (1.25 / 1.6) * (h - 50)}" x2="${w - 30}" y2="${(h - 30) - (1.25 / 1.6) * (h - 50)}" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4,4"/>
               <text x="${w - 25}" y="${(h - 26) - (1.25 / 1.6) * (h - 50)}" fill="#ef4444" font-size="10" font-family="monospace" font-weight="bold">1.25 熔斷</text>
 
               <line x1="40" y1="${(h - 30) - (1.00 / 1.6) * (h - 50)}" x2="${w - 30}" y2="${(h - 30) - (1.00 / 1.6) * (h - 50)}" stroke="#10b981" stroke-width="1.5" stroke-dasharray="4,4"/>
               <text x="${w - 25}" y="${(h - 26) - (1.00 / 1.6) * (h - 50)}" fill="#10b981" font-size="10" font-family="monospace" font-weight="bold">1.00 通航</text>
 
-              <!-- 填充區域與波形主線 -->
               <path d="${areaD}" fill="url(#trendAreaGrad)"/>
               <path d="${pathD}" fill="none" stroke="#38bdf8" stroke-width="3" stroke-linecap="round"/>
 
-              <!-- 數據節點與燈號 -->
               ${points.map((val, idx) => {
                 const x = 40 + idx * (w - 70) / (points.length - 1);
                 const y = (h - 30) - (val / 1.6) * (h - 50);
@@ -2978,7 +3317,6 @@ setInterval(syncLatestDecision, 3000);
             </svg>
           `;
 
-          // 插入圖表至卡片中心
           if (chartTarget && chartTarget.parentNode) {
             chartTarget.parentNode.insertBefore(svgDiv, chartTarget);
             if (chartTarget.tagName === 'CANVAS' || chartTarget.id === 'radarChart') {
@@ -2992,11 +3330,10 @@ setInterval(syncLatestDecision, 3000);
     });
   }
 
-  // 3. 桌面版版面清理 (精確剔除雷達圖，絕不抹除 30 天宏觀走勢圖)
+  // 6. 桌面版版面極簡化與區塊收合
   function refactorDesktopLayout() {
     if (isMobilePage) return;
 
-    // 精確刪除純雷達圖元素
     const radarEls = document.querySelectorAll('#radarChart, #radar-chart, .radar-chart-card');
     radarEls.forEach(el => el.remove());
 
@@ -3006,7 +3343,6 @@ setInterval(syncLatestDecision, 3000);
       }
     });
 
-    // PINN Engine 與 航次時程卡片全寬展滿
     document.querySelectorAll('div, section, main, [class*="col-span-"], [class*="w-"]').forEach(el => {
       if (el.textContent.includes('PINN Engine') || el.textContent.includes('航次時程') || el.textContent.includes('剛性物理防線')) {
         el.style.width = '100%';
@@ -3018,7 +3354,6 @@ setInterval(syncLatestDecision, 3000);
       }
     });
 
-    // 預設收合「游擊式動態調度」與「五大關鍵安全裕度」
     document.querySelectorAll('details, section, .card, div').forEach(el => {
       if (el.textContent.includes('游擊式動態調度') || el.textContent.includes('即時突發感知') ||
           el.textContent.includes('五大關鍵安全裕度') || el.textContent.includes('南北岸對稱子彈條')) {
@@ -3085,13 +3420,20 @@ setInterval(syncLatestDecision, 3000);
     });
   }
 
+  // 7. 核心水合進入點：依據 isMobilePage 精準執行兩端靈魂卡片渲染
   function initHydration() {
     injectFixCSS();
     bindMetrics();
     syncDateTimeAllViews();
-    render30DayMacroTrendChart();
 
-    if (!isMobilePage) {
+    if (isMobilePage) {
+      // 📱 手機端：顯示颱風應變專區與南北岸剖面卡片
+      injectTyphoonEOCCard();
+      injectMobileBottomProfileCard();
+    } else {
+      // 💻 桌面端：顯示第一頁風浪流汐四軌時序圖與30天宏觀圖，並精簡排版
+      renderTodayMeteoHydroTimelineCard();
+      render30DayMacroTrendChart();
       refactorDesktopLayout();
     }
 
