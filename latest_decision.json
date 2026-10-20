@@ -1,6 +1,6 @@
 {
-  "version": "v64.2-Typhoon Accordion Master SSOT Engine",
-  "timestamp": "2026-10-20 08:27:01 CST",
+  "version": "v64.3-Mobile Profile & Radar Accordion Engine",
+  "timestamp": "2026-10-20 08:33:43 CST",
   "date_str": "2026-10-20 (二)",
   "decision_code": "Q4",
   "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)",
@@ -17,6 +17,7 @@
     "delta_theta_deg": 58.0,
     "tide_eta_m": 0.65,
     "hs_pier_m": 3.74,
+    "hs_north_m": 3.93,
     "w_eff_ms": 5.03,
     "squat_m": 0.09,
     "ukc_south_m": 1.12,
@@ -39,9 +40,7 @@
     "eoc_administrative_status": {
       "agency": "中央災害應變中心 (CEOC) / 國家海洋研究院海事支援中樞",
       "activation_level": "🔴 一級開設 (加強警戒與動員)",
-      "status_code": "EOC-LV1",
-      "directive": "龜山島周邊海域實施全線封島管制，各港口客輪強制繫纜避風，海岸線禁止遊憩登島。",
-      "last_updated": "2026-10-20 08:27:01 CST"
+      "directive": "龜山島周邊海域實施全線封島管制，各港口客輪強制繫纜避風，海岸線禁止遊憩登島。"
     }
   },
   "global_metrics": {
