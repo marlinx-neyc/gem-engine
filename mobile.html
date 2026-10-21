@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>🌊 GEM Engine v65.4 - 龜山島手持戰術中樞 (Mobile Master Pro)</title>
+    <title>🌊 GEM-V36D 龜山島手持戰術中樞 (Mobile Master Pro)</title>
 
-    <!-- 手機 PWA 與 Favicon 配置 -->
+    <!-- PWA 與 Favicon 配置 -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.88em%22 font-size=%2286%22>🌊</text></svg>">
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%230b1120%22/><text x=%2250%25%22 y=%2254%25%22 dominant-baseline=%22central%22 text-anchor=%22middle%22 font-size=%2268%22>🌊</text></svg>">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -90,6 +90,11 @@
         }
         .data-table th { background: var(--table-header-bg); color: #e2e8f0; font-weight: 700; font-size: 10px; }
         
+        @keyframes pulseBorderAlert {
+            0%, 100% { border-color: #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.45); }
+            50% { border-color: #facc15; box-shadow: 0 0 18px rgba(250, 204, 21, 0.7); }
+        }
+        .border-flashing-alert { animation: pulseBorderAlert 1.8s infinite ease-in-out; }
         .box-alert-danger {
             background: rgba(239, 68, 68, 0.16); border-left: 3px solid var(--status-danger);
             color: #fca5a5; padding: 7px 9px; font-size: 11px; border-radius: 0 5px 5px 0; line-height: 1.45;
@@ -119,7 +124,7 @@
     <header class="bg-[#1e293b] border border-[#334155] border-l-[5px] border-l-[#ef4444] rounded-xl p-3 mb-2.5 shadow-lg w-full" id="headerMaster">
         <div class="flex flex-wrap justify-between items-center gap-1.5">
             <h1 class="text-[14px] font-extrabold text-white flex items-center gap-1.5">
-                <span class="pulse-dot-blue"></span> 龜山島手持戰術中樞 (Mobile Master)
+                <span class="pulse-dot-blue"></span> 龜山島手持戰術中樞 (Mobile Master Pro)
             </h1>
             <span class="badge badge-veto text-[10.5px] px-2 py-0.5" id="badgeMobDecision">🔴 熔斷封島</span>
         </div>
@@ -192,7 +197,7 @@
     <!-- 主內容區塊 -->
     <main class="flex flex-col gap-2.5 w-full">
         
-        <!-- 1. PINN 剛性水文指標檢核表 -->
+        <!-- 1. PINN 剛性水文指標分欄檢核表 -->
         <div class="card border-[#38bdf8]/80">
             <div class="card-header">
                 <span>1. ⚖️ PINN 剛性水文指標分欄檢核表</span>
@@ -236,10 +241,10 @@
             </table>
         </div>
 
-        <!-- 2. 🌀 颱風專區：官方 vs GEM 模型預判與自主學習卡片 -->
+        <!-- 2. 🌀 颱風專區：官方 vs GEM 模型預判與自主學習 -->
         <div class="card border-sky-500/60">
             <div class="card-header !text-sky-300">
-                <span>🌀 颱風專區：官方 vs 模型預判與自主學習</span>
+                <span>2. 🌀 颱風專區：官方 vs 模型預判與自主學習</span>
                 <span class="badge badge-pass text-[8.5px]" id="m-learning-badge">● 自主學習中</span>
             </div>
             <div class="grid grid-cols-2 gap-2 text-[10px] font-mono text-center mb-2">
@@ -266,10 +271,31 @@
             </div>
         </div>
 
-        <!-- 3. 未來三日官方 vs 模型雙軌檢核 -->
+        <!-- 3. 📐 南北雙岸碼頭水體動態剖面與防碰撞資訊 -->
         <div class="card border-[#38bdf8]">
             <div class="card-header !text-[#38bdf8]">
-                <span>3. 📅 未來三日官方 vs 模型雙軌方案</span>
+                <span>3. 📐 南北雙岸碼頭水體動態剖面</span>
+                <span class="badge badge-veto">雙岸失效</span>
+            </div>
+            <div class="space-y-2 text-[10px] font-mono">
+                <div class="bg-[#0f172a] p-2 rounded border border-slate-700">
+                    <div class="text-sky-400 font-bold mb-1">⚓ 北岸主碼頭 (圖冊水深 -3.20m CD)</div>
+                    <div class="flex justify-between"><span>折算波高 (Hs,north):</span><b id="m-hs-north" class="text-red-400">3.93 m</b></div>
+                    <div class="flex justify-between"><span>底隙裕深 (UKC,north):</span><b id="m-ukc-north" class="text-red-400">-1.90 m (坐灘)</b></div>
+                    <div class="flex justify-between"><span>預留乾舷 (FB,north):</span><b id="m-fb-north" class="text-red-400">0.15 m (越浪)</b></div>
+                </div>
+                <div class="bg-[#0f172a] p-2 rounded border border-slate-700">
+                    <div class="text-emerald-400 font-bold mb-1">⚓ 南岸權宜碼頭 (圖冊水深 -5.50m CD)</div>
+                    <div class="flex justify-between"><span>港池波高 (Hs,pier):</span><b id="m-hs-pier" class="text-red-400">3.71 m</b></div>
+                    <div class="flex justify-between"><span>底隙裕深 (UKC,south):</span><b id="m-ukc-south" class="text-red-400">-0.80 m (觸底)</b></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. 未來三日官方 vs 模型雙軌檢核方案 -->
+        <div class="card border-[#38bdf8]">
+            <div class="card-header !text-[#38bdf8]">
+                <span>4. 📅 未來三日官方 vs 模型雙軌方案</span>
                 <span class="badge badge-yellow text-[9px]">預報對齊</span>
             </div>
             <table class="data-table">
@@ -298,10 +324,52 @@
             </table>
         </div>
 
-        <!-- 4. 態勢雷達圖 (含三分頁與 Canvas 自癒) -->
+        <!-- 5. 沿岸主要氣象測站即時監控 -->
+        <div class="card border-slate-700">
+            <div class="card-header">
+                <span class="flex items-center gap-1.5">
+                    <span class="pulse-dot-green"></span> 5. 📡 沿岸主要氣象測站即時監控
+                </span>
+                <span class="text-[9.5px] text-[#38bdf8] font-mono font-bold" id="stationHeartbeatClock">● 監聽中 0.8s 前</span>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th class="w-[28%]">測站 / 類型</th>
+                        <th class="w-[50%]">即時測值 (簡化色標)</th>
+                        <th class="w-[22%] text-center">判定燈號</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><b class="text-white">龜山島外海</b></td>
+                        <td class="font-mono text-[9.5px]">💨 <span class="text-red-400 font-bold">13.8m/s</span> | 🌊 <span class="text-red-400 font-bold">3.71m 大浪</span></td>
+                        <td class="text-center"><span class="badge badge-veto">🔴 官方封島</span></td>
+                    </tr>
+                    <tr class="bg-[#111f38] border-t-2 border-[#38bdf8]">
+                        <td><b class="text-[#38bdf8]">🤖 GEM-V36D</b></td>
+                        <td class="font-mono text-[9.5px]">• Hs <b class="text-red-400">3.71m</b> | Weff <b class="text-red-400">16.5m/s</b></td>
+                        <td class="text-center"><span class="badge badge-veto">🔴 模型熔斷</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 6. 官方公佈開封島標準與關鍵調度時窗 -->
         <div class="card border-[#38bdf8]">
             <div class="card-header !text-[#38bdf8]">
-                <span>4. 🎯 態勢雷達圖 (圖表動態自癒)</span>
+                <span>6. ⏱️ 官方公佈開封島標準與關鍵時窗</span>
+                <span class="badge badge-yellow text-[9.5px]">觀光署對齊</span>
+            </div>
+            <div class="box-alert-danger text-[10.5px]">
+                <b>🎯 關鍵調度執行：</b><span class="text-[#facc15] font-extrabold">11:20 止登截止</span>（雙岸越浪超標，禁止登島）；<span class="text-[#facc15] font-extrabold">14:20 強制清島撤離</span>（全員撤退直航返航烏石港，精算耗時 25 分鐘）。
+            </div>
+        </div>
+
+        <!-- 7. 態勢雷達圖與關鍵調度時序 -->
+        <div class="card border-[#38bdf8]">
+            <div class="card-header !text-[#38bdf8]">
+                <span>7. 🎯 態勢雷達圖與關鍵調度時序</span>
                 <span class="badge badge-yellow text-[9.5px]" id="txtRadarActiveTime">11:20 CST</span>
             </div>
 
@@ -326,10 +394,10 @@
             </div>
         </div>
 
-        <!-- 5. 🚢 智慧避航與海陸聯運引導 -->
+        <!-- 8. 🚢 智慧避航導引與海陸疏運鏈 -->
         <div class="card border-sky-500/60">
             <div class="card-header !text-sky-300">
-                <span>5. 🚢 智慧避航導引與海陸疏運鏈</span>
+                <span>8. 🚢 智慧避航導引與海陸疏運鏈</span>
             </div>
             <div class="grid grid-cols-2 gap-1.5 text-[10px] font-mono">
                 <div class="bg-[#0f172a] p-1.5 rounded border border-slate-700">
@@ -353,7 +421,7 @@
 
     </main>
 
-    <!-- 手機端核心物件腳本 (事件驅動與 Canvas 自癒引擎) -->
+    <!-- 手機端核心物件腳本 -->
     <script>
         const CONSTANTS = { HARD_HS_MAX: 1.13, HARD_WEFF_MAX: 10.17, HARD_UKC_MIN: 1.50, HARD_FB_MIN: 0.50 };
 
@@ -364,7 +432,7 @@
         let activeRadarPier = 'SOUTH';
         let isAutoSyncEnabled = true;
 
-        // 1. 原生 Canvas 雷達圖繪製 (ResizeObserver 自癒)
+        // 雷達圖 Canvas 自適應繪製引擎
         function renderNativeRadar() {
             const canvas = document.getElementById('nativeRadarCanvas');
             if (!canvas) return;
@@ -413,7 +481,6 @@
             }
             ctx.closePath(); ctx.strokeStyle = '#facc15'; ctx.lineWidth = 2; ctx.stroke(); ctx.restore();
 
-            // 多邊形畫法
             function drawPoly(ratios, stroke, fill) {
                 ctx.beginPath();
                 ratios.forEach((ratio, i) => {
@@ -447,7 +514,7 @@
             renderNativeRadar();
         }
 
-        // 2. SSOT 動態水合機制
+        // SSOT 動態水合機制
         async function fetchSSOTFileMobile() {
             if (!isAutoSyncEnabled) return;
             try {
@@ -473,6 +540,12 @@
                         document.getElementById('valMobWeff').textContent = `${pm.w_eff} m/s`;
                         document.getElementById('valMobUKC').textContent = `${pm.ukc_south} m`;
                         document.getElementById('valMobFB').textContent = `${pm.fb_north} m`;
+                        
+                        document.getElementById('m-hs-north').textContent = `${pm.hs_north || (pm.hs_pier * 1.06).toFixed(2)} m`;
+                        document.getElementById('m-ukc-north').textContent = `${pm.ukc_north || '-1.90'} m`;
+                        document.getElementById('m-fb-north').textContent = `${pm.fb_north || '0.15'} m`;
+                        document.getElementById('m-hs-pier').textContent = `${pm.hs_pier} m`;
+                        document.getElementById('m-ukc-south').textContent = `${pm.ukc_south} m`;
                     }
 
                     if (data.evacuation_routing) {
