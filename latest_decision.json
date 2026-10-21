@@ -1,13 +1,13 @@
 {
   "version": "v65.4-Dual-Sync-Learning-Engine",
-  "timestamp": "2026-10-21 16:47:21 CST",
+  "timestamp": "2026-10-21 17:13:09 CST",
   "date_str": "2026-10-21 (三)",
   "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)",
   "hard_veto_alert": true,
   "e_net": 25.66,
   "p_veto": 1.0,
   "typhoon_section": {
-    "model_predicted_start": "2026-10-21 18:00 CST",
+    "model_predicted_start": "2026-10-21 19:00 CST",
     "model_predicted_days": 3,
     "official_announced_start": "2026-10-21 08:00 CST",
     "official_announced_days": 3,
