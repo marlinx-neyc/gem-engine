@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🌊 GEM Engine v66.0 龜山島戰術指揮中樞</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg-dark: #080e1a;
+            --card-bg: #111c2e;
+            --card-border: #1e2d4a;
+            --accent-blue: #38bdf8;
+            --status-danger: #ef4444;
+            --status-pass: #10b981;
+        }
+        body { background-color: var(--bg-dark); color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 12px; }
+        button, summary, input[type="range"] { cursor: pointer !important; }
+        .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 12px; margin-bottom: 12px; }
+        .badge { font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+        .badge-veto { background: rgba(239, 68, 68, 0.25); color: #fca5a5; border: 1px solid var(--status-danger); }
+        .badge-pass { background: rgba(16, 185, 129, 0.25); color: #86efac; border: 1px solid var(--status-pass); }
+        .canvas-container { position: relative; width: 100%; background: #050a14; border-radius: 8px; border: 1px solid #1e2d4a; }
+        details summary::-webkit-details-marker { display: none; }
+    </style>
+</head>
+<body class="max-w-[1600px] mx-auto">
+
+    <!-- 頂部 VETO 警示橫幅 -->
+    <div id="vetoBanner" class="bg-red-600 text-white font-extrabold text-xs md:text-sm py-2 px-3 rounded-lg mb-3 text-center shadow-lg animate-pulse">
+        🚨 警示：觸發物理 VETO 熔斷（浪高/風速/水深超標），強制執行防颱封島管制！
+    </div>
+
+    <!-- Master Header -->
+    <header class="card border-l-[6px] border-l-red-500 flex flex-wrap justify-between items-center gap-2">
+        <div>
+            <h1 class="text-base md:text-lg font-black flex items-center gap-2">
+                🌊 龜山島戰術指揮中樞 <span class="text-xs text-[#38bdf8] font-mono">(GEM OOP Engine v66.0)</span>
+            </h1>
+            <div class="text-xs text-slate-300 mt-1 flex flex-wrap gap-2 font-mono">
+                <span>時間: <b id="liveClock" class="text-white bg-white/10 px-1 py-0.5 rounded">--:--:-- CST</b></span>
+                <span>| 日期: <b id="liveDate" class="text-emerald-300">2026-10-22</b></span>
+                <span>| 心跳: <b id="heartbeatCounter" class="text-[#38bdf8]">0</b></span>
+            </div>
+        </div>
+        <span class="badge badge-veto text-xs px-3 py-1" id="mainStatusBadge">🔴 0.0% 剛性熔斷</span>
+    </header>
+
+    <!-- 雙欄/單欄自適應主佈局 -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-3">
+        
+        <!-- 左側面板 (颱風專區 + 沙盤 + 剖面) -->
+        <div class="lg:col-span-5 flex flex-col gap-1">
+            
+            <!-- 🌀 颱風專區 (可收合) -->
+            <details class="card border-red-500/50 bg-[#180d1a]" open>
+                <summary class="font-extrabold text-sm text-red-400 flex justify-between items-center cursor-pointer">
+                    <span>🌀 颱風專區：NCDR動態路徑/行政開設層級</span>
+                    <span class="text-xs text-slate-400">▼ 折疊</span>
+                </summary>
+                <div class="mt-3 pt-2 border-t border-red-500/30 text-xs space-y-2">
+                    <div class="grid grid-cols-2 gap-2 bg-red-950/40 p-2 rounded">
+                        <div>中央應變中心：<span class="badge badge-veto">🔴 一級開設</span></div>
+                        <div>宜蘭縣應變中心：<span class="badge text-amber-300 border border-amber-500 bg-amber-950/40">🟡 二級開設</span></div>
+                    </div>
+                    <div class="bg-black/50 p-2 rounded border border-slate-700">
+                        <div class="font-bold text-[#38bdf8] mb-1">🗺️ NCDR 暴風圈侵襲動態</div>
+                        <div class="text-[11px] text-slate-300">強烈颱風第21號 | 侵襲率 88% | 近接距離 45km</div>
+                    </div>
+                    <div class="bg-black/40 p-2 rounded text-[11px] font-mono text-red-300">
+                        致命警戒值：Hs &gt; 1.20m | Tp &ge; 11.5s | Weff &gt; 10.17m/s | UKC &lt; 1.50m
+                    </div>
+                </div>
+            </details>
+
+            <!-- 🎮 沙盤調度演練 -->
+            <section class="card border-blue-500/50">
+                <div class="font-bold text-xs text-[#38bdf8] mb-2 flex justify-between">
+                    <span>🎮 戰術沙盤調度演練</span>
+                    <button id="btnLiveToggle" class="text-[10px] border border-[#38bdf8] px-2 py-0.5 rounded-full text-[#38bdf8]">● 實時監聽</button>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div class="slider-item">
+                        <div class="flex justify-between text-[11px]"><span>波高 Hs</span><b id="lblHs" class="text-[#38bdf8]">3.71m</b></div>
+                        <input type="range" id="rngHs" min="0.4" max="6.0" step="0.05" value="3.71">
+                    </div>
+                    <div class="slider-item">
+                        <div class="flex justify-between text-[11px]"><span>風速 W</span><b id="lblW" class="text-[#38bdf8]">8.50m/s</b></div>
+                        <input type="range" id="rngW" min="2.0" max="22.0" step="0.2" value="8.50">
+                    </div>
+                </div>
+            </section>
+
+            <!-- 📐 剖面圖形 Canvas -->
+            <section class="card border-[#38bdf8]">
+                <div class="font-bold text-xs text-[#38bdf8] mb-2">📐 南北岸動態水深與碼頭剖面圖示</div>
+                <div class="canvas-container h-[200px]" id="profileContainer">
+                    <canvas id="profileCanvas"></canvas>
+                </div>
+            </section>
+        </div>
+
+        <!-- 右側面板 (剛性指標 + 雙軌比對 + 雷達圖) -->
+        <div class="lg:col-span-7 flex flex-col gap-1">
+            
+            <!-- ⚖️ 剛性指標檢核 -->
+            <section class="card border-[#38bdf8]">
+                <div class="font-bold text-xs text-[#38bdf8] mb-2">⚖️ PINN 剛性水文指標分欄檢核表</div>
+                <div class="grid grid-cols-4 gap-1 text-center text-xs font-mono border-t border-slate-700 pt-2">
+                    <div>Hs: <b id="valHs" class="text-red-400">3.71m</b></div>
+                    <div>Weff: <b id="valWeff" class="text-emerald-400">5.46m/s</b></div>
+                    <div>UKC: <b id="valUKC" class="text-red-400">-0.80m</b></div>
+                    <div>FB: <b id="valFB" class="text-red-400">0.15m</b></div>
+                </div>
+            </section>
+
+            <!-- ⏱️ 關鍵調度時窗 -->
+            <section class="card border-amber-500/50 bg-amber-950/20 text-xs">
+                <span class="font-bold text-amber-300">🎯 關鍵游擊調度執行時窗：</span>
+                <span class="text-yellow-200">11:20 止登截止（雙岸越浪超標） | 14:20 強制清島撤離（直航返烏石港）</span>
+            </section>
+
+            <!-- 🎯 六角態勢雷達圖 Canvas -->
+            <section class="card border-[#38bdf8]">
+                <div class="font-bold text-xs text-[#38bdf8] mb-2 flex justify-between">
+                    <span>🎯 態勢雷達圖與關鍵調度時序 (11:20 止登)</span>
+                    <span class="text-slate-400 text-[10px]">黃虛線: 100% 限值</span>
+                </div>
+                <div class="canvas-container h-[320px]" id="radarContainer">
+                    <canvas id="radarCanvas"></canvas>
+                </div>
+            </section>
+        </div>
+
+    </div>
+
+    <!-- OBJECT-ORIENTED FRONTEND ARCHITECTURE -->
+    <script>
+        // 1. STATE MANAGER (Observer Pattern)
+        class GEMState {
+            constructor() {
+                this.telemetry = { hs: 3.71, w: 8.50, tp: 15.5, deltaTheta: 50, tide: 1.00 };
+                this.listeners = [];
+            }
+            subscribe(listener) { this.listeners.push(listener); }
+            notify() { this.listeners.forEach(cb => cb(this.telemetry)); }
+            updateTelemetry(params) {
+                Object.assign(this.telemetry, params);
+                this.notify();
+            }
+        }
+
+        // 2. PHYSICS DOMAIN ENGINE
+        class GEMPhysicsEngine {
+            static evaluate(tel) {
+                const rad = tel.deltaTheta * (Math.PI / 180);
+                const w_eff = Number((tel.w * Math.abs(Math.cos(rad))).toFixed(2));
+                const ukc_south = Number((5.50 + tel.tide - 2.02 - tel.hs).toFixed(2));
+                const ukc_north = Number((3.20 + tel.tide - 2.02 - (tel.hs * 1.06)).toFixed(2));
+                const fb = 0.15;
+                const hasVeto = tel.hs > 1.20 || tel.tp >= 11.5 || w_eff > 10.17 || ukc_south < 1.50 || fb < 0.50;
+
+                return { hs: tel.hs, w_eff, ukc_south, ukc_north, fb, hasVeto };
+            }
+        }
+
+        // 3. CANVAS RENDERER FOR PROFILE
+        class ProfileRenderer {
+            constructor(canvasId, containerId) {
+                this.canvas = document.getElementById(canvasId);
+                this.container = document.getElementById(containerId);
+            }
+            render(res) {
+                if (!this.canvas) return;
+                const dpr = window.devicePixelRatio || 1;
+                const w = this.container.clientWidth || 300;
+                const h = 200;
+                this.canvas.width = w * dpr; this.canvas.height = h * dpr;
+                this.canvas.style.width = w + 'px'; this.canvas.style.height = h + 'px';
+
+                const ctx = this.canvas.getContext('2d');
+                ctx.scale(dpr, dpr);
+                ctx.fillStyle = '#050a14'; ctx.fillRect(0, 0, w, h);
+
+                // Structure
+                ctx.fillStyle = '#1e2d4a'; ctx.fillRect(w * 0.55, h * 0.35, w * 0.45, h * 0.65);
+                // Water
+                ctx.fillStyle = 'rgba(56, 189, 248, 0.35)';
+                ctx.beginPath(); ctx.moveTo(0, h * 0.45);
+                for (let x = 0; x <= w * 0.55; x += 10) ctx.lineTo(x, h * 0.45 + Math.sin(x * 0.05) * (res.hs * 3));
+                ctx.lineTo(w * 0.55, h); ctx.lineTo(0, h); ctx.fill();
+
+                ctx.font = 'bold 11px sans-serif'; ctx.fillStyle = '#38bdf8';
+                ctx.fillText(`南岸碼頭 CD -5.5m | UKC: ${res.ukc_south}m`, 10, 20);
+            }
+        }
+
+        // 4. CANVAS RENDERER FOR RADAR
+        class RadarRenderer {
+            constructor(canvasId, containerId) {
+                this.canvas = document.getElementById(canvasId);
+                this.container = document.getElementById(containerId);
+            }
+            render(res) {
+                if (!this.canvas) return;
+                const dpr = window.devicePixelRatio || 1;
+                const w = this.container.clientWidth || 300;
+                const h = 320;
+                this.canvas.width = w * dpr; this.canvas.height = h * dpr;
+                this.canvas.style.width = w + 'px'; this.canvas.style.height = h + 'px';
+
+                const ctx = this.canvas.getContext('2d');
+                ctx.scale(dpr, dpr);
+                const cx = w / 2, cy = h / 2, R = Math.min(w * 0.28, 90);
+
+                // Grid
+                ctx.strokeStyle = '#334155'; ctx.lineWidth = 1;
+                [0.5, 1.0].forEach(r => {
+                    ctx.beginPath(); ctx.arc(cx, cy, R * r, 0, Math.PI * 2); ctx.stroke();
+                });
+
+                // Polygon
+                ctx.beginPath();
+                ctx.arc(cx, cy, R * (res.hasVeto ? 1.1 : 0.5), 0, Math.PI * 2);
+                ctx.fillStyle = res.hasVeto ? 'rgba(239,68,68,0.4)' : 'rgba(16,185,129,0.4)';
+                ctx.fill(); ctx.strokeStyle = res.hasVeto ? '#ef4444' : '#10b981'; ctx.lineWidth = 2; ctx.stroke();
+
+                ctx.font = 'bold 12px sans-serif'; ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center';
+                ctx.fillText(res.hasVeto ? '🔴 0.0% 物理熔斷' : '🟢 100% 通航', cx, cy + 4);
+            }
+        }
+
+        // 5. APPLICATION CONTROLLER
+        class GEMDashboardApp {
+            constructor() {
+                this.state = new GEMState();
+                this.profileRenderer = new ProfileRenderer('profileCanvas', 'profileContainer');
+                this.radarRenderer = new RadarRenderer('radarCanvas', 'radarContainer');
+                this.heartbeat = 0;
+
+                this.init();
+            }
+            init() {
+                this.state.subscribe(tel => this.onStateChange(tel));
+                this.bindEvents();
+                this.startTimers();
+                this.state.notify();
+            }
+            bindEvents() {
+                document.getElementById('rngHs').addEventListener('input', e => {
+                    document.getElementById('lblHs').textContent = `${e.target.value}m`;
+                    this.state.updateTelemetry({ hs: parseFloat(e.target.value) });
+                });
+                document.getElementById('rngW').addEventListener('input', e => {
+                    document.getElementById('lblW').textContent = `${e.target.value}m/s`;
+                    this.state.updateTelemetry({ w: parseFloat(e.target.value) });
+                });
+                window.addEventListener('resize', () => this.state.notify());
+            }
+            onStateChange(tel) {
+                const res = GEMPhysicsEngine.evaluate(tel);
+                
+                document.getElementById('valHs').textContent = `${res.hs}m`;
+                document.getElementById('valWeff').textContent = `${res.w_eff}m/s`;
+                document.getElementById('valUKC').textContent = `${res.ukc_south}m`;
+                document.getElementById('valFB').textContent = `${res.fb}m`;
+
+                this.profileRenderer.render(res);
+                this.radarRenderer.render(res);
+            }
+            startTimers() {
+                setInterval(() => {
+                    const now = new Date();
+                    document.getElementById('liveClock').textContent = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} CST`;
+                    if (now.getSeconds() % 5 === 0) {
+                        this.heartbeat++;
+                        document.getElementById('heartbeatCounter').textContent = this.heartbeat;
+                    }
+                }, 1000);
+            }
+        }
+
+        // Entrypoint
+        window.addEventListener('DOMContentLoaded', () => new GEMDashboardApp());
+    </script>
+</body>
+</html>
