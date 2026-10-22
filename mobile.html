@@ -103,7 +103,6 @@
         }
         .canvas-container {
             position: relative; width: 100%; border-radius: 8px; overflow: hidden; background: #050a14; border: 1px solid #1e2d4a;
-            transition: height 0.25s ease-in-out;
         }
         .tab-active { background: #2563eb !important; color: #ffffff !important; border-color: #60a5fa !important; box-shadow: 0 0 10px rgba(37, 99, 235, 0.5); }
         .tab-south-active { background: #059669 !important; color: #ffffff !important; border-color: #34d399 !important; box-shadow: 0 0 10px rgba(5, 150, 105, 0.5); }
@@ -526,7 +525,7 @@
                     </div>
                 </div>
 
-                <div class="canvas-container h-[340px]" id="radarContainer">
+                <div class="canvas-container h-[360px]" id="radarContainer">
                     <canvas id="nativeRadarCanvas" class="w-full h-full block"></canvas>
                 </div>
 
@@ -792,7 +791,7 @@
             }
         }
 
-        // 4. CANVAS RENDERER: RADAR (DYNAMIC NORTH VS SOUTH MULTI-AXIS)
+        // 4. CANVAS RENDERER: RADAR (RESPONSIVE NO-CUTOFF RENDERER)
         class RadarCanvasRenderer {
             constructor(canvasId, containerId) {
                 this.canvas = document.getElementById(canvasId);
@@ -802,7 +801,7 @@
                 if (!this.canvas) return;
                 const dpr = window.devicePixelRatio || 1;
                 const w = this.container.clientWidth || 340;
-                const h = 340;
+                const h = 360;
                 this.canvas.width = w * dpr; this.canvas.height = h * dpr;
                 this.canvas.style.width = w + 'px'; this.canvas.style.height = h + 'px';
 
@@ -810,7 +809,10 @@
                 ctx.scale(dpr, dpr);
                 ctx.fillStyle = '#050a14'; ctx.fillRect(0, 0, w, h);
 
-                const cx = w / 2, cy = h * 0.46, R = Math.min(w * 0.27, 88), count = 6;
+                const cx = w / 2;
+                const cy = h * 0.42;
+                const R = Math.min(w * 0.18, h * 0.18, 62);
+                const count = 6;
                 const angles = [];
                 for (let i = 0; i < count; i++) angles.push(-Math.PI / 2 + (i * 2 * Math.PI) / count);
 
@@ -829,7 +831,7 @@
                 // Axis Web Lines
                 for (let i = 0; i < count; i++) {
                     ctx.beginPath(); ctx.moveTo(cx, cy);
-                    ctx.lineTo(cx + R * 1.25 * Math.cos(angles[i]), cy + R * 1.25 * Math.sin(angles[i]));
+                    ctx.lineTo(cx + R * 1.22 * Math.cos(angles[i]), cy + R * 1.22 * Math.sin(angles[i]));
                     ctx.strokeStyle = '#334155'; ctx.lineWidth = 1; ctx.stroke();
                 }
 
@@ -905,23 +907,25 @@
                     { title: 'CV 越浪率', sVal: `${southData.q}L`, nVal: `${northData.q}L`, limit: '限0L/s/m', sPass: southData.q === 0, nPass: northData.q === 0 }
                 ];
 
-                ctx.font = 'bold 9px sans-serif'; ctx.textBaseline = 'middle';
+                ctx.textBaseline = 'middle';
                 indicators.forEach((ind, i) => {
                     let lx = cx, ly = cy, align = 'center';
-                    if (i === 0) { lx = cx; ly = cy - R * 1.30 - 8; align = 'center'; }
-                    else if (i === 3) { lx = cx; ly = cy + R * 1.30 + 8; align = 'center'; }
-                    else if (i === 1 || i === 2) { lx = cx + R * 1.32 * Math.cos(angles[i]) + 6; ly = cy + R * 1.26 * Math.sin(angles[i]); align = 'left'; }
-                    else { lx = cx + R * 1.32 * Math.cos(angles[i]) - 6; ly = cy + R * 1.26 * Math.sin(angles[i]); align = 'right'; }
+                    if (i === 0) { lx = cx; ly = cy - R * 1.22 - 6; align = 'center'; }
+                    else if (i === 3) { lx = cx; ly = cy + R * 1.22 + 6; align = 'center'; }
+                    else if (i === 1 || i === 2) { lx = cx + R * 1.20 * Math.cos(angles[i]) + 4; ly = cy + R * 1.20 * Math.sin(angles[i]); align = 'left'; }
+                    else { lx = cx + R * 1.20 * Math.cos(angles[i]) - 4; ly = cy + R * 1.20 * Math.sin(angles[i]); align = 'right'; }
 
                     ctx.textAlign = align;
+                    ctx.font = 'bold 8.5px sans-serif';
                     ctx.fillStyle = '#f8fafc';
-                    ctx.fillText(`${ind.title} (${ind.limit})`, lx, ly - 7);
+                    ctx.fillText(`${ind.title} (${ind.limit})`, lx, ly - 6);
 
+                    ctx.font = 'bold 8.5px monospace';
                     if (mode === 'COMPARE') {
                         ctx.fillStyle = ind.sPass ? '#34d399' : '#f87171';
                         ctx.fillText(`南:${ind.sVal}${ind.sPass ? '🟢' : '🔴'}`, lx, ly + 5);
                         ctx.fillStyle = ind.nPass ? '#38bdf8' : '#f87171';
-                        ctx.fillText(`北:${ind.nVal}${ind.nPass ? '🟢' : '🔴'}`, lx, ly + 16);
+                        ctx.fillText(`北:${ind.nVal}${ind.nPass ? '🟢' : '🔴'}`, lx, ly + 15);
                     } else if (mode === 'NORTH') {
                         ctx.fillStyle = ind.nPass ? '#38bdf8' : '#f87171';
                         ctx.fillText(`北岸: ${ind.nVal} [${ind.nPass ? '🟢合格' : '🔴超標'}]`, lx, ly + 6);
@@ -931,14 +935,14 @@
                     }
                 });
 
-                ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
+                ctx.font = 'bold 9.5px sans-serif'; ctx.textAlign = 'center';
                 if (mode === 'COMPARE') {
-                    ctx.fillStyle = '#10b981'; ctx.fillText('🟢 南岸 (權宜背風 -5.5m)', cx - 60, h - 12);
-                    ctx.fillStyle = '#38bdf8'; ctx.fillText('🔷 北岸 (主泊迎風 -3.2m)', cx + 60, h - 12);
+                    ctx.fillStyle = '#10b981'; ctx.fillText('🟢 南岸 (權宜背風 -5.5m)', cx - 60, h - 10);
+                    ctx.fillStyle = '#38bdf8'; ctx.fillText('🔷 北岸 (主泊迎風 -3.2m)', cx + 60, h - 10);
                 } else if (mode === 'NORTH') {
-                    ctx.fillStyle = '#38bdf8'; ctx.fillText('🔷 正在檢視：北岸碼頭 (迎風面 -3.2m CD)', cx, h - 12);
+                    ctx.fillStyle = '#38bdf8'; ctx.fillText('🔷 正在檢視：北岸碼頭 (迎風面 -3.2m CD)', cx, h - 10);
                 } else {
-                    ctx.fillStyle = '#10b981'; ctx.fillText('🟢 正在檢視：南岸碼頭 (背風面 -5.5m CD)', cx, h - 12);
+                    ctx.fillStyle = '#10b981'; ctx.fillText('🟢 正在檢視：南岸碼頭 (背風面 -5.5m CD)', cx, h - 10);
                 }
             }
 
@@ -954,14 +958,14 @@
                 }
                 ctx.closePath();
                 ctx.fillStyle = fillColor; ctx.fill();
-                ctx.strokeStyle = strokeColor; ctx.lineWidth = 2.2; ctx.stroke();
+                ctx.strokeStyle = strokeColor; ctx.lineWidth = 2.0; ctx.stroke();
 
                 for (let i = 0; i < angles.length; i++) {
                     const val = Math.max(0.15, Math.min(1.35, ratios[i]));
                     const r = R * val;
                     const x = cx + r * Math.cos(angles[i]);
                     const y = cy + r * Math.sin(angles[i]);
-                    ctx.beginPath(); ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+                    ctx.beginPath(); ctx.arc(x, y, 3.0, 0, Math.PI * 2);
                     ctx.fillStyle = strokeColor; ctx.fill();
                 }
             }
