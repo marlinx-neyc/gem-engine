@@ -1,6 +1,6 @@
 {
-  "version": "v65.5-Desktop-Universal-SSOT",
-  "timestamp": "2026-10-22 09:20:56 CST",
+  "version": "v65.4-Dual-Sync-Learning-Engine",
+  "timestamp": "2026-10-22 09:27:15 CST",
   "date_str": "2026-10-22 (四)",
   "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)",
   "hard_veto_alert": true,
@@ -15,7 +15,7 @@
     "is_aligned": true,
     "accuracy_score": 100.0,
     "feedback_applied": true,
-    "future_trend_summary": "🌀 颱風外圍長浪持續穿透，雙岸湧浪高於 1.5m，預估第 4 日減弱通航。"
+    "future_trend_summary": "🌀 颱風外圍長浪持續穿透，雙岸湧浪高於1.5m，預計第4日減弱通航。"
   },
   "historical_warning_thresholds": {
     "critical_hs_m": 1.2,
@@ -23,20 +23,6 @@
     "critical_weff_ms": 10.17,
     "critical_ukc_m": 1.5,
     "critical_fb_m": 0.5
-  },
-  "pier_seats_spec": {
-    "north_pier": {
-      "role": "主泊位 (迎風面)",
-      "chart_depth_m": 3.2,
-      "deck_height_m": 3.2,
-      "status": "🔴 嚴重大浪坐灘 (UKC -1.90m)"
-    },
-    "south_pier": {
-      "role": "權宜泊位 (背風面)",
-      "chart_depth_m": 5.5,
-      "deck_height_m": 2.5,
-      "status": "🔴 繞射長浪觸底 (UKC -0.80m)"
-    }
   },
   "physics_metrics": {
     "hs_pier": 3.71,
