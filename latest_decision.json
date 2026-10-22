@@ -1,6 +1,6 @@
 {
-  "version": "v66.0-Integrated-RL-80Pct-CBR",
-  "timestamp": "2026-10-22 11:00:39 CST",
+  "version": "v66.0-90Pct-Hexagram-RL-Master",
+  "timestamp": "2026-10-22 11:05:52 CST",
   "date_str": "2026-10-22 (四)",
   "decision": "🔴 0.0% 全線物理熔斷：雙岸越浪/觸底超標，強制執行防颱封島管制。",
   "hard_veto_alert": true,
@@ -9,7 +9,7 @@
     "decision_level": "HARD_VETO",
     "clearance_percentage": 0.0,
     "active_pier": "NONE",
-    "similarity_score": 98.9,
+    "similarity_score": 100.0,
     "matched_case_id": "CASE_20240812",
     "stop_boarding_time": "2026-10-22 08:00 CST (未開放)",
     "evacuation_time": "即刻直航返航烏石港",
@@ -53,6 +53,8 @@
     "ukc_south": 1.92,
     "fb_north": 0.15,
     "fb_south": 0.15,
+    "hexagram": "坎為水",
+    "moving_line": 6,
     "qimen_door": "死門",
     "vessel_spec": {
       "static_draft_m": 1.2,
