@@ -1,18 +1,20 @@
 {
-  "version": "v66.0-Refined-GreyArea-Tactics",
-  "timestamp": "2026-10-22 10:50:50 CST",
+  "version": "v66.0-Integrated-RL-80Pct-CBR",
+  "timestamp": "2026-10-22 11:00:39 CST",
   "date_str": "2026-10-22 (四)",
-  "decision": "🔴 0.0% 全線物理熔斷：雙岸越浪/觸底超標，強制執行防颱封島管制，禁止任何船隻靠泊。",
+  "decision": "🔴 0.0% 全線物理熔斷：雙岸越浪/觸底超標，強制執行防颱封島管制。",
   "hard_veto_alert": true,
   "tactical_guerrilla_route": {
     "allow_boarding": false,
     "decision_level": "HARD_VETO",
     "clearance_percentage": 0.0,
     "active_pier": "NONE",
+    "similarity_score": 98.9,
+    "matched_case_id": "CASE_20240812",
     "stop_boarding_time": "2026-10-22 08:00 CST (未開放)",
     "evacuation_time": "即刻直航返航烏石港",
     "transit_duration_mins": 25,
-    "tactical_instruction": "🔴 0.0% 全線物理熔斷：雙岸越浪/觸底超標，強制執行防颱封島管制，禁止任何船隻靠泊。"
+    "tactical_instruction": "🔴 0.0% 全線物理熔斷：雙岸越浪/觸底超標，強制執行防颱封島管制。"
   },
   "japan_oceanic_telemetry": {
     "v_kuroshio_ms": 1.38,
@@ -44,12 +46,14 @@
     "hs_pier": 2.68,
     "hs_north": 4.59,
     "hs_south": 2.68,
+    "tp_s": 15.5,
     "w_eff_north": 6.11,
     "w_eff_south": 7.28,
     "ukc_north": -2.29,
     "ukc_south": 1.92,
     "fb_north": 0.15,
     "fb_south": 0.15,
+    "qimen_door": "死門",
     "vessel_spec": {
       "static_draft_m": 1.2,
       "dynamic_squat_m": 0.82,
