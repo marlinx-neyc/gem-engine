@@ -1,14 +1,16 @@
 {
-  "version": "v66.0-Japan-Assimilated-Master",
-  "timestamp": "2026-10-22 10:22:40 CST",
+  "version": "v66.0-Live-Japan-API-Assimilated",
+  "timestamp": "2026-10-22 10:26:57 CST",
   "date_str": "2026-10-22 (四)",
   "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)",
   "hard_veto_alert": true,
   "japan_oceanic_telemetry": {
     "v_kuroshio_ms": 1.38,
     "ssh_anomaly_m": 0.12,
-    "tp_jma_farfield_s": 15.5,
-    "wave_current_factor": 1.166
+    "tp_jma_farfield_s": 13.2,
+    "wave_current_factor": 1.166,
+    "api_source": "LIVE_JMA_MARINE_API",
+    "is_fallback": false
   },
   "typhoon_section": {
     "model_predicted_start": "2026-10-22 08:00 CST",
