@@ -1,6 +1,6 @@
 {
   "version": "v66.0-90Pct-Hexagram-RL-Master",
-  "timestamp": "2026-10-22 11:06:44 CST",
+  "timestamp": "2026-10-22 12:39:30 CST",
   "date_str": "2026-10-22 (四)",
   "decision": "🔴 0.0% 全線物理熔斷：雙岸越浪/觸底超標，強制執行防颱封島管制。",
   "hard_veto_alert": true,
@@ -19,7 +19,7 @@
   "japan_oceanic_telemetry": {
     "v_kuroshio_ms": 1.38,
     "ssh_anomaly_m": 0.12,
-    "tp_jma_farfield_s": 13.25,
+    "tp_jma_farfield_s": 13.4,
     "wave_current_factor": 1.166,
     "api_source": "LIVE_JMA_MARINE_API",
     "is_fallback": false
