@@ -1,6 +1,6 @@
 {
   "version": "v66.0-Modular-OOP-Architecture",
-  "timestamp": "2026-10-22 09:45:35 CST",
+  "timestamp": "2026-10-22 10:01:11 CST",
   "date_str": "2026-10-22 (四)",
   "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)",
   "hard_veto_alert": true,
@@ -31,18 +31,41 @@
     "ukc_south": 0.77,
     "fb_north": 0.15,
     "fb_south": 0.15,
+    "vessel_spec": {
+      "static_draft_m": 1.2,
+      "dynamic_squat_m": 0.82,
+      "total_draft_m": 2.02
+    },
+    "overtopping": {
+      "north": {
+        "depth_m": 0.0,
+        "q_rate_lsm": 0.0,
+        "is_overtopping": false
+      },
+      "south": {
+        "depth_m": 0.35,
+        "q_rate_lsm": 0.53,
+        "is_overtopping": true
+      }
+    },
     "has_veto": true
   },
   "pier_seats_spec": {
     "north_pier": {
       "role": "主泊位 (迎風面)",
-      "depth_m": 3.2,
-      "status": "🔴 大浪坐灘"
+      "chart_depth_m": 3.2,
+      "deck_height_m": 3.2,
+      "ukc_m": -1.75,
+      "overtopping_q_lsm": 0.0,
+      "status": "🔴 嚴重大浪坐灘 (UKC -1.90m)"
     },
     "south_pier": {
       "role": "權宜泊位 (背風面)",
-      "depth_m": 5.5,
-      "status": "🔴 湧浪觸底"
+      "chart_depth_m": 5.5,
+      "deck_height_m": 2.5,
+      "ukc_m": 0.77,
+      "overtopping_q_lsm": 0.53,
+      "status": "🔴 繞射長浪觸底 (UKC -0.80m)"
     }
   }
 }
