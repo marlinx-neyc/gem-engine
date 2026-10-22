@@ -1,19 +1,25 @@
 {
-  "version": "v66.0-Modular-OOP-Architecture",
-  "timestamp": "2026-10-22 10:01:59 CST",
+  "version": "v66.0-Japan-Assimilated-Master",
+  "timestamp": "2026-10-22 10:22:22 CST",
   "date_str": "2026-10-22 (四)",
   "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)",
   "hard_veto_alert": true,
+  "japan_oceanic_telemetry": {
+    "v_kuroshio_ms": 1.38,
+    "ssh_anomaly_m": 0.12,
+    "tp_jma_farfield_s": 15.5,
+    "wave_current_factor": 1.166
+  },
   "typhoon_section": {
     "model_predicted_start": "2026-10-22 08:00 CST",
     "model_predicted_days": 3,
     "official_announced_start": "2026-10-22 08:00 CST",
     "official_announced_days": 3,
-    "lead_time_hours": 12.0,
+    "lead_time_hours": 36.0,
     "is_aligned": true,
     "accuracy_score": 100.0,
     "feedback_applied": true,
-    "future_trend_summary": "🌀 颱風外圍長浪穿透，雙岸湧浪>1.5m，預估第4日恢復通航。"
+    "future_trend_summary": "🌀 JMA 遠場長浪(15.5s)穿透，雙岸湧浪超標，預估第4日恢復通航。"
   },
   "historical_warning_thresholds": {
     "critical_hs_m": 1.2,
@@ -23,12 +29,13 @@
     "critical_fb_m": 0.5
   },
   "physics_metrics": {
-    "hs_pier": 3.71,
-    "hs_north": 3.93,
-    "hs_south": 3.71,
-    "w_eff": 6.11,
-    "ukc_north": -1.75,
-    "ukc_south": 0.77,
+    "hs_pier": 2.68,
+    "hs_north": 4.59,
+    "hs_south": 2.68,
+    "w_eff_north": 6.11,
+    "w_eff_south": 7.28,
+    "ukc_north": -2.29,
+    "ukc_south": 1.92,
     "fb_north": 0.15,
     "fb_south": 0.15,
     "vessel_spec": {
@@ -38,34 +45,34 @@
     },
     "overtopping": {
       "north": {
+        "depth_m": 0.21,
+        "q_rate_lsm": 0.32,
+        "is_overtopping": true
+      },
+      "south": {
         "depth_m": 0.0,
         "q_rate_lsm": 0.0,
         "is_overtopping": false
-      },
-      "south": {
-        "depth_m": 0.35,
-        "q_rate_lsm": 0.53,
-        "is_overtopping": true
       }
     },
+    "has_veto_north": true,
+    "has_veto_south": true,
     "has_veto": true
   },
   "pier_seats_spec": {
     "north_pier": {
-      "role": "主泊位 (迎風面)",
+      "role": "主泊位 (迎風面 -3.2m CD)",
       "chart_depth_m": 3.2,
-      "deck_height_m": 3.2,
-      "ukc_m": -1.75,
-      "overtopping_q_lsm": 0.0,
-      "status": "🔴 嚴重大浪坐灘 (UKC -1.90m)"
+      "ukc_m": -2.29,
+      "overtopping_q_lsm": 0.32,
+      "status": "🔴 巨浪坐灘熔斷"
     },
     "south_pier": {
-      "role": "權宜泊位 (背風面)",
+      "role": "權宜泊位 (背風面 -5.5m CD)",
       "chart_depth_m": 5.5,
-      "deck_height_m": 2.5,
-      "ukc_m": 0.77,
-      "overtopping_q_lsm": 0.53,
-      "status": "🔴 繞射長浪觸底 (UKC -0.80m)"
+      "ukc_m": 1.92,
+      "overtopping_q_lsm": 0.0,
+      "status": "🔴 繞射浪觸底熔斷"
     }
   }
 }
