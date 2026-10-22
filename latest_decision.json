@@ -1,9 +1,28 @@
 {
-  "version": "v66.0-90Pct-Hexagram-RL-Master",
-  "timestamp": "2026-10-22 12:39:30 CST",
+  "version": "v66.0-Full-Assimilation-Gemini-AI-Master",
+  "timestamp": "2026-10-22 12:44:24 CST",
   "date_str": "2026-10-22 (四)",
   "decision": "🔴 0.0% 全線物理熔斷：雙岸越浪/觸底超標，強制執行防颱封島管制。",
+  "ai_commander_briefing": "🤖 [GEM AI 簡報]: 🔴 0.0% 全線物理熔斷：雙岸越浪/觸底超標，強制執行防颱封島管制。",
   "hard_veto_alert": true,
+  "cwa_buoy_telemetry": {
+    "guishan_hs_m": 3.71,
+    "guishan_tp_s": 15.5,
+    "guishan_wind_ms": 9.5,
+    "suao_hs_m": 3.1,
+    "wushi_hs_m": 2.05,
+    "longdong_hs_m": 3.3,
+    "api_source": "CWA_FALLBACK_BASELINE",
+    "is_fallback": true
+  },
+  "japan_oceanic_telemetry": {
+    "v_kuroshio_ms": 1.38,
+    "ssh_anomaly_m": 0.12,
+    "tp_jma_farfield_s": 13.4,
+    "wave_current_factor": 1.166,
+    "api_source": "LIVE_JMA_MARINE_API",
+    "is_fallback": false
+  },
   "tactical_guerrilla_route": {
     "allow_boarding": false,
     "decision_level": "HARD_VETO",
@@ -15,14 +34,6 @@
     "evacuation_time": "即刻直航返航烏石港",
     "transit_duration_mins": 25,
     "tactical_instruction": "🔴 0.0% 全線物理熔斷：雙岸越浪/觸底超標，強制執行防颱封島管制。"
-  },
-  "japan_oceanic_telemetry": {
-    "v_kuroshio_ms": 1.38,
-    "ssh_anomaly_m": 0.12,
-    "tp_jma_farfield_s": 13.4,
-    "wave_current_factor": 1.166,
-    "api_source": "LIVE_JMA_MARINE_API",
-    "is_fallback": false
   },
   "typhoon_section": {
     "model_predicted_start": "2026-10-22 08:00 CST",
