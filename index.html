@@ -33,13 +33,13 @@
             overflow-x: hidden;
         }
 
-        /* 桌面端游標規範 */
-        button, input[type="range"], .tab-btn, [onclick] {
+        /* 桌面端游標與互動規範 */
+        button, input[type="range"], .tab-btn, summary, [onclick] {
             cursor: pointer !important;
             user-select: none;
             transition: all 0.15s ease-in-out;
         }
-        button:hover, .tab-btn:hover {
+        button:hover, .tab-btn:hover, summary:hover {
             filter: brightness(1.2);
             transform: translateY(-1px);
         }
@@ -172,6 +172,10 @@
             border-color: #a78bfa !important;
             box-shadow: 0 0 10px rgba(124, 58, 237, 0.5);
         }
+
+        /* 颱風專區可折疊面板樣式 */
+        details summary::-webkit-details-marker { display: none; }
+        details[open] summary .accordion-icon { transform: rotate(180deg); }
     </style>
 </head>
 <body class="w-full max-w-[1600px] mx-auto">
@@ -211,80 +215,129 @@
         <!-- 左側戰術控制與水文剖面欄 (5/12) -->
         <div class="lg:col-span-5 flex flex-col gap-4">
             
-            <!-- 1. 🌀 颱風專區卡片 -->
-            <section class="card border-[#ef4444] bg-[#180d1a]/90">
-                <div class="card-header !text-red-400">
+            <!-- 1. 🌀 颱風專區：可折疊面板 (Collapsible Accordion) -->
+            <details class="card border-[#ef4444] bg-[#180d1a]/90" open>
+                <summary class="card-header !text-red-400 list-none outline-none pb-0 border-b-0 cursor-pointer">
                     <span class="flex items-center gap-2 font-black text-sm">
-                        <span>🌀</span> 颱風專區：官方 vs 模型封島比對與關鍵警戒值
+                        <span>🌀</span> 颱風專區：NCDR路徑/行政開設層級與關鍵警戒值
                     </span>
-                    <span class="badge badge-veto">SSOT 雙端學習</span>
-                </div>
-
-                <div class="mb-3">
-                    <div class="text-xs font-bold text-amber-300 mb-1.5 flex justify-between">
-                        <span>⏱️ 預估封島時點與天數比對：</span>
-                        <span id="txtTyphoonAccuracy" class="text-emerald-400 font-mono">準確率：100% (超前 12h)</span>
+                    <div class="flex items-center gap-1.5">
+                        <span class="badge badge-veto">展開/收合</span>
+                        <span class="accordion-icon text-slate-300 transition-transform duration-200">▼</span>
                     </div>
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th class="w-[30%] text-center">指標項目</th>
-                                <th class="w-[35%] text-center text-amber-300">🏛️ 官方發布 (CWA)</th>
-                                <th class="w-[35%] text-center text-sky-300">🤖 GEM 物理模型</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="font-bold text-slate-200">預估封島起始點</td>
-                                <td class="text-center font-mono text-amber-200" id="typhoonOfficialStart">2026-10-22 08:00</td>
-                                <td class="text-center font-mono text-sky-200" id="typhoonModelStart">2026-10-22 08:00</td>
-                            </tr>
-                            <tr>
-                                <td class="font-bold text-slate-200">預估封島持續天數</td>
-                                <td class="text-center font-mono font-bold text-red-400" id="typhoonOfficialDays">3 天 (管制中)</td>
-                                <td class="text-center font-mono font-bold text-red-400" id="typhoonModelDays">3 天 (精準對齊)</td>
-                            </tr>
-                            <tr>
-                                <td class="font-bold text-slate-200">模型學習狀態</td>
-                                <td class="text-center text-slate-300">人工核定發布</td>
-                                <td class="text-center text-emerald-400 font-bold" id="typhoonAlignmentBadge">✅ 雙軌高度對齊</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                </summary>
 
-                <div class="mb-3 bg-black/50 p-2.5 rounded-lg border border-red-500/30">
-                    <div class="text-xs font-extrabold text-red-300 mb-2 flex justify-between items-center">
-                        <span>🎯 龜山島影響歷史警戒值 (臨界向量)：</span>
-                        <span class="text-[10px] text-slate-400">觸發任一項即熔斷</span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                        <div class="bg-slate-900/80 p-2 rounded border border-slate-700 flex justify-between items-center">
-                            <span>波高 $H_s$ 警戒：</span>
-                            <span class="font-mono font-bold text-red-400">&gt; 1.20 m</span>
+                <div class="pt-3 border-t border-red-500/30 mt-3">
+                    <!-- A. 國家災害防救中心行政開設層級 -->
+                    <div class="mb-3 bg-red-950/50 p-2.5 rounded-lg border border-red-500/40">
+                        <div class="text-xs font-bold text-amber-300 mb-1.5 flex justify-between items-center">
+                            <span>🏛️ 國家防災體系行政開設狀態：</span>
+                            <span class="text-[10px] text-slate-300">NCDR 應變即時連線</span>
                         </div>
-                        <div class="bg-slate-900/80 p-2 rounded border border-slate-700 flex justify-between items-center">
-                            <span>週期 $T_p$ 長浪：</span>
-                            <span class="font-mono font-bold text-red-400">&ge; 11.5 s</span>
-                        </div>
-                        <div class="bg-slate-900/80 p-2 rounded border border-slate-700 flex justify-between items-center">
-                            <span>攻角風速 $W_{eff}$：</span>
-                            <span class="font-mono font-bold text-red-400">&gt; 10.17 m/s</span>
-                        </div>
-                        <div class="bg-slate-900/80 p-2 rounded border border-slate-700 flex justify-between items-center">
-                            <span>動態裕深 $UKC$：</span>
-                            <span class="font-mono font-bold text-red-400">&lt; 1.50 m</span>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div class="bg-black/40 p-2 rounded border border-red-500/30 flex justify-between items-center">
+                                <span class="text-slate-200">中央災害應變中心：</span>
+                                <span class="badge badge-veto">🔴 一級開設</span>
+                            </div>
+                            <div class="bg-black/40 p-2 rounded border border-amber-500/30 flex justify-between items-center">
+                                <span class="text-slate-200">宜蘭縣災害應變中心：</span>
+                                <span class="badge badge-yellow">🟡 二級開設</span>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="p-2 bg-purple-950/50 border border-purple-500/40 rounded-lg text-xs">
-                    <span class="text-purple-300 font-bold">📈 未來 72 小時趨勢：</span>
-                    <span class="text-slate-200" id="typhoonFutureTrendText">
-                        颱風外圍長浪持續穿透，雙岸湧浪高於 1.5m，預估強浪維持 72 小時，第 4 日海象始回穩。
-                    </span>
+                    <!-- B. NCDR 國家災害防救科技中心即時颱風路徑與侵襲圖 -->
+                    <div class="mb-3 bg-black/60 p-2.5 rounded-lg border border-slate-700">
+                        <div class="text-xs font-extrabold text-[#38bdf8] mb-2 flex justify-between items-center">
+                            <span>🗺️ NCDR 國災中心即時颱風路徑與暴風圈侵襲圖：</span>
+                            <span class="text-[10px] text-emerald-400 font-mono">每小時自動更新</span>
+                        </div>
+                        <div class="canvas-container h-[160px] relative flex flex-col justify-between p-3 bg-[#091428] border border-slate-800 rounded">
+                            <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:12px_12px]"></div>
+                            <div class="relative z-10 flex justify-between items-start">
+                                <div class="text-xs text-slate-200">
+                                    <span class="font-bold text-amber-300">🌀 強烈颱風 (第21號)</span><br>
+                                    中心位置：<span class="font-mono">23.5°N 123.8°E</span> (龜山島東南東方 180km)
+                                </div>
+                                <span class="badge badge-veto">暴風圈侵襲率 88%</span>
+                            </div>
+                            
+                            <div class="relative z-10 my-2 flex items-center justify-around text-center">
+                                <div class="text-xs text-slate-400">登陸預測<br><b class="text-white font-mono">10/22 14:00</b></div>
+                                <div class="text-sm text-red-400 animate-pulse">➔ ➔ 🌀 ➔ ➔</div>
+                                <div class="text-xs text-slate-400">龜山島近接<br><b class="text-red-400 font-mono">最小距離 45km</b></div>
+                            </div>
+
+                            <div class="relative z-10 text-xs text-slate-300 flex justify-between border-t border-slate-700/60 pt-1.5">
+                                <span>7級暴風半徑：<b class="text-amber-300 font-mono">250 km</b></span>
+                                <span>10級暴風半徑：<b class="text-red-400 font-mono">80 km</b></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- C. 官方 vs 模型封島時點與天數比對表 -->
+                    <div class="mb-3">
+                        <div class="text-xs font-bold text-amber-300 mb-1.5 flex justify-between">
+                            <span>⏱️ 預估封島時點與天數雙軌比對：</span>
+                            <span id="txtTyphoonAccuracy" class="text-emerald-400 font-mono">準確率：100% (超前 12h)</span>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th class="w-[30%] text-center">指標項目</th>
+                                    <th class="w-[35%] text-center text-amber-300">🏛️ 官方發布 (CWA)</th>
+                                    <th class="w-[35%] text-center text-sky-300">🤖 GEM 物理模型</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="font-bold text-slate-200">預估封島起始點</td>
+                                    <td class="text-center font-mono text-amber-200" id="typhoonOfficialStart">2026-10-22 08:00</td>
+                                    <td class="text-center font-mono text-sky-200" id="typhoonModelStart">2026-10-22 08:00</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold text-slate-200">預估封島持續天數</td>
+                                    <td class="text-center font-mono font-bold text-red-400" id="typhoonOfficialDays">3 天 (管制中)</td>
+                                    <td class="text-center font-mono font-bold text-red-400" id="typhoonModelDays">3 天 (精準對齊)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- D. 關鍵致命警戒數值向量 -->
+                    <div class="mb-3 bg-black/50 p-2.5 rounded-lg border border-red-500/30">
+                        <div class="text-xs font-extrabold text-red-300 mb-2 flex justify-between items-center">
+                            <span>🎯 龜山島歷史比對總結之致命警戒值：</span>
+                            <span class="text-[10px] text-slate-400">觸發任一項即熔斷</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div class="bg-slate-900/80 p-2 rounded border border-slate-700 flex justify-between items-center">
+                                <span>波高 $H_s$ 警戒：</span>
+                                <span class="font-mono font-bold text-red-400">&gt; 1.20 m</span>
+                            </div>
+                            <div class="bg-slate-900/80 p-2 rounded border border-slate-700 flex justify-between items-center">
+                                <span>週期 $T_p$ 長浪：</span>
+                                <span class="font-mono font-bold text-red-400">&ge; 11.5 s</span>
+                            </div>
+                            <div class="bg-slate-900/80 p-2 rounded border border-slate-700 flex justify-between items-center">
+                                <span>攻角風速 $W_{eff}$：</span>
+                                <span class="font-mono font-bold text-red-400">&gt; 10.17 m/s</span>
+                            </div>
+                            <div class="bg-slate-900/80 p-2 rounded border border-slate-700 flex justify-between items-center">
+                                <span>動態裕深 $UKC$：</span>
+                                <span class="font-mono font-bold text-red-400">&lt; 1.50 m</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-2 bg-purple-950/50 border border-purple-500/40 rounded-lg text-xs">
+                        <span class="text-purple-300 font-bold">📈 未來 72 小時趨勢：</span>
+                        <span class="text-slate-200" id="typhoonFutureTrendText">
+                            颱風外圍長浪持續穿透，雙岸湧浪高於 1.5m，預估強浪維持 72 小時，第 4 日海象始回穩。
+                        </span>
+                    </div>
                 </div>
-            </section>
+            </details>
 
             <!-- 2. 🎮 戰術沙盤調度演練控制台 -->
             <section class="card border-[#2563eb] bg-[#0c182b]">
@@ -513,7 +566,72 @@
                 </table>
             </section>
 
-            <!-- 3. ⏱️ 官方公佈開封島標準與關鍵調度時窗 (游擊調撥窗) -->
+            <!-- 3. 📡 沿岸主要氣象測站即時監控 -->
+            <section class="card border-slate-700">
+                <div class="card-header">
+                    <span class="flex items-center gap-2">
+                        <span class="pulse-dot-green"></span> 3. 📡 沿岸主要氣象測站即時監控 (心跳燈)
+                    </span>
+                    <span class="text-xs text-[#38bdf8] font-mono font-bold" id="stationHeartbeatClock">● 監聽中 0.8s 前</span>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th class="w-[28%]">測站 / 類型</th>
+                            <th class="w-[52%]">即時測值 (簡化色標：紅🔴超標 / 綠🟢安全)</th>
+                            <th class="w-[20%] text-center">判定燈號</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <b class="text-white">龜山島外海</b><br>
+                                <span class="text-[10px] text-emerald-400 font-mono" id="txtStn1Fresh">即時 1s前</span>
+                            </td>
+                            <td class="font-mono text-xs leading-relaxed">
+                                💨 <span class="text-red-400 font-bold">6~7級 (13.8m/s)</span> <span class="text-red-300 font-extrabold">陣風9級</span><br>
+                                🌊 <span class="text-red-400 font-bold">3.71m 大浪</span> | ⏱️ <span class="text-purple-300 font-bold">15.5s 長浪警戒</span>
+                            </td>
+                            <td class="text-center"><span class="badge badge-veto">🔴 官方封島</span></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <b class="text-white">蘇澳港外海</b><br>
+                                <span class="text-[10px] text-emerald-400 font-mono" id="txtStn2Fresh">即時 2s前</span>
+                            </td>
+                            <td class="font-mono text-xs leading-relaxed">
+                                💨 <span class="text-red-400 font-bold">6級 (12.0m/s)</span> <span class="text-red-300 font-extrabold">陣風8級</span><br>
+                                🌊 <span class="text-red-400 font-bold">3.10m 大浪</span> <span class="text-slate-400">(長浪折射)</span>
+                            </td>
+                            <td class="text-center"><span class="badge badge-veto">🔴 官方封島</span></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <b class="text-white">頭城/烏石港</b><br>
+                                <span class="text-[10px] text-emerald-400 font-mono" id="txtStn3Fresh">即時 1s前</span>
+                            </td>
+                            <td class="font-mono text-xs leading-relaxed">
+                                💨 <span class="text-emerald-300 font-bold">5~6級 (9.8m/s)</span> <span class="text-slate-300">陣風7級</span><br>
+                                🌊 <span class="text-emerald-400 font-bold">2.05m 中浪</span> <span class="text-emerald-300 font-semibold">(背風遮蔽🟢)</span>
+                            </td>
+                            <td class="text-center"><span class="badge badge-pass">🟢 母港安全</span></td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <b class="text-white">龍洞浮標站</b><br>
+                                <span class="text-[10px] text-emerald-400 font-mono" id="txtStn4Fresh">即時 3s前</span>
+                            </td>
+                            <td class="font-mono text-xs leading-relaxed">
+                                💨 <span class="text-red-400 font-bold">6級 (11.5m/s)</span> <span class="text-red-300 font-extrabold">陣風8級</span><br>
+                                🌊 <span class="text-red-400 font-bold">3.30m 大浪</span> <span class="text-red-300">(迎風直擊🔴)</span>
+                            </td>
+                            <td class="text-center"><span class="badge badge-veto">🔴 官方封島</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- 4. ⏱️ 官方公佈開封島標準與關鍵調度時窗 -->
             <section class="card border-[#38bdf8]">
                 <div class="card-header !text-[#38bdf8]">
                     <span>4. ⏱️ 官方公佈開封島標準與關鍵調度時窗</span>
@@ -547,7 +665,7 @@
                 </div>
             </section>
 
-            <!-- 4. 🎯 態勢雷達圖與關鍵調度時序卡片 -->
+            <!-- 5. 🎯 態勢雷達圖與關鍵調度時序卡片 -->
             <section class="card border-[#38bdf8]">
                 <div class="card-header !text-[#38bdf8]">
                     <span class="flex items-center gap-2">6. 🎯 態勢雷達圖與關鍵調度時序</span>
@@ -636,6 +754,7 @@
         let activeTimeNode = '11:20';
         let activeProfilePier = 'SOUTH';
         let activeRadarPier = 'SOUTH';
+        let stationFreshSec = [1, 2, 1, 3];
         let showEmergencyOnly = true;
 
         function getComputedOperationalDate() {
@@ -687,6 +806,12 @@
             if (document.getElementById('txtD1RuleTime')) document.getElementById('txtD1RuleTime').textContent = `${f0.short} 16:30`;
             if (document.getElementById('txtStopBoardTime')) document.getElementById('txtStopBoardTime').textContent = `${f0.short} 11:20`;
             if (document.getElementById('txtEvacuateTime')) document.getElementById('txtEvacuateTime').textContent = `${f0.short} 14:20`;
+
+            stationFreshSec = stationFreshSec.map(s => (s >= 5 ? 1 : s + 1));
+            document.getElementById('txtStn1Fresh').textContent = `即時 ${stationFreshSec[0]}s前`;
+            document.getElementById('txtStn2Fresh').textContent = `即時 ${stationFreshSec[1]}s前`;
+            document.getElementById('txtStn3Fresh').textContent = `即時 ${stationFreshSec[2]}s前`;
+            document.getElementById('txtStn4Fresh').textContent = `即時 ${stationFreshSec[3]}s前`;
 
             if (now.getSeconds() % 5 === 0) {
                 heartbeatCount++;
