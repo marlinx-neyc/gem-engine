@@ -307,12 +307,12 @@
                             ⚓ 北岸剖面
                         </button>
                         <button id="tabProfileCompare" class="tab-btn py-1 px-1.5 rounded-lg text-[10px] font-bold border border-slate-700 bg-slate-800 text-slate-300 hover:text-white transition-all text-center">
-                            ⚖️ 雙岸對比 (上下)
+                            ⚖️ 雙岸對比
                         </button>
                     </div>
                 </div>
 
-                <div class="canvas-container h-[220px] mb-2" id="profileContainer">
+                <div class="canvas-container h-[210px] mb-2" id="profileContainer">
                     <canvas id="profileCanvas" class="w-full h-full block"></canvas>
                 </div>
 
@@ -975,6 +975,14 @@
                 this.radarRenderer = new RadarCanvasRenderer('nativeRadarCanvas', 'radarContainer');
                 this.heartbeat = 12;
                 this.stationSec = [1, 2, 1, 3];
+                this.timePresets = {
+                    '08:00': { hs: 0.85, w: 5.20, tp: 8.5, deltaTheta: 25, tide: 0.60, label: '08:00 正常開島通航' },
+                    '10:00': { hs: 2.10, w: 9.80, tp: 12.0, deltaTheta: 45, tide: 1.20, label: '10:00 滿潮湧浪增強' },
+                    '11:20': { hs: 3.71, w: 8.50, tp: 15.5, deltaTheta: 50, tide: 1.00, label: '11:20 雙岸越浪止登截止' },
+                    '12:00': { hs: 4.10, w: 14.20, tp: 16.0, deltaTheta: 65, tide: 0.80, label: '12:00 風向突變巨浪' },
+                    '14:20': { hs: 3.20, w: 11.50, tp: 14.5, deltaTheta: 55, tide: 0.40, label: '14:20 強制清島全速撤離' },
+                    '16:00': { hs: 2.50, w: 8.00, tp: 11.0, deltaTheta: 40, tide: 0.20, label: '16:00 常態撤退完成' }
+                };
 
                 this.init();
             }
@@ -1021,22 +1029,86 @@
                 document.getElementById('tabRadarNorth').onclick = () => this.state.setRadarPier('NORTH');
                 document.getElementById('tabRadarCompare').onclick = () => this.state.setRadarPier('COMPARE');
 
+                // Filter Buttons (Emergency vs All)
+                const btnEmergency = document.getElementById('btnFilterEmergency');
+                const btnAll = document.getElementById('btnFilterAll');
+
+                if (btnEmergency) {
+                    btnEmergency.onclick = () => {
+                        this.state.showEmergencyOnly = true;
+                        document.querySelectorAll('.routine-node').forEach(el => el.classList.add('hidden'));
+                        btnEmergency.className = 'bg-red-500/30 border border-red-500 text-red-200 px-2 py-0.5 rounded text-[9.5px] font-extrabold shadow-md';
+                        if (btnAll) btnAll.className = 'bg-[#1e293b] border border-[#475569] text-slate-400 px-2 py-0.5 rounded text-[9.5px] font-bold';
+                        this.state.notify();
+                    };
+                }
+
+                if (btnAll) {
+                    btnAll.onclick = () => {
+                        this.state.showEmergencyOnly = false;
+                        document.querySelectorAll('.routine-node').forEach(el => el.classList.remove('hidden'));
+                        btnAll.className = 'bg-blue-600/40 border border-blue-400 text-white px-2 py-0.5 rounded text-[9.5px] font-extrabold shadow-md';
+                        if (btnEmergency) btnEmergency.className = 'bg-[#1e293b] border border-[#475569] text-slate-400 px-2 py-0.5 rounded text-[9.5px] font-bold';
+                        this.state.notify();
+                    };
+                }
+
+                // Time Node Buttons
+                ['0800', '1000', '1120', '1200', '1420', '1600'].forEach(timeKey => {
+                    const btn = document.getElementById(`btnT${timeKey}`);
+                    if (btn) {
+                        const timeStr = timeKey.slice(0, 2) + ':' + timeKey.slice(2);
+                        btn.onclick = () => this.selectTimeNode(timeStr);
+                    }
+                });
+
                 window.addEventListener('resize', () => this.state.notify());
             }
+            selectTimeNode(timeStr) {
+                this.state.setTimeNode(timeStr);
+                const preset = this.timePresets[timeStr];
+                if (preset) {
+                    this.state.updateTelemetry({
+                        hs: preset.hs,
+                        w: preset.w,
+                        tp: preset.tp,
+                        deltaTheta: preset.deltaTheta,
+                        tide: preset.tide
+                    });
+                    document.getElementById('rngHs').value = preset.hs;
+                    document.getElementById('rngW').value = preset.w;
+                    document.getElementById('rngTp').value = preset.tp;
+                    document.getElementById('rngDeltaTheta').value = preset.deltaTheta;
+                    document.getElementById('lblHs').textContent = `${preset.hs}m`;
+                    document.getElementById('lblW').textContent = `${preset.w}m/s`;
+                    document.getElementById('lblTp').textContent = `${preset.tp}s`;
+                    document.getElementById('lblDeltaTheta').textContent = `${preset.deltaTheta}°`;
+                }
+            }
+            updateTimeButtonStyles(state) {
+                ['0800', '1000', '1120', '1200', '1420', '1600'].forEach(nk => {
+                    const timeStr = nk.slice(0, 2) + ':' + nk.slice(2);
+                    const btn = document.getElementById(`btnT${nk}`);
+                    if (btn) {
+                        if (state.activeTimeNode === timeStr) {
+                            btn.style.boxShadow = '0 0 10px rgba(56, 189, 248, 0.8)';
+                            btn.style.borderColor = '#38bdf8';
+                            btn.style.color = '#ffffff';
+                            btn.style.backgroundColor = '#1e293b';
+                        } else {
+                            btn.style.boxShadow = 'none';
+                            btn.style.borderColor = nk === '1120' || nk === '1420' ? '#facc15' : '#334155';
+                            btn.style.color = nk === '1120' || nk === '1420' ? '#facc15' : '#94a3b8';
+                            btn.style.backgroundColor = '#0f172a';
+                        }
+                    }
+                });
+            }
             loadScenario(type) {
-                if (type === 'CURRENT') this.state.updateTelemetry({ hs: 3.71, w: 8.50, tp: 15.5, deltaTheta: 50 });
-                else if (type === 'GUERRILLA') this.state.updateTelemetry({ hs: 1.15, w: 7.20, tp: 9.8, deltaTheta: 38 });
-                else if (type === 'CALM') this.state.updateTelemetry({ hs: 0.65, w: 4.80, tp: 8.0, deltaTheta: 18 });
-                else if (type === 'OVERTOPPING') this.state.updateTelemetry({ hs: 2.10, w: 11.50, tp: 13.0, deltaTheta: 42 });
-
-                document.getElementById('rngHs').value = this.state.telemetry.hs;
-                document.getElementById('rngW').value = this.state.telemetry.w;
-                document.getElementById('rngTp').value = this.state.telemetry.tp;
-                document.getElementById('rngDeltaTheta').value = this.state.telemetry.deltaTheta;
-                document.getElementById('lblHs').textContent = `${this.state.telemetry.hs}m`;
-                document.getElementById('lblW').textContent = `${this.state.telemetry.w}m/s`;
-                document.getElementById('lblTp').textContent = `${this.state.telemetry.tp}s`;
-                document.getElementById('lblDeltaTheta').textContent = `${this.state.telemetry.deltaTheta}°`;
+                if (type === 'CURRENT') this.selectTimeNode('11:20');
+                else if (type === 'GUERRILLA') this.selectTimeNode('10:00');
+                else if (type === 'CALM') this.selectTimeNode('08:00');
+                else if (type === 'OVERTOPPING') this.selectTimeNode('12:00');
             }
             updateTabStyles(state) {
                 ['South', 'North', 'Compare'].forEach(p => {
@@ -1079,19 +1151,22 @@
                 if (elUKCS) elUKCS.textContent = `${res.ukc_south} m ${res.ukc_south < 1.5 ? '🔴 觸底' : '🟢 安全'}`;
 
                 this.updateTabStyles(state);
+                this.updateTimeButtonStyles(state);
 
                 this.profileRenderer.render(state, res);
                 this.radarRenderer.render(state, res);
 
                 const radarMode = state.activeRadarPier;
+                const timePreset = this.timePresets[state.activeTimeNode];
+                const timeLabel = timePreset ? timePreset.label : state.activeTimeNode;
 
                 let txtVerdict = "";
                 if (radarMode === 'NORTH') {
-                    txtVerdict = res.hasVetoNorth ? `🔴 北岸 0.0% 熔斷 / 【迎風浪${res.hs_north}m/UKC ${res.ukc_north}m】禁止靠泊` : `🟢 北岸 100.0% 放行 / 符合主泊位靠泊標準`;
+                    txtVerdict = res.hasVetoNorth ? `🔴 北岸 0.0% 熔斷 / 【${timeLabel}】迎風浪 ${res.hs_north}m (UKC ${res.ukc_north}m) 禁止靠泊` : `🟢 北岸 100.0% 放行 / 【${timeLabel}】符合主泊位靠泊標準`;
                 } else if (radarMode === 'SOUTH') {
-                    txtVerdict = res.hasVetoSouth ? `🔴 南岸 0.0% 熔斷 / 【背風浪${res.hs_south}m/UKC ${res.ukc_south}m】止登` : `🟢 南岸 100.0% 權宜放行 / 允許備用泊位靠泊`;
+                    txtVerdict = res.hasVetoSouth ? `🔴 南岸 0.0% 熔斷 / 【${timeLabel}】背風浪 ${res.hs_south}m (UKC ${res.ukc_south}m) 止登` : `🟢 南岸 100.0% 權宜放行 / 【${timeLabel}】允許備用泊位靠泊`;
                 } else {
-                    txtVerdict = `🔴 雙岸疊合比較：北岸 (浪${res.hs_north}m/UKC ${res.ukc_north}m ${res.hasVetoNorth?'🔴熔斷':'🟢放行'}) | 南岸 (浪${res.hs_south}m/UKC ${res.ukc_south}m ${res.hasVetoSouth?'🔴熔斷':'🟢放行'})`;
+                    txtVerdict = `🔴 雙岸疊合比較：【${timeLabel}】北岸 (浪${res.hs_north}m ${res.hasVetoNorth?'🔴熔斷':'🟢放行'}) | 南岸 (浪${res.hs_south}m ${res.hasVetoSouth?'🔴熔斷':'🟢放行'})`;
                 }
                 const elVerdict = document.getElementById('txtRadarFinalVerdict');
                 if (elVerdict) elVerdict.textContent = txtVerdict;
