@@ -1,13 +1,23 @@
 {
-  "version": "v66.0-Live-Japan-API-Assimilated",
-  "timestamp": "2026-10-22 10:32:31 CST",
+  "version": "v66.0-Refined-GreyArea-Tactics",
+  "timestamp": "2026-10-22 10:50:50 CST",
   "date_str": "2026-10-22 (四)",
-  "decision": "🔴 0.0% 物理熔斷 (Q4 / 全線封島管制)",
+  "decision": "🔴 0.0% 全線物理熔斷：雙岸越浪/觸底超標，強制執行防颱封島管制，禁止任何船隻靠泊。",
   "hard_veto_alert": true,
+  "tactical_guerrilla_route": {
+    "allow_boarding": false,
+    "decision_level": "HARD_VETO",
+    "clearance_percentage": 0.0,
+    "active_pier": "NONE",
+    "stop_boarding_time": "2026-10-22 08:00 CST (未開放)",
+    "evacuation_time": "即刻直航返航烏石港",
+    "transit_duration_mins": 25,
+    "tactical_instruction": "🔴 0.0% 全線物理熔斷：雙岸越浪/觸底超標，強制執行防颱封島管制，禁止任何船隻靠泊。"
+  },
   "japan_oceanic_telemetry": {
     "v_kuroshio_ms": 1.38,
     "ssh_anomaly_m": 0.12,
-    "tp_jma_farfield_s": 13.2,
+    "tp_jma_farfield_s": 13.25,
     "wave_current_factor": 1.166,
     "api_source": "LIVE_JMA_MARINE_API",
     "is_fallback": false
