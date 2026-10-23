@@ -1,12 +1,12 @@
 {
   "version": "GEM-ENG-SPEC-2026-V43",
-  "timestamp": "2026-10-23 22:01:13 CST",
+  "timestamp": "2026-10-23 22:02:02 CST",
   "decision": {
-    "action_id": 0,
-    "tactical_instruction": "🔴 0.0% 物理 VETO 熔斷 (全線封島)",
-    "confidence": 51.7,
+    "action_id": 1,
+    "tactical_instruction": "🟡 Q2 游擊調撥 (移防南岸權宜碼頭 + 限速 3 節)",
+    "confidence": 95.2,
     "evac_minutes": 20,
-    "is_closed": true
+    "is_closed": false
   },
   "physics": {
     "hs_pier": 0.95,
