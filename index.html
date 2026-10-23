@@ -3,285 +3,228 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🌊 GEM Engine v66.0 龜山島戰術指揮中樞</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>GEM Engine 龜山島戰術面板 (Modular View)</title>
     <style>
         :root {
-            --bg-dark: #080e1a;
-            --card-bg: #111c2e;
-            --card-border: #1e2d4a;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --border-color: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --danger-color: #ef4444;
+            --success-color: #10b981;
             --accent-blue: #38bdf8;
-            --status-danger: #ef4444;
-            --status-pass: #10b981;
         }
-        body { background-color: var(--bg-dark); color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, sans-serif; padding: 12px; }
-        button, summary, input[type="range"] { cursor: pointer !important; }
-        .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 12px; margin-bottom: 12px; }
-        .badge { font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
-        .badge-veto { background: rgba(239, 68, 68, 0.25); color: #fca5a5; border: 1px solid var(--status-danger); }
-        .badge-pass { background: rgba(16, 185, 129, 0.25); color: #86efac; border: 1px solid var(--status-pass); }
-        .canvas-container { position: relative; width: 100%; background: #050a14; border-radius: 8px; border: 1px solid #1e2d4a; }
-        details summary::-webkit-details-marker { display: none; }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-primary); padding: 12px; font-size: 14px; line-height: 1.5; }
+
+        /* Watchdog Banner 模組 */
+        #watchdog-banner {
+            display: none;
+            background-color: var(--danger-color);
+            color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 12px;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-color); }
+        .brand-title { font-size: 16px; font-weight: 700; color: var(--accent-blue); }
+        .status-badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; background-color: #334155; }
+        .status-badge.live { background-color: rgba(16, 185, 129, 0.2); color: var(--success-color); }
+        .status-badge.stale { background-color: rgba(239, 68, 68, 0.2); color: var(--danger-color); }
+
+        .card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+        .card-title { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 8px; display: flex; justify-content: space-between; }
+
+        .decision-box { font-size: 15px; font-weight: 700; padding: 12px; border-radius: 8px; background-color: rgba(239, 68, 68, 0.15); border-left: 4px solid var(--danger-color); color: #fca5a5; }
+        .decision-box.success { background-color: rgba(16, 185, 129, 0.15); border-left-color: var(--success-color); color: #6ee7b7; }
+
+        .veto-reason { margin-top: 8px; font-size: 12px; color: #f59e0b; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .metric-item { background-color: rgba(15, 23, 42, 0.5); padding: 8px 10px; border-radius: 6px; }
+        .metric-label { font-size: 11px; color: var(--text-secondary); }
+        .metric-value { font-size: 14px; font-weight: 600; margin-top: 2px; }
+
+        .pier-card { padding: 10px; border-radius: 8px; background-color: rgba(15, 23, 42, 0.4); border: 1px solid var(--border-color); margin-top: 6px; }
+        .pier-header { display: flex; justify-content: space-between; font-weight: 600; font-size: 13px; margin-bottom: 6px; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 6px; font-size: 12px; }
+        th, td { padding: 6px 8px; text-align: left; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        th { color: var(--text-secondary); }
     </style>
 </head>
-<body class="max-w-[1600px] mx-auto">
+<body>
 
-    <!-- 頂部 VETO 警示橫幅 -->
-    <div id="vetoBanner" class="bg-red-600 text-white font-extrabold text-xs md:text-sm py-2 px-3 rounded-lg mb-3 text-center shadow-lg animate-pulse">
-        🚨 警示：觸發物理 VETO 熔斷（浪高/風速/水深超標），強制執行防颱封島管制！
+    <!-- Watchdog 告警模組 -->
+    <div id="watchdog-banner">
+        ⚠️ 氣象數據過期 (>30s)：看門狗啟動，強制鎖定 🔴 0.0% 熔斷防禦！
     </div>
 
-    <!-- Master Header -->
-    <header class="card border-l-[6px] border-l-red-500 flex flex-wrap justify-between items-center gap-2">
-        <div>
-            <h1 class="text-base md:text-lg font-black flex items-center gap-2">
-                🌊 龜山島戰術指揮中樞 <span class="text-xs text-[#38bdf8] font-mono">(GEM OOP Engine v66.0)</span>
-            </h1>
-            <div class="text-xs text-slate-300 mt-1 flex flex-wrap gap-2 font-mono">
-                <span>時間: <b id="liveClock" class="text-white bg-white/10 px-1 py-0.5 rounded">--:--:-- CST</b></span>
-                <span>| 日期: <b id="liveDate" class="text-emerald-300">2026-10-22</b></span>
-                <span>| 心跳: <b id="heartbeatCounter" class="text-[#38bdf8]">0</b></span>
-            </div>
-        </div>
-        <span class="badge badge-veto text-xs px-3 py-1" id="mainStatusBadge">🔴 0.0% 剛性熔斷</span>
+    <!-- Header 模組 -->
+    <header>
+        <div id="ui-system-title" class="brand-title">GEM Engine</div>
+        <div id="ui-watchdog-badge" class="status-badge live">● LIVE OK</div>
     </header>
 
-    <!-- 雙欄/單欄自適應主佈局 -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-3">
-        
-        <!-- 左側面板 (颱風專區 + 沙盤 + 剖面) -->
-        <div class="lg:col-span-5 flex flex-col gap-1">
-            
-            <!-- 🌀 颱風專區 (可收合) -->
-            <details class="card border-red-500/50 bg-[#180d1a]" open>
-                <summary class="font-extrabold text-sm text-red-400 flex justify-between items-center cursor-pointer">
-                    <span>🌀 颱風專區：NCDR動態路徑/行政開設層級</span>
-                    <span class="text-xs text-slate-400">▼ 折疊</span>
-                </summary>
-                <div class="mt-3 pt-2 border-t border-red-500/30 text-xs space-y-2">
-                    <div class="grid grid-cols-2 gap-2 bg-red-950/40 p-2 rounded">
-                        <div>中央應變中心：<span class="badge badge-veto">🔴 一級開設</span></div>
-                        <div>宜蘭縣應變中心：<span class="badge text-amber-300 border border-amber-500 bg-amber-950/40">🟡 二級開設</span></div>
-                    </div>
-                    <div class="bg-black/50 p-2 rounded border border-slate-700">
-                        <div class="font-bold text-[#38bdf8] mb-1">🗺️ NCDR 暴風圈侵襲動態</div>
-                        <div class="text-[11px] text-slate-300">強烈颱風第21號 | 侵襲率 88% | 近接距離 45km</div>
-                    </div>
-                    <div class="bg-black/40 p-2 rounded text-[11px] font-mono text-red-300">
-                        致命警戒值：Hs &gt; 1.20m | Tp &ge; 11.5s | Weff &gt; 10.17m/s | UKC &lt; 1.50m
-                    </div>
-                </div>
-            </details>
-
-            <!-- 🎮 沙盤調度演練 -->
-            <section class="card border-blue-500/50">
-                <div class="font-bold text-xs text-[#38bdf8] mb-2 flex justify-between">
-                    <span>🎮 戰術沙盤調度演練</span>
-                    <button id="btnLiveToggle" class="text-[10px] border border-[#38bdf8] px-2 py-0.5 rounded-full text-[#38bdf8]">● 實時監聽</button>
-                </div>
-                <div class="grid grid-cols-2 gap-2 text-xs">
-                    <div class="slider-item">
-                        <div class="flex justify-between text-[11px]"><span>波高 Hs</span><b id="lblHs" class="text-[#38bdf8]">3.71m</b></div>
-                        <input type="range" id="rngHs" min="0.4" max="6.0" step="0.05" value="3.71">
-                    </div>
-                    <div class="slider-item">
-                        <div class="flex justify-between text-[11px]"><span>風速 W</span><b id="lblW" class="text-[#38bdf8]">8.50m/s</b></div>
-                        <input type="range" id="rngW" min="2.0" max="22.0" step="0.2" value="8.50">
-                    </div>
-                </div>
-            </section>
-
-            <!-- 📐 剖面圖形 Canvas -->
-            <section class="card border-[#38bdf8]">
-                <div class="font-bold text-xs text-[#38bdf8] mb-2">📐 南北岸動態水深與碼頭剖面圖示</div>
-                <div class="canvas-container h-[200px]" id="profileContainer">
-                    <canvas id="profileCanvas"></canvas>
-                </div>
-            </section>
+    <!-- 1. 戰術指揮決策模組 -->
+    <div class="card">
+        <div class="card-title">
+            <span>戰術指揮決策</span>
+            <span id="ui-timestamp">--:--:--</span>
         </div>
-
-        <!-- 右側面板 (剛性指標 + 雙軌比對 + 雷達圖) -->
-        <div class="lg:col-span-7 flex flex-col gap-1">
-            
-            <!-- ⚖️ 剛性指標檢核 -->
-            <section class="card border-[#38bdf8]">
-                <div class="font-bold text-xs text-[#38bdf8] mb-2">⚖️ PINN 剛性水文指標分欄檢核表</div>
-                <div class="grid grid-cols-4 gap-1 text-center text-xs font-mono border-t border-slate-700 pt-2">
-                    <div>Hs: <b id="valHs" class="text-red-400">3.71m</b></div>
-                    <div>Weff: <b id="valWeff" class="text-emerald-400">5.46m/s</b></div>
-                    <div>UKC: <b id="valUKC" class="text-red-400">-0.80m</b></div>
-                    <div>FB: <b id="valFB" class="text-red-400">0.15m</b></div>
-                </div>
-            </section>
-
-            <!-- ⏱️ 關鍵調度時窗 -->
-            <section class="card border-amber-500/50 bg-amber-950/20 text-xs">
-                <span class="font-bold text-amber-300">🎯 關鍵游擊調度執行時窗：</span>
-                <span class="text-yellow-200">11:20 止登截止（雙岸越浪超標） | 14:20 強制清島撤離（直航返烏石港）</span>
-            </section>
-
-            <!-- 🎯 六角態勢雷達圖 Canvas -->
-            <section class="card border-[#38bdf8]">
-                <div class="font-bold text-xs text-[#38bdf8] mb-2 flex justify-between">
-                    <span>🎯 態勢雷達圖與關鍵調度時序 (11:20 止登)</span>
-                    <span class="text-slate-400 text-[10px]">黃虛線: 100% 限值</span>
-                </div>
-                <div class="canvas-container h-[320px]" id="radarContainer">
-                    <canvas id="radarCanvas"></canvas>
-                </div>
-            </section>
+        <div id="ui-decision-box" class="decision-box">
+            載入模組數據中...
         </div>
-
+        <div id="ui-veto-reason" class="veto-reason"></div>
     </div>
 
-    <!-- OBJECT-ORIENTED FRONTEND ARCHITECTURE -->
+    <!-- 2. 颱風與行政開設模組 -->
+    <div class="card">
+        <div class="card-title">行政開設與動態颱風情資</div>
+        <div id="ui-official-status" style="font-size: 13px; font-weight: 600; margin-bottom: 6px;">--</div>
+        <div class="grid-2">
+            <div class="metric-item">
+                <div class="metric-label">颱風名稱 / 報次</div>
+                <div id="ui-typhoon-name" class="metric-value">--</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-label">7級暴風半徑</div>
+                <div id="ui-typhoon-radius" class="metric-value">--</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. 碼頭對齊規格模組 (-8.5m / -9.8m CD) -->
+    <div class="card">
+        <div class="card-title">南北泊位水動力規格</div>
+        
+        <div class="pier-card">
+            <div class="pier-header">
+                <span id="ui-north-title">北岸主泊位 (-8.5m CD)</span>
+                <span id="ui-north-status" style="color: var(--danger-color);">--</span>
+            </div>
+            <div class="grid-2">
+                <div>富餘水深 (UKC): <strong id="ui-north-ukc">--</strong></div>
+                <div>引橋乾舷 (FB): <strong id="ui-north-fb">--</strong></div>
+            </div>
+        </div>
+
+        <div class="pier-card">
+            <div class="pier-header">
+                <span id="ui-south-title">南岸權宜泊位 (-9.8m CD)</span>
+                <span id="ui-south-status" style="color: var(--danger-color);">--</span>
+            </div>
+            <div class="grid-2">
+                <div>富餘水深 (UKC): <strong id="ui-south-ukc">--</strong></div>
+                <div>引橋乾舷 (FB): <strong id="ui-south-fb">--</strong></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. 物理防線矩陣模組 -->
+    <div class="card">
+        <div class="card-title">四層剛性物理防線</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>防線項目</th>
+                    <th>實測/計算值</th>
+                    <th>剛性門檻</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>北岸折算浪高 ($H_s$)</td>
+                    <td id="ui-m-hs">--</td>
+                    <td id="ui-m-hs-limit">--</td>
+                </tr>
+                <tr>
+                    <td>有效攻角風速 ($W_{\text{eff}}$)</td>
+                    <td id="ui-m-weff">--</td>
+                    <td id="ui-m-weff-limit">--</td>
+                </tr>
+                <tr>
+                    <td>水下富餘水深 ($\text{UKC}$)</td>
+                    <td id="ui-m-ukc">--</td>
+                    <td id="ui-m-ukc-limit">--</td>
+                </tr>
+                <tr>
+                    <td>預留乾舷高程 ($\text{FB}$)</td>
+                    <td id="ui-m-fb">--</td>
+                    <td id="ui-m-fb-limit">--</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
     <script>
-        // 1. STATE MANAGER (Observer Pattern)
-        class GEMState {
-            constructor() {
-                this.telemetry = { hs: 3.71, w: 8.50, tp: 15.5, deltaTheta: 50, tide: 1.00 };
-                this.listeners = [];
-            }
-            subscribe(listener) { this.listeners.push(listener); }
-            notify() { this.listeners.forEach(cb => cb(this.telemetry)); }
-            updateTelemetry(params) {
-                Object.assign(this.telemetry, params);
-                this.notify();
-            }
-        }
+        const API_URL = 'latest_decision.json';
 
-        // 2. PHYSICS DOMAIN ENGINE
-        class GEMPhysicsEngine {
-            static evaluate(tel) {
-                const rad = tel.deltaTheta * (Math.PI / 180);
-                const w_eff = Number((tel.w * Math.abs(Math.cos(rad))).toFixed(2));
-                const ukc_south = Number((5.50 + tel.tide - 2.02 - tel.hs).toFixed(2));
-                const ukc_north = Number((3.20 + tel.tide - 2.02 - (tel.hs * 1.06)).toFixed(2));
-                const fb = 0.15;
-                const hasVeto = tel.hs > 1.20 || tel.tp >= 11.5 || w_eff > 10.17 || ukc_south < 1.50 || fb < 0.50;
+        async function updateDashboard() {
+            try {
+                // 加上毫秒時間戳防快取
+                const response = await fetch(`${API_URL}?t=${Date.now()}`, { cache: 'no-store' });
+                if (!response.ok) throw new Error('網路由中斷');
 
-                return { hs: tel.hs, w_eff, ukc_south, ukc_north, fb, hasVeto };
-            }
-        }
+                const ssot = await response.json();
+                const m = ssot.modules; // 直接讀取模組字典
 
-        // 3. CANVAS RENDERER FOR PROFILE
-        class ProfileRenderer {
-            constructor(canvasId, containerId) {
-                this.canvas = document.getElementById(canvasId);
-                this.container = document.getElementById(containerId);
-            }
-            render(res) {
-                if (!this.canvas) return;
-                const dpr = window.devicePixelRatio || 1;
-                const w = this.container.clientWidth || 300;
-                const h = 200;
-                this.canvas.width = w * dpr; this.canvas.height = h * dpr;
-                this.canvas.style.width = w + 'px'; this.canvas.style.height = h + 'px';
+                if (!m) return;
 
-                const ctx = this.canvas.getContext('2d');
-                ctx.scale(dpr, dpr);
-                ctx.fillStyle = '#050a14'; ctx.fillRect(0, 0, w, h);
+                // 1. Header 模組槽位填充
+                document.getElementById('ui-system-title').innerText = m.header.system_title;
+                document.getElementById('ui-timestamp').innerText = m.header.timestamp_display;
+                document.getElementById('ui-watchdog-badge').innerText = m.header.watchdog_status_text;
+                document.getElementById('ui-watchdog-badge').className = `status-badge ${m.header.watchdog_is_stale ? 'stale' : 'live'}`;
+                document.getElementById('watchdog-banner').style.display = m.header.watchdog_is_stale ? 'block' : 'none';
 
-                // Structure
-                ctx.fillStyle = '#1e2d4a'; ctx.fillRect(w * 0.55, h * 0.35, w * 0.45, h * 0.65);
-                // Water
-                ctx.fillStyle = 'rgba(56, 189, 248, 0.35)';
-                ctx.beginPath(); ctx.moveTo(0, h * 0.45);
-                for (let x = 0; x <= w * 0.55; x += 10) ctx.lineTo(x, h * 0.45 + Math.sin(x * 0.05) * (res.hs * 3));
-                ctx.lineTo(w * 0.55, h); ctx.lineTo(0, h); ctx.fill();
+                // 2. 決策模組槽位填充
+                const decBox = document.getElementById('ui-decision-box');
+                decBox.innerText = m.decision.decision_text;
+                decBox.className = `decision-box ${m.decision.badge_color}`;
+                document.getElementById('ui-veto-reason').innerText = m.decision.veto_reason;
 
-                ctx.font = 'bold 11px sans-serif'; ctx.fillStyle = '#38bdf8';
-                ctx.fillText(`南岸碼頭 CD -5.5m | UKC: ${res.ukc_south}m`, 10, 20);
-            }
-        }
+                // 3. 颱風模組槽位填充
+                document.getElementById('ui-official-status').innerText = m.typhoon.official_status_text;
+                document.getElementById('ui-typhoon-name').innerText = m.typhoon.typhoon_name;
+                document.getElementById('ui-typhoon-radius').innerText = m.typhoon.radius_7_km_display;
 
-        // 4. CANVAS RENDERER FOR RADAR
-        class RadarRenderer {
-            constructor(canvasId, containerId) {
-                this.canvas = document.getElementById(canvasId);
-                this.container = document.getElementById(containerId);
-            }
-            render(res) {
-                if (!this.canvas) return;
-                const dpr = window.devicePixelRatio || 1;
-                const w = this.container.clientWidth || 300;
-                const h = 320;
-                this.canvas.width = w * dpr; this.canvas.height = h * dpr;
-                this.canvas.style.width = w + 'px'; this.canvas.style.height = h + 'px';
+                // 4. 碼頭模組槽位填充
+                document.getElementById('ui-north-title').innerText = m.piers.north_pier.title;
+                document.getElementById('ui-north-status').innerText = m.piers.north_pier.status_text;
+                document.getElementById('ui-north-ukc').innerText = m.piers.north_pier.ukc_text;
+                document.getElementById('ui-north-fb').innerText = m.piers.north_pier.fb_text;
 
-                const ctx = this.canvas.getContext('2d');
-                ctx.scale(dpr, dpr);
-                const cx = w / 2, cy = h / 2, R = Math.min(w * 0.28, 90);
+                document.getElementById('ui-south-title').innerText = m.piers.south_pier.title;
+                document.getElementById('ui-south-status').innerText = m.piers.south_pier.status_text;
+                document.getElementById('ui-south-ukc').innerText = m.piers.south_pier.ukc_text;
+                document.getElementById('ui-south-fb').innerText = m.piers.south_pier.fb_text;
 
-                // Grid
-                ctx.strokeStyle = '#334155'; ctx.lineWidth = 1;
-                [0.5, 1.0].forEach(r => {
-                    ctx.beginPath(); ctx.arc(cx, cy, R * r, 0, Math.PI * 2); ctx.stroke();
-                });
+                // 5. 物理防線模組槽位填充
+                document.getElementById('ui-m-hs').innerText = m.physics.hs_north_display;
+                document.getElementById('ui-m-weff').innerText = m.physics.weff_north_display;
+                document.getElementById('ui-m-ukc').innerText = m.physics.ukc_north_display;
+                document.getElementById('ui-m-fb').innerText = m.physics.fb_north_display;
 
-                // Polygon
-                ctx.beginPath();
-                ctx.arc(cx, cy, R * (res.hasVeto ? 1.1 : 0.5), 0, Math.PI * 2);
-                ctx.fillStyle = res.hasVeto ? 'rgba(239,68,68,0.4)' : 'rgba(16,185,129,0.4)';
-                ctx.fill(); ctx.strokeStyle = res.hasVeto ? '#ef4444' : '#10b981'; ctx.lineWidth = 2; ctx.stroke();
+                document.getElementById('ui-m-hs-limit').innerText = m.physics.hs_limit;
+                document.getElementById('ui-m-weff-limit').innerText = m.physics.weff_limit;
+                document.getElementById('ui-m-ukc-limit').innerText = m.physics.ukc_limit;
+                document.getElementById('ui-m-fb-limit').innerText = m.physics.fb_limit;
 
-                ctx.font = 'bold 12px sans-serif'; ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center';
-                ctx.fillText(res.hasVeto ? '🔴 0.0% 物理熔斷' : '🟢 100% 通航', cx, cy + 4);
+            } catch (err) {
+                console.warn('SSOT 數據擷取中斷:', err);
             }
         }
 
-        // 5. APPLICATION CONTROLLER
-        class GEMDashboardApp {
-            constructor() {
-                this.state = new GEMState();
-                this.profileRenderer = new ProfileRenderer('profileCanvas', 'profileContainer');
-                this.radarRenderer = new RadarRenderer('radarCanvas', 'radarContainer');
-                this.heartbeat = 0;
-
-                this.init();
-            }
-            init() {
-                this.state.subscribe(tel => this.onStateChange(tel));
-                this.bindEvents();
-                this.startTimers();
-                this.state.notify();
-            }
-            bindEvents() {
-                document.getElementById('rngHs').addEventListener('input', e => {
-                    document.getElementById('lblHs').textContent = `${e.target.value}m`;
-                    this.state.updateTelemetry({ hs: parseFloat(e.target.value) });
-                });
-                document.getElementById('rngW').addEventListener('input', e => {
-                    document.getElementById('lblW').textContent = `${e.target.value}m/s`;
-                    this.state.updateTelemetry({ w: parseFloat(e.target.value) });
-                });
-                window.addEventListener('resize', () => this.state.notify());
-            }
-            onStateChange(tel) {
-                const res = GEMPhysicsEngine.evaluate(tel);
-                
-                document.getElementById('valHs').textContent = `${res.hs}m`;
-                document.getElementById('valWeff').textContent = `${res.w_eff}m/s`;
-                document.getElementById('valUKC').textContent = `${res.ukc_south}m`;
-                document.getElementById('valFB').textContent = `${res.fb}m`;
-
-                this.profileRenderer.render(res);
-                this.radarRenderer.render(res);
-            }
-            startTimers() {
-                setInterval(() => {
-                    const now = new Date();
-                    document.getElementById('liveClock').textContent = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} CST`;
-                    if (now.getSeconds() % 5 === 0) {
-                        this.heartbeat++;
-                        document.getElementById('heartbeatCounter').textContent = this.heartbeat;
-                    }
-                }, 1000);
-            }
-        }
-
-        // Entrypoint
-        window.addEventListener('DOMContentLoaded', () => new GEMDashboardApp());
+        // 輪詢更新 (每 5 秒一次)
+        updateDashboard();
+        setInterval(updateDashboard, 5000);
     </script>
 </body>
 </html>
