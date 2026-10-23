@@ -1,107 +1,55 @@
 {
-  "version": "v66.0-Full-Assimilation-Gemini-AI-Master",
-  "timestamp": "2026-10-22 12:44:24 CST",
-  "date_str": "2026-10-22 (四)",
-  "decision": "🔴 0.0% 全線物理熔斷：雙岸越浪/觸底超標，強制執行防颱封島管制。",
-  "ai_commander_briefing": "🤖 [GEM AI 簡報]: 🔴 0.0% 全線物理熔斷：雙岸越浪/觸底超標，強制執行防颱封島管制。",
-  "hard_veto_alert": true,
-  "cwa_buoy_telemetry": {
-    "guishan_hs_m": 3.71,
-    "guishan_tp_s": 15.5,
-    "guishan_wind_ms": 9.5,
-    "suao_hs_m": 3.1,
-    "wushi_hs_m": 2.05,
-    "longdong_hs_m": 3.3,
-    "api_source": "CWA_FALLBACK_BASELINE",
-    "is_fallback": true
-  },
-  "japan_oceanic_telemetry": {
-    "v_kuroshio_ms": 1.38,
-    "ssh_anomaly_m": 0.12,
-    "tp_jma_farfield_s": 13.4,
-    "wave_current_factor": 1.166,
-    "api_source": "LIVE_JMA_MARINE_API",
-    "is_fallback": false
-  },
-  "tactical_guerrilla_route": {
-    "allow_boarding": false,
-    "decision_level": "HARD_VETO",
-    "clearance_percentage": 0.0,
-    "active_pier": "NONE",
-    "similarity_score": 100.0,
-    "matched_case_id": "CASE_20240812",
-    "stop_boarding_time": "2026-10-22 08:00 CST (未開放)",
-    "evacuation_time": "即刻直航返航烏石港",
-    "transit_duration_mins": 25,
-    "tactical_instruction": "🔴 0.0% 全線物理熔斷：雙岸越浪/觸底超標，強制執行防颱封島管制。"
-  },
-  "typhoon_section": {
-    "model_predicted_start": "2026-10-22 08:00 CST",
-    "model_predicted_days": 3,
-    "official_announced_start": "2026-10-22 08:00 CST",
-    "official_announced_days": 3,
-    "lead_time_hours": 36.0,
-    "is_aligned": true,
-    "accuracy_score": 100.0,
-    "feedback_applied": true,
-    "future_trend_summary": "🌀 JMA 遠場長浪(15.5s)穿透，雙岸湧浪超標，預估第4日恢復通航。"
-  },
-  "historical_warning_thresholds": {
-    "critical_hs_m": 1.2,
-    "critical_tp_s": 11.5,
-    "critical_weff_ms": 10.17,
-    "critical_ukc_m": 1.5,
-    "critical_fb_m": 0.5
-  },
-  "physics_metrics": {
-    "hs_pier": 2.68,
-    "hs_north": 4.59,
-    "hs_south": 2.68,
-    "tp_s": 15.5,
-    "w_eff_north": 6.11,
-    "w_eff_south": 7.28,
-    "ukc_north": -2.29,
-    "ukc_south": 1.92,
-    "fb_north": 0.15,
-    "fb_south": 0.15,
-    "hexagram": "坎為水",
-    "moving_line": 6,
-    "qimen_door": "死門",
-    "vessel_spec": {
-      "static_draft_m": 1.2,
-      "dynamic_squat_m": 0.82,
-      "total_draft_m": 2.02
+  "version": "v66.0-Full-Assimilation-SSOT",
+  "timestamp": "2026-10-23 20:09:15 CST",
+  "modules": {
+    "header": {
+      "system_title": "GEM Engine v66.0",
+      "timestamp_display": "20:09:15 CST",
+      "date_display": "2026-10-23 (五)",
+      "watchdog_status_text": "🟢 LIVE_OK",
+      "watchdog_is_stale": false,
+      "latency_seconds": 1.0
     },
-    "overtopping": {
-      "north": {
-        "depth_m": 0.21,
-        "q_rate_lsm": 0.32,
-        "is_overtopping": true
+    "decision": {
+      "decision_title": "戰術指揮決策",
+      "decision_text": "🟢 全線開放：南北雙岸海象良好，符合剛性安全標準。",
+      "is_closed": false,
+      "badge_color": "success",
+      "veto_reason": "物理指標正常 (PASS)",
+      "rl_confidence_pct": 25.0
+    },
+    "typhoon": {
+      "official_status_text": "🟢 常態營運（無颱風警報）",
+      "is_active_warning": false,
+      "typhoon_name": "無颱風警報",
+      "warning_number": "N/A",
+      "radius_7_km_display": "0 km"
+    },
+    "piers": {
+      "north_pier": {
+        "title": "北岸主泊位 (-8.5m CD)",
+        "ukc_text": "7.55 m",
+        "fb_text": "1.5 m",
+        "status_text": "🟢 正常靠泊",
+        "is_closed": false
       },
-      "south": {
-        "depth_m": 0.0,
-        "q_rate_lsm": 0.0,
-        "is_overtopping": false
+      "south_pier": {
+        "title": "南岸權宜泊位 (-9.8m CD)",
+        "ukc_text": "9.14 m",
+        "fb_text": "0.94 m",
+        "status_text": "🟢 正常靠泊",
+        "is_closed": false
       }
     },
-    "has_veto_north": true,
-    "has_veto_south": true,
-    "has_veto": true
-  },
-  "pier_seats_spec": {
-    "north_pier": {
-      "role": "主泊位 (迎風面 -3.2m CD)",
-      "chart_depth_m": 3.2,
-      "ukc_m": -2.29,
-      "overtopping_q_lsm": 0.32,
-      "status": "🔴 巨浪坐灘熔斷"
-    },
-    "south_pier": {
-      "role": "權宜泊位 (背風面 -5.5m CD)",
-      "chart_depth_m": 5.5,
-      "ukc_m": 1.92,
-      "overtopping_q_lsm": 0.0,
-      "status": "🔴 繞射浪觸底熔斷"
+    "physics": {
+      "hs_north_display": "0.97 m",
+      "weff_north_display": "5.83 m/s",
+      "ukc_north_display": "7.55 m",
+      "fb_north_display": "1.5 m",
+      "hs_limit": "≤ 1.13 m",
+      "weff_limit": "≤ 10.17 m/s",
+      "ukc_limit": "≥ 1.5 m",
+      "fb_limit": "≥ 0.5 m"
     }
   }
 }
