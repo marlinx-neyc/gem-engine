@@ -67,7 +67,6 @@
         .canvas-container { position: relative; width: 100%; border-radius: 8px; overflow: hidden; background: #050a14; border: 1px solid #1e2d4a; }
         .tab-active { background: #2563eb !important; color: #ffffff !important; border-color: #60a5fa !important; }
         .tab-south-active { background: #059669 !important; color: #ffffff !important; border-color: #34d399 !important; }
-        .tab-compare-active { background: #7c3aed !important; color: #ffffff !important; border-color: #a78bfa !important; }
     </style>
 </head>
 <body class="w-full max-w-[1700px] mx-auto">
@@ -119,10 +118,10 @@
                 </div>
             </section>
 
-            <!-- 南北岸動態水深與碼頭剖面動態圖 -->
+            <!-- 南北岸動態水深與碼頭剖面圖 -->
             <section class="card border-[#38bdf8]">
                 <div class="card-header !text-[#38bdf8]">
-                    <span>📐 南北岸動態水深與碼頭剖面圖</span>
+                    <span>📐 南北岸動態水深與碼頭剖面圖 (含越浪波峰虛線)</span>
                     <div class="flex gap-1">
                         <button id="tabProfileSouth" class="tab-btn py-0.5 px-2 rounded text-[10px] tab-south-active">南岸剖面</button>
                         <button id="tabProfileNorth" class="tab-btn py-0.5 px-2 rounded text-[10px] bg-slate-800 text-slate-300">北岸剖面</button>
@@ -157,6 +156,11 @@
                             <td class="text-center font-mono font-bold" id="valProfileNorthFB">--</td>
                             <td class="text-center font-mono font-bold" id="valProfileSouthFB">--</td>
                         </tr>
+                        <tr>
+                            <td class="font-bold text-white">淹水水頭/越浪率</td>
+                            <td class="text-center font-mono font-bold" id="valProfileNorthOvertopping">--</td>
+                            <td class="text-center font-mono font-bold" id="valProfileSouthOvertopping">--</td>
+                        </tr>
                         <tr class="bg-red-950/40">
                             <td class="font-bold text-amber-300">總體碼頭燈號</td>
                             <td class="text-center"><span id="badgeNorthPierStatus" class="badge badge-veto">🔴 熔斷禁止靠泊</span></td>
@@ -186,7 +190,7 @@
     </div>
 
     <script>
-        // 完全物理模型與 Canvas 視覺直覺化算子
+        // 完全對齊工程竣工圖說與 EuroTop 2018 物理算子
         class GEMPhysicsEngine {
             static evaluate(tel) {
                 const radNorth = tel.deltaTheta * (Math.PI / 180);
@@ -198,147 +202,159 @@
                 const w_eff_north = Number((tel.w * Math.abs(Math.cos(radNorth))).toFixed(2));
                 const w_eff_south = Number((tel.w * Math.abs(Math.cos(radSouth))).toFixed(2));
 
-                // 水下動態裕深 (-8.5m / -9.8m CD)
-                const ukc_north = Number((8.50 + tel.tide - 1.20 - hs_north).toFixed(2));
-                const ukc_south = Number((9.80 + tel.tide - 1.20 - hs_south).toFixed(2));
+                // 動態水深對齊 (-8.50m / -9.80m CD)
+                const ukc_north = Number((8.50 + tel.tide - 1.20 - hs_north * 0.5).toFixed(2));
+                const ukc_south = Number((9.80 + tel.tide - 1.20 - hs_south * 0.5).toFixed(2));
 
-                // 水上波峰與乾舷
-                const crestNorth = tel.tide + (hs_north * 0.5);
-                const crestSouth = tel.tide + (hs_south * 0.5);
+                // 浪頂高程與乾舷高程
+                const zeta_crest = tel.tp >= 11.5 ? 0.68 : 0.50;
+                const crestNorth = tel.tide + (hs_north * zeta_crest);
+                const crestSouth = tel.tide + (hs_south * zeta_crest);
 
-                const fb_north = Number(Math.max(0.15, 3.20 - crestNorth).toFixed(2));
-                const fb_south = Number(Math.max(0.15, 2.50 - crestSouth).toFixed(2));
+                const deckNorth = 3.20; // 鋼桁架引橋面 (+3.20m CD)
+                const deckSouth = 2.50; // 沉箱碼頭面 (+2.50m CD)
 
-                const hasVetoNorth = hs_north > 1.13 || tel.tp >= 11.5 || w_eff_north > 10.17 || ukc_north < 1.50 || fb_north < 0.50;
-                const hasVetoSouth = hs_south > 1.13 || tel.tp >= 11.5 || w_eff_south > 10.17 || ukc_south < 1.50 || fb_south < 0.50;
+                const h_water_north = Math.max(0, Number((crestNorth - deckNorth).toFixed(2)));
+                const h_water_south = Math.max(0, Number((crestSouth - deckSouth).toFixed(2)));
+
+                const fb_north = Number(Math.max(0.15, deckNorth - crestNorth).toFixed(2));
+                const fb_south = Number(Math.max(0.15, deckSouth - crestSouth).toFixed(2));
+
+                // EuroTop 越浪率 q (L/s/m)
+                const g = 9.80665;
+                const rc_north = Math.max(0.001, deckNorth - tel.tide);
+                const rc_south = Math.max(0.001, deckSouth - tel.tide);
+                const q_north = hs_north > 0 ? Number((Math.sqrt(g * Math.pow(hs_north, 3)) * 0.023 * Math.exp(-2.7 * rc_north / (hs_north * 0.40)) * 1000).toFixed(1)) : 0;
+                const q_south = hs_south > 0 ? Number((Math.sqrt(g * Math.pow(hs_south, 3)) * 0.023 * Math.exp(-2.7 * rc_south / (hs_south * 1.00)) * 1000).toFixed(1)) : 0;
+
+                const hasVetoNorth = hs_north > 1.13 || tel.tp >= 11.5 || w_eff_north > 10.17 || ukc_north < 1.50 || fb_north < 0.50 || h_water_north > 0;
+                const hasVetoSouth = hs_south > 1.13 || tel.tp >= 11.5 || w_eff_south > 10.17 || ukc_south < 1.50 || fb_south < 0.50 || h_water_south > 0;
 
                 return {
                     hs: tel.hs, hs_north, hs_south, w_eff_north, w_eff_south,
                     ukc_north, ukc_south, fb_north, fb_south, crestNorth, crestSouth,
+                    h_water_north, h_water_south, q_north, q_south,
                     hasVetoNorth, hasVetoSouth, hasVeto: hasVetoNorth || hasVetoSouth
                 };
             }
         }
 
-        // 重構 1：剖面圖繪製器 (物理精確 + 越浪紅色衝擊波)
+        // 剖面圖繪製器：精確幾何 + 紅色虛線越浪水線
         class ProfileCanvasRenderer {
-    constructor(canvasId, containerId) {
-        this.canvas = document.getElementById(canvasId);
-        this.container = document.getElementById(containerId);
-        this.animFrame = 0;
-    }
+            constructor(canvasId, containerId) {
+                this.canvas = document.getElementById(canvasId);
+                this.container = document.getElementById(containerId);
+                this.animFrame = 0;
+            }
 
-    render(tel, res, activePier) {
-        if (!this.canvas) return;
-        const dpr = window.devicePixelRatio || 1;
-        const w = this.container.clientWidth || 340;
-        const h = 220;
-        this.canvas.width = w * dpr; this.canvas.height = h * dpr;
-        this.canvas.style.width = w + 'px'; this.canvas.style.height = h + 'px';
+            render(tel, res, activePier) {
+                if (!this.canvas) return;
+                const dpr = window.devicePixelRatio || 1;
+                const w = this.container.clientWidth || 340;
+                const h = 220;
+                this.canvas.width = w * dpr; this.canvas.height = h * dpr;
+                this.canvas.style.width = w + 'px'; this.canvas.style.height = h + 'px';
 
-        const ctx = this.canvas.getContext('2d');
-        ctx.scale(dpr, dpr);
-        ctx.fillStyle = '#050a14'; ctx.fillRect(0, 0, w, h);
+                const ctx = this.canvas.getContext('2d');
+                ctx.scale(dpr, dpr);
+                ctx.fillStyle = '#050a14'; ctx.fillRect(0, 0, w, h);
 
-        this.animFrame += 0.08;
+                this.animFrame += 0.08;
 
-        const isNorth = activePier === 'NORTH';
-        const depthBase = isNorth ? 8.50 : 9.80;
-        const deckHeight = isNorth ? 3.20 : 2.50;
-        const hs = isNorth ? res.hs_north : res.hs_south;
-        const ukc = isNorth ? res.ukc_north : res.ukc_south;
-        const fb = isNorth ? res.fb_north : res.fb_south;
-        const title = isNorth ? '北岸碼頭 (主泊位 -8.50m CD)' : '南岸碼頭 (權宜泊位 -9.80m CD)';
-        const accentColor = isNorth ? '#38bdf8' : '#34d399';
+                const isNorth = activePier === 'NORTH';
+                const depthBase = isNorth ? 8.50 : 9.80;
+                const deckHeight = isNorth ? 3.20 : 2.50;
+                const hs = isNorth ? res.hs_north : res.hs_south;
+                const ukc = isNorth ? res.ukc_north : res.ukc_south;
+                const fb = isNorth ? res.fb_north : res.fb_south;
+                const hWater = isNorth ? res.h_water_north : res.h_water_south;
+                const qRate = isNorth ? res.q_north : res.q_south;
+                const title = isNorth ? '北岸碼頭 (主泊位 -8.50m CD)' : '南岸碼頭 (權宜泊位 -9.80m CD)';
+                const accentColor = isNorth ? '#38bdf8' : '#34d399';
 
-        // Y 軸空間映射 (固定天花板 +5.0m CD, 底面 -12.0m CD)
-        const topCD = 5.0, bottomCD = -12.0;
-        const cdToY = (cd) => ((topCD - cd) / (topCD - bottomCD)) * (h - 30) + 20;
+                // Y 軸高程映射天花板 +5.0m CD, 地板 -12.0m CD
+                const topCD = 5.0, bottomCD = -12.0;
+                const cdToY = (cd) => ((topCD - cd) / (topCD - bottomCD)) * (h - 30) + 20;
 
-        const tideY = cdToY(tel.tide);
-        const deckY = cdToY(deckHeight);
-        const seabedY = cdToY(-depthBase);
-        const keelY = cdToY(tel.tide - 1.20);
-        const quayX = w * 0.52;
+                const tideY = cdToY(tel.tide);
+                const deckY = cdToY(deckHeight);
+                const seabedY = cdToY(-depthBase);
+                const keelY = cdToY(tel.tide - 1.20);
+                const quayX = w * 0.52;
 
-        // 計算實際波峰高程 Z_crest
-        const crestCD = tel.tide + (hs * 0.5);
-        const crestY = cdToY(crestCD);
-        const overtopDepth = Math.max(0, crestCD - deckHeight);
-        const isOvertopping = fb < 0.50 || overtopDepth > 0;
+                const crestCD = isNorth ? res.crestNorth : res.crestSouth;
+                const crestY = cdToY(crestCD);
+                const isOvertopping = fb < 0.50 || hWater > 0;
 
-        // 1. 繪製海底面與碼頭結構
-        ctx.fillStyle = '#1a1816'; ctx.fillRect(0, seabedY, w, h - seabedY);
-        ctx.strokeStyle = '#6b7280'; ctx.lineWidth = 1.2;
-        ctx.beginPath(); ctx.moveTo(0, seabedY); ctx.lineTo(w, seabedY); ctx.stroke();
-        ctx.font = '9px monospace'; ctx.fillStyle = '#9ca3af'; ctx.fillText(`海底 -${depthBase.toFixed(2)}m CD`, 6, seabedY + 12);
+                // 1. 海底床
+                ctx.fillStyle = '#1a1816'; ctx.fillRect(0, seabedY, w, h - seabedY);
+                ctx.strokeStyle = '#6b7280'; ctx.lineWidth = 1.2;
+                ctx.beginPath(); ctx.moveTo(0, seabedY); ctx.lineTo(w, seabedY); ctx.stroke();
+                ctx.font = '9px monospace'; ctx.fillStyle = '#9ca3af'; ctx.fillText(`海底 -${depthBase.toFixed(2)}m CD`, 6, seabedY + 12);
 
-        // 碼頭水泥主體
-        ctx.fillStyle = '#1e2d4a'; ctx.fillRect(quayX, deckY, w - quayX, seabedY - deckY);
-        ctx.strokeStyle = accentColor; ctx.lineWidth = 1.5; ctx.strokeRect(quayX, deckY, w - quayX, seabedY - deckY);
+                // 2. 碼頭水泥幾何結構
+                ctx.fillStyle = '#1e2d4a'; ctx.fillRect(quayX, deckY, w - quayX, seabedY - deckY);
+                ctx.strokeStyle = accentColor; ctx.lineWidth = 1.5; ctx.strokeRect(quayX, deckY, w - quayX, seabedY - deckY);
 
-        // 2. 繪製動態海浪水體
-        const waveAmp = Math.min(25, hs * 4.5);
-        const waveFreq = 0.05;
+                // 3. 動態海浪水體
+                const waveAmp = Math.min(25, hs * 4.5);
+                const waveFreq = 0.05;
 
-        ctx.beginPath();
-        ctx.moveTo(0, seabedY);
-        ctx.lineTo(0, tideY);
-        for (let x = 0; x <= quayX; x += 4) {
-            const wy = tideY + Math.sin(x * waveFreq + this.animFrame) * waveAmp;
-            ctx.lineTo(x, wy);
+                ctx.beginPath();
+                ctx.moveTo(0, seabedY);
+                ctx.lineTo(0, tideY);
+                for (let x = 0; x <= quayX; x += 4) {
+                    const wy = tideY + Math.sin(x * waveFreq + this.animFrame) * waveAmp;
+                    ctx.lineTo(x, wy);
+                }
+
+                if (isOvertopping) {
+                    ctx.lineTo(quayX, crestY);
+                    ctx.lineTo(w, crestY + 2);
+                    ctx.lineTo(w, seabedY);
+                } else {
+                    ctx.lineTo(quayX, tideY);
+                    ctx.lineTo(quayX, seabedY);
+                }
+                ctx.closePath();
+                ctx.fillStyle = isOvertopping ? 'rgba(239, 68, 68, 0.40)' : (isNorth ? 'rgba(56, 189, 248, 0.35)' : 'rgba(52, 211, 153, 0.35)');
+                ctx.fill();
+
+                // 4. 🎯 關鍵升級：紅虛線越浪波峰警戒線貫穿甲板
+                if (isOvertopping) {
+                    ctx.save();
+                    ctx.setLineDash([6, 4]);
+                    ctx.strokeStyle = '#ef4444';
+                    ctx.lineWidth = 2.2;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(quayX - 20, crestY);
+                    ctx.lineTo(w, crestY);
+                    ctx.stroke();
+                    ctx.restore();
+
+                    ctx.fillStyle = '#ef4444';
+                    ctx.fillRect(quayX + 4, deckY - 22, w - quayX - 8, 18);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 9.5px sans-serif';
+                    ctx.fillText(`🚨 越浪波峰高程 +${crestCD.toFixed(2)}m CD (積水 +${hWater.toFixed(2)}m / q:${qRate}L/s/m)`, quayX + 6, deckY - 9);
+                }
+
+                // 5. 船體與水下 UKC 裕深線
+                const shipW = 65, shipX = quayX - shipW - 8, shipDeckY = tideY - 12;
+                ctx.fillStyle = '#1e293b'; ctx.fillRect(shipX, shipDeckY, shipW, keelY - shipDeckY);
+                ctx.strokeStyle = '#f8fafc'; ctx.lineWidth = 1.2; ctx.strokeRect(shipX, shipDeckY, shipW, keelY - shipDeckY);
+
+                const ukcX = shipX + shipW * 0.5;
+                ctx.beginPath(); ctx.moveTo(ukcX, keelY); ctx.lineTo(ukcX, seabedY);
+                ctx.strokeStyle = ukc < 1.50 ? '#ef4444' : '#10b981'; ctx.lineWidth = 2.0; ctx.stroke();
+
+                // 6. 抬頭標題
+                ctx.font = 'bold 11px sans-serif'; ctx.fillStyle = accentColor; ctx.fillText(title, 6, 14);
+            }
         }
 
-        if (isOvertopping) {
-            // 水體淹沒碼頭面
-            ctx.lineTo(quayX, crestY);
-            ctx.lineTo(w, crestY + 2);
-            ctx.lineTo(w, seabedY);
-        } else {
-            ctx.lineTo(quayX, tideY);
-            ctx.lineTo(quayX, seabedY);
-        }
-        ctx.closePath();
-        ctx.fillStyle = isOvertopping ? 'rgba(239, 68, 68, 0.40)' : (isNorth ? 'rgba(56, 189, 248, 0.35)' : 'rgba(52, 211, 153, 0.35)');
-        ctx.fill();
-
-        // 3. 🎯 關鍵改進：新增紅色虛線越浪波峰警戒線橫跨碼頭甲板面
-        if (isOvertopping) {
-            ctx.save();
-            ctx.setLineDash([6, 4]);           // 設定虛線樣式
-            ctx.strokeStyle = '#ef4444';       // 鮮紅色
-            ctx.lineWidth = 2.2;
-            
-            // 從碼頭前緣延伸穿過碼頭甲板面
-            ctx.beginPath();
-            ctx.moveTo(quayX - 20, crestY);
-            ctx.lineTo(w, crestY);
-            ctx.stroke();
-            ctx.restore();
-
-            // 越浪高度動態箭頭與文字標籤
-            ctx.fillStyle = '#ef4444';
-            ctx.fillRect(quayX + 4, deckY - 22, w - quayX - 8, 18);
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 9.5px sans-serif';
-            ctx.fillText(`🚨 越浪波峰高程 +${crestCD.toFixed(2)}m CD (溢深 +${overtopDepth.toFixed(2)}m)`, quayX + 8, deckY - 9);
-        }
-
-        // 4. 船體與 UKC 水下裕深
-        const shipW = 65, shipX = quayX - shipW - 8, shipDeckY = tideY - 12;
-        ctx.fillStyle = '#1e293b'; ctx.fillRect(shipX, shipDeckY, shipW, keelY - shipDeckY);
-        ctx.strokeStyle = '#f8fafc'; ctx.lineWidth = 1.2; ctx.strokeRect(shipX, shipDeckY, shipW, keelY - shipDeckY);
-
-        const ukcX = shipX + shipW * 0.5;
-        ctx.beginPath(); ctx.moveTo(ukcX, keelY); ctx.lineTo(ukcX, seabedY);
-        ctx.strokeStyle = ukc < 1.50 ? '#ef4444' : '#10b981'; ctx.lineWidth = 2.0; ctx.stroke();
-
-        // 5. 頂部抬頭標題
-        ctx.font = 'bold 11px sans-serif'; ctx.fillStyle = accentColor; ctx.fillText(title, 6, 14);
-    }
-}
-
-        // 重構 2：雷達圖繪製器 (黃線=1.0剛性門檻 / 越浪大幅向外拉伸)
+        // 雷達圖繪製器：剛性邊界 (黃線=1.0) 與紅色爆表衝出
         class RadarCanvasRenderer {
             constructor(canvasId, containerId) {
                 this.canvas = document.getElementById(canvasId);
@@ -361,7 +377,6 @@
                 const angles = [];
                 for (let i = 0; i < count; i++) angles.push(-Math.PI / 2 + (i * 2 * Math.PI) / count);
 
-                // 雷達底網
                 [0.5, 1.0, 1.4].forEach((lvl) => {
                     ctx.beginPath();
                     for (let i = 0; i < count; i++) {
@@ -383,7 +398,7 @@
                 const fb = isNorth ? res.fb_north : res.fb_south;
                 const hasVeto = isNorth ? res.hasVetoNorth : res.hasVetoSouth;
 
-                // 核心比例算子：1.0 為剛性邊界，超過 1.0 衝出黃線！
+                // 1.0 為剛性警戒上限
                 const r_hs = hs / 1.13;
                 const r_weff = w_eff / 10.17;
                 const r_tp = tel.tp / 11.5;
@@ -392,7 +407,6 @@
 
                 const ratios = [r_hs, r_weff, r_tp, r_ukc, r_fb];
 
-                // 繪製雷達多邊形 (破防時直接變為鮮紅色爆表圖案)
                 ctx.beginPath();
                 for (let i = 0; i < count; i++) {
                     const val = Math.max(0.2, Math.min(1.5, ratios[i]));
@@ -408,7 +422,6 @@
                 ctx.lineWidth = 2.5;
                 ctx.stroke();
 
-                // 中央實體破防標籤
                 if (hasVeto) {
                     ctx.fillStyle = '#ef4444';
                     ctx.font = 'bold 12px sans-serif';
@@ -418,7 +431,7 @@
             }
         }
 
-        // 前端控制器與即時渲染
+        // 即時控制與 UI 寫入
         let activePier = 'SOUTH';
         const profileRenderer = new ProfileCanvasRenderer('profileCanvas', 'profileContainer');
         const radarRenderer = new RadarCanvasRenderer('nativeRadarCanvas', 'radarContainer');
@@ -446,6 +459,9 @@
 
             document.getElementById('valProfileNorthFB').innerHTML = `${res.fb_north} m ${res.fb_north < 0.50 ? '<span class="badge badge-veto">🔴 越浪</span>' : '<span class="badge badge-pass">🟢 安全</span>'}`;
             document.getElementById('valProfileSouthFB').innerHTML = `${res.fb_south} m ${res.fb_south < 0.50 ? '<span class="badge badge-veto">🔴 越浪</span>' : '<span class="badge badge-pass">🟢 安全</span>'}`;
+
+            document.getElementById('valProfileNorthOvertopping').innerHTML = `${res.h_water_north > 0 ? `<span class="text-red-400 font-bold">+${res.h_water_north}m (${res.q_north}L/s/m)` : '<span class="text-emerald-400">0.00m (無積水)</span>'}`;
+            document.getElementById('valProfileSouthOvertopping').innerHTML = `${res.h_water_south > 0 ? `<span class="text-red-400 font-bold">+${res.h_water_south}m (${res.q_south}L/s/m)` : '<span class="text-emerald-400">0.00m (無積水)</span>'}`;
 
             document.getElementById('badgeNorthPierStatus').className = res.hasVetoNorth ? 'badge badge-veto' : 'badge badge-pass';
             document.getElementById('badgeNorthPierStatus').textContent = res.hasVetoNorth ? '🔴 熔斷禁止靠泊' : '🟢 許可靠泊';
