@@ -128,7 +128,7 @@
                     </h1>
                     <div class="text-[10.5px] text-[#cbd5e1] mt-0.5 flex flex-wrap gap-2 items-center font-mono">
                         <span>時間：<b id="liveClock" class="text-white bg-white/10 px-1.5 py-0.5 rounded">--:--:-- CST</b></span>
-                        <span>| 日期：<b id="liveDate" class="text-emerald-300 bg-emerald-950/60 border border-emerald-500/40 px-1.5 py-0.5 rounded">2026-10-22 (四)</b></span>
+                        <span>| 日期：<b id="liveDate" class="text-emerald-300 bg-emerald-950/60 border border-emerald-500/40 px-1.5 py-0.5 rounded">2026-10-23 (五)</b></span>
                         <span>| 心跳連線：<b id="heartbeatCounter" class="text-[#38bdf8]">12</b></span>
                         <span>| 總裁示：<b id="ssotDecisionBadge" class="text-[#ef4444] font-bold">0.0% 熔斷</b></span>
                     </div>
@@ -172,11 +172,11 @@
                         <div class="grid grid-cols-2 gap-1.5 text-[10px]">
                             <div class="bg-black/40 p-1.5 rounded border border-red-500/30 flex justify-between items-center">
                                 <span class="text-slate-200">中央應變中心：</span>
-                                <span class="badge badge-veto">🔴 一級開設</span>
+                                <span class="badge badge-veto" id="uiTyphoonCentral">🔴 一級開設</span>
                             </div>
                             <div class="bg-black/40 p-1.5 rounded border border-amber-500/30 flex justify-between items-center">
                                 <span class="text-slate-200">宜蘭縣應變中心：</span>
-                                <span class="badge badge-yellow">🟡 二級開設</span>
+                                <span class="badge badge-yellow" id="uiTyphoonLocal">🟡 二級開設</span>
                             </div>
                         </div>
                     </div>
@@ -191,19 +191,19 @@
                             <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:12px_12px]"></div>
                             <div class="relative z-10 flex justify-between items-start">
                                 <div class="text-[10px] text-slate-200">
-                                    <span class="font-bold text-amber-300">🌀 強烈颱風 (第21號)</span><br>
-                                    中心位置：<span class="font-mono">23.5°N 123.8°E</span> (龜山島東南東 180km)
+                                    <span class="font-bold text-amber-300" id="uiTyphoonNameTitle">🌀 中度颱風 薔琵 (第29號)</span><br>
+                                    中心位置：<span class="font-mono" id="uiTyphoonCoord">24.3°N 123.0°E</span> (距宜蘭 140km)
                                 </div>
-                                <span class="badge badge-veto text-[9px]">暴風圈侵襲率 88%</span>
+                                <span class="badge badge-veto text-[9px]" id="uiTyphoonImpactProb">暴風圈侵襲率 88%</span>
                             </div>
                             <div class="relative z-10 my-1 flex items-center justify-around text-center">
-                                <div class="text-[9px] text-slate-400">登陸預測<br><b class="text-white font-mono">10/22 14:00</b></div>
+                                <div class="text-[9px] text-slate-400">近接預測<br><b class="text-white font-mono" id="uiTyphoonTime">10/23 18:00</b></div>
                                 <div class="text-xs text-red-400 animate-pulse">➔ ➔ 🌀 ➔ ➔</div>
-                                <div class="text-[9px] text-slate-400">龜山島近接<br><b class="text-red-400 font-mono">最小距離 45km</b></div>
+                                <div class="text-[9px] text-slate-400">龜山島近接<br><b class="text-red-400 font-mono" id="uiTyphoonMinDist">最小距離 45km</b></div>
                             </div>
                             <div class="relative z-10 text-[9px] text-slate-300 flex justify-between border-t border-slate-700/60 pt-1">
-                                <span>7級暴風半徑：<b class="text-amber-300 font-mono">250 km</b></span>
-                                <span>10級暴風半徑：<b class="text-red-400 font-mono">80 km</b></span>
+                                <span>7級暴風半徑：<b class="text-amber-300 font-mono" id="uiTyphoonR7">320 km</b></span>
+                                <span>近中心最大風速：<b class="text-red-400 font-mono" id="uiTyphoonMaxWind">43 m/s</b></span>
                             </div>
                         </div>
                     </div>
@@ -220,8 +220,8 @@
                         <tbody>
                             <tr>
                                 <td class="font-bold text-slate-200">預估封島起始點</td>
-                                <td class="text-center font-mono text-amber-200">2026-10-22 08:00</td>
-                                <td class="text-center font-mono text-sky-200">2026-10-22 08:00</td>
+                                <td class="text-center font-mono text-amber-200">2026-10-23 08:00</td>
+                                <td class="text-center font-mono text-sky-200">2026-10-23 08:00</td>
                             </tr>
                             <tr>
                                 <td class="font-bold text-slate-200">預估封島持續天數</td>
@@ -239,7 +239,7 @@
                         </div>
                         <div class="grid grid-cols-2 gap-1.5 text-[9.5px]">
                             <div class="bg-slate-900/80 p-1.5 rounded border border-slate-700 flex justify-between">
-                                <span>波高 Hs 警戒：</span><span class="font-mono font-bold text-red-400">&gt; 1.20 m</span>
+                                <span>波高 Hs 警戒：</span><span class="font-mono font-bold text-red-400">&gt; 1.13 m</span>
                             </div>
                             <div class="bg-slate-900/80 p-1.5 rounded border border-slate-700 flex justify-between">
                                 <span>週期 Tp 長浪：</span><span class="font-mono font-bold text-red-400">&ge; 11.5 s</span>
@@ -326,23 +326,23 @@
                     <tbody>
                         <tr>
                             <td class="font-bold text-white">海底水深 Base CD</td>
-                            <td class="text-center font-mono">-3.20 m (淺水區)</td>
-                            <td class="text-center font-mono text-emerald-300">-5.50 m (深水區)</td>
+                            <td class="text-center font-mono">-8.50 m (浚挖區)</td>
+                            <td class="text-center font-mono text-emerald-300">-9.80 m (深水區)</td>
                         </tr>
                         <tr>
                             <td class="font-bold text-white">動態裕深 UKC</td>
-                            <td class="text-center font-mono text-red-400 font-bold" id="valProfileNorthUKC">-1.90 m 🔴 坐灘</td>
-                            <td class="text-center font-mono text-red-400 font-bold" id="valProfileSouthUKC">-0.80 m 🔴 觸底</td>
+                            <td class="text-center font-mono text-emerald-300 font-bold" id="valProfileNorthUKC">3.40 m 🟢 安全</td>
+                            <td class="text-center font-mono text-emerald-300 font-bold" id="valProfileSouthUKC">5.50 m 🟢 安全</td>
                         </tr>
                         <tr>
                             <td class="font-bold text-white">碼頭乾舷 FB</td>
-                            <td class="text-center font-mono text-red-400 font-bold">0.15 m 🔴 越浪</td>
-                            <td class="text-center font-mono text-red-400 font-bold">0.15 m 🔴 越浪</td>
+                            <td class="text-center font-mono text-red-400 font-bold" id="valProfileNorthFB">0.15 m 🔴 越浪</td>
+                            <td class="text-center font-mono text-red-400 font-bold" id="valProfileSouthFB">0.15 m 🔴 越浪</td>
                         </tr>
                         <tr class="bg-red-950/40">
                             <td class="font-bold text-amber-300">最終碼頭燈號</td>
-                            <td class="text-center"><span class="badge badge-veto">🔴 熔斷禁止靠泊</span></td>
-                            <td class="text-center"><span class="badge badge-veto">🔴 熔斷禁止靠泊</span></td>
+                            <td class="text-center"><span class="badge badge-veto" id="badgeNorthPierStatus">🔴 熔斷禁止靠泊</span></td>
+                            <td class="text-center"><span class="badge badge-veto" id="badgeSouthPierStatus">🔴 熔斷禁止靠泊</span></td>
                         </tr>
                     </tbody>
                 </table>
@@ -382,9 +382,9 @@
                         </tr>
                         <tr>
                             <td class="font-bold text-white">動態裕深 <span class="font-mono text-[#38bdf8]">(UKC)</span></td>
-                            <td class="text-center font-mono font-extrabold text-red-400" id="valMobUKC">-0.80 m</td>
+                            <td class="text-center font-mono font-extrabold text-emerald-300" id="valMobUKC">3.40 m</td>
                             <td class="text-center font-mono text-slate-300">≥ 1.50 m</td>
-                            <td class="text-center"><span class="badge badge-veto">🔴 觸底</span></td>
+                            <td class="text-center"><span class="badge badge-pass">🟢 PASS</span></td>
                         </tr>
                         <tr>
                             <td class="font-bold text-white">碼頭乾舷 <span class="font-mono text-[#38bdf8]">(FB)</span></td>
@@ -406,9 +406,9 @@
                     <thead>
                         <tr>
                             <th class="w-[22%] bg-slate-900 text-[#38bdf8] text-center">體系 / 方案</th>
-                            <th class="w-[26%] text-center bg-blue-950/70 text-emerald-300 font-extrabold" id="thD0Day">今日 10/22<br><span class="text-[8.5px] font-normal text-slate-300">🌀 長浪</span></th>
-                            <th class="w-[26%] text-center bg-indigo-950/70 text-amber-300 font-extrabold" id="thD1Day">明日 10/23<br><span class="text-[8.5px] font-normal text-slate-300">☁️ 浪退</span></th>
-                            <th class="w-[26%] text-center bg-slate-900 text-sky-300 font-extrabold" id="thD2Day">後日 10/24<br><span class="text-[8.5px] font-normal text-slate-300">☀️ 平穩</span></th>
+                            <th class="w-[26%] text-center bg-blue-950/70 text-emerald-300 font-extrabold" id="thD0Day">今日 10/23<br><span class="text-[8.5px] font-normal text-slate-300">🌀 長浪</span></th>
+                            <th class="w-[26%] text-center bg-indigo-950/70 text-amber-300 font-extrabold" id="thD1Day">明日 10/24<br><span class="text-[8.5px] font-normal text-slate-300">☁️ 浪退</span></th>
+                            <th class="w-[26%] text-center bg-slate-900 text-sky-300 font-extrabold" id="thD2Day">後日 10/25<br><span class="text-[8.5px] font-normal text-slate-300">☀️ 平穩</span></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -488,7 +488,7 @@
                     <span class="badge badge-yellow text-[9.5px]">觀光署標準對齊</span>
                 </div>
                 <div class="box-alert-danger text-[10.5px]">
-                    <b>🎯 關鍵游擊調度執行：</b><span class="text-[#facc15] font-extrabold"><span id="txtStopBoardTime">10/22 11:20</span> 止登截止</span>（雙岸越浪超標，禁止散客登島）；<span class="text-[#facc15] font-extrabold"><span id="txtEvacuateTime">10/22 14:20</span> 強制清島撤離</span>（全員撤退直航返航烏石港，避難耗時精算 25 分鐘）。
+                    <b>🎯 關鍵游擊調度執行：</b><span class="text-[#facc15] font-extrabold"><span id="txtStopBoardTime">10/23 11:20</span> 止登截止</span>（雙岸越浪超標，禁止散客登島）；<span class="text-[#facc15] font-extrabold"><span id="txtEvacuateTime">10/23 14:20</span> 強制清島撤離</span>（全員撤退直航返航烏石港，避難耗時精算 25 分鐘）。
                 </div>
             </section>
 
@@ -561,27 +561,25 @@
             setRadarPier(pierKey) { this.activeRadarPier = pierKey; this.notify(); }
         }
 
-        // 2. DOMAIN PHYSICS CALCULATOR (NORTH VS SOUTH PIER SEPARATION)
+        // 2. DOMAIN PHYSICS CALCULATOR (對齊工程圖說 -8.5m / -9.8m CD 水深)
         class GEMPhysicsEngine {
             static evaluate(tel) {
                 const radNorth = tel.deltaTheta * (Math.PI / 180);
                 const radSouth = (90 - tel.deltaTheta) * (Math.PI / 180);
 
-                // North Pier (迎風面 -3.2m CD): Higher wave, direct onshore wind
+                // 北岸碼頭 (-8.50m CD) 迎風面，南岸碼頭 (-9.80m CD) 背風面 (折算波高 62%)
                 const hs_north = Number((tel.hs * 1.06).toFixed(2));
                 const w_eff_north = Number((tel.w * Math.abs(Math.cos(radNorth))).toFixed(2));
                 
-                // South Pier (背風面 -5.5m CD): Attenuated leeward wave (62%), angle wind
                 const hs_south = Number((tel.hs * 0.62).toFixed(2));
                 const w_eff_south = Number((tel.w * Math.abs(Math.cos(radSouth))).toFixed(2));
 
-                const draft = 2.02; // Vessel static (1.20m) + dynamic squat (0.82m)
-                
-                // Dynamic UKC
-                const ukc_north = Number((3.20 + tel.tide - draft - hs_north).toFixed(2));
-                const ukc_south = Number((5.50 + tel.tide - draft - hs_south).toFixed(2));
+                const draft = 1.20; // 靜態吃水 1.20m
 
-                // Deck height & Overtopping
+                // 對齊工程圖說基準水深：北岸 8.50m CD, 南岸 9.80m CD
+                const ukc_north = Number((8.50 + tel.tide - draft - hs_north).toFixed(2));
+                const ukc_south = Number((9.80 + tel.tide - draft - hs_south).toFixed(2));
+
                 const deckNorth = 3.20;
                 const deckSouth = 2.50;
 
@@ -597,8 +595,8 @@
                 const fb_north = Number(Math.max(0.15, deckNorth - crestNorth).toFixed(2));
                 const fb_south = Number(Math.max(0.15, deckSouth - crestSouth).toFixed(2));
 
-                const hasVetoNorth = hs_north > 1.20 || tel.tp >= 11.5 || w_eff_north > 10.17 || ukc_north < 1.50 || fb_north < 0.50;
-                const hasVetoSouth = hs_south > 1.20 || tel.tp >= 11.5 || w_eff_south > 10.17 || ukc_south < 1.50 || fb_south < 0.50;
+                const hasVetoNorth = hs_north > 1.13 || tel.tp >= 11.5 || w_eff_north > 10.17 || ukc_north < 1.50 || fb_north < 0.50;
+                const hasVetoSouth = hs_south > 1.13 || tel.tp >= 11.5 || w_eff_south > 10.17 || ukc_south < 1.50 || fb_south < 0.50;
 
                 return {
                     hs: tel.hs,
@@ -614,7 +612,7 @@
             }
         }
 
-        // 3. CANVAS RENDERER: PROFILE (STACKED TOP/BOTTOM FOR COMPARE)
+        // 3. CANVAS RENDERER: PROFILE (對齊校正水深與 Y 軸深度範圍)
         class ProfileCanvasRenderer {
             constructor(canvasId, containerId) {
                 this.canvas = document.getElementById(canvasId);
@@ -624,9 +622,8 @@
             render(state, res) {
                 if (!this.canvas) return;
                 const dpr = window.devicePixelRatio || 1;
-                const mode = state.activeProfilePier; // 'SOUTH', 'NORTH', 'COMPARE'
+                const mode = state.activeProfilePier;
                 
-                // Set Container height dynamically
                 const h = mode === 'COMPARE' ? 280 : 220;
                 const w = this.container.clientWidth || 340;
                 
@@ -641,23 +638,20 @@
                 this.animFrame += 0.05;
 
                 if (mode === 'COMPARE') {
-                    // STACKED DISPLAY: TOP = NORTH PIER, BOTTOM = SOUTH PIER
                     const subH = (h - 8) / 2;
-
-                    // Divider line
                     ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 1; ctx.setLineDash([4, 3]);
                     ctx.beginPath(); ctx.moveTo(0, subH + 4); ctx.lineTo(w, subH + 4); ctx.stroke();
                     ctx.setLineDash([]);
 
-                    // TOP SUB-DIAGRAM: North Pier (迎風面 -3.2m CD)
-                    this.drawDetailedProfile(ctx, 0, 0, w, subH, '北岸碼頭 (迎風面 -3.2m CD)', 3.20, 3.20, res.hs_north, res.ukc_north, res.overtopDepthNorth, res.qNorth, state.telemetry.tide, '#38bdf8', true);
+                    // 北岸主泊位 (-8.5m CD)
+                    this.drawDetailedProfile(ctx, 0, 0, w, subH, '北岸碼頭 (主泊位 -8.5m CD)', 8.50, 3.20, res.hs_north, res.ukc_north, res.overtopDepthNorth, res.qNorth, state.telemetry.tide, '#38bdf8', true);
 
-                    // BOTTOM SUB-DIAGRAM: South Pier (背風面 -5.5m CD)
-                    this.drawDetailedProfile(ctx, 0, subH + 8, w, subH, '南岸碼頭 (背風面 -5.5m CD)', 5.50, 2.50, res.hs_south, res.ukc_south, res.overtopDepthSouth, res.qSouth, state.telemetry.tide, '#34d399', false);
+                    // 南岸權宜泊位 (-9.8m CD)
+                    this.drawDetailedProfile(ctx, 0, subH + 8, w, subH, '南岸碼頭 (權宜泊位 -9.8m CD)', 9.80, 2.50, res.hs_south, res.ukc_south, res.overtopDepthSouth, res.qSouth, state.telemetry.tide, '#34d399', false);
                 } else if (mode === 'NORTH') {
-                    this.drawDetailedProfile(ctx, 0, 0, w, h, '北岸碼頭 (主泊迎風面 -3.2m CD)', 3.20, 3.20, res.hs_north, res.ukc_north, res.overtopDepthNorth, res.qNorth, state.telemetry.tide, '#38bdf8', true);
+                    this.drawDetailedProfile(ctx, 0, 0, w, h, '北岸碼頭 (主泊位 -8.5m CD)', 8.50, 3.20, res.hs_north, res.ukc_north, res.overtopDepthNorth, res.qNorth, state.telemetry.tide, '#38bdf8', true);
                 } else {
-                    this.drawDetailedProfile(ctx, 0, 0, w, h, '南岸碼頭 (權宜背風面 -5.5m CD)', 5.50, 2.50, res.hs_south, res.ukc_south, res.overtopDepthSouth, res.qSouth, state.telemetry.tide, '#34d399', false);
+                    this.drawDetailedProfile(ctx, 0, 0, w, h, '南岸碼頭 (權宜泊位 -9.8m CD)', 9.80, 2.50, res.hs_south, res.ukc_south, res.overtopDepthSouth, res.qSouth, state.telemetry.tide, '#34d399', false);
                 }
             }
 
@@ -665,19 +659,20 @@
                 ctx.save();
                 ctx.translate(offsetX, offsetY);
 
-                const topCD = 4.5;
-                const bottomCD = -6.5;
+                // 校正 Y 軸空間範圍，確保 -9.8m 水深完整呈現
+                const topCD = 5.0;
+                const bottomCD = -12.0;
                 const cdToY = (cd) => ((topCD - cd) / (topCD - bottomCD)) * (h - 22) + 16;
 
                 const tideY = cdToY(tide);
                 const deckY = cdToY(deckHeight);
                 const seabedY = cdToY(-depthBase);
-                const draft = 2.02;
+                const draft = 1.20;
                 const keelY = cdToY(tide - draft);
 
                 const quayX = w * 0.54;
 
-                // 1. Seabed
+                // 1. 海底床
                 ctx.fillStyle = '#1a1816';
                 ctx.fillRect(0, seabedY, w, Math.max(10, h - seabedY));
                 ctx.strokeStyle = '#6b7280'; ctx.lineWidth = 1.2;
@@ -686,7 +681,7 @@
                 ctx.font = '8.5px monospace'; ctx.fillStyle = '#9ca3af';
                 ctx.fillText(`海底 -${depthBase.toFixed(1)}m CD`, 6, seabedY + 9);
 
-                // 2. Quay Structure
+                // 2. 碼頭結構
                 ctx.fillStyle = '#1e2d4a';
                 ctx.fillRect(quayX, deckY, w - quayX, seabedY - deckY);
                 ctx.strokeStyle = accentColor; ctx.lineWidth = 1.2;
@@ -695,7 +690,7 @@
                 ctx.fillStyle = '#facc15';
                 ctx.fillRect(quayX + 4, deckY - 5, 5, 5);
 
-                // 3. Water Surface & Overtopping
+                // 3. 水面與越浪
                 const waveAmp = Math.min(18, hs * 3.2);
                 const waveFreq = 0.06;
                 const wavePhase = this.animFrame * (isNorth ? 1.2 : 0.9);
@@ -721,7 +716,7 @@
                 ctx.fillStyle = isNorth ? 'rgba(56, 189, 248, 0.32)' : 'rgba(52, 211, 153, 0.32)';
                 ctx.fill();
 
-                // Wave surface stroke
+                // 水面線
                 ctx.beginPath();
                 ctx.moveTo(0, tideY + Math.sin(wavePhase) * waveAmp);
                 for (let x = 0; x <= quayX; x += 4) {
@@ -729,7 +724,7 @@
                 }
                 ctx.strokeStyle = isNorth ? '#38bdf8' : '#34d399'; ctx.lineWidth = 1.6; ctx.stroke();
 
-                // 4. Ship Hull & Draft
+                // 4. 船體與吃水線
                 const shipW = Math.min(70, quayX * 0.62);
                 const shipX = quayX - shipW - 6;
                 const shipDeckY = tideY - 12;
@@ -746,15 +741,13 @@
                 ctx.fillStyle = '#1e293b'; ctx.fill();
                 ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1.2; ctx.stroke();
 
-                // Cabin
                 ctx.fillStyle = '#3b82f6'; ctx.fillRect(shipX + 10, shipDeckY - 8, shipW * 0.4, 8);
 
-                // Waterline
                 ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 1; ctx.setLineDash([2, 1]);
                 ctx.beginPath(); ctx.moveTo(shipX - 2, tideY); ctx.lineTo(shipX + shipW + 2, tideY); ctx.stroke();
                 ctx.setLineDash([]);
 
-                // 5. UKC Line
+                // 5. UKC 水下富餘水深線
                 const ukcX = shipX + shipW * 0.5;
                 ctx.beginPath(); ctx.moveTo(ukcX, keelY); ctx.lineTo(ukcX, seabedY);
                 ctx.strokeStyle = ukc < 1.50 ? '#ef4444' : '#10b981'; ctx.lineWidth = 1.8; ctx.stroke();
@@ -764,17 +757,15 @@
                     ctx.fillRect(shipX + 4, keelY, shipW - 8, Math.max(6, seabedY - keelY + 4));
                 }
 
-                // 6. Text Header & Labels
+                // 6. 標題與標籤
                 ctx.font = 'bold 9.5px sans-serif'; ctx.fillStyle = accentColor;
                 ctx.fillText(title, 6, 12);
 
                 ctx.font = 'bold 9px monospace';
-                if (ukc < 0) {
-                    ctx.fillStyle = '#f87171'; ctx.fillText(`UKC: ${ukc.toFixed(2)}m 🔴 坐灘觸底`, 6, 23);
-                } else if (ukc < 1.50) {
-                    ctx.fillStyle = '#facc15'; ctx.fillText(`UKC: ${ukc.toFixed(2)}m 🟡 裕深不足`, 6, 23);
+                if (ukc < 1.50) {
+                    ctx.fillStyle = '#f87171'; ctx.fillText(`UKC: ${ukc.toFixed(2)}m 🔴 裕深破防`, 6, 23);
                 } else {
-                    ctx.fillStyle = '#4ade80'; ctx.fillText(`UKC: ${ukc.toFixed(2)}m 🟢 安全`, 6, 23);
+                    ctx.fillStyle = '#4ade80'; ctx.fillText(`UKC: ${ukc.toFixed(2)}m 🟢 水深安全`, 6, 23);
                 }
 
                 if (overtopDepth > 0) {
@@ -791,7 +782,7 @@
             }
         }
 
-        // 4. CANVAS RENDERER: RADAR (RESPONSIVE NO-CUTOFF RENDERER)
+        // 4. RADAR RENDERER
         class RadarCanvasRenderer {
             constructor(canvasId, containerId) {
                 this.canvas = document.getElementById(canvasId);
@@ -816,7 +807,6 @@
                 const angles = [];
                 for (let i = 0; i < count; i++) angles.push(-Math.PI / 2 + (i * 2 * Math.PI) / count);
 
-                // Background Web
                 [0.25, 0.5, 0.75, 1.0, 1.25].forEach((lvl, idx) => {
                     ctx.beginPath();
                     for (let i = 0; i < count; i++) {
@@ -828,14 +818,12 @@
                     ctx.fill(); ctx.strokeStyle = (lvl === 1.0) ? '#64748b' : '#334155'; ctx.lineWidth = (lvl===1.0)?1.5:1; ctx.stroke();
                 });
 
-                // Axis Web Lines
                 for (let i = 0; i < count; i++) {
                     ctx.beginPath(); ctx.moveTo(cx, cy);
                     ctx.lineTo(cx + R * 1.22 * Math.cos(angles[i]), cy + R * 1.22 * Math.sin(angles[i]));
                     ctx.strokeStyle = '#334155'; ctx.lineWidth = 1; ctx.stroke();
                 }
 
-                // 100% Threshold Dashed Circle (Yellow)
                 ctx.save(); ctx.beginPath(); ctx.setLineDash([4, 4]);
                 for (let i = 0; i < count; i++) {
                     const x = cx + R * Math.cos(angles[i]), y = cy + R * Math.sin(angles[i]);
@@ -843,9 +831,8 @@
                 }
                 ctx.closePath(); ctx.strokeStyle = '#facc15'; ctx.lineWidth = 1.8; ctx.stroke(); ctx.restore();
 
-                const mode = state.activeRadarPier; // 'SOUTH', 'NORTH', 'COMPARE'
+                const mode = state.activeRadarPier;
 
-                // Helper to map metrics to ratios (1.0 = Threshold Limit)
                 const calcRatio = (val, limit, isReverse = false) => {
                     if (!isReverse) {
                         return val / limit;
@@ -866,7 +853,7 @@
                     const fb = isNorth ? res.fb_north : res.fb_south;
                     const q = isNorth ? res.qNorth : res.qSouth;
 
-                    const r_hs = calcRatio(hs, 1.20);
+                    const r_hs = calcRatio(hs, 1.13);
                     const r_weff = calcRatio(w_eff, 10.17);
                     const r_tp = calcRatio(tp, 11.5);
                     const r_ukc = calcRatio(ukc, 1.50, true);
@@ -883,7 +870,6 @@
                 const northData = getPierRatios(true);
                 const southData = getPierRatios(false);
 
-                // Draw Radar Polygons
                 if (mode === 'COMPARE') {
                     this.drawRadarPolygon(ctx, cx, cy, R, angles, southData.ratios, '#10b981', 'rgba(16, 185, 129, 0.25)');
                     this.drawRadarPolygon(ctx, cx, cy, R, angles, northData.ratios, '#38bdf8', 'rgba(56, 189, 248, 0.25)');
@@ -897,9 +883,8 @@
                     this.drawRadarPolygon(ctx, cx, cy, R, angles, southData.ratios, stroke, fill);
                 }
 
-                // 6-Axis Labels
                 const indicators = [
-                    { title: 'Hs 浪高', sVal: `${southData.hs}m`, nVal: `${northData.hs}m`, limit: '限1.20m', sPass: southData.hs <= 1.20, nPass: northData.hs <= 1.20 },
+                    { title: 'Hs 浪高', sVal: `${southData.hs}m`, nVal: `${northData.hs}m`, limit: '限1.13m', sPass: southData.hs <= 1.13, nPass: northData.hs <= 1.13 },
                     { title: 'Weff 攻角風', sVal: `${southData.w_eff}m/s`, nVal: `${northData.w_eff}m/s`, limit: '限10.17m/s', sPass: southData.w_eff <= 10.17, nPass: northData.w_eff <= 10.17 },
                     { title: 'Tp 週期', sVal: `${southData.tp}s`, nVal: `${northData.tp}s`, limit: '限11.5s', sPass: southData.tp < 11.5, nPass: northData.tp < 11.5 },
                     { title: 'UKC 裕深', sVal: `${southData.ukc}m`, nVal: `${northData.ukc}m`, limit: '限1.50m', sPass: southData.ukc >= 1.50, nPass: northData.ukc >= 1.50 },
@@ -937,12 +922,12 @@
 
                 ctx.font = 'bold 9.5px sans-serif'; ctx.textAlign = 'center';
                 if (mode === 'COMPARE') {
-                    ctx.fillStyle = '#10b981'; ctx.fillText('🟢 南岸 (權宜背風 -5.5m)', cx - 60, h - 10);
-                    ctx.fillStyle = '#38bdf8'; ctx.fillText('🔷 北岸 (主泊迎風 -3.2m)', cx + 60, h - 10);
+                    ctx.fillStyle = '#10b981'; ctx.fillText('🟢 南岸 (權宜背風 -9.8m)', cx - 60, h - 10);
+                    ctx.fillStyle = '#38bdf8'; ctx.fillText('🔷 北岸 (主泊迎風 -8.5m)', cx + 60, h - 10);
                 } else if (mode === 'NORTH') {
-                    ctx.fillStyle = '#38bdf8'; ctx.fillText('🔷 正在檢視：北岸碼頭 (迎風面 -3.2m CD)', cx, h - 10);
+                    ctx.fillStyle = '#38bdf8'; ctx.fillText('🔷 正在檢視：北岸碼頭 (迎風面 -8.5m CD)', cx, h - 10);
                 } else {
-                    ctx.fillStyle = '#10b981'; ctx.fillText('🟢 正在檢視：南岸碼頭 (背風面 -5.5m CD)', cx, h - 10);
+                    ctx.fillStyle = '#10b981'; ctx.fillText('🟢 正在檢視：南岸碼頭 (背風面 -9.8m CD)', cx, h - 10);
                 }
             }
 
@@ -971,7 +956,7 @@
             }
         }
 
-        // 5. APPLICATION CONTROLLER
+        // 5. APPLICATION CONTROLLER (含 30s 看門狗與 SSOT 動態擷取)
         class GEMUnifiedDashboardApp {
             constructor() {
                 this.state = new GEMStateStore();
@@ -979,6 +964,8 @@
                 this.radarRenderer = new RadarCanvasRenderer('nativeRadarCanvas', 'radarContainer');
                 this.heartbeat = 12;
                 this.stationSec = [1, 2, 1, 3];
+                this.isLiveSSOT = true;
+
                 this.timePresets = {
                     '08:00': { hs: 0.85, w: 5.20, tp: 8.5, deltaTheta: 25, tide: 0.60, label: '08:00 正常開島通航' },
                     '10:00': { hs: 2.10, w: 9.80, tp: 12.0, deltaTheta: 45, tide: 1.20, label: '10:00 滿潮湧浪增強' },
@@ -995,6 +982,7 @@
                 this.bindUIEvents();
                 this.startClockAndHeartbeat();
                 this.startAnimationLoop();
+                this.fetchSSOTLoop();
                 this.state.notify();
             }
             startAnimationLoop() {
@@ -1007,23 +995,71 @@
                 };
                 requestAnimationFrame(loop);
             }
+            async fetchSSOTLoop() {
+                const fetchOnce = async () => {
+                    if (!this.isLiveSSOT) return;
+                    try {
+                        const res = await fetch(`latest_decision.json?t=${Date.now()}`, { cache: 'no-store' });
+                        if (res.ok) {
+                            const ssot = await res.json();
+                            const lastTs = new Date(ssot.timestamp).getTime();
+                            const nowTs = Date.now();
+                            const isStale = isNaN(lastTs) || (nowTs - lastTs) > 30000;
+
+                            const vetoBanner = document.getElementById('vetoBanner');
+                            if (isStale) {
+                                vetoBanner.style.display = 'block';
+                                vetoBanner.innerText = '🚨 警示：氣象數據通訊逾期 (>30s)，看門狗啟動，強制執行防颱封島管制！';
+                            } else if (ssot.hard_veto_alert) {
+                                vetoBanner.style.display = 'block';
+                                vetoBanner.innerText = `🚨 警示：${ssot.veto_reason || '實體觸發物理 VETO 熔斷，強制執行防颱封島管制！'}`;
+                            } else {
+                                vetoBanner.style.display = 'none';
+                            }
+
+                            if (ssot.cwa_buoy_telemetry) {
+                                const buoy = ssot.cwa_buoy_telemetry;
+                                this.state.updateTelemetry({
+                                    hs: buoy.guishan_hs_m || 3.71,
+                                    w: buoy.guishan_wind_ms || 8.50,
+                                    tp: buoy.guishan_tp_s || 15.5
+                                });
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('SSOT Polling Offline:', e);
+                    }
+                };
+                fetchOnce();
+                setInterval(fetchOnce, 5000);
+            }
             bindUIEvents() {
                 document.getElementById('rngHs').addEventListener('input', e => {
+                    this.isLiveSSOT = false;
                     document.getElementById('lblHs').textContent = `${e.target.value}m`;
                     this.state.updateTelemetry({ hs: parseFloat(e.target.value) });
                 });
                 document.getElementById('rngW').addEventListener('input', e => {
+                    this.isLiveSSOT = false;
                     document.getElementById('lblW').textContent = `${e.target.value}m/s`;
                     this.state.updateTelemetry({ w: parseFloat(e.target.value) });
                 });
                 document.getElementById('rngTp').addEventListener('input', e => {
+                    this.isLiveSSOT = false;
                     document.getElementById('lblTp').textContent = `${e.target.value}s`;
                     this.state.updateTelemetry({ tp: parseFloat(e.target.value) });
                 });
                 document.getElementById('rngDeltaTheta').addEventListener('input', e => {
+                    this.isLiveSSOT = false;
                     document.getElementById('lblDeltaTheta').textContent = `${e.target.value}°`;
                     this.state.updateTelemetry({ deltaTheta: parseFloat(e.target.value) });
                 });
+
+                document.getElementById('btnLiveToggle').onclick = () => {
+                    this.isLiveSSOT = true;
+                    document.getElementById('txtLiveMode').textContent = '● SSOT 實時監聽';
+                    this.fetchSSOTLoop();
+                };
 
                 document.getElementById('tabProfileSouth').onclick = () => this.state.setProfilePier('SOUTH');
                 document.getElementById('tabProfileNorth').onclick = () => this.state.setProfilePier('NORTH');
@@ -1033,7 +1069,6 @@
                 document.getElementById('tabRadarNorth').onclick = () => this.state.setRadarPier('NORTH');
                 document.getElementById('tabRadarCompare').onclick = () => this.state.setRadarPier('COMPARE');
 
-                // Filter Buttons (Emergency vs All)
                 const btnEmergency = document.getElementById('btnFilterEmergency');
                 const btnAll = document.getElementById('btnFilterAll');
 
@@ -1057,7 +1092,6 @@
                     };
                 }
 
-                // Time Node Buttons
                 ['0800', '1000', '1120', '1200', '1420', '1600'].forEach(timeKey => {
                     const btn = document.getElementById(`btnT${timeKey}`);
                     if (btn) {
@@ -1069,6 +1103,7 @@
                 window.addEventListener('resize', () => this.state.notify());
             }
             selectTimeNode(timeStr) {
+                this.isLiveSSOT = false;
                 this.state.setTimeNode(timeStr);
                 const preset = this.timePresets[timeStr];
                 if (preset) {
@@ -1150,9 +1185,14 @@
                 document.getElementById('valMobFB').textContent = `${res.fb_south} m`;
                 
                 const elUKCN = document.getElementById('valProfileNorthUKC');
-                if (elUKCN) elUKCN.textContent = `${res.ukc_north} m ${res.ukc_north < 0 ? '🔴 坐灘' : '🟢 安全'}`;
+                if (elUKCN) elUKCN.textContent = `${res.ukc_north} m ${res.ukc_north < 1.50 ? '🔴 破防' : '🟢 安全'}`;
                 const elUKCS = document.getElementById('valProfileSouthUKC');
-                if (elUKCS) elUKCS.textContent = `${res.ukc_south} m ${res.ukc_south < 1.5 ? '🔴 觸底' : '🟢 安全'}`;
+                if (elUKCS) elUKCS.textContent = `${res.ukc_south} m ${res.ukc_south < 1.50 ? '🔴 破防' : '🟢 安全'}`;
+
+                const elFBN = document.getElementById('valProfileNorthFB');
+                if (elFBN) elFBN.textContent = `${res.fb_north} m ${res.fb_north < 0.50 ? '🔴 越浪' : '🟢 安全'}`;
+                const elFBS = document.getElementById('valProfileSouthFB');
+                if (elFBS) elFBS.textContent = `${res.fb_south} m ${res.fb_south < 0.50 ? '🔴 越浪' : '🟢 安全'}`;
 
                 this.updateTabStyles(state);
                 this.updateTimeButtonStyles(state);
