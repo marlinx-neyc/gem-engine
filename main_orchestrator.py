@@ -509,21 +509,21 @@ def run():
             loop.run_until_complete(orchestrator.execute_cycle())
     except NameError:
         asyncio.run(orchestrator.execute_cycle())
-
-
 if __name__ == "__main__":
     run()
 
-# ==============================================================================
-# 9. HTML Panel Output (Auto Export & Render)
-# ==============================================================================
-from IPython.display import HTML  # type: ignore
+    # 安全匯出 mobile.html (僅在 html_content 存在時寫入)
+    if "html_content" in globals():
+        with open("mobile.html", "w", encoding="utf-8") as f:
+            f.write(html_content)
+        print("✅ mobile.html 成功寫入存檔！")
 
-# 匯出產出完整的 mobile.html
-with open("mobile.html", "w", encoding="utf-8") as f:
-    f.write(html_content)
+    # 安全相容 Colab / Jupyter 即時預覽 (避免 GitHub Actions 崩潰)
+    try:
+        from IPython.display import HTML, display  # type: ignore
 
-print("✅ mobile.html 成功寫入存檔！包含 EuroTop 2018 越浪波峰警戒紅虛線與雙岸對比面板。")
-
-# Colab / Jupyter 即時顯示
+        if "html_content" in globals():
+            display(HTML(open("mobile.html", "r", encoding="utf-8").read()))
+    except (ImportError, NameError):
+        pass
 display(HTML(open("mobile.html", "r", encoding="utf-8").read()))
