@@ -1,94 +1,26 @@
 {
-  "version": "v66.0-EuroTop-Full-Inundation-SSOT",
-  "timestamp": "2026-10-23 21:37:47 CST",
+  "version": "GEM-ENG-SPEC-2026-V43",
+  "timestamp": "2026-10-23 21:56:09 CST",
+  "decision": {
+    "action_id": 0,
+    "tactical_instruction": "🔴 0.0% 物理 VETO 熔斷 (全線封島)",
+    "confidence": 99.0,
+    "evac_minutes": 20,
+    "is_closed": false
+  },
+  "physics": {
+    "hs_pier": 0.93,
+    "w_eff": 4.54,
+    "ukc": 7.6,
+    "fb": 2.1,
+    "squat": 0.337,
+    "e_net": 0.355,
+    "p_veto": 0.054,
+    "hard_veto": false,
+    "delta_theta": 20.0
+  },
   "calibration": {
-    "learned_bias": 0.0127,
-    "status": "🟢 測站即時校準完成"
-  },
-  "official_announcement": {
-    "status": "🟢 常態營運（無颱風警報）",
-    "is_active_warning": false,
-    "typhoon_name": "無颱風警報",
-    "warning_number": "N/A",
-    "radius_7_km": 0.0,
-    "official_start": "無管制"
-  },
-  "modules": {
-    "header": {
-      "system_title": "GEM Engine v66.0",
-      "timestamp_display": "21:37:47 CST",
-      "date_display": "2026-10-23 (五)",
-      "watchdog_status_text": "🟢 LIVE_OK",
-      "watchdog_is_stale": false,
-      "latency_seconds": 0.0
-    },
-    "decision": {
-      "decision_title": "戰術指揮決策",
-      "decision_text": "🟢 全線開放：南北雙岸海象良好，符合剛性安全標準。",
-      "is_closed": false,
-      "badge_color": "success",
-      "veto_reason": "物理指標正常 (PASS)",
-      "rl_confidence_pct": 100.0
-    },
-    "inundation_matrix": {
-      "north_truss_bridge": {
-        "deck_cd": 3.2,
-        "z_crest_cd": 1.835,
-        "h_water_m": 0.0,
-        "fb_m": 1.37,
-        "q_eurotop_lsm": 0.0,
-        "status": "🟢 安全"
-      },
-      "north_parapet_wall": {
-        "wall_cd": 3.6,
-        "z_crest_cd": 1.835,
-        "h_water_m": 0.0,
-        "status": "🟢 安全"
-      },
-      "south_caisson_deck": {
-        "deck_cd": 2.5,
-        "z_crest_cd": 1.67,
-        "h_water_m": 0.0,
-        "fb_m": 0.83,
-        "q_eurotop_lsm": 0.52,
-        "status": "🟢 安全"
-      },
-      "south_slope_dike": {
-        "dike_cd": 5.0,
-        "z_crest_cd": 1.67,
-        "h_water_m": 0.0,
-        "status": "🟢 安全"
-      }
-    },
-    "piers": {
-      "north_pier": {
-        "title": "北岸主泊位 (-8.5m CD)",
-        "ukc_text": "8.04 m",
-        "fb_text": "1.37 m",
-        "h_water_text": "+0.0 m",
-        "q_eurotop_text": "0.0 L/s/m",
-        "status_text": "🟢 正常靠泊"
-      },
-      "south_pier": {
-        "title": "南岸權宜泊位 (-9.8m CD)",
-        "ukc_text": "9.51 m",
-        "fb_text": "0.83 m",
-        "h_water_text": "+0.0 m",
-        "q_eurotop_text": "0.52 L/s/m",
-        "status_text": "🟢 正常靠泊"
-      }
-    },
-    "physics": {
-      "total_water_level_cd": "+1.29 m",
-      "storm_surge_m": "+0.05 m",
-      "hs_north_display": "1.09 m",
-      "weff_north_display": "6.18 m/s",
-      "ukc_north_display": "8.04 m",
-      "fb_north_display": "1.37 m",
-      "hs_limit": "≤ 1.13 m",
-      "weff_limit": "≤ 10.17 m/s",
-      "ukc_limit": "≥ 1.5 m",
-      "fb_limit": "≥ 0.5 m"
-    }
+    "match_rate": 0.917,
+    "bias": 0.0167
   }
 }
