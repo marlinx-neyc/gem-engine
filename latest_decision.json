@@ -1,10 +1,10 @@
 {
   "version": "GEM-ENG-SPEC-2026-V43",
-  "timestamp": "2026-10-23 21:56:09 CST",
+  "timestamp": "2026-10-23 21:56:21 CST",
   "decision": {
     "action_id": 0,
     "tactical_instruction": "🔴 0.0% 物理 VETO 熔斷 (全線封島)",
-    "confidence": 99.0,
+    "confidence": 89.7,
     "evac_minutes": 20,
     "is_closed": false
   },
@@ -20,7 +20,7 @@
     "delta_theta": 20.0
   },
   "calibration": {
-    "match_rate": 0.917,
-    "bias": 0.0167
+    "match_rate": 0.921,
+    "bias": 0.0207
   }
 }
