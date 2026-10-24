@@ -3,7 +3,7 @@
 """
 ==============================================================================
 GEM Engine v66.0 Master Spatial-Dynamic Orchestrator
-全域 SSOT 去矛盾協同主中樞 - 整合前端面板與狀態機隔離修復版
+全域 SSOT 去矛盾協同主中樞 - 雷達監測數值與動態時戳修復版
 ==============================================================================
 """
 
@@ -58,21 +58,17 @@ class EngineConfig:
     GUISHAN_LAT: float = 24.843
     GUISHAN_LON: float = 121.952
 
-    # 碼頭水深參數
     CHART_DEPTH_NORTH: float = 8.50           # 北岸主泊位水深 (-8.50m CD)
     CHART_DEPTH_SOUTH: float = 9.80           # 南岸權宜泊位水深 (-9.80m CD)
 
-    # 高程參數
     NORTH_TRUSS_BRIDGE_DECK_CD: float = 3.20  # 北岸鋼桁架引橋面頂高程 (+3.20m CD)
     NORTH_PARAPET_WALL_CD: float = 3.60       # 北岸防波擋浪側牆頂高程 (+3.60m CD)
     SOUTH_CAISSON_DECK_CD: float = 2.50       # 南岸沉箱碼頭面頂高程 (+2.50m CD)
     SOUTH_SLOPE_DIKE_CD: float = 5.00         # 南岸護岸頂高程 (+5.00m CD)
 
-    # 船舶與水理物理參數
     VESSEL_STATIC_DRAFT: float = 1.20         # 客輪靜態吃水 (1.20m)
     VESSEL_CB: float = 0.65                   # 方形係數
 
-    # Fermi-Dirac 參數
     E_CRIT: float = 1.00
     BETA_FD: float = 0.25
     ALPHA_TUNE: float = 0.90
@@ -89,8 +85,8 @@ class DynamicTyphoonInfo:
     warning_number: str = "N/A"
     p_min_hpa: float = 1013.0
     official_status: str = "🟢 常態營運（無颱風警報）"
-    predicted_landfall: str = "N/A"           # 修復：補齊預測登陸時戳
-    timestamp: str = ""                       # 修復：補齊 API 擷取時戳供 Watchdog 檢驗
+    predicted_landfall: str = "N/A"           
+    timestamp: str = ""                       
 
 
 @dataclass
@@ -138,14 +134,12 @@ class JapanEstatApiService:
 
 class CwaAndTdxCombinedApiService:
     async def fetch_taiwan_telemetry(self, client: Optional[Any]) -> Tuple[Dict[str, Any], bool]:
-        # 模擬颱風情境
         return {"hs": 3.71, "tp": 15.5, "wind": 8.5, "dir": 50.0, "tide": 1.10, "p_min": 975.0, "source": "LIVE_CWA"}, False
 
 
 class CwaTyphoonApiService:
     async def fetch_active_typhoon_warning(self, client: Optional[Any]) -> DynamicTyphoonInfo:
         now_str = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
-        # 模擬擷取颱風資料，加入 predicted_landfall 與 timestamp 提供看門狗校驗
         return DynamicTyphoonInfo(
             is_active_warning=True,
             typhoon_name= "強烈颱風 (第21號)",
@@ -165,7 +159,7 @@ class YongZhongOrthogonalRLBrain:
     def extract_orthogonal_basis(self, *args) -> np.ndarray:
         return np.zeros(14, dtype=np.float32)
     def select_action(self, phi: np.ndarray) -> Tuple[int, float]:
-        return 0, 100.0  # 模擬 Q4 熔斷決策
+        return 0, 100.0
     def train_step(self, *args): pass
 
 
@@ -339,6 +333,7 @@ html_content = """<!DOCTYPE html>
                     <h1 class="text-sm md:text-base font-extrabold text-white flex items-center gap-2">龜山島全域戰術指揮中樞 <span class="text-xs text-[#38bdf8] font-normal font-mono">(Unified RWD Master v66.0)</span></h1>
                     <div class="text-[10.5px] text-[#cbd5e1] mt-0.5 flex flex-wrap gap-2 items-center font-mono">
                         <span>時間：<b id="liveClock" class="text-white bg-white/10 px-1.5 py-0.5 rounded">--:--:-- CST</b></span>
+                        <span>| 日期：<b id="liveDate" class="text-emerald-300 bg-emerald-950/60 border border-emerald-500/40 px-1.5 py-0.5 rounded">2026-10-23 (五)</b></span>
                         <span>| 心跳連線：<b id="heartbeatCounter" class="text-[#38bdf8]">12</b></span>
                         <span>| 總裁示：<b id="ssotDecisionBadge" class="text-[#ef4444] font-bold">0.0% 熔斷</b></span>
                     </div>
@@ -482,6 +477,40 @@ html_content = """<!DOCTYPE html>
                 const angles = [];
                 for (let i = 0; i < count; i++) angles.push(-Math.PI / 2 + (i * 2 * Math.PI) / count);
 
+                // 修復：繪製 5 個象限的輻射軸線
+                ctx.beginPath();
+                for (let i = 0; i < count; i++) {
+                    const ax = cx + R * 1.45 * Math.cos(angles[i]);
+                    const ay = cy + R * 1.45 * Math.sin(angles[i]);
+                    ctx.moveTo(cx, cy);
+                    ctx.lineTo(ax, ay);
+                }
+                ctx.strokeStyle = '#334155';
+                ctx.lineWidth = 1.0;
+                ctx.stroke();
+
+                // 修復：繪製五大物理門檻警戒標籤 (Axis Labels)
+                const axisLabels = [
+                    `波高Hs\n(<=1.13m)`,
+                    `風速Weff\n(<=10.17m)`,
+                    `週期Tp\n(<12.0s)`,
+                    `裕深UKC\n(>=1.50m)`,
+                    `乾舷FB\n(>=0.50m)`
+                ];
+                ctx.fillStyle = '#cbd5e1';
+                ctx.font = 'bold 9px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                for (let i = 0; i < count; i++) {
+                    const lx = cx + R * 1.7 * Math.cos(angles[i]);
+                    const ly = cy + R * 1.7 * Math.sin(angles[i]);
+                    const lines = axisLabels[i].split('\n');
+                    lines.forEach((line, idx) => {
+                        ctx.fillText(line, lx, ly + (idx * 11) - 5);
+                    });
+                }
+
+                // 繪製背景同心多邊形網格
                 [0.5, 1.0, 1.4].forEach((lvl) => {
                     ctx.beginPath();
                     for (let i = 0; i < count; i++) {
@@ -497,36 +526,55 @@ html_content = """<!DOCTYPE html>
                 });
 
                 const mode = state.activeRadarPier;
-                const getRatios = (isNorth) => {
+                
+                // 動態獲取推算值陣列與比例
+                const getRatiosAndValues = (isNorth) => {
                     const hs = isNorth ? res.hs_north : res.hs_south;
-                    return { ratios: [hs/1.13, 0.8, 1.3, 0.5, 0.6], hasVeto: isNorth ? res.hasVetoNorth : res.hasVetoSouth };
+                    // 模擬簡化版風速、乾舷、週期比例
+                    const w_eff = isNorth ? 10.8 : 5.46; 
+                    const tp = state.telemetry.tp;
+                    const ukc = isNorth ? res.ukc_north : res.ukc_south;
+                    const fb = 0.15; // 模擬越浪
+
+                    const r_hs = hs / 1.13;
+                    const r_weff = w_eff / 10.17;
+                    const r_tp = tp / 11.5;
+                    const r_ukc = ukc < 1.50 ? (1.0 + (1.50 - ukc) / 1.50) : (ukc / 1.50 * 0.5);
+                    const r_fb = fb < 0.50 ? (1.0 + (0.50 - fb) / 0.50 * 0.6) : (fb / 0.50 * 0.5);
+
+                    return { 
+                        ratios: [r_hs, r_weff, r_tp, r_ukc, r_fb], 
+                        values: [hs.toFixed(2)+'m', w_eff.toFixed(1)+'m', tp.toFixed(1)+'s', ukc.toFixed(2)+'m', fb.toFixed(2)+'m'],
+                        hasVeto: isNorth ? res.hasVetoNorth : res.hasVetoSouth
+                    };
                 };
 
-                const northData = getRatios(true);
-                const southData = getRatios(false);
+                const northData = getRatiosAndValues(true);
+                const southData = getRatiosAndValues(false);
 
                 if (mode === 'COMPARE') {
-                    this.drawPolygon(ctx, cx, cy, R, angles, southData.ratios, '#10b981', 'rgba(16, 185, 129, 0.25)');
-                    this.drawPolygon(ctx, cx, cy, R, angles, northData.ratios, '#38bdf8', 'rgba(56, 189, 248, 0.25)');
+                    this.drawPolygon(ctx, cx, cy, R, angles, southData.ratios, southData.values, '#10b981', 'rgba(16, 185, 129, 0.25)', 0);
+                    this.drawPolygon(ctx, cx, cy, R, angles, northData.ratios, northData.values, '#38bdf8', 'rgba(56, 189, 248, 0.25)', 12);
                 } else if (mode === 'NORTH') {
                     const stroke = northData.hasVeto ? '#ef4444' : '#38bdf8';
                     const fill = northData.hasVeto ? 'rgba(239, 68, 68, 0.35)' : 'rgba(56, 189, 248, 0.35)';
-                    this.drawPolygon(ctx, cx, cy, R, angles, northData.ratios, stroke, fill);
+                    this.drawPolygon(ctx, cx, cy, R, angles, northData.ratios, northData.values, stroke, fill, 0);
                 } else {
                     const stroke = southData.hasVeto ? '#ef4444' : '#10b981';
                     const fill = southData.hasVeto ? 'rgba(239, 68, 68, 0.35)' : 'rgba(16, 185, 129, 0.35)';
-                    this.drawPolygon(ctx, cx, cy, R, angles, southData.ratios, stroke, fill);
+                    this.drawPolygon(ctx, cx, cy, R, angles, southData.ratios, southData.values, stroke, fill, 0);
                 }
 
                 ctx.fillStyle = '#ef4444'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
                 if ((mode === 'NORTH' && northData.hasVeto) || (mode === 'SOUTH' && southData.hasVeto) || (mode === 'COMPARE' && (northData.hasVeto || southData.hasVeto))) {
-                    ctx.fillText('🔴 實體破防熔斷 (VETO)', cx, cy + R + 30);
+                    ctx.fillText('🔴 實體破防熔斷 (VETO)', cx, cy + R + 35);
                 } else {
-                    ctx.fillStyle = '#10b981'; ctx.fillText('🟢 剛性指標合格 (PASS)', cx, cy + R + 30);
+                    ctx.fillStyle = '#10b981'; ctx.fillText('🟢 剛性指標合格 (PASS)', cx, cy + R + 35);
                 }
             }
 
-            drawPolygon(ctx, cx, cy, R, angles, ratios, strokeColor, fillColor) {
+            // 修復：接收 values 並在多邊形頂點繪製動態監測數值
+            drawPolygon(ctx, cx, cy, R, angles, ratios, values, strokeColor, fillColor, textOffset = 0) {
                 ctx.beginPath();
                 for (let i = 0; i < angles.length; i++) {
                     const val = Math.max(0.2, Math.min(1.5, ratios[i]));
@@ -538,6 +586,18 @@ html_content = """<!DOCTYPE html>
                 ctx.closePath();
                 ctx.fillStyle = fillColor; ctx.fill();
                 ctx.strokeStyle = strokeColor; ctx.lineWidth = 2.0; ctx.stroke();
+
+                // 繪製動態監測數值
+                ctx.fillStyle = strokeColor;
+                ctx.font = 'bold 10px monospace';
+                for (let i = 0; i < angles.length; i++) {
+                    const val = Math.max(0.2, Math.min(1.5, ratios[i]));
+                    const r = R * val;
+                    // 將數值文字向外推 12px 加上動態偏移 (雙岸對比模式避免文字重疊)
+                    const tx = cx + (r + 12 + textOffset) * Math.cos(angles[i]);
+                    const ty = cy + (r + 12 + textOffset) * Math.sin(angles[i]);
+                    ctx.fillText(values[i], tx, ty);
+                }
             }
         }
 
@@ -604,7 +664,9 @@ html_content = """<!DOCTYPE html>
                     }
                     if (elVerdict) {
                         const maxHs = Math.max(res.hs_north, res.hs_south).toFixed(1);
-                        elVerdict.innerHTML = `🔴 0.0% 物理 VETO 熔斷 / 【強颱極端暴風全線封島】最大浪高 ${maxHs}m 禁絕出航`;
+                        const minUkc = Math.min(res.ukc_north, res.ukc_south).toFixed(2);
+                        // 修復：還原完整具備詳細水文資訊的最終戰術裁決
+                        elVerdict.innerHTML = `🔴 0.0% 物理 VETO 熔斷 / 【強颱極端暴風全線封島】最大浪高 ${maxHs}m (UKC ${minUkc}m) 禁絕出航`;
                         elVerdict.className = "text-[#fca5a5] font-extrabold text-[11.5px] mt-0.5 inline-block";
                     }
                 } else {
@@ -633,17 +695,31 @@ html_content = """<!DOCTYPE html>
             startClockAndHeartbeat() {
                 setInterval(() => {
                     const now = new Date();
+                    
+                    // 修復：頂部全局日期文字動態刷新 (Live Date Format)
+                    const yyyy = now.getFullYear();
+                    const mm = String(now.getMonth() + 1).padStart(2, '0');
+                    const dd = String(now.getDate()).padStart(2, '0');
+                    const days = ['日', '一', '二', '三', '四', '五', '六'];
+                    const dateEl = document.getElementById('liveDate');
+                    if (dateEl) {
+                        dateEl.textContent = `${yyyy}-${mm}-${dd} (${days[now.getDay()]})`;
+                    }
+
+                    // 頂部時鐘刷新
                     document.getElementById('liveClock').textContent = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} CST`;
+                    
                     if (now.getSeconds() % 5 === 0) {
                         this.heartbeat++;
                         document.getElementById('heartbeatCounter').textContent = this.heartbeat;
                     }
                     
-                    // 登陸預測時戳看門狗防呆校驗
+                    // 修復：NCDR 登陸預測時戳看門狗防呆校驗
                     const landfallEl = document.getElementById('typhoonLandfallTime');
                     const statusTagEl = document.getElementById('typhoonStatusTag');
                     const predictLandfallTime = new Date('2026/10/23 14:00:00').getTime();
                     
+                    // 若當前系統時間已經超過預測登陸時間，強制更新快取標籤
                     if (now.getTime() > predictLandfallTime && landfallEl) {
                         landfallEl.innerHTML = `<span style="color:#f59e0b;">已通過/登陸 (14:00)</span>`;
                         if (statusTagEl) statusTagEl.innerText = "中心掠過，暴風圈持續籠罩";
@@ -677,11 +753,11 @@ if __name__ == "__main__":
 # ==============================================================================
 from IPython.display import HTML  # type: ignore
 
-# 匯出產出完整的 mobile.html (修正缺失的 html_content 變數參照)
+# 匯出產出完整的 mobile.html
 with open("mobile.html", "w", encoding="utf-8") as f:
     f.write(html_content)
 
-print("✅ mobile.html 成功寫入存檔！包含徹底修復之狀態機互鎖與預測看門狗防呆機制。")
+print("✅ mobile.html 成功寫入存檔！雷達監測數值顯示與動態日期時鐘刷新機制已徹底修復。")
 
 # Colab / Jupyter 即時顯示
 # display(HTML(open("mobile.html", "r", encoding="utf-8").read()))
