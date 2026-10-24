@@ -129,7 +129,7 @@
                     </h1>
                     <div class="text-[10.5px] text-[#cbd5e1] mt-0.5 flex flex-wrap gap-2 items-center font-mono">
                         <span>時間：<b id="liveClock" class="text-white bg-white/10 px-1.5 py-0.5 rounded">--:--:-- CST</b></span>
-                        <span>| 日期：<b id="liveDate" class="text-emerald-300 bg-emerald-950/60 border border-emerald-500/40 px-1.5 py-0.5 rounded">2026-10-23 (五)</b></span>
+                        <span>| 日期：<b id="liveDate" class="text-emerald-300 bg-emerald-950/60 border border-emerald-500/40 px-1.5 py-0.5 rounded">----/--/-- (一)</b></span>
                         <span>| 心跳連線：<b id="heartbeatCounter" class="text-[#38bdf8]">12</b></span>
                         <span>| 總裁示：<b id="ssotDecisionBadge" class="text-[#ef4444] font-bold">0.0% 熔斷</b></span>
                     </div>
@@ -236,7 +236,7 @@
                         </div>
                         <div class="grid grid-cols-2 gap-1.5 text-[9.5px]">
                             <div class="bg-slate-900/80 p-1.5 rounded border border-slate-700 flex justify-between">
-                                <span>波高 Hs 警戒：</span><span class="font-mono font-bold text-red-400">&gt; 1.20 m</span>
+                                <span>波高 Hs 警戒：</span><span class="font-mono font-bold text-red-400">&gt; 1.13 m</span>
                             </div>
                             <div class="bg-slate-900/80 p-1.5 rounded border border-slate-700 flex justify-between">
                                 <span>週期 Tp 長浪：</span><span class="font-mono font-bold text-red-400">&ge; 11.5 s</span>
@@ -408,9 +408,9 @@
                     <thead>
                         <tr>
                             <th class="w-[22%] bg-slate-900 text-[#38bdf8] text-center">體系 / 方案</th>
-                            <th class="w-[26%] text-center bg-blue-950/70 text-emerald-300 font-extrabold" id="thD0Day">今日 10/23<br><span class="text-[8.5px] font-normal text-slate-300">🌀 長浪</span></th>
-                            <th class="w-[26%] text-center bg-indigo-950/70 text-amber-300 font-extrabold" id="thD1Day">明日 10/24<br><span class="text-[8.5px] font-normal text-slate-300">☁️ 浪退</span></th>
-                            <th class="w-[26%] text-center bg-slate-900 text-sky-300 font-extrabold" id="thD2Day">後日 10/25<br><span class="text-[8.5px] font-normal text-slate-300">☀️ 平穩</span></th>
+                            <th class="w-[26%] text-center bg-blue-950/70 text-emerald-300 font-extrabold" id="thD0Day">今日 --/--<br><span class="text-[8.5px] font-normal text-slate-300">🌀 長浪</span></th>
+                            <th class="w-[26%] text-center bg-indigo-950/70 text-amber-300 font-extrabold" id="thD1Day">明日 --/--<br><span class="text-[8.5px] font-normal text-slate-300">☁️ 浪退</span></th>
+                            <th class="w-[26%] text-center bg-slate-900 text-sky-300 font-extrabold" id="thD2Day">後日 --/--<br><span class="text-[8.5px] font-normal text-slate-300">☀️ 平穩</span></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -528,7 +528,7 @@
                     </div>
                 </div>
 
-                <div class="canvas-container h-[360px]" id="radarContainer">
+                <div class="canvas-container h-[400px]" id="radarContainer">
                     <canvas id="nativeRadarCanvas" class="w-full h-full block"></canvas>
                 </div>
 
@@ -542,6 +542,25 @@
     </div>
 
     <script>
+        // 安全路徑圓角矩形跨瀏覽器 Helper
+        function drawPathRoundRect(ctx, x, y, width, height, radius) {
+            if (ctx.roundRect) {
+                ctx.roundRect(x, y, width, height, radius);
+            } else {
+                ctx.beginPath();
+                ctx.moveTo(x + radius, y);
+                ctx.lineTo(x + width - radius, y);
+                ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+                ctx.lineTo(x + width, y + height - radius);
+                ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                ctx.lineTo(x + radius, y + height);
+                ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+                ctx.lineTo(x, y + radius);
+                ctx.quadraticCurveTo(x, y, x + radius, y);
+                ctx.closePath();
+            }
+        }
+
         // 1. STATE STORE (SSOT & Observer Pattern)
         class GEMStateStore {
             constructor() {
@@ -775,7 +794,7 @@
             }
         }
 
-        // 4. CANVAS RENDERER: RADAR
+        // 4. CANVAS RENDERER: RADAR (含完整警戒門檻環與節點數據標籤)
         class RadarCanvasRenderer {
             constructor(canvasId, containerId) {
                 this.canvas = document.getElementById(canvasId);
@@ -784,8 +803,10 @@
             render(state, res) {
                 if (!this.canvas || !this.container) return;
                 const dpr = window.devicePixelRatio || 1;
-                const w = this.container.clientWidth || 320;
-                const h = 320;
+                const w = this.container.clientWidth || 340;
+                const h = 400; // 擴充高度以容納多行文字標籤
+                
+                this.container.style.height = h + 'px';
                 this.canvas.width = w * dpr; this.canvas.height = h * dpr;
                 this.canvas.style.width = w + 'px'; this.canvas.style.height = h + 'px';
 
@@ -795,28 +816,117 @@
                 ctx.fillStyle = '#050a14'; ctx.fillRect(0, 0, w, h);
 
                 const cx = w / 2;
-                const cy = h * 0.45;
-                const R = Math.min(w * 0.22, h * 0.22, 65);
+                const cy = h * 0.44;
+                const R = Math.min(w * 0.22, h * 0.20, 72); // 1.0 門檻基底半徑
                 const count = 5;
                 const angles = [];
                 for (let i = 0; i < count; i++) angles.push(-Math.PI / 2 + (i * 2 * Math.PI) / count);
 
+                const labels = ['波高 Hs', '攻角風速 Weff', '週期 Tp', '動態裕深 UKC', '碼頭乾舷 FB'];
+                const thresholdTexts = ['≤1.13m', '≤10.17m/s', '≤11.5s', '≥1.50m', '≥0.50m'];
+
+                // 取得南北岸原始數值
+                const getRawValues = (isNorth) => {
+                    const hs = isNorth ? res.hs_north : res.hs_south;
+                    const w_eff = isNorth ? res.w_eff_north : res.w_eff_south;
+                    const tp = state.telemetry.tp;
+                    const ukc = isNorth ? res.ukc_north : res.ukc_south;
+                    const fb = isNorth ? res.fb_north : res.fb_south;
+                    return [
+                        { val: `${hs}m`, fail: hs > 1.13 },
+                        { val: `${w_eff}m/s`, fail: w_eff > 10.17 },
+                        { val: `${tp}s`, fail: tp >= 11.5 },
+                        { val: `${ukc}m`, fail: ukc < 1.50 },
+                        { val: `${fb}m`, fail: fb < 0.50 }
+                    ];
+                };
+
+                const northRaw = getRawValues(true);
+                const southRaw = getRawValues(false);
+
+                // 1. 繪製多重正五邊形同心圓環與警戒門檻線
                 [0.5, 1.0, 1.4].forEach((lvl) => {
                     ctx.beginPath();
                     for (let i = 0; i < count; i++) {
-                        const r = R * lvl, x = cx + r * Math.cos(angles[i]), y = cy + r * Math.sin(angles[i]);
+                        const r = R * lvl;
+                        const x = cx + r * Math.cos(angles[i]);
+                        const y = cy + r * Math.sin(angles[i]);
                         if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
                     }
                     ctx.closePath();
-                    ctx.strokeStyle = (lvl === 1.0) ? '#facc15' : '#334155';
-                    ctx.lineWidth = (lvl === 1.0) ? 1.8 : 0.8;
-                    ctx.setLineDash((lvl === 1.0) ? [4, 4] : []);
+                    if (lvl === 1.0) {
+                        ctx.strokeStyle = '#facc15'; // 醒目黃色警戒門檻線
+                        ctx.lineWidth = 2.0;
+                        ctx.setLineDash([6, 4]);
+                    } else {
+                        ctx.strokeStyle = '#1e2d4a';
+                        ctx.lineWidth = 1.0;
+                        ctx.setLineDash([]);
+                    }
                     ctx.stroke();
                     ctx.setLineDash([]);
                 });
 
-                const mode = state.activeRadarPier;
+                // 標示 100% 警戒門檻環說明文字
+                ctx.font = 'bold 9px sans-serif';
+                ctx.fillStyle = '#facc15';
+                ctx.textAlign = 'center';
+                ctx.fillText('── 100% 警戒門檻線 ──', cx, cy - R - 4);
 
+                // 2. 繪製軸線與軸外指標名稱 + 警戒值 + 即時測值
+                for (let i = 0; i < count; i++) {
+                    const angle = angles[i];
+                    const cosA = Math.cos(angle);
+                    const sinA = Math.sin(angle);
+
+                    // 軸線
+                    ctx.beginPath();
+                    ctx.moveTo(cx, cy);
+                    ctx.lineTo(cx + R * 1.25 * cosA, cy + R * 1.25 * sinA);
+                    ctx.strokeStyle = '#334155'; ctx.lineWidth = 1.0; ctx.stroke();
+
+                    // 軸外文字座標
+                    const labelR = R * 1.35;
+                    const lx = cx + labelR * cosA;
+                    const ly = cy + labelR * sinA;
+
+                    let align = 'center';
+                    let baseline = 'middle';
+                    if (Math.abs(cosA) < 0.2) {
+                        align = 'center';
+                        baseline = sinA < 0 ? 'bottom' : 'top';
+                    } else if (cosA > 0) {
+                        align = 'left';
+                        baseline = sinA < -0.2 ? 'bottom' : (sinA > 0.2 ? 'top' : 'middle');
+                    } else {
+                        align = 'right';
+                        baseline = sinA < -0.2 ? 'bottom' : (sinA > 0.2 ? 'top' : 'middle');
+                    }
+
+                    ctx.textAlign = align;
+                    ctx.textBaseline = baseline;
+
+                    // 第 1 行：指標名稱
+                    ctx.font = 'bold 11px sans-serif';
+                    ctx.fillStyle = '#e2e8f0';
+                    ctx.fillText(labels[i], lx, ly);
+
+                    // 第 2 行：警戒門檻標準 (警戒值)
+                    const lyOffset1 = baseline === 'bottom' ? -13 : 13;
+                    ctx.font = 'bold 10px sans-serif';
+                    ctx.fillStyle = '#facc15';
+                    ctx.fillText(`門檻: ${thresholdTexts[i]}`, lx, ly + lyOffset1);
+
+                    // 第 3 行：當前即時測值
+                    const lyOffset2 = baseline === 'bottom' ? -25 : 25;
+                    const mode = state.activeRadarPier;
+                    const targetData = mode === 'SOUTH' ? southRaw[i] : northRaw[i];
+                    ctx.font = 'bold 10px monospace';
+                    ctx.fillStyle = targetData.fail ? '#f87171' : '#4ade80';
+                    ctx.fillText(`實測: ${targetData.val}`, lx, ly + lyOffset2);
+                }
+
+                // 3. 計算歸一化數據比例
                 const getRatios = (isNorth) => {
                     const hs = isNorth ? res.hs_north : res.hs_south;
                     const w_eff = isNorth ? res.w_eff_north : res.w_eff_south;
@@ -835,44 +945,93 @@
 
                 const northData = getRatios(true);
                 const southData = getRatios(false);
+                const mode = state.activeRadarPier;
 
+                // 4. 繪製數據多邊形與節點數值標籤
                 if (mode === 'COMPARE') {
-                    this.drawPolygon(ctx, cx, cy, R, angles, southData.ratios, '#10b981', 'rgba(16, 185, 129, 0.25)');
-                    this.drawPolygon(ctx, cx, cy, R, angles, northData.ratios, '#38bdf8', 'rgba(56, 189, 248, 0.25)');
+                    this.drawPolygonWithValues(ctx, cx, cy, R, angles, southData.ratios, southRaw, '#10b981', 'rgba(16, 185, 129, 0.25)', '南岸');
+                    this.drawPolygonWithValues(ctx, cx, cy, R, angles, northData.ratios, northRaw, '#38bdf8', 'rgba(56, 189, 248, 0.25)', '北岸');
                 } else if (mode === 'NORTH') {
                     const stroke = northData.hasVeto ? '#ef4444' : '#38bdf8';
-                    const fill = northData.hasVeto ? 'rgba(239, 68, 68, 0.35)' : 'rgba(56, 189, 248, 0.35)';
-                    this.drawPolygon(ctx, cx, cy, R, angles, northData.ratios, stroke, fill);
+                    const fill = northData.hasVeto ? 'rgba(239, 68, 68, 0.30)' : 'rgba(56, 189, 248, 0.30)';
+                    this.drawPolygonWithValues(ctx, cx, cy, R, angles, northData.ratios, northRaw, stroke, fill, '北岸');
                 } else {
                     const stroke = southData.hasVeto ? '#ef4444' : '#10b981';
-                    const fill = southData.hasVeto ? 'rgba(239, 68, 68, 0.35)' : 'rgba(16, 185, 129, 0.35)';
-                    this.drawPolygon(ctx, cx, cy, R, angles, southData.ratios, stroke, fill);
+                    const fill = southData.hasVeto ? 'rgba(239, 68, 68, 0.30)' : 'rgba(16, 185, 129, 0.30)';
+                    this.drawPolygonWithValues(ctx, cx, cy, R, angles, southData.ratios, southRaw, stroke, fill, '南岸');
                 }
 
-                ctx.fillStyle = '#ef4444';
-                ctx.font = 'bold 11px sans-serif';
-                ctx.textAlign = 'center';
-                if ((mode === 'NORTH' && northData.hasVeto) || (mode === 'SOUTH' && southData.hasVeto) || (mode === 'COMPARE' && (northData.hasVeto || southData.hasVeto))) {
-                    ctx.fillText('🔴 實體破防熔斷 (VETO)', cx, cy + R + 30);
+                // 5. 圖例與狀態裁決標籤
+                const legendY = h - 38;
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = 'bold 10px sans-serif';
+                ctx.fillStyle = '#facc15'; ctx.fillText('🟨 虛線: 100% 警戒門檻', cx - 90, legendY);
+                ctx.fillStyle = '#38bdf8'; ctx.fillText('🟦 北岸 (主泊位)', cx, legendY);
+                ctx.fillStyle = '#10b981'; ctx.fillText('🟩 南岸 (備用泊位)', cx + 90, legendY);
+
+                const verdictY = h - 16;
+                const hasAnyVeto = (mode === 'NORTH' && northData.hasVeto) || (mode === 'SOUTH' && southData.hasVeto) || (mode === 'COMPARE' && (northData.hasVeto || southData.hasVeto));
+                
+                ctx.font = 'bold 12px sans-serif';
+                if (hasAnyVeto) {
+                    ctx.fillStyle = '#ef4444';
+                    ctx.fillText('🚨 狀態：觸發剛性 VETO 熔斷（指標超過警戒門檻）', cx, verdictY);
                 } else {
                     ctx.fillStyle = '#10b981';
-                    ctx.fillText('🟢 剛性指標合格 (PASS)', cx, cy + R + 30);
+                    ctx.fillText('✅ 狀態：全項符合安全門檻（許可通航/靠泊）', cx, verdictY);
                 }
             }
 
-            drawPolygon(ctx, cx, cy, R, angles, ratios, strokeColor, fillColor) {
+            drawPolygonWithValues(ctx, cx, cy, R, angles, ratios, rawData, strokeColor, fillColor, labelPrefix) {
+                const count = angles.length;
+                const vertices = [];
+
                 ctx.beginPath();
-                for (let i = 0; i < angles.length; i++) {
-                    const val = Math.max(0.2, Math.min(1.5, ratios[i]));
+                for (let i = 0; i < count; i++) {
+                    const val = Math.max(0.15, Math.min(1.5, ratios[i]));
                     const r = R * val;
                     const x = cx + r * Math.cos(angles[i]);
                     const y = cy + r * Math.sin(angles[i]);
-                    if (i === 0) ctx.moveTo(x, y);
-                    else ctx.lineTo(x, y);
+                    vertices.push({ x, y, raw: rawData[i] });
+                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
                 }
                 ctx.closePath();
                 ctx.fillStyle = fillColor; ctx.fill();
-                ctx.strokeStyle = strokeColor; ctx.lineWidth = 2.0; ctx.stroke();
+                ctx.strokeStyle = strokeColor; ctx.lineWidth = 2.2; ctx.stroke();
+
+                // 繪製頂點圓圈與數值標籤
+                vertices.forEach((v, idx) => {
+                    ctx.beginPath();
+                    ctx.arc(v.x, v.y, 4, 0, Math.PI * 2);
+                    ctx.fillStyle = v.raw.fail ? '#ef4444' : strokeColor;
+                    ctx.fill();
+                    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1; ctx.stroke();
+
+                    // 標籤文字與微幅位移
+                    const txt = `${v.raw.val}`;
+                    ctx.font = 'bold 9.5px monospace';
+                    const textWidth = ctx.measureText(txt).width;
+                    
+                    const angle = angles[idx];
+                    const tagDistance = 14;
+                    const bx = v.x + Math.cos(angle) * tagDistance;
+                    const by = v.y + Math.sin(angle) * tagDistance;
+
+                    const paddingX = 3, paddingY = 2;
+                    const boxW = textWidth + paddingX * 2;
+                    const boxH = 13;
+
+                    ctx.save();
+                    ctx.fillStyle = v.raw.fail ? 'rgba(220, 38, 38, 0.90)' : 'rgba(15, 23, 42, 0.90)';
+                    ctx.strokeStyle = v.raw.fail ? '#fca5a5' : strokeColor;
+                    ctx.lineWidth = 1;
+
+                    drawPathRoundRect(ctx, bx - boxW / 2, by - boxH / 2, boxW, boxH, 3);
+                    ctx.fill(); ctx.stroke();
+
+                    ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                    ctx.fillText(txt, bx, by + 0.5);
+                    ctx.restore();
+                });
             }
         }
 
@@ -999,7 +1158,6 @@
                 else if (type === 'OVERTOPPING') this.selectTimeNode('12:00');
             }
             
-            // 修復3：前端碼頭分頁權限互鎖與狀態隔離
             updateTabStyles(state, isTyphoonLockdown) {
                 ['South', 'North', 'Compare'].forEach(p => {
                     const btnP = document.getElementById(`tabProfile${p}`);
@@ -1018,12 +1176,10 @@
                     if (btnR) {
                         const key = p.toUpperCase();
                         if (isTyphoonLockdown) {
-                            // 觸發熔斷時，雙岸強制呈現紅色禁用狀態
                             btnR.className = 'tab-btn py-1 px-1.5 rounded-lg text-[10px] font-bold border border-[#ef4444] bg-[#450a0a] text-[#ef4444] pointer-events-none text-center';
                             const rawText = key === 'SOUTH' ? '南岸' : key === 'NORTH' ? '北岸' : '雙岸';
                             btnR.innerText = `🚫 ${rawText} (熔斷)`;
                         } else {
-                            // 恢復常態
                             const rawText = key === 'SOUTH' ? '⚓ 南岸碼頭' : key === 'NORTH' ? '⚓ 北岸碼頭' : '⚖️ 雙岸疊合';
                             btnR.innerText = rawText;
                             if (state.activeRadarPier === key) {
@@ -1038,7 +1194,6 @@
                 });
             }
             
-            // 修復2：前端狀態機隔離與純化
             onStateChange(state) {
                 const res = GEMPhysicsEngine.evaluate(state.telemetry);
                 
@@ -1074,14 +1229,12 @@
                     bS.textContent = res.hasVetoSouth ? '🔴 熔斷禁止靠泊' : '🟢 許可靠泊';
                 }
 
-                // 執行狀態機隔離：Q4全線封島(Veto) 與 Q3日間排程隔離
                 const isTyphoonLockdown = res.hasVeto;
                 const timelineContainer = document.getElementById('toolbarTimeButtons');
                 const boxVerdict = document.getElementById('boxRadarFinalVerdict');
                 const elVerdict = document.getElementById('txtRadarFinalVerdict');
 
                 if (isTyphoonLockdown) {
-                    // 強制隱藏日間游擊排程，杜絕「止登」「開窗」字眼殘留
                     if (timelineContainer) timelineContainer.style.display = "none";
                     if (boxVerdict) {
                         boxVerdict.style.background = "rgba(239, 68, 68, 0.16)";
@@ -1094,7 +1247,6 @@
                         elVerdict.className = "text-[#fca5a5] font-extrabold text-[11.5px] mt-0.5 inline-block";
                     }
                 } else {
-                    // 常態或 Q3 動態開窗渲染
                     if (timelineContainer) timelineContainer.style.display = "flex";
                     if (boxVerdict) {
                         boxVerdict.style.background = "rgba(239, 68, 68, 0.16)";
@@ -1117,16 +1269,40 @@
                     }
                 }
 
-                // 呼叫更新碼頭分頁樣式 (攜帶 Lockdown 狀態)
                 this.updateTabStyles(state, isTyphoonLockdown);
 
                 this.profileRenderer.render(state, res);
                 this.radarRenderer.render(state, res);
             }
+
             startClockAndHeartbeat() {
-                setInterval(() => {
+                const updateTimeAndDate = () => {
                     const now = new Date();
-                    document.getElementById('liveClock').textContent = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} CST`;
+                    
+                    // 1. 動態時間顯示
+                    const hours = String(now.getHours()).padStart(2, '0');
+                    const minutes = String(now.getMinutes()).padStart(2, '0');
+                    const seconds = String(now.getSeconds()).padStart(2, '0');
+                    const clockEl = document.getElementById('liveClock');
+                    if (clockEl) clockEl.textContent = `${hours}:${minutes}:${seconds} CST`;
+
+                    // 2. 動態日期顯示 (修復手機端日期不正確與 iOS 相容性)
+                    const year = now.getFullYear();
+                    const month = String(now.getMonth() + 1).padStart(2, '0');
+                    const day = String(now.getDate()).padStart(2, '0');
+                    const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+                    const wday = weekdays[now.getDay()];
+                    const dateEl = document.getElementById('liveDate');
+                    if (dateEl) dateEl.textContent = `${year}-${month}-${day} (${wday})`;
+
+                    // 3. 自動更新三日預報表欄位動態日期
+                    this.updateForecastDates(now);
+                };
+
+                updateTimeAndDate();
+                setInterval(() => {
+                    updateTimeAndDate();
+
                     this.stationSec = this.stationSec.map(s => (s >= 5 ? 1 : s + 1));
                     const stn1 = document.getElementById('txtStn1Fresh');
                     if (stn1) stn1.textContent = `即時 ${this.stationSec[0]}s前`;
@@ -1137,13 +1313,13 @@
                     const stn4 = document.getElementById('txtStn4Fresh');
                     if (stn4) stn4.textContent = `即時 ${this.stationSec[3]}s前`;
 
+                    const now = new Date();
                     if (now.getSeconds() % 5 === 0) {
                         this.heartbeat++;
                         const hb = document.getElementById('heartbeatCounter');
                         if (hb) hb.textContent = this.heartbeat;
                     }
 
-                    // 修復1：NCDR 登陸預測時戳看門狗防呆校驗
                     const landfallEl = document.getElementById('typhoonLandfallTime');
                     const statusTagEl = document.getElementById('typhoonStatusTag');
                     const predictLandfallTime = new Date('2026/10/23 14:00:00').getTime();
@@ -1153,6 +1329,23 @@
                         if (statusTagEl) statusTagEl.innerText = "中心掠過，暴風圈籠罩";
                     }
                 }, 1000);
+            }
+
+            updateForecastDates(now) {
+                const d0 = new Date(now);
+                const d1 = new Date(now); d1.setDate(d1.getDate() + 1);
+                const d2 = new Date(now); d2.setDate(d2.getDate() + 2);
+
+                const fmtShort = (d) => `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`;
+                
+                const thD0 = document.getElementById('thD0Day');
+                if (thD0) thD0.innerHTML = `今日 ${fmtShort(d0)}<br><span class="text-[8.5px] font-normal text-slate-300">🌀 長浪</span>`;
+                
+                const thD1 = document.getElementById('thD1Day');
+                if (thD1) thD1.innerHTML = `明日 ${fmtShort(d1)}<br><span class="text-[8.5px] font-normal text-slate-300">☁️ 浪退</span>`;
+                
+                const thD2 = document.getElementById('thD2Day');
+                if (thD2) thD2.innerHTML = `後日 ${fmtShort(d2)}<br><span class="text-[8.5px] font-normal text-slate-300">☀️ 平穩</span>`;
             }
         }
 
