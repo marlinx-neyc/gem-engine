@@ -1,36 +1,18 @@
 {
   "version": "GEM-ENG-SPEC-2026-V66",
-  "timestamp": "2026-10-23 22:20:52 CST",
+  "timestamp": "2026-10-24 15:01:46 CST",
+  "decision_code": "Q4",
   "decision": {
-    "action_id": 1,
-    "tactical_instruction": "🟡 Q2 游擊調撥 (移防南岸權宜碼頭 + 限速 3 節)",
+    "action_id": 0,
+    "tactical_instruction": "🔴 0.0% 物理 VETO 熔斷 (全線封島)",
     "confidence": 100.0,
-    "evac_minutes": 20,
-    "is_closed": false
+    "is_closed": true
   },
-  "physics": {
-    "hs_pier": 0.95,
-    "w_eff": 4.82,
-    "ukc_north": 7.59,
-    "ukc_south": 8.89,
-    "fb_north": 2.1,
-    "fb_south": 1.4,
-    "squat": 0.337,
-    "e_net": 0.365,
-    "p_veto": 0.056,
-    "hard_veto": false,
-    "delta_theta": 15.0
-  },
-  "calibration": {
-    "match_rate": 0.921,
-    "bias": 0.0207
-  },
-  "official_announcement": {
-    "is_active_warning": false,
-    "typhoon_name": "無颱風警報",
-    "typhoon_number": "N/A",
-    "warning_number": "N/A",
-    "p_min_hpa": 1013.0,
-    "official_status": "🟢 常態營運（無颱風警報）"
+  "physics_metrics": {
+    "hs_pier_m": 3.71,
+    "w_local_ms": 5.46,
+    "ukc_m": -0.8,
+    "fb_pier_m": 0.15,
+    "has_veto": true
   }
 }
