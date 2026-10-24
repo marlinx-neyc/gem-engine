@@ -19,7 +19,15 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 import urllib3
-from IPython.display import HTML, display
+try:
+    from IPython.display import HTML, display
+except ModuleNotFoundError:
+    # 當沒有 IPython 環境時的備用函數
+    def display(*args, **kwargs):
+        print(*args)
+
+    def HTML(data):
+        return data
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
