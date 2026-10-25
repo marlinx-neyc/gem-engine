@@ -1,6 +1,6 @@
 {
-  "version": "GEM-ENG-SPEC-2026-V66",
-  "timestamp": "2026-10-25 16:01:05 CST",
+  "version": "GEM-ENG-SPEC-2026-V66-20261025_191314",
+  "timestamp": "2026-10-25 19:13:14 CST",
   "decision_code": "Q4",
   "decision": {
     "action_id": 0,
@@ -19,10 +19,5 @@
     "07:30-08:30",
     "11:30-12:30",
     "16:30-17:30"
-  ],
-  "learning_engine": {
-    "model_mode": "PINN-Reinforcement-Rolling",
-    "loss_convergence": 0.0012,
-    "matching_rate_pct": 95.8
-  }
+  ]
 }
