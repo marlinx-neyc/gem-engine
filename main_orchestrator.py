@@ -3,17 +3,20 @@
 """
 ==============================================================================
 GEM Engine v66.0 Master Spatial-Dynamic Orchestrator
-全域 SSOT 戰術指揮中樞 - 行政開設權責防誤報、多源 API 融合與完全去矛盾完整版
+全域 SSOT 戰術指揮中樞 - 完整修復與手機版同步部署發布版
 ==============================================================================
 """
 
 import asyncio
 import datetime
+import http.server
 import json
 import logging
 import math
 import os
+import socketserver
 import sys
+import threading
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
@@ -52,7 +55,7 @@ class GEMMasterOrchestrator:
         self.config = EngineConfig()
 
     async def execute_cycle(self):
-        logging.info("🚀 GEM Engine v66.0 Master Orchestrator 完整版啟動...")
+        logging.info("🚀 GEM Engine v66.0 Master Orchestrator 完整版執行中...")
         now_cst = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
         
         ssot_payload = {
@@ -74,11 +77,18 @@ class GEMMasterOrchestrator:
             }
         }
         
+        # 同步寫入 SSOT JSON 檔
         with open("latest_decision.json", "w", encoding="utf-8") as f:
             json.dump(ssot_payload, f, ensure_ascii=False, indent=2)
             
+        # 同步寫入 index.html 與 mobile.html，解決手機版讀取不到新版檔案之問題
         with open("index.html", "w", encoding="utf-8") as f:
             f.write(HTML_CONTENT)
+            
+        with open("mobile.html", "w", encoding="utf-8") as f:
+            f.write(HTML_CONTENT)
+            
+        logging.info("✅ 檔案寫入完成：index.html, mobile.html, latest_decision.json")
 
 
 HTML_CONTENT = """<!DOCTYPE html>
