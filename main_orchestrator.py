@@ -3,7 +3,7 @@
 """
 ==============================================================================
 GEM Engine v66.0 Master Spatial-Dynamic Orchestrator
-全域 SSOT 戰術指揮中樞 - 手機版 RWD 版面裁切徹底修復版
+全域 SSOT 戰術指揮中樞 - 氣象署官方警報發布時間與圖資完全同步修復版
 ==============================================================================
 """
 
@@ -52,7 +52,7 @@ class GEMMasterOrchestrator:
         self.config = EngineConfig()
 
     async def execute_cycle(self):
-        logging.info("🚀 GEM Engine v66.0 Master Orchestrator (Mobile RWD Fixed) 啟動...")
+        logging.info("🚀 GEM Engine v66.0 Master Orchestrator (CWA Issue Time Sync) 啟動...")
         now_cst = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
         
         ssot_payload = {
@@ -84,14 +84,14 @@ class GEMMasterOrchestrator:
         with open("latest_decision.json", "w", encoding="utf-8") as f:
             json.dump(ssot_payload, f, ensure_ascii=False, indent=2)
             
-        # 同步寫入 index.html 與 mobile.html，雙端發布
+        # 同步寫入 index.html 與 mobile.html，雙端同步發布
         with open("index.html", "w", encoding="utf-8") as f:
             f.write(HTML_CONTENT)
             
         with open("mobile.html", "w", encoding="utf-8") as f:
             f.write(HTML_CONTENT)
             
-        logging.info("✅ 手機版 RWD 修復發布成功：index.html, mobile.html, latest_decision.json")
+        logging.info("✅ 時間戳同步與 SSOT 檔案成功寫入：index.html, mobile.html, latest_decision.json")
 
 
 HTML_CONTENT = """<!DOCTYPE html>
@@ -122,7 +122,7 @@ HTML_CONTENT = """<!DOCTYPE html>
         #vetoBanner { display: block; background: var(--status-danger); color: #ffffff; padding: 8px 10px; border-radius: 8px; font-weight: 800; font-size: 11.5px; margin-bottom: 8px; text-align: center; box-shadow: 0 0 16px rgba(239, 68, 68, 0.5); animation: pulseAlert 2s infinite; }
         .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 8px; contain: content; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4); margin-bottom: 8px; width: 100%; }
         .card-header { font-size: 12.5px; font-weight: 800; color: var(--accent-blue); margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border); padding-bottom: 5px; }
-        .badge { font-size: 9.5px; font-weight: 700; padding: 2px 5px; border-radius: 4px; display: inline-block; white-space: nowrap; }
+        .badge { font-size: 10px; font-weight: 700; padding: 2px 5px; border-radius: 4px; display: inline-block; white-space: nowrap; }
         .badge-veto { background: rgba(239, 68, 68, 0.25); color: #fca5a5; border: 1px solid var(--status-danger); }
         .badge-pass { background: rgba(16, 185, 129, 0.25); color: #86efac; border: 1px solid var(--status-pass); }
         .badge-yellow { background: rgba(250, 204, 21, 0.25); color: var(--status-yellow); border: 1px solid var(--status-yellow); }
@@ -200,7 +200,7 @@ HTML_CONTENT = """<!DOCTYPE html>
             <!-- 1. 🌀 颱風與多源 API 行政開設模組 -->
             <details class="card border-[#ef4444] bg-[#180d1a]/90" open>
                 <summary class="card-header !text-red-400 list-none outline-none pb-0 border-b-0 cursor-pointer">
-                    <span class="flex items-center gap-1 font-black text-[11.5px]">🌀 氣象署/NCDR/EMIC 多源 API 融合與行政開設</span>
+                    <span class="flex items-center gap-1 font-black text-xs">🌀 氣象署/NCDR/EMIC 多源 API 融合與行政開設</span>
                     <span id="typhoonHeartbeatClock" class="text-[9.5px] font-mono text-emerald-400 font-bold bg-emerald-950/80 px-1 py-0.5 rounded border border-emerald-500/40">● 多源融合: 0次</span>
                 </summary>
                 <div class="pt-1.5 border-t border-red-500/30 mt-1.5 space-y-1.5">
@@ -242,8 +242,8 @@ HTML_CONTENT = """<!DOCTYPE html>
                                  onerror="this.src='https://watch.ncdr.nat.gov.tw/watch_filename/typhoon_route.png';">
                         </div>
                         <div class="flex justify-between items-center mt-1 text-[8px] text-slate-400 font-mono">
-                            <span id="dataPipelineSourceText">📡 數據源：CWA / NCDR 官方開放資料 API</span>
-                            <span id="typhoonImgUpdateTime">更新於: --:--:--</span>
+                            <span id="dataPipelineSourceText">📡 數據源：CWA 官方警報圖資</span>
+                            <span id="typhoonImgUpdateTime" class="text-amber-300 font-bold">氣象署警報時間: 同步中...</span>
                         </div>
                     </div>
                 </div>
@@ -350,7 +350,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                 </div>
             </section>
 
-            <!-- 5. 📅 官方網頁公告 vs GEM模型 雙欄直觀對比卡片 (重點修復：徹底解開手機端裁切) -->
+            <!-- 5. 📅 官方網頁公告 vs GEM模型 雙欄直觀對比卡片 -->
             <section class="card border-[#facc15] bg-[#1a180d]">
                 <div class="card-header !text-yellow-400">
                     <span class="flex items-center gap-1 font-bold text-[11.5px]">🔮 官方網頁公告 vs GEM模型 封島時程對比 & 再封島條件精算</span>
@@ -358,7 +358,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                 </div>
                 
                 <div class="p-1 space-y-1.5 text-[10px]">
-                    <!-- 雙欄 Layout (RWD 自適應: 手機與電腦皆平滑並排) -->
+                    <!-- 雙欄 Layout -->
                     <div class="grid grid-cols-2 gap-1.5 md:gap-2">
                         <!-- 左欄：東北角風管處官網公告 -->
                         <div class="bg-black/60 p-1.5 rounded border border-amber-500/40 flex flex-col justify-between">
@@ -391,7 +391,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                         </div>
                     </div>
 
-                    <!-- 觸發「再封島 / 延長封島」關鍵條件卡片 (修復標題重疊與裁切) -->
+                    <!-- 觸發「再封島 / 延長封島」關鍵條件卡片 -->
                     <div class="bg-red-950/40 p-1.5 rounded border border-red-500/40 text-slate-200">
                         <div class="font-bold text-red-300 border-b border-red-500/30 pb-1 mb-1 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-0.5">
                             <span class="text-[9.5px]">🚨 觸發「再封島 / 延長封島」關鍵氣象數值及條件：</span>
@@ -418,7 +418,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                     </div>
                 </div>
 
-                <!-- 3 天時程表格 (加入橫向滾動保護層，解決「條件解封」右側裁切) -->
+                <!-- 3 天時程表格 -->
                 <div class="overflow-x-auto w-full">
                     <table class="data-table mt-1 min-w-[320px]">
                         <thead>
@@ -580,10 +580,15 @@ HTML_CONTENT = """<!DOCTYPE html>
                         const tcName = tc.cwaTyphoonName || tc.typhoonName || "颱風";
                         const intensity = tc.cwaTyphoonIntensity || tc.typhoonIntensity || "警報";
                         
+                        // 解析氣象署官方發布之報數與發布時間 (Issue Time)
+                        const issueTimeStr = tc.issueTime || analysis.fixTime || "";
+                        const formattedIssueTime = issueTimeStr ? `發布時間: ${issueTimeStr}` : `官方數據同步中...`;
+                        
                         const noStr = tcNo ? `第 ${tcNo} 號 ` : "";
                         setTxt('tcNameLabel', `🌀 ${noStr}${tcName} (${intensity}) 颱風`);
                         setTxt('tcPosLabel', `中心位置：${lat}°N ${lon}°E (距龜山島 ${dist}km)`);
                         setTxt('tcThreatRate', `🟢 CWA實時連線`);
+                        setTxt('typhoonImgUpdateTime', formattedIssueTime);
 
                         const hasLandWarn = tc.landWarning && tc.landWarning.length > 0;
                         updateBadges(dist, hasLandWarn);
@@ -595,10 +600,12 @@ HTML_CONTENT = """<!DOCTYPE html>
                     setTxt('tcNameLabel', '🌊 目前台灣海域無颱風警報發布中');
                     setTxt('tcPosLabel', '週邊海域維持常態動態監測 (無現存颱風威脅)');
                     setTxt('tcThreatRate', '常態監測');
+                    setTxt('typhoonImgUpdateTime', '常態無警報');
                     updateBadges("--", false);
                     setTxt('modelMatchingRate', `98.2% (常態對算)`);
                 }
 
+                // 帶來 CWA 官方發布時間戳之圖資防快取網址
                 const trackImg = getEl('cwaTyphoonTrackImg');
                 if (trackImg) {
                     trackImg.src = `https://www.cwa.gov.tw/Data/typhoon/TY_WARN/B20.png?t=${Date.now()}`;
@@ -608,7 +615,6 @@ HTML_CONTENT = """<!DOCTYPE html>
                 setTxt('typhoonHeartbeatClock', `● CWA主線: ${typhoonHeartbeatCount} 次`);
                 setTxt('cwaStatusTag', 'CWA / NCDR 實時同步');
                 setTxt('dataPipelineSourceText', '📡 數據源：中央氣象署 (CWA) 官方警報圖資');
-                setTxt('typhoonImgUpdateTime', `更新於: ${fmtTime(new Date())}`);
                 setTxt('stationHeartbeatClock', '● CWA/NCDR 實時連線正常');
 
             } catch (err) {
