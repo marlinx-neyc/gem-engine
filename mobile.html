@@ -104,7 +104,7 @@
                 </div>
             </section>
 
-            <!-- 1. Windy 動態實時地圖與颱風/行政開設專區 (h-[480px] 達成 2:1 視野比例，啟用海流/風場流場) -->
+            <!-- 1. Windy 動態實時地圖（加入純流場全景 vs 含表格模式按鈕） -->
             <details class="card border-[#ef4444] bg-[#180d1a]/90" open>
                 <summary class="card-header !text-red-400 list-none outline-none pb-0 border-b-0 cursor-pointer">
                     <span class="flex items-center gap-1 font-black text-xs">🌀 Windy 動態實時海流/風場地圖 & 行政開設</span>
@@ -133,24 +133,30 @@
                     </div>
 
                     <div class="bg-black/60 p-1.5 rounded-lg border border-slate-700">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-[9.5px] font-bold text-amber-300" id="tcNameLabel">🌀 龜山島周邊實時海流與風場動態地圖</span>
-                            <span class="badge badge-pass text-[8px]" id="tcThreatRate">🟢 Windy實時</span>
+                        <div class="flex flex-wrap justify-between items-center gap-1 mb-1">
+                            <span class="text-[9.5px] font-bold text-amber-300" id="tcNameLabel">🌀 龜山島周邊動態海流與風場圖</span>
+                            
+                            <!-- 新增：Windy 視窗切換按鈕組 -->
+                            <div class="flex gap-1">
+                                <button id="btnWindyFlow" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-[8.5px] px-1.5 py-0.5 rounded border border-blue-400">🌊 純海流流場</button>
+                                <button id="btnWindyWind" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-[8.5px] px-1.5 py-0.5 rounded border border-slate-600">💨 純風場流場</button>
+                                <button id="btnWindyDetail" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-[8.5px] px-1.5 py-0.5 rounded border border-slate-600">📊 含預報表格</button>
+                            </div>
                         </div>
                         <div class="text-[9px] text-slate-300 mb-1 font-mono" id="tcPosLabel">
                             定位座標：24.843°N 121.952°E (龜山島中心點標註)
                         </div>
 
-                        <!-- 高度 480px 確保地圖對氣象預報表格為 2:1 比例，overlay=currents 呈現海流動態趨勢 -->
-                        <div class="relative w-full rounded border border-slate-800 overflow-hidden bg-[#050a14] h-[480px]">
+                        <!-- Windy 內嵌容器：預設極簡海流流場視窗，確保全圖清晰無擋 -->
+                        <div class="relative w-full rounded border border-slate-800 overflow-hidden bg-[#050a14] h-[360px]" id="windyContainer">
                             <iframe id="windyFrame"
-                                    src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=m%2Fs&zoom=11&overlay=currents&product=ecmwf&level=surface&lat=24.843&lon=121.952&marker=true&detail=true&detailLat=24.843&detailLon=121.952"
+                                    src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=m%2Fs&zoom=11&overlay=currents&product=ecmwf&level=surface&lat=24.843&lon=121.952&marker=true&detail=false"
                                     class="w-full h-full block border-0 rounded"
                                     loading="lazy">
                             </iframe>
                         </div>
                         <div class="flex justify-between items-center mt-1 text-[8px] text-slate-400 font-mono">
-                            <span id="dataPipelineSourceText">📡 數據源：Windy ECMWF 海流與動態風場地圖 (2:1視野加強)</span>
+                            <span id="dataPipelineSourceText">📡 數據源：Windy ECMWF 動態海流流場視窗</span>
                             <span id="typhoonImgUpdateTime" class="text-emerald-300 font-bold">全天候實時動態渲染</span>
                         </div>
                     </div>
@@ -258,7 +264,7 @@
                 </div>
             </section>
 
-            <!-- 5. ⚡ 游擊調度時序與戰術機動任務鏈 (點擊自動切換海象並重繪剖面與雷達圖) -->
+            <!-- 5. ⚡ 游擊調度時序與戰術機動任務鏈 -->
             <section class="card border-[#eab308] bg-[#1a180d]">
                 <div class="card-header !text-amber-400">
                     <span class="flex items-center gap-1 font-bold text-[11.5px]">⚡ 游擊調度時序與戰術機動任務鏈 (點擊切換連動圖場)</span>
@@ -443,6 +449,45 @@
         let typhoonHeartbeatCount = 0;
         let currentTimelineLabel = "07:30 - 08:30 (晨間預警)";
 
+        // Windy 視窗模式動態切換（解決預報表擋住流場與切換圖層表格消失問題）
+        function setWindyView(mode) {
+            const frame = getEl('windyFrame');
+            const container = getEl('windyContainer');
+            const btnFlow = getEl('btnWindyFlow');
+            const btnWind = getEl('btnWindyWind');
+            const btnDetail = getEl('btnWindyDetail');
+            if (!frame) return;
+
+            const baseBtn = "text-[8.5px] px-1.5 py-0.5 rounded border transition-all ";
+            const activeBtn = baseClass => baseClass + " font-bold text-white shadow-md";
+            const inactiveBtn = "bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700";
+
+            const baseUrl = "https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=m%2Fs&zoom=11&product=ecmwf&level=surface&lat=24.843&lon=121.952&marker=true";
+
+            if (mode === 'FLOW') {
+                if (container) container.className = "relative w-full rounded border border-slate-800 overflow-hidden bg-[#050a14] h-[360px]";
+                frame.src = baseUrl + "&overlay=currents&detail=false";
+                if (btnFlow) btnFlow.className = activeBtn("bg-blue-600 border-blue-400");
+                if (btnWind) btnWind.className = inactiveBtn;
+                if (btnDetail) btnDetail.className = inactiveBtn;
+                setTxt('dataPipelineSourceText', '📡 數據源：Windy ECMWF 動態海流流場視窗 (全景無擋)');
+            } else if (mode === 'WIND') {
+                if (container) container.className = "relative w-full rounded border border-slate-800 overflow-hidden bg-[#050a14] h-[360px]";
+                frame.src = baseUrl + "&overlay=wind&detail=false";
+                if (btnFlow) btnFlow.className = inactiveBtn;
+                if (btnWind) btnWind.className = activeBtn("bg-indigo-600 border-indigo-400");
+                if (btnDetail) btnDetail.className = inactiveBtn;
+                setTxt('dataPipelineSourceText', '📡 數據源：Windy ECMWF 動態風場向量圖 (全景無擋)');
+            } else if (mode === 'DETAIL') {
+                if (container) container.className = "relative w-full rounded border border-slate-800 overflow-hidden bg-[#050a14] h-[480px]";
+                frame.src = baseUrl + "&overlay=currents&detail=true&detailLat=24.843&detailLon=121.952";
+                if (btnFlow) btnFlow.className = inactiveBtn;
+                if (btnWind) btnWind.className = inactiveBtn;
+                if (btnDetail) btnDetail.className = activeBtn("bg-amber-600 border-amber-400");
+                setTxt('dataPipelineSourceText', '📡 數據源：Windy ECMWF 海流圖與詳細預報表 (2:1黃金視野)');
+            }
+        }
+
         function getGuishanDist(lat, lon) {
             const R = 6371;
             const dLat = (lat - 24.843) * Math.PI / 180;
@@ -452,28 +497,6 @@
                       Math.sin(dLon/2) * Math.sin(dLon/2);
             const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
             return (R * c).toFixed(1);
-        }
-
-        function checkDailySyncWindows(nowDate) {
-            const h = nowDate.getHours();
-            const m = nowDate.getMinutes();
-            const mins = h * 60 + m;
-
-            const w1 = mins >= 7 * 60 + 30 && mins <= 8 * 60 + 30;   // 07:30 ~ 08:30
-            const w2 = mins >= 11 * 60 + 30 && mins <= 12 * 60 + 30; // 11:30 ~ 12:30
-            const w3 = mins >= 16 * 60 + 30 && mins <= 17 * 60 + 30; // 16:30 ~ 17:30
-
-            const badgeEl = getEl('syncWindowBadge');
-            if (badgeEl) {
-                if (w1 || w2 || w3) {
-                    badgeEl.innerText = "🟢 官方對算視窗中";
-                    badgeEl.className = "badge badge-pass text-[8px]";
-                } else {
-                    badgeEl.innerText = "⏱️ 離線連動巡航";
-                    badgeEl.className = "badge badge-yellow text-[8px]";
-                }
-            }
-            return (w1 || w2 || w3);
         }
 
         function updateBadges(dist, hasRealLandAlert) {
@@ -536,7 +559,7 @@
                         setTxt('modelMatchingRate', `95.8% (Loss: 0.0012)`);
                     }
                 } else {
-                    setTxt('tcNameLabel', '🌀 龜山島周邊實時海流與風場動態地圖 (Windy 實時圖場)');
+                    setTxt('tcNameLabel', '🌀 龜山島周邊動態海流與風場圖 (Windy 實時渲染)');
                     setTxt('tcPosLabel', '定位座標：24.843°N 121.952°E (龜山島中心點標註)');
                     setTxt('tcThreatRate', '🟢 Windy實時');
                     updateBadges("--", false);
@@ -558,7 +581,7 @@
             const hs = parseFloat(getEl('rngHs')?.value || 3.71);
             const simulatedDist = Math.max(20, (350 - (hs * 35))).toFixed(1);
 
-            setTxt('tcNameLabel', `🌀 龜山島周邊實時海流與風場動態地圖 (Windy 實時渲染中)`);
+            setTxt('tcNameLabel', `🌀 龜山島周邊動態海流與風場圖 (Windy 實時渲染)`);
             setTxt('tcPosLabel', `定位座標：24.843°N 121.952°E (海象場推估能量距: ${simulatedDist}km)`);
             setTxt('tcThreatRate', `🟢 Windy實時`);
 
@@ -567,8 +590,6 @@
             typhoonHeartbeatCount++;
             setTxt('typhoonHeartbeatClock', `⚠️ Windy即時: ${typhoonHeartbeatCount} 次`);
             setTxt('cwaStatusTag', 'GEM 離線反饋 (降權保護中)');
-            setTxt('dataPipelineSourceText', '📡 數據源：Windy ECMWF 海流與動態風場地圖 (2:1視野加強)');
-            setTxt('typhoonImgUpdateTime', `全天候實時渲染更新`);
             setTxt('stationHeartbeatClock', '● Windy 地圖實時連線正常');
             setTxt('modelMatchingRate', `92.4% (Loss: 0.0031)`);
             setTxt('learningStatusTag', 'PINN 自主學習中');
@@ -611,6 +632,14 @@
             startClockAndWatchdog();
             initUIControls();
             recalculatePhysicsAndRender();
+
+            // 綁定 Windy 模式切換按鈕
+            const btnFlow = getEl('btnWindyFlow');
+            const btnWind = getEl('btnWindyWind');
+            const btnDetail = getEl('btnWindyDetail');
+            if (btnFlow) btnFlow.addEventListener('click', () => setWindyView('FLOW'));
+            if (btnWind) btnWind.addEventListener('click', () => setWindyView('WIND'));
+            if (btnDetail) btnDetail.addEventListener('click', () => setWindyView('DETAIL'));
 
             // 綁定所有對算與游擊時序卡片之點擊連動監聽
             document.querySelectorAll('.timeline-btn').forEach(btn => {
@@ -664,8 +693,6 @@
                 setTxt('gemClosureStart', `${fmtM(d0)} (今日) 07:30`);
                 setTxt('offReopenTime', `${fmtM(d2)} (後日) 08:00`);
                 setTxt('gemReopenTime', `${fmtM(d2)} (後日) 08:00`);
-
-                checkDailySyncWindows(now);
             };
             update();
             setInterval(update, 1000);
