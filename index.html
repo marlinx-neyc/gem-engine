@@ -71,7 +71,7 @@
     </header>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-2.5 w-full">
-        <!-- 左側面板 (lg:col-span-5) -->
+        <!-- 左側面板 -->
         <div class="lg:col-span-5 flex flex-col gap-1">
             <!-- 0. 每日 3 時段自動對算 -->
             <section class="card border-[#34d399] bg-[#0d2218]">
@@ -104,10 +104,10 @@
                 </div>
             </section>
 
-            <!-- 1. Windy 動態實時地圖與行政開設 -->
+            <!-- 1. Windy 動態實時地圖與行政開設（已包含龜山島定位針與卡片標註） -->
             <details class="card border-[#ef4444] bg-[#180d1a]/90" open>
                 <summary class="card-header !text-red-400 list-none outline-none pb-0 border-b-0 cursor-pointer">
-                    <span class="flex items-center gap-1 font-black text-xs">🌀 Windy 動態實時海流/風場地圖 & 行政開設</span>
+                    <span class="flex items-center gap-1 font-black text-xs">🌀 Windy 動態實時氣象風場地圖 & 行政開設</span>
                     <span id="typhoonHeartbeatClock" class="text-[9.5px] font-mono text-emerald-400 font-bold bg-emerald-950/80 px-1 py-0.5 rounded border border-emerald-500/40">● Windy實時</span>
                 </summary>
                 <div class="pt-1.5 border-t border-red-500/30 mt-1.5 space-y-1.5">
@@ -133,28 +133,24 @@
                     </div>
 
                     <div class="bg-black/60 p-1.5 rounded-lg border border-slate-700">
-                        <div class="flex flex-wrap justify-between items-center gap-1 mb-1">
-                            <span class="text-[9.5px] font-bold text-amber-300" id="tcNameLabel">🌀 龜山島周邊動態海流與風場圖</span>
-                            
-                            <div class="flex gap-1">
-                                <button id="btnWindyFlow" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-[8.5px] px-1.5 py-0.5 rounded border border-blue-400">🌊 純海流流場</button>
-                                <button id="btnWindyWind" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-[8.5px] px-1.5 py-0.5 rounded border border-slate-600">💨 純風場流場</button>
-                                <button id="btnWindyDetail" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-[8.5px] px-1.5 py-0.5 rounded border border-slate-600">📊 含預報表格</button>
-                            </div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[9.5px] font-bold text-amber-300" id="tcNameLabel">🌀 龜山島周邊實時動態風場與氣象地圖</span>
+                            <span class="badge badge-pass text-[8px]" id="tcThreatRate">🟢 Windy實時</span>
                         </div>
                         <div class="text-[9px] text-slate-300 mb-1 font-mono" id="tcPosLabel">
                             定位座標：24.843°N 121.952°E (龜山島中心點標註)
                         </div>
 
-                        <div class="relative w-full rounded border border-slate-800 overflow-hidden bg-[#050a14] h-[360px]" id="windyContainer">
+                        <!-- 嵌入 Windy 動態地圖：Zoom=11, 龜山島 Marker 紅針與 Detail 氣象卡片標註 -->
+                        <div class="relative w-full rounded border border-slate-800 overflow-hidden bg-[#050a14] h-[260px]">
                             <iframe id="windyFrame"
-                                    src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=m%2Fs&zoom=11&overlay=currents&product=ecmwf&level=surface&lat=24.843&lon=121.952&marker=true&detail=false"
+                                    src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=m%2Fs&zoom=11&overlay=wind&product=ecmwf&level=surface&lat=24.843&lon=121.952&marker=true&detail=true&detailLat=24.843&detailLon=121.952"
                                     class="w-full h-full block border-0 rounded"
                                     loading="lazy">
                             </iframe>
                         </div>
                         <div class="flex justify-between items-center mt-1 text-[8px] text-slate-400 font-mono">
-                            <span id="dataPipelineSourceText">📡 數據源：Windy ECMWF 動態海流流場視窗</span>
+                            <span id="dataPipelineSourceText">📡 數據源：Windy ECMWF 動態實時風場地圖 (含龜山島紅針標註)</span>
                             <span id="typhoonImgUpdateTime" class="text-emerald-300 font-bold">全天候實時動態渲染</span>
                         </div>
                     </div>
@@ -237,44 +233,9 @@
                     </div>
                 </div>
             </section>
-
-            <!-- 8. 🌀 颱風專區與防颱應變動態指南 (填補左下角版面空間) -->
-            <details class="card border-[#ef4444] bg-[#180d1a]/90" open id="typhoonSpecialSection">
-                <summary class="card-header !text-red-400 list-none outline-none pb-0 border-b-0 cursor-pointer">
-                    <span class="flex items-center gap-1 font-black text-[11.5px]">🌀 颱風專區與動態共振衝擊評估 (收合版)</span>
-                    <span class="badge badge-veto text-[8px]" id="typhoonZoneBadge">防颱管制</span>
-                </summary>
-                <div class="pt-1.5 border-t border-red-500/30 mt-1.5 space-y-1.5 text-[9.5px]">
-                    <div class="bg-black/60 p-1.5 rounded border border-red-500/30 space-y-1">
-                        <div class="flex justify-between items-center text-amber-300 font-bold">
-                            <span>🌀 颱風中心氣壓與暴風半徑精算：</span>
-                            <span class="text-[8px] font-mono text-slate-400">ECMWF / CWA</span>
-                        </div>
-                        <div class="grid grid-cols-2 gap-1 text-[8.5px] font-mono">
-                            <div class="bg-black/40 p-1 rounded">中心氣壓：<b class="text-sky-300" id="tpPressureVal">955 hPa</b></div>
-                            <div class="bg-black/40 p-1 rounded">7級暴風半徑：<b class="text-sky-300" id="tpRadius7Val">250 km</b></div>
-                            <div class="bg-black/40 p-1 rounded">10級暴風半徑：<b class="text-sky-300" id="tpRadius10Val">80 km</b></div>
-                            <div class="bg-black/40 p-1 rounded">移動速度方向：<b class="text-amber-300" id="tpSpeedVal">西北 22 km/h</b></div>
-                        </div>
-                    </div>
-
-                    <div class="bg-black/60 p-1.5 rounded border border-slate-700 space-y-1">
-                        <div class="flex justify-between items-center text-amber-300 font-bold">
-                            <span>🛡️ 龜山島防颱撤離與防護 SOP 檢核：</span>
-                            <span class="badge badge-pass text-[7.5px]">SSOT 指揮</span>
-                        </div>
-                        <ul class="list-disc pl-3 text-[8.5px] text-slate-300 space-y-0.5">
-                            <li><b>預警發布 (+0h)</b>：啟動 GEM 雙生模型對算，決定是否啟動 0.0% 熔斷。</li>
-                            <li><b>遊客淨空 (+2h)</b>：駐守人員清查最後航班，確保島上遊客零留滯。</li>
-                            <li><b>港埠加固 (+3h)</b>：南岸沉箱碼頭繫纜加固、北岸桁架引橋防波閘閉鎖。</li>
-                            <li><b>巡視撤離 (+4h)</b>：工作人員搭乘公務船移防宜蘭本島烏石港避風。</li>
-                        </ul>
-                    </div>
-                </div>
-            </details>
         </div>
 
-        <!-- 右側面板 (lg:col-span-7) -->
+        <!-- 右側面板 -->
         <div class="lg:col-span-7 flex flex-col gap-1">
             <!-- 4. 📐 南北岸動態剖面 -->
             <section class="card border-[#38bdf8]">
@@ -298,7 +259,7 @@
             </section>
 
             <!-- 5. ⚡ 游擊調度時序與戰術機動任務鏈 -->
-            <section class="card border-[#eab308] bg-[#1a180d]">
+            <section class="card border-[#eab308] bg-[#1a170d]">
                 <div class="card-header !text-amber-400">
                     <span class="flex items-center gap-1 font-bold text-[11.5px]">⚡ 游擊調度時序與戰術機動任務鏈 (點擊切換連動圖場)</span>
                     <span class="badge badge-yellow text-[8px]">點擊帶入數據</span>
@@ -351,7 +312,7 @@
                 </div>
             </section>
 
-            <!-- 6. 🔮 官方網頁公告 vs GEM模型 雙欄直觀對比卡片 -->
+            <!-- 6. 官方網頁公告 vs GEM模型 雙欄直觀對比卡片 -->
             <section class="card border-[#facc15] bg-[#1a180d]">
                 <div class="card-header !text-yellow-400">
                     <span class="flex items-center gap-1 font-bold text-[11.5px]">🔮 官方網頁公告 vs GEM模型 封島時程對比 & 再封島條件精算</span>
@@ -443,10 +404,10 @@
                 </div>
             </section>
 
-            <!-- 7. 🎯 態勢雷達圖（加大滿版 h-[420px]，填補版面下半部） -->
+            <!-- 7. 🎯 態勢雷達圖 -->
             <section class="card border-[#38bdf8]">
                 <div class="card-header !text-[#38bdf8]">
-                    <span class="flex items-center gap-1 font-extrabold">🎯 態勢雷達圖與 5 大算子對比 (受游擊時序連動)</span>
+                    <span class="flex items-center gap-1">🎯 態勢雷達圖與 5 大算子對比 (受游擊時序連動)</span>
                     <span class="badge badge-yellow text-[8px]">邊界防護</span>
                 </div>
 
@@ -459,8 +420,7 @@
                     </div>
                 </div>
 
-                <!-- 畫布容器高度擴增至 420px，完美貼合底部 -->
-                <div class="canvas-container h-[420px] mb-1" id="radarContainer">
+                <div class="canvas-container h-[260px] mb-1" id="radarContainer">
                     <canvas id="nativeRadarCanvas" class="w-full h-full block"></canvas>
                 </div>
 
@@ -482,151 +442,6 @@
         let animPhase = 0;
         let typhoonHeartbeatCount = 0;
         let currentTimelineLabel = "07:30 - 08:30 (晨間預警)";
-
-        function setWindyView(mode) {
-            const frame = getEl('windyFrame');
-            const container = getEl('windyContainer');
-            const btnFlow = getEl('btnWindyFlow');
-            const btnWind = getEl('btnWindyWind');
-            const btnDetail = getEl('btnWindyDetail');
-            if (!frame) return;
-
-            const baseClass = "text-[8.5px] px-1.5 py-0.5 rounded border transition-all ";
-            const activeBtn = extra => extra + " font-bold text-white shadow-md";
-            const inactiveBtn = "bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700";
-
-            const baseUrl = "https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=m%2Fs&zoom=11&product=ecmwf&level=surface&lat=24.843&lon=121.952&marker=true";
-
-            if (mode === 'FLOW') {
-                if (container) container.className = "relative w-full rounded border border-slate-800 overflow-hidden bg-[#050a14] h-[360px]";
-                frame.src = baseUrl + "&overlay=currents&detail=false";
-                if (btnFlow) btnFlow.className = activeBtn("bg-blue-600 border-blue-400");
-                if (btnWind) btnWind.className = inactiveBtn;
-                if (btnDetail) btnDetail.className = inactiveBtn;
-                setTxt('dataPipelineSourceText', '📡 數據源：Windy ECMWF 動態海流流場視窗 (全景無擋)');
-            } else if (mode === 'WIND') {
-                if (container) container.className = "relative w-full rounded border border-slate-800 overflow-hidden bg-[#050a14] h-[360px]";
-                frame.src = baseUrl + "&overlay=wind&detail=false";
-                if (btnFlow) btnFlow.className = inactiveBtn;
-                if (btnWind) btnWind.className = activeBtn("bg-indigo-600 border-indigo-400");
-                if (btnDetail) btnDetail.className = inactiveBtn;
-                setTxt('dataPipelineSourceText', '📡 數據源：Windy ECMWF 動態風場向量圖 (全景無擋)');
-            } else if (mode === 'DETAIL') {
-                if (container) container.className = "relative w-full rounded border border-slate-800 overflow-hidden bg-[#050a14] h-[480px]";
-                frame.src = baseUrl + "&overlay=currents&detail=true&detailLat=24.843&detailLon=121.952";
-                if (btnFlow) btnFlow.className = inactiveBtn;
-                if (btnWind) btnWind.className = inactiveBtn;
-                if (btnDetail) btnDetail.className = activeBtn("bg-amber-600 border-amber-400");
-                setTxt('dataPipelineSourceText', '📡 數據源：Windy ECMWF 海流圖與詳細預報表 (2:1黃金視野)');
-            }
-        }
-
-        function getGuishanDist(lat, lon) {
-            const R = 6371;
-            const dLat = (lat - 24.843) * Math.PI / 180;
-            const dLon = (lon - 121.952) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                      Math.cos(24.843 * Math.PI / 180) * Math.cos(lat * Math.PI / 180) *
-                      Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return (R * c).toFixed(1);
-        }
-
-        function updateBadges(dist, hasRealLandAlert) {
-            const centralBadge = getEl('badgeCentralAlert');
-            const yilanBadge = getEl('badgeYilanAlert');
-            const ntpcBadge = getEl('badgeNtpCAlert');
-
-            const applyClass = (cTxt, cCls, yTxt, yCls, nTxt, nCls) => {
-                if (centralBadge) { centralBadge.innerText = cTxt; centralBadge.className = cCls; }
-                if (yilanBadge) { yilanBadge.innerText = yTxt; yilanBadge.className = yCls; }
-                if (ntpcBadge) { ntpcBadge.innerText = nTxt; ntpcBadge.className = nCls; }
-            };
-
-            if (!hasRealLandAlert) {
-                applyClass('🟢 未開設', 'badge badge-pass text-[8px]', '🟢 未開設', 'badge badge-pass text-[8px]', '🟢 未開設', 'badge badge-pass text-[8px]');
-                return;
-            }
-
-            if (dist !== "--" && parseFloat(dist) < 300) {
-                applyClass('🔴 一級開設', 'badge badge-veto text-[8px]', '🔴 一級開設', 'badge badge-veto text-[8px]', '🔴 一級開設', 'badge badge-veto text-[8px]');
-            } else if (dist !== "--" && parseFloat(dist) < 500) {
-                applyClass('🟡 二級開設', 'badge badge-yellow text-[8px]', '🟡 二級開設', 'badge badge-yellow text-[8px]', '🟡 二級開設', 'badge badge-yellow text-[8px]');
-            } else {
-                applyClass('🟢 未開設', 'badge badge-pass text-[8px]', '🟢 未開設', 'badge badge-pass text-[8px]', '🟢 未開設', 'badge badge-pass text-[8px]');
-            }
-        }
-
-        async function fetchCWALiveData() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const userKey = urlParams.get('cwa_key') || 'CWA-YOUR-API-KEY-HERE';
-            const cwaUrl = `https://opendata.cwa.gov.tw/api/v1/rest/datastore/W-C0034-001?Authorization=${userKey}`;
-
-            try {
-                const response = await fetch(cwaUrl);
-                if (!response.ok) throw new Error(`CWA API error! status: ${response.status}`);
-                const result = await response.json();
-
-                const cyclones = result.records?.tropicalCyclones?.tropicalCyclone;
-
-                if (cyclones && cyclones.length > 0) {
-                    const tc = cyclones[0];
-                    const analysis = tc.analysisData?.fix?.slice(-1)[0];
-
-                    if (analysis) {
-                        const lat = parseFloat(analysis.latitude || analysis.lat || 0);
-                        const lon = parseFloat(analysis.longitude || analysis.lon || 0);
-                        const dist = (lat > 0 && lon > 0) ? getGuishanDist(lat, lon) : "--";
-
-                        const tcNo = tc.cwaTyphoonNo || tc.typhoonNo || tc.typhoonNumber || "";
-                        const tcName = tc.cwaTyphoonName || tc.typhoonName || "颱風";
-                        const intensity = tc.cwaTyphoonIntensity || tc.typhoonIntensity || "警報";
-
-                        const noStr = tcNo ? `第 ${tcNo} 號 ` : "";
-                        setTxt('tcNameLabel', `🌀 ${noStr}${tcName} (${intensity}) 颱風警報生效中`);
-                        setTxt('tcPosLabel', `中心位置：${lat}°N ${lon}°E (距龜山島 ${dist}km)`);
-                        setTxt('tcThreatRate', `🟢 CWA實時連線`);
-
-                        const hasLandWarn = tc.landWarning && tc.landWarning.length > 0;
-                        updateBadges(dist, hasLandWarn);
-                        setTxt('modelMatchingRate', `95.8% (Loss: 0.0012)`);
-                    }
-                } else {
-                    setTxt('tcNameLabel', '🌀 龜山島周邊動態海流與風場圖 (Windy 實時渲染)');
-                    setTxt('tcPosLabel', '定位座標：24.843°N 121.952°E (龜山島中心點標註)');
-                    setTxt('tcThreatRate', '🟢 Windy實時');
-                    updateBadges("--", false);
-                    setTxt('modelMatchingRate', `98.2% (Windy實時對算)`);
-                }
-
-                typhoonHeartbeatCount++;
-                setTxt('typhoonHeartbeatClock', `● Windy即時: ${typhoonHeartbeatCount} 次`);
-                setTxt('cwaStatusTag', 'CWA / NCDR / Windy 實時同步');
-                setTxt('stationHeartbeatClock', '● Windy 地圖實時連線正常');
-
-            } catch (err) {
-                console.warn("API 備援切換，保持 Windy 動態地圖獨立運作:", err);
-                processGEMBackupHistoricalModel();
-            }
-        }
-
-        function processGEMBackupHistoricalModel() {
-            const hs = parseFloat(getEl('rngHs')?.value || 3.71);
-            const simulatedDist = Math.max(20, (350 - (hs * 35))).toFixed(1);
-
-            setTxt('tcNameLabel', `🌀 龜山島周邊動態海流與風場圖 (Windy 實時渲染)`);
-            setTxt('tcPosLabel', `定位座標：24.843°N 121.952°E (海象場推估能量距: ${simulatedDist}km)`);
-            setTxt('tcThreatRate', `🟢 Windy實時`);
-
-            updateBadges(simulatedDist, false);
-
-            typhoonHeartbeatCount++;
-            setTxt('typhoonHeartbeatClock', `⚠️ Windy即時: ${typhoonHeartbeatCount} 次`);
-            setTxt('cwaStatusTag', 'GEM 離線反饋 (降權保護中)');
-            setTxt('stationHeartbeatClock', '● Windy 地圖實時連線正常');
-            setTxt('modelMatchingRate', `92.4% (Loss: 0.0031)`);
-            setTxt('learningStatusTag', 'PINN 自主學習中');
-        }
 
         function applyTimelineLinkage(hs, w, tp, theta, labelText, targetEl) {
             currentTimelineLabel = labelText;
@@ -666,15 +481,6 @@
             initUIControls();
             recalculatePhysicsAndRender();
 
-            // 綁定 Windy 模式切換按鈕
-            const btnFlow = getEl('btnWindyFlow');
-            const btnWind = getEl('btnWindyWind');
-            const btnDetail = getEl('btnWindyDetail');
-            if (btnFlow) btnFlow.addEventListener('click', () => setWindyView('FLOW'));
-            if (btnWind) btnWind.addEventListener('click', () => setWindyView('WIND'));
-            if (btnDetail) btnDetail.addEventListener('click', () => setWindyView('DETAIL'));
-
-            // 綁定對算與游擊時序卡片之點擊連動
             document.querySelectorAll('.timeline-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const card = e.currentTarget;
@@ -687,9 +493,6 @@
                     applyTimelineLinkage(hs, w, tp, theta, label, card);
                 });
             });
-
-            fetchCWALiveData();
-            setInterval(fetchCWALiveData, 300000);
 
             window.addEventListener('resize', renderAllCanvas);
 
@@ -721,11 +524,6 @@
                 const thD0 = getEl('thD0Day'); if (thD0) thD0.innerHTML = `今日 ${fmtM(d0)}`;
                 const thD1 = getEl('thD1Day'); if (thD1) thD1.innerHTML = `明日 ${fmtM(d1)}`;
                 const thD2 = getEl('thD2Day'); if (thD2) thD2.innerHTML = `後日 ${fmtM(d2)}`;
-
-                setTxt('offClosureStart', `${fmtM(d0)} (今日) 08:00`);
-                setTxt('gemClosureStart', `${fmtM(d0)} (今日) 07:30`);
-                setTxt('offReopenTime', `${fmtM(d2)} (後日) 08:00`);
-                setTxt('gemReopenTime', `${fmtM(d2)} (後日) 08:00`);
             };
             update();
             setInterval(update, 1000);
@@ -817,7 +615,6 @@
             const fbNorth = deckNorth - crestNorth;
             const fbSouth = deckSouth - crestSouth;
 
-            // 即時更新物理算子檢核表
             setTxt('cmpHsVal', `${hsNorth.toFixed(2)} m`);
             const hsB = getEl('cmpHsBadge'); if (hsB) hsB.innerHTML = hsNorth > 1.13 ? '<span class="badge badge-veto text-[8px]">🔴 VETO</span>' : '<span class="badge badge-pass text-[8px]">🟢 通過</span>';
 
@@ -934,7 +731,6 @@
 
             const ctx = canvas.getContext('2d');
             ctx.scale(dpr, dpr);
-
             ctx.fillStyle = '#050a14';
             ctx.fillRect(0, 0, w, h);
 
@@ -968,7 +764,6 @@
             const seabedY = cdToY(-depthBase);
             const keelY = cdToY(keelCD);
             const crestY = cdToY(crestCD);
-
             const quayX = w * 0.52;
 
             ctx.fillStyle = '#1a1816';
@@ -1084,7 +879,6 @@
             ctx.restore();
         }
 
-        // 雷達圖繪製優化 (畫布放大至 420px，雷達半徑 R 最大擴至 90)
         function drawRadarCanvas() {
             const canvas = getEl('nativeRadarCanvas');
             const container = getEl('radarContainer');
@@ -1117,7 +911,7 @@
             const vetoSouth = (hsSouth > 1.13) || (weffSouth > 10.17) || (tpVal >= 11.5) || (ukcSouth < 1.50) || (fbSouth < 0.50);
 
             const w = container.clientWidth || 320;
-            const h = container.clientHeight || 420; // 放大至 420px
+            const h = 260;
             const dpr = window.devicePixelRatio || 1;
 
             canvas.width = w * dpr;
@@ -1127,14 +921,12 @@
 
             const ctx = canvas.getContext('2d');
             ctx.scale(dpr, dpr);
-
             ctx.fillStyle = '#050a14';
             ctx.fillRect(0, 0, w, h);
 
             const cx = w / 2;
-            const cy = h * 0.44;
-            // 雷達半徑放大 2 倍 (最高 90px)，充滿視窗
-            const R = Math.min(w * 0.22, h * 0.26, 90);
+            const cy = h * 0.42;
+            const R = Math.min(w * 0.16, 48);
             const count = 5;
             const angles = [];
             for (let i = 0; i < count; i++) angles.push(-Math.PI / 2 + (i * 2 * Math.PI) / count);
@@ -1149,8 +941,8 @@
                 }
                 ctx.closePath();
                 ctx.strokeStyle = lvl === 1.0 ? '#facc15' : '#1e2d4a';
-                ctx.lineWidth = lvl === 1.0 ? 1.4 : 0.8;
-                if (lvl === 1.0) ctx.setLineDash([4, 4]); else ctx.setLineDash([]);
+                ctx.lineWidth = lvl === 1.0 ? 1.2 : 0.8;
+                if (lvl === 1.0) ctx.setLineDash([3, 3]); else ctx.setLineDash([]);
                 ctx.stroke();
             });
 
@@ -1202,21 +994,20 @@
                 { title: "乾舷", val: fbDisp, limit: "≥0.50m", fail: fbFail }
             ];
 
-            // 文字大小調大為 10.5px，與大圖成比例
-            ctx.font = 'bold 10.5px sans-serif';
+            ctx.font = 'bold 8.5px sans-serif';
             for (let i = 0; i < count; i++) {
-                const r = R * 1.35;
+                const r = R * 1.48;
                 let x = cx + r * Math.cos(angles[i]);
                 let y = cy + r * Math.sin(angles[i]);
                 const item = dynamicLabels[i];
 
-                x = Math.max(12, Math.min(w - 12, x));
+                x = Math.max(8, Math.min(w - 8, x));
 
                 ctx.fillStyle = item.fail ? '#fca5a5' : '#86efac';
-                ctx.textAlign = x < cx - 12 ? 'right' : (x > cx + 12 ? 'left' : 'center');
+                ctx.textAlign = x < cx - 8 ? 'right' : (x > cx + 8 ? 'left' : 'center');
                 ctx.fillText(`${item.title}: ${item.val}`, x, y);
                 ctx.fillStyle = '#cbd5e1';
-                ctx.fillText(`(${item.limit}) ${item.fail ? '🔴' : '🟢'}`, x, y + 12);
+                ctx.fillText(`(${item.limit}) ${item.fail ? '🔴' : '🟢'}`, x, y + 10);
             }
 
             const activeText = currentRadarMode === 'NORTH' ? '【北岸】' :
@@ -1225,17 +1016,17 @@
             const activeVeto = isN ? vetoNorth : (isS ? vetoSouth : (vetoNorth && vetoSouth));
             const activeWarn = currentRadarMode === 'COMPARE' && (vetoNorth !== vetoSouth);
 
-            ctx.font = 'bold 12px sans-serif';
+            ctx.font = 'bold 10.5px sans-serif';
             ctx.textAlign = 'center';
             if (activeVeto && !activeWarn) {
                 ctx.fillStyle = '#ef4444';
-                ctx.fillText(`🔴 0.0% 物理 VETO 熔斷 (${activeText}) [時段: ${currentTimelineLabel}]`, cx, cy + R + 45);
+                ctx.fillText(`🔴 0.0% 物理 VETO 熔斷 (${activeText}) [時段: ${currentTimelineLabel}]`, cx, cy + R + 38);
             } else if (activeWarn) {
                 ctx.fillStyle = '#f59e0b';
-                ctx.fillText(`🟡 50.0% 條件機動靠泊 (${activeText}) [時段: ${currentTimelineLabel}]`, cx, cy + R + 45);
+                ctx.fillText(`🟡 50.0% 條件機動靠泊 (${activeText}) [時段: ${currentTimelineLabel}]`, cx, cy + R + 38);
             } else {
                 ctx.fillStyle = '#10b981';
-                ctx.fillText(`🟢 100% 物理安全通過 (${activeText}) [時段: ${currentTimelineLabel}]`, cx, cy + R + 45);
+                ctx.fillText(`🟢 100% 物理安全通過 (${activeText}) [時段: ${currentTimelineLabel}]`, cx, cy + R + 38);
             }
         }
 
@@ -1252,7 +1043,7 @@
             ctx.fillStyle = fillColor;
             ctx.fill();
             ctx.strokeStyle = strokeColor;
-            ctx.lineWidth = 2.2;
+            ctx.lineWidth = 1.8;
             ctx.setLineDash([]);
             ctx.stroke();
 
@@ -1262,7 +1053,7 @@
                 const x = cx + r * Math.cos(angles[i]);
                 const y = cy + r * Math.sin(angles[i]);
                 ctx.beginPath();
-                ctx.arc(x, y, 3.5, 0, Math.PI * 2);
+                ctx.arc(x, y, 2.5, 0, Math.PI * 2);
                 ctx.fillStyle = strokeColor;
                 ctx.fill();
             }
