@@ -104,7 +104,7 @@
                 </div>
             </section>
 
-            <!-- 1. Windy 動態實時地圖（已設定 h-[480px] 達成 2:1 地圖表格比例，並啟用海流/風場流場） -->
+            <!-- 1. Windy 動態實時地圖（設定 h-[480px] 達成 2:1 視角比例，並啟用海流流場） -->
             <details class="card border-[#ef4444] bg-[#180d1a]/90" open>
                 <summary class="card-header !text-red-400 list-none outline-none pb-0 border-b-0 cursor-pointer">
                     <span class="flex items-center gap-1 font-black text-xs">🌀 Windy 動態實時海流/風場地圖 & 行政開設</span>
@@ -141,7 +141,7 @@
                             定位座標：24.843°N 121.952°E (龜山島中心點標註)
                         </div>
 
-                        <!-- 嵌入 Windy 動態地圖：高度擴充至 480px，實現地圖對表格 2:1 比例，並呈現清晰海流變化 -->
+                        <!-- 高度 480px，呈現地圖與預報表格 2:1 黃金視覺比例，並清晰顯現龜山島周邊海流與風向流場 -->
                         <div class="relative w-full rounded border border-slate-800 overflow-hidden bg-[#050a14] h-[480px]">
                             <iframe id="windyFrame"
                                     src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=m%2Fs&zoom=11&overlay=currents&product=ecmwf&level=surface&lat=24.843&lon=121.952&marker=true&detail=true&detailLat=24.843&detailLon=121.952"
@@ -258,7 +258,7 @@
                 </div>
             </section>
 
-            <!-- 5. ⚡ 游擊調度時序與戰術機動任務鏈 -->
+            <!-- 5. ⚡ 游擊調度時序與戰術機動任務鏈 (點擊自動切換海象並重繪剖面與雷達圖) -->
             <section class="card border-[#eab308] bg-[#1a180d]">
                 <div class="card-header !text-amber-400">
                     <span class="flex items-center gap-1 font-bold text-[11.5px]">⚡ 游擊調度時序與戰術機動任務鏈 (點擊切換連動圖場)</span>
@@ -442,6 +442,7 @@
         let animPhase = 0;
         let currentTimelineLabel = "07:30 - 08:30 (晨間預警)";
 
+        // 時序卡片動態連動帶入與全圖場動態渲染
         function applyTimelineLinkage(hs, w, tp, theta, labelText, targetEl) {
             currentTimelineLabel = labelText;
             setTxt('activeTimelineLabel', labelText);
@@ -480,6 +481,7 @@
             initUIControls();
             recalculatePhysicsAndRender();
 
+            // 綁定所有對算與游擊時序卡片之點擊連動監聽
             document.querySelectorAll('.timeline-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const card = e.currentTarget;
@@ -619,6 +621,7 @@
             const fbNorth = deckNorth - crestNorth;
             const fbSouth = deckSouth - crestSouth;
 
+            // 即時更新物理檢核表
             setTxt('cmpHsVal', `${hsNorth.toFixed(2)} m`);
             const hsB = getEl('cmpHsBadge'); if (hsB) hsB.innerHTML = hsNorth > 1.13 ? '<span class="badge badge-veto text-[8px]">🔴 VETO</span>' : '<span class="badge badge-pass text-[8px]">🟢 通過</span>';
 
