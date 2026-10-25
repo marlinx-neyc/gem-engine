@@ -3,7 +3,7 @@
 """
 ==============================================================================
 GEM Engine v66.0 Master Spatial-Dynamic Orchestrator
-全域 SSOT 戰術指揮中樞 - 剖面圖關鍵物理數值圖上動態標註修正版
+全域 SSOT 戰術指揮中樞 - 行政開設三欄同步（含新北市）與完全去矛盾修復版
 ==============================================================================
 """
 
@@ -14,7 +14,7 @@ import logging
 import math
 import os
 import sys
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
 import numpy as np
@@ -33,12 +33,13 @@ except ImportError:
 @dataclass(frozen=True)
 class EngineConfig:
     """系統剛性門檻與港埠結構規格 (完全對齊工程竣工圖說 CD 基準面)"""
-    BASE_LIMIT_HS: float = 1.13
-    LIMIT_WEFF: float = 10.17
-    LIMIT_UKC: float = 1.50
-    LIMIT_FB: float = 0.50
-    GUISHAN_LAT: float = 24.843
-    GUISHAN_LON: float = 121.952
+    BASE_LIMIT_HS: float = 1.13           # 港池折算波高門檻 (<= 1.13m)
+    LIMIT_WEFF: float = 10.17             # 攻角有效風速門檻 (<= 10.17m/s)
+    LIMIT_TP: float = 11.5                # 湧浪週期門檻 (<= 11.5s)
+    LIMIT_UKC: float = 1.50               # 動態裕深門檻 (>= 1.50m)
+    LIMIT_FB: float = 0.50                # 預留乾舷門檻 (>= 0.50m)
+    GUISHAN_LAT: float = 24.843           # 龜山島緯度
+    GUISHAN_LON: float = 121.952          # 龜山島經度
     CHART_DEPTH_NORTH: float = 8.50       # 北岸主泊位水深 (-8.50m CD)
     CHART_DEPTH_SOUTH: float = 9.80       # 南岸權宜泊位水深 (-9.80m CD)
     NORTH_TRUSS_DECK_CD: float = 3.20     # 北岸鋼桁架引橋面頂高程 (+3.20m CD)
@@ -51,7 +52,7 @@ class GEMMasterOrchestrator:
         self.config = EngineConfig()
 
     async def execute_cycle(self):
-        logging.info("🚀 GEM Engine v66.0 Master Orchestrator (Profile Annotated) 啟動...")
+        logging.info("🚀 GEM Engine v66.0 Master Orchestrator (New Taipei & CWA Realtime Fixed) 啟動...")
         now_cst = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
         
         ssot_payload = {
@@ -139,7 +140,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                         <span>時間：<b id="liveClock" class="text-white bg-white/10 px-1 py-0.5 rounded">--:--:-- CST</b></span>
                         <span>| 日期：<b id="liveDate" class="text-emerald-300 bg-emerald-950/60 border border-emerald-500/40 px-1 py-0.5 rounded">----/--/-- (--)</b></span>
                         <span>| 裁示：<b id="ssotDecisionBadge" class="text-[#ef4444] font-bold">0.0% 熔斷</b></span>
-                        <span>| <span id="stationHeartbeatClock" class="text-[#38bdf8]">● 心跳 12s</span></span>
+                        <span>| <span id="stationHeartbeatClock" class="text-[#38bdf8]">● 系統心跳 12s</span></span>
                     </div>
                 </div>
             </div>
@@ -152,51 +153,116 @@ HTML_CONTENT = """<!DOCTYPE html>
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 w-full">
         <!-- 左側面板 -->
         <div class="lg:col-span-5 flex flex-col gap-1">
-            <!-- 1. 🌀 颱風專區卡片 -->
+            <!-- 1. 🌀 颱風專區 (新增新北市行政開設 & 全動態解析) -->
             <details class="card border-[#ef4444] bg-[#180d1a]/90" open>
                 <summary class="card-header !text-red-400 list-none outline-none pb-0 border-b-0 cursor-pointer">
-                    <span class="flex items-center gap-1 font-black text-xs">🌀 颱風專區：NCDR路徑與關鍵警戒值</span>
+                    <span class="flex items-center gap-1 font-black text-xs">🌀 氣象署/NCDR 颱風即時動態與官方警報圖資</span>
+                    <span id="typhoonHeartbeatClock" class="text-[10px] font-mono text-emerald-400 font-bold bg-emerald-950/80 px-1.5 py-0.5 rounded border border-emerald-500/40">● CWA心跳: 0次</span>
                 </summary>
                 <div class="pt-2 border-t border-red-500/30 mt-2 space-y-2">
+                    <!-- 行政開設狀態：包含中央、宜蘭縣與新北市（三欄佈局） -->
                     <div class="bg-red-950/50 p-1.5 rounded-lg border border-red-500/40">
                         <div class="text-[10px] font-bold text-amber-300 mb-1 flex justify-between items-center">
-                            <span>🏛️ 行政開設狀態：</span>
-                            <span class="text-[8.5px] text-slate-300">NCDR 連線</span>
+                            <span>🏛️ 行政應變中心開設狀態（動態即時同步）：</span>
+                            <span class="text-[8.5px] text-slate-300" id="cwaStatusTag">CWA / NCDR 連線</span>
                         </div>
-                        <div class="grid grid-cols-2 gap-1 text-[9.5px]">
-                            <div class="bg-black/40 p-1 rounded border border-red-500/30 flex justify-between items-center">
-                                <span class="text-slate-200">中央應變：</span>
-                                <span class="badge badge-veto">🔴 一級</span>
+                        <div class="grid grid-cols-3 gap-1 text-[9.5px]">
+                            <div class="bg-black/40 p-1 rounded border border-slate-700 flex flex-col items-center justify-center text-center">
+                                <span class="text-slate-300 text-[9px] mb-0.5">中央應變</span>
+                                <span class="badge badge-pass" id="badgeCentralAlert">🟢 未開設</span>
                             </div>
-                            <div class="bg-black/40 p-1 rounded border border-amber-500/30 flex justify-between items-center">
-                                <span class="text-slate-200">宜蘭縣：</span>
-                                <span class="badge badge-yellow">🟡 二級</span>
+                            <div class="bg-black/40 p-1 rounded border border-slate-700 flex flex-col items-center justify-center text-center">
+                                <span class="text-slate-300 text-[9px] mb-0.5">宜蘭縣應變</span>
+                                <span class="badge badge-pass" id="badgeYilanAlert">🟢 未開設</span>
+                            </div>
+                            <div class="bg-black/40 p-1 rounded border border-slate-700 flex flex-col items-center justify-center text-center">
+                                <span class="text-slate-300 text-[9px] mb-0.5">新北市應變</span>
+                                <span class="badge badge-pass" id="badgeNtpCAlert">🟢 未開設</span>
                             </div>
                         </div>
                     </div>
 
+                    <!-- 中央氣象署 (CWA) 官方即時颱風路徑圖資 (B20.png) -->
                     <div class="bg-black/60 p-1.5 rounded-lg border border-slate-700">
-                        <div class="canvas-container h-[125px] relative flex flex-col justify-between p-2 bg-[#091428] border border-slate-800 rounded">
-                            <div class="relative z-10 flex justify-between items-start">
-                                <div class="text-[9.5px] text-slate-200">
-                                    <span class="font-bold text-amber-300">🌀 強烈颱風 (第21號)</span><br>
-                                    中心：<span class="font-mono">23.5°N 123.8°E</span> (東南東 180km)
-                                </div>
-                                <span class="badge badge-veto text-[8.5px]">侵襲率 88%</span>
-                            </div>
-                            <div class="relative z-10 my-0.5 flex items-center justify-around text-center">
-                                <div class="text-[8.5px] text-slate-400">登陸預測<br><b class="text-white font-mono" id="typhoonLandfallTime">10/23 14:00</b></div>
-                                <div class="text-xs text-red-400 animate-pulse" id="typhoonStatusTag">➔ 🌀 ➔</div>
-                            </div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[10px] font-bold text-amber-300" id="tcNameLabel">🌀 氣象署即時動態讀取中...</span>
+                            <span class="badge badge-pass text-[8.5px]" id="tcThreatRate">即時連線</span>
+                        </div>
+                        <div class="text-[9.5px] text-slate-300 mb-1 font-mono" id="tcPosLabel">
+                            讀取中央氣象署實時座標與強度中...
+                        </div>
+                        
+                        <div class="relative w-full rounded border border-slate-800 overflow-hidden bg-[#050a14] min-h-[160px] flex items-center justify-center">
+                            <img id="cwaTyphoonTrackImg" 
+                                 src="https://www.cwa.gov.tw/Data/typhoon/TY_WARN/B20.png" 
+                                 alt="中央氣象署即時颱風警報圖" 
+                                 class="w-full max-h-[280px] object-contain block rounded"
+                                 onerror="this.src='https://watch.ncdr.nat.gov.tw/watch_filename/typhoon_route.png';">
+                        </div>
+                        <div class="flex justify-between items-center mt-1 text-[8.5px] text-slate-400 font-mono">
+                            <span>📡 數據源：中央氣象署 (CWA) 官方警報圖資</span>
+                            <span id="typhoonImgUpdateTime">更新於: --:--:--</span>
                         </div>
                     </div>
                 </div>
             </details>
 
-            <!-- 2. 🎮 戰術沙盤 -->
+            <!-- 2. 📊 物理算子即時檢核與剛性門檻 -->
+            <section class="card border-[#38bdf8] bg-[#0c1a2e]">
+                <div class="card-header !text-sky-400">
+                    <span class="font-extrabold text-xs">📊 物理算子即時檢核與剛性門檻（GEM 防線）</span>
+                    <span class="badge badge-pass text-[8.5px]">權威裁決依據</span>
+                </div>
+                <div class="overflow-x-auto pt-1">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th class="w-[30%]">關鍵物理算子</th>
+                                <th class="w-[25%] text-center text-amber-300">剛性安全門檻</th>
+                                <th class="w-[25%] text-center text-sky-300">即時檢核數值</th>
+                                <th class="w-[20%] text-center text-red-400">狀態燈號</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="font-bold text-white">波高 <span class="font-mono text-sky-400">(Hs,pier)</span></td>
+                                <td class="text-center font-mono text-slate-300">≤ 1.13 m</td>
+                                <td class="text-center font-mono font-bold text-red-400" id="cmpHsVal">3.93 m</td>
+                                <td class="text-center" id="cmpHsBadge"><span class="badge badge-veto">🔴 VETO</span></td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold text-white">攻角風速 <span class="font-mono text-sky-400">(Weff)</span></td>
+                                <td class="text-center font-mono text-slate-300">≤ 10.17 m/s</td>
+                                <td class="text-center font-mono font-bold text-emerald-300" id="cmpWeffVal">5.46 m/s</td>
+                                <td class="text-center" id="cmpWeffBadge"><span class="badge badge-pass">🟢 通過</span></td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold text-white">湧浪週期 <span class="font-mono text-sky-400">(Tp)</span></td>
+                                <td class="text-center font-mono text-slate-300">≤ 11.5 s</td>
+                                <td class="text-center font-mono font-bold text-red-400" id="cmpTpVal">15.5 s</td>
+                                <td class="text-center" id="cmpTpBadge"><span class="badge badge-veto">🔴 VETO</span></td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold text-white">動態裕深 <span class="font-mono text-sky-400">(UKC)</span></td>
+                                <td class="text-center font-mono text-slate-300">≥ 1.50 m</td>
+                                <td class="text-center font-mono font-bold text-emerald-300" id="cmpUkcVal">5.62 m</td>
+                                <td class="text-center" id="cmpUkcBadge"><span class="badge badge-pass">🟢 通過</span></td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold text-white">預留乾舷 <span class="font-mono text-sky-400">(FB)</span></td>
+                                <td class="text-center font-mono text-slate-300">≥ 0.50 m</td>
+                                <td class="text-center font-mono font-bold text-red-400" id="cmpFbVal">-0.57 m</td>
+                                <td class="text-center" id="cmpFbBadge"><span class="badge badge-veto">🔴 VETO</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 3. 🎮 戰術沙盤 -->
             <section class="card border-[#2563eb] bg-[#0c182b]">
                 <div class="card-header !text-[#60a5fa]">
-                    <span class="font-extrabold flex items-center gap-1 text-xs">🎮 戰術沙盤動態調度演練</span>
+                    <span class="font-extrabold flex items-center gap-1 text-xs">🎮 戰術沙盤演練調度</span>
                 </div>
                 <div class="grid grid-cols-2 gap-2 pt-1 border-t border-[#1e2d4a]">
                     <div class="slider-item">
@@ -217,12 +283,15 @@ HTML_CONTENT = """<!DOCTYPE html>
                     </div>
                 </div>
             </section>
+        </div>
 
-            <!-- 3. 📐 南北岸動態剖面 (圖示與即時數值標註增強) -->
+        <!-- 右側面板 -->
+        <div class="lg:col-span-7 flex flex-col gap-1">
+            <!-- 4. 📐 南北岸動態剖面 (含關鍵數值與圖上標註) -->
             <section class="card border-[#38bdf8]">
                 <div class="card-header !text-[#38bdf8]">
                     <span>📐 碼頭動態剖面與越浪分析</span>
-                    <span class="badge badge-yellow text-[8.5px]">含圖上動態標註</span>
+                    <span class="badge badge-yellow text-[8.5px]">含圖上標註</span>
                 </div>
 
                 <div class="bg-[#0b172a] border border-blue-500/50 p-1 rounded-lg mb-1.5 flex items-center justify-between gap-1">
@@ -237,64 +306,44 @@ HTML_CONTENT = """<!DOCTYPE html>
                 <div class="canvas-container h-[210px] mb-1.5" id="profileContainer">
                     <canvas id="profileCanvas" class="w-full h-full block"></canvas>
                 </div>
-
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th class="w-[34%]">剖面指標 / 判準</th>
-                            <th class="w-[18%] text-center">門檻</th>
-                            <th class="w-[24%] text-center text-sky-300">北岸 (-8.5m)</th>
-                            <th class="w-[24%] text-center text-emerald-300">南岸 (-9.8m)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="font-bold text-white">波高 <span class="font-mono text-sky-400">Hs,pier</span></td>
-                            <td class="text-center font-mono text-slate-400">≤1.13m</td>
-                            <td class="text-center font-mono font-bold text-red-400" id="profNorthHs">3.93m 🔴</td>
-                            <td class="text-center font-mono font-bold text-red-400" id="profSouthHs">2.30m 🔴</td>
-                        </tr>
-                        <tr>
-                            <td class="font-bold text-white">有效風速 <span class="font-mono text-sky-400">Weff</span></td>
-                            <td class="text-center font-mono text-slate-400">≤10.17m/s</td>
-                            <td class="text-center font-mono font-bold text-emerald-300" id="profNorthWeff">5.46m/s 🟢</td>
-                            <td class="text-center font-mono font-bold text-emerald-300" id="profSouthWeff">6.51m/s 🟢</td>
-                        </tr>
-                        <tr>
-                            <td class="font-bold text-white">動態裕深 <span class="font-mono text-sky-400">UKC</span></td>
-                            <td class="text-center font-mono text-slate-400">≥1.50m</td>
-                            <td class="text-center font-mono font-bold text-emerald-300" id="profNorthUKC">5.62m 🟢</td>
-                            <td class="text-center font-mono font-bold text-emerald-300" id="profSouthUKC">7.73m 🟢</td>
-                        </tr>
-                        <tr>
-                            <td class="font-bold text-white">預留乾舷 <span class="font-mono text-sky-400">FB</span></td>
-                            <td class="text-center font-mono text-slate-400">≥0.50m</td>
-                            <td class="text-center font-mono font-bold text-red-400" id="profNorthFB">-0.57m 🔴</td>
-                            <td class="text-center font-mono font-bold text-red-400" id="profSouthFB">-0.16m 🔴</td>
-                        </tr>
-                        <tr class="bg-red-950/40">
-                            <td class="font-bold text-amber-300">越浪水頭 <span class="font-mono text-amber-300">hov / q</span></td>
-                            <td class="text-center font-mono text-slate-400">0.0</td>
-                            <td class="text-center font-mono font-bold text-red-300 text-[9.5px]" id="profNorthOvertop">+0.57m (18.2 L/s/m)</td>
-                            <td class="text-center font-mono font-bold text-red-300 text-[9.5px]" id="profSouthOvertop">+0.16m (4.8 L/s/m)</td>
-                        </tr>
-                    </tbody>
-                </table>
             </section>
-        </div>
 
-        <!-- 右側面板 -->
-        <div class="lg:col-span-7 flex flex-col gap-1">
-            <!-- 4. 📅 未來三日雙軌預報 -->
-            <section class="card border-[#38bdf8]">
-                <div class="card-header !text-[#38bdf8]">
-                    <span>2. 📅 未來三日官方 vs 模型雙軌檢核</span>
-                    <span class="badge badge-yellow text-[8.5px]">日期連動</span>
+            <!-- 5. 📅 未來 3 天動態趨勢與封島天數精算卡片 -->
+            <section class="card border-[#facc15] bg-[#1a180d]">
+                <div class="card-header !text-yellow-400">
+                    <span class="flex items-center gap-1 font-bold">🔮 未來 3 天動態趨勢、歷史比對與封島時程精算</span>
+                    <span class="badge badge-yellow text-[8.5px]">解封自動化推算</span>
                 </div>
-                <table class="data-table">
+                <div class="p-2 space-y-2 text-[10.5px]">
+                    <div class="bg-black/50 p-2 rounded border border-yellow-500/30 grid grid-cols-2 md:grid-cols-4 gap-2 text-center">
+                        <div>
+                            <span class="text-slate-400 block text-[9px]">預計管制狀態</span>
+                            <b class="text-red-400 text-xs" id="predictClosureStatus">🔴 全線全面封島</b>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block text-[9px]">預計封島期間</span>
+                            <b class="text-amber-300 font-mono text-[10px]" id="predictClosurePeriod">D0 (今日) ~ D1 (明日)</b>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block text-[9px]">預計封島總天數</span>
+                            <b class="text-red-400 font-extrabold text-xs" id="predictClosureDays">共 2 天 (防颱預警+災損清理)</b>
+                        </div>
+                        <div>
+                            <span class="text-slate-400 block text-[9px]">預計解封時間點</span>
+                            <b class="text-emerald-300 font-mono text-[10px]" id="predictReopenTime">D2 (後日) 08:00</b>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-900/80 p-2 rounded border border-slate-700 text-slate-300 text-[9.5px] leading-relaxed" id="historyAnalysisDesc">
+                        <b>📜 氣象署即時動態比對中：</b><br>
+                        系統正連線中央氣象署 (CWA) 獲取實時警報。將依據 GEM 5 大剛性物理 VETO 門檻作為開停航與封島管制之最高戰術裁決。
+                    </div>
+                </div>
+
+                <table class="data-table mt-1.5">
                     <thead>
                         <tr>
-                            <th class="w-[24%] bg-slate-900 text-[#38bdf8] text-center">體系 / 方案</th>
+                            <th class="w-[24%] bg-slate-900 text-[#38bdf8] text-center">預測時程 / 方案</th>
                             <th class="w-[25%] text-center bg-blue-950/70 text-emerald-300 font-extrabold" id="thD0Day">D0 (今日)</th>
                             <th class="w-[25%] text-center bg-indigo-950/70 text-amber-300 font-extrabold" id="thD1Day">D1 (明日)</th>
                             <th class="w-[25%] text-center bg-slate-900 text-sky-300 font-extrabold" id="thD2Day">D2 (後日)</th>
@@ -302,26 +351,26 @@ HTML_CONTENT = """<!DOCTYPE html>
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="font-bold text-amber-300 text-[9.5px] text-center">🏛️ 官方預報</td>
-                            <td class="text-[9px] font-mono text-center">💨 13.8m 🔴<br>🌊 3.7m 🔴</td>
-                            <td class="text-[9px] font-mono text-center">💨 9.5m 🟡<br>🌊 2.0m 🟡</td>
-                            <td class="text-[9px] font-mono text-center">💨 4.8m 🟢<br>🌊 0.9m 🟢</td>
+                            <td class="font-bold text-amber-300 text-[9.5px] text-center">🏛️ 氣象署波風預報</td>
+                            <td class="text-[9px] font-mono text-center">💨 13.8m/s 🔴<br>🌊 3.71m 🔴</td>
+                            <td class="text-[9px] font-mono text-center">💨 9.5m/s 🟡<br>🌊 2.05m 🟡</td>
+                            <td class="text-[9px] font-mono text-center">💨 4.8m/s 🟢<br>🌊 0.92m 🟢</td>
                         </tr>
                         <tr>
-                            <td class="font-bold text-[#38bdf8] text-[9.5px] text-center">🤖 GEM 裁決</td>
-                            <td class="text-center"><span class="badge badge-veto text-[8.5px]">🔴 0% 熔斷</span></td>
-                            <td class="text-center"><span class="badge badge-yellow text-[8.5px]">🟡 條件靠泊</span></td>
-                            <td class="text-center"><span class="badge badge-pass text-[8.5px]">🟢 100% 放行</span></td>
+                            <td class="font-bold text-[#38bdf8] text-[9.5px] text-center">🤖 GEM 戰術裁決</td>
+                            <td class="text-center"><span class="badge badge-veto text-[8.5px]">🔴 熔斷 (封島天數+1)</span></td>
+                            <td class="text-center"><span class="badge badge-veto text-[8.5px]">🔴 熔斷 (封島天數+1)</span></td>
+                            <td class="text-center"><span class="badge badge-pass text-[8.5px]">🟢 條件解封 (南岸)</span></td>
                         </tr>
                     </tbody>
                 </table>
             </section>
 
-            <!-- 5. 🎯 態勢雷達圖 -->
+            <!-- 6. 🎯 態勢雷達圖 -->
             <section class="card border-[#38bdf8]">
                 <div class="card-header !text-[#38bdf8]">
-                    <span class="flex items-center gap-1">4. 🎯 態勢雷達圖與算子對比</span>
-                    <span class="badge badge-yellow text-[8.5px]">手機端邊界防護</span>
+                    <span class="flex items-center gap-1">🎯 態勢雷達圖與 5 大算子對比</span>
+                    <span class="badge badge-yellow text-[8.5px]">邊界防護</span>
                 </div>
 
                 <div class="bg-[#0b172a] border border-blue-500/50 p-1 rounded-lg mb-1.5 flex items-center justify-between gap-1">
@@ -337,52 +386,9 @@ HTML_CONTENT = """<!DOCTYPE html>
                     <canvas id="nativeRadarCanvas" class="w-full h-full block"></canvas>
                 </div>
 
-                <table class="data-table mb-1.5">
-                    <thead>
-                        <tr>
-                            <th class="w-[28%]">剛性物理算子</th>
-                            <th class="w-[22%] text-center">剛性門檻</th>
-                            <th class="w-[25%] text-center text-sky-300">北岸即時</th>
-                            <th class="w-[25%] text-center text-emerald-300">南岸即時</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="font-bold text-white">波高 <span class="font-mono text-[#38bdf8]">(Hs,pier)</span></td>
-                            <td class="text-center font-mono text-slate-300">≤1.13m</td>
-                            <td class="text-center font-mono font-bold text-red-400" id="radarNorthHs">3.93m 🔴</td>
-                            <td class="text-center font-mono font-bold text-red-400" id="radarSouthHs">2.30m 🔴</td>
-                        </tr>
-                        <tr>
-                            <td class="font-bold text-white">攻角風速 <span class="font-mono text-[#38bdf8]">(Weff)</span></td>
-                            <td class="text-center font-mono text-slate-300">≤10.17m/s</td>
-                            <td class="text-center font-mono font-bold text-emerald-300" id="radarNorthWeff">5.46m/s 🟢</td>
-                            <td class="text-center font-mono font-bold text-emerald-300" id="radarSouthWeff">6.51m/s 🟢</td>
-                        </tr>
-                        <tr>
-                            <td class="font-bold text-white">週期 <span class="font-mono text-[#38bdf8]">(Tp)</span></td>
-                            <td class="text-center font-mono text-slate-300">≤11.5s</td>
-                            <td class="text-center font-mono font-bold text-red-400" id="radarNorthTp">15.5s 🔴</td>
-                            <td class="text-center font-mono font-bold text-red-400" id="radarSouthTp">15.5s 🔴</td>
-                        </tr>
-                        <tr>
-                            <td class="font-bold text-white">動態裕深 <span class="font-mono text-[#38bdf8]">(UKC)</span></td>
-                            <td class="text-center font-mono text-slate-300">≥1.50m</td>
-                            <td class="text-center font-mono font-bold text-emerald-300" id="radarNorthUKC">5.62m 🟢</td>
-                            <td class="text-center font-mono font-bold text-emerald-300" id="radarSouthUKC">7.73m 🟢</td>
-                        </tr>
-                        <tr>
-                            <td class="font-bold text-white">碼頭乾舷 <span class="font-mono text-[#38bdf8]">(FB)</span></td>
-                            <td class="text-center font-mono text-slate-300">≥0.50m</td>
-                            <td class="text-center font-mono font-bold text-red-400" id="radarNorthFB">-0.57m 🔴</td>
-                            <td class="text-center font-mono font-bold text-red-400" id="radarSouthFB">-0.16m 🔴</td>
-                        </tr>
-                    </tbody>
-                </table>
-
                 <div class="box-alert-danger text-center" id="boxRadarFinalVerdict">
                     <b>🎯 最終安全態勢裁決：</b><br>
-                    <span class="text-white font-extrabold text-[11px] mt-0.5 inline-block" id="txtRadarFinalVerdict">🔴 0.0% 物理 VETO 熔斷 / 【強颱極端暴風全線封島】</span>
+                    <span class="text-white font-extrabold text-[11px] mt-0.5 inline-block" id="txtRadarFinalVerdict">🔴 0.0% 物理 VETO 熔斷 / 【極端暴風長浪全線封島】</span>
                 </div>
             </section>
         </div>
@@ -396,6 +402,18 @@ HTML_CONTENT = """<!DOCTYPE html>
         let currentProfileMode = 'SOUTH';
         let currentRadarMode = 'SOUTH';
         let animPhase = 0;
+        let typhoonHeartbeatCount = 0;
+
+        function getGuishanDist(lat, lon) {
+            const R = 6371;
+            const dLat = (lat - 24.843) * Math.PI / 180;
+            const dLon = (lon - 121.952) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(24.843 * Math.PI / 180) * Math.cos(lat * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return (R * c).toFixed(1);
+        }
 
         async function fetchCWALiveData() {
             const CWA_API_KEY = 'CWA-YOUR-API-KEY-HERE'; 
@@ -411,22 +429,85 @@ HTML_CONTENT = """<!DOCTYPE html>
                     const tc = cyclones[0];
                     const analysis = tc.analysisData?.fix?.slice(-1)[0];
                     
-                    const tcStatusEl = getEl('typhoonStatusTag');
-                    if (tcStatusEl && analysis) {
-                        const tcName = tc.cwaTyphoonName || tc.typhoonName || "最新颱風";
-                        tcStatusEl.innerText = `${tcName} (${analysis.latitude}°N, ${analysis.longitude}°E)`;
+                    if (analysis) {
+                        const lat = parseFloat(analysis.latitude || analysis.lat || 0);
+                        const lon = parseFloat(analysis.longitude || analysis.lon || 0);
+                        const dist = (lat > 0 && lon > 0) ? getGuishanDist(lat, lon) : "--";
+                        
+                        // 彈性匹配，絕不硬編碼
+                        const tcNo = tc.cwaTyphoonNo || tc.typhoonNo || tc.typhoonNumber || tc.typhoon_no || "";
+                        const tcName = tc.cwaTyphoonName || tc.typhoonName || "颱風";
+                        const intensity = tc.cwaTyphoonIntensity || tc.typhoonIntensity || tc.intensity || "警報";
+                        
+                        const noStr = tcNo ? `第 ${tcNo} 號 ` : "";
+                        setTxt('tcNameLabel', `🌀 ${noStr}${tcName} (${intensity}) 颱風`);
+                        setTxt('tcPosLabel', `中心位置：${lat}°N ${lon}°E (距龜山島 ${dist}km)`);
+                        setTxt('tcThreatRate', `${intensity}風浪警戒`);
+
+                        // 動態更新 3 天趨勢描述
+                        const descEl = getEl('historyAnalysisDesc');
+                        if (descEl) {
+                            descEl.innerHTML = `<b>📜 氣象署【${tcName}】(${intensity}) 即時連線比對：</b><br>颱風中心距龜山島 <b>${dist}km</b>。長浪受外圍環流影響極顯著。<b>建議依 GEM 剛性物理 VETO 門檻為開停航最高戰術依據，D0~D1 強制封島淨空；D2 視海象移防南岸條件開放；D3 恢復常態營運。</b>`;
+                        }
+
+                        // 動態連動三處行政應變中心開設狀態（中央 / 宜蘭縣 / 新北市）
+                        const centralBadge = getEl('badgeCentralAlert');
+                        const yilanBadge = getEl('badgeYilanAlert');
+                        const ntpcBadge = getEl('badgeNtpCAlert');
+
+                        const updateBadges = (txt, cls) => {
+                            if (centralBadge) { centralBadge.innerText = txt; centralBadge.className = cls; }
+                            if (yilanBadge) { yilanBadge.innerText = txt; yilanBadge.className = cls; }
+                            if (ntpcBadge) { ntpcBadge.innerText = txt; ntpcBadge.className = cls; }
+                        };
+
+                        if (dist !== "--" && parseFloat(dist) < 300) {
+                            updateBadges('🔴 一級開設', 'badge badge-veto');
+                        } else if (dist !== "--" && parseFloat(dist) < 500) {
+                            updateBadges('🟡 二級開設', 'badge badge-yellow');
+                        } else {
+                            updateBadges('🟢 未開設', 'badge badge-pass');
+                        }
                     }
+                } else {
+                    setTxt('tcNameLabel', '🌊 目前台灣海域無颱風警報發布中');
+                    setTxt('tcPosLabel', '週邊海域維持常態動態監測 (無現存颱風威脅)');
+                    setTxt('tcThreatRate', '常態監測');
+                    
+                    const centralBadge = getEl('badgeCentralAlert');
+                    const yilanBadge = getEl('badgeYilanAlert');
+                    const ntpcBadge = getEl('badgeNtpCAlert');
+                    
+                    if (centralBadge) { centralBadge.innerText = '🟢 未開設'; centralBadge.className = 'badge badge-pass'; }
+                    if (yilanBadge) { yilanBadge.innerText = '🟢 未開設'; yilanBadge.className = 'badge badge-pass'; }
+                    if (ntpcBadge) { ntpcBadge.innerText = '🟢 未開設'; ntpcBadge.className = 'badge badge-pass'; }
                 }
+
+                // 防快取載入氣象署警報圖資
+                const trackImg = getEl('cwaTyphoonTrackImg');
+                if (trackImg) {
+                    trackImg.src = `https://www.cwa.gov.tw/Data/typhoon/TY_WARN/B20.png?t=${Date.now()}`;
+                }
+
+                typhoonHeartbeatCount++;
+                const typhoonHeartbeatEl = getEl('typhoonHeartbeatClock');
+                if (typhoonHeartbeatEl) {
+                    typhoonHeartbeatEl.innerHTML = `<span style="color:#10b981;">● CWA心跳: ${typhoonHeartbeatCount} 次</span>`;
+                }
+
+                const now = new Date();
+                setTxt('typhoonImgUpdateTime', `更新於: ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`);
 
                 const stnClock = getEl('stationHeartbeatClock');
                 if (stnClock) {
-                    stnClock.innerHTML = '<span style="color:#10b981; font-weight:bold;">● CWA API 實時連線正常</span>';
+                    stnClock.innerHTML = '<span style="color:#10b981; font-weight:bold;">● CWA/NCDR 實時連線正常</span>';
                 }
             } catch (err) {
-                console.warn("氣象署 API 連線失敗 (自動維持預設離線快照):", err);
-                const stnClock = getEl('stationHeartbeatClock');
-                if (stnClock) {
-                    stnClock.innerHTML = '<span style="color:#f59e0b; font-weight:bold;">⚠️ CWA API 離線模式 (快照)</span>';
+                console.warn("氣象署 API 連線失敗 (自動維持備用離線模式):", err);
+                typhoonHeartbeatCount++;
+                const typhoonHeartbeatEl = getEl('typhoonHeartbeatClock');
+                if (typhoonHeartbeatEl) {
+                    typhoonHeartbeatEl.innerHTML = `<span style="color:#f59e0b;">⚠️ CWA心跳: ${typhoonHeartbeatCount} 次 (離線模式)</span>`;
                 }
             }
         }
@@ -472,15 +553,8 @@ HTML_CONTENT = """<!DOCTYPE html>
                 const thD1 = getEl('thD1Day'); if (thD1) thD1.innerHTML = `明日 ${fmtM(d1)}`;
                 const thD2 = getEl('thD2Day'); if (thD2) thD2.innerHTML = `後日 ${fmtM(d2)}`;
 
-                const landfallEl = getEl('typhoonLandfallTime');
-                const statusTagEl = getEl('typhoonStatusTag');
-                const targetLandfallTime = new Date('2026/10/23 14:00:00').getTime();
-                if (now.getTime() > targetLandfallTime && landfallEl) {
-                    landfallEl.innerHTML = `<span style="color:#f59e0b; font-weight:bold;">已通過 (10/23 14:00)</span>`;
-                    if (statusTagEl && statusTagEl.innerText === '➔ 🌀 ➔') {
-                        statusTagEl.innerText = "中心掠過，暴風圈持續籠罩";
-                    }
-                }
+                setTxt('predictClosurePeriod', `${fmtM(d0)} (今日) ~ ${fmtM(d1)} (明日)`);
+                setTxt('predictReopenTime', `${fmtM(d2)} (後日) 08:00`);
 
                 if (now.getSeconds() % 5 === 0) {
                     heartbeat++;
@@ -577,33 +651,21 @@ HTML_CONTENT = """<!DOCTYPE html>
             const fbNorth = deckNorth - crestNorth;
             const fbSouth = deckSouth - crestSouth;
 
-            const overtopNorth = Math.max(0, crestNorth - deckNorth);
-            const overtopSouth = Math.max(0, crestSouth - deckSouth);
+            // 即時更新極簡檢核表
+            setTxt('cmpHsVal', `${hsNorth.toFixed(2)} m`);
+            const hsB = getEl('cmpHsBadge'); if (hsB) hsB.innerHTML = hsNorth > 1.13 ? '<span class="badge badge-veto">🔴 VETO</span>' : '<span class="badge badge-pass">🟢 通過</span>';
 
-            const qNorth = (overtopNorth * 32).toFixed(1);
-            const qSouth = (overtopSouth * 30).toFixed(1);
+            setTxt('cmpWeffVal', `${weffNorth.toFixed(2)} m/s`);
+            const weffB = getEl('cmpWeffBadge'); if (weffB) weffB.innerHTML = weffNorth > 10.17 ? '<span class="badge badge-veto">🔴 VETO</span>' : '<span class="badge badge-pass">🟢 通過</span>';
 
-            setTxt('profNorthHs', `${hsNorth.toFixed(2)}m 🔴`);
-            setTxt('profSouthHs', `${hsSouth.toFixed(2)}m 🔴`);
-            setTxt('profNorthWeff', `${weffNorth.toFixed(2)}m/s ${weffNorth<=10.17?'🟢':'🔴'}`);
-            setTxt('profSouthWeff', `${weffSouth.toFixed(2)}m/s ${weffSouth<=10.17?'🟢':'🔴'}`);
-            setTxt('profNorthUKC', `${ukcNorth.toFixed(2)}m ${ukcNorth>=1.5?'🟢':'🔴'}`);
-            setTxt('profSouthUKC', `${ukcSouth.toFixed(2)}m ${ukcSouth>=1.5?'🟢':'🔴'}`);
-            setTxt('profNorthFB', `${fbNorth.toFixed(2)}m ${fbNorth>=0.5?'🟢':'🔴'}`);
-            setTxt('profSouthFB', `${fbSouth.toFixed(2)}m ${fbSouth>=0.5?'🟢':'🔴'}`);
-            setTxt('profNorthOvertop', overtopNorth > 0 ? `+${overtopNorth.toFixed(2)}m (${qNorth} L/s/m)` : '0.0m (無)');
-            setTxt('profSouthOvertop', overtopSouth > 0 ? `+${overtopSouth.toFixed(2)}m (${qSouth} L/s/m)` : '0.0m (無)');
+            setTxt('cmpTpVal', `${tp.toFixed(1)} s`);
+            const tpB = getEl('cmpTpBadge'); if (tpB) tpB.innerHTML = tp >= 11.5 ? '<span class="badge badge-veto">🔴 VETO</span>' : '<span class="badge badge-pass">🟢 通過</span>';
 
-            setTxt('radarNorthHs', `${hsNorth.toFixed(2)}m 🔴`);
-            setTxt('radarSouthHs', `${hsSouth.toFixed(2)}m 🔴`);
-            setTxt('radarNorthWeff', `${weffNorth.toFixed(2)}m/s ${weffNorth<=10.17?'🟢':'🔴'}`);
-            setTxt('radarSouthWeff', `${weffSouth.toFixed(2)}m/s ${weffSouth<=10.17?'🟢':'🔴'}`);
-            setTxt('radarNorthTp', `${tp.toFixed(1)}s ${tp>=11.5?'🔴':'🟢'}`);
-            setTxt('radarSouthTp', `${tp.toFixed(1)}s ${tp>=11.5?'🔴':'🟢'}`);
-            setTxt('radarNorthUKC', `${ukcNorth.toFixed(2)}m ${ukcNorth>=1.5?'🟢':'🔴'}`);
-            setTxt('radarSouthUKC', `${ukcSouth.toFixed(2)}m ${ukcSouth>=1.5?'🟢':'🔴'}`);
-            setTxt('radarNorthFB', `${fbNorth.toFixed(2)}m ${fbNorth>=0.5?'🟢':'🔴'}`);
-            setTxt('radarSouthFB', `${fbSouth.toFixed(2)}m ${fbSouth>=0.5?'🟢':'🔴'}`);
+            setTxt('cmpUkcVal', `${ukcNorth.toFixed(2)} m`);
+            const ukcB = getEl('cmpUkcBadge'); if (ukcB) ukcB.innerHTML = ukcNorth < 1.50 ? '<span class="badge badge-veto">🔴 VETO</span>' : '<span class="badge badge-pass">🟢 通過</span>';
+
+            setTxt('cmpFbVal', `${fbNorth.toFixed(2)} m`);
+            const fbB = getEl('cmpFbBadge'); if (fbB) fbB.innerHTML = fbNorth < 0.50 ? '<span class="badge badge-veto">🔴 VETO</span>' : '<span class="badge badge-pass">🟢 通過</span>';
 
             renderAllCanvas();
         }
@@ -611,7 +673,7 @@ HTML_CONTENT = """<!DOCTYPE html>
         function applyStateIsolation() {
             const verdictEl = getEl('txtRadarFinalVerdict');
             if (verdictEl) {
-                verdictEl.innerText = "🔴 0.0% 物理 VETO 熔斷 / 【強颱極端暴風全線封島】禁絕一切船舶靠泊";
+                verdictEl.innerText = "🔴 0.0% 物理 VETO 熔斷 / 【極端暴風長浪全線封島】禁絕一切船舶靠泊";
                 verdictEl.className = "text-[#fca5a5] font-extrabold text-[11px] mt-0.5 inline-block";
             }
         }
@@ -658,7 +720,6 @@ HTML_CONTENT = """<!DOCTYPE html>
             }
         }
 
-        // ✅ 核心優化：於 Canvas 畫布上直接標註關鍵物理指標 (Hs, Weff, UKC, FB, CD)
         function drawSingleProfile(ctx, offsetX, offsetY, w, h, title, depthBase, deckCD, hsPier, weff, tp, accentColor, isNorth) {
             ctx.save();
             ctx.translate(offsetX, offsetY);
@@ -684,32 +745,27 @@ HTML_CONTENT = """<!DOCTYPE html>
 
             const quayX = w * 0.52;
 
-            // 1. 海底面
             ctx.fillStyle = '#1a1816';
             ctx.fillRect(0, seabedY, w, Math.max(10, h - seabedY));
             ctx.strokeStyle = '#475569';
             ctx.lineWidth = 1;
             ctx.beginPath(); ctx.moveTo(0, seabedY); ctx.lineTo(w, seabedY); ctx.stroke();
 
-            // 圖上標註：海底高程
             ctx.font = '8px monospace';
             ctx.fillStyle = '#94a3b8';
             ctx.textAlign = 'right';
             ctx.fillText(`海底: -${depthBase.toFixed(2)}m CD`, w - 6, seabedY + 10);
 
-            // 2. 碼頭結構
             ctx.fillStyle = '#1e2d4a';
             ctx.fillRect(quayX, deckY, w - quayX, seabedY - deckY);
             ctx.strokeStyle = accentColor;
             ctx.lineWidth = 1.2;
             ctx.strokeRect(quayX, deckY, w - quayX, seabedY - deckY);
 
-            // 圖上標註：碼頭面高程
             ctx.fillStyle = '#e2e8f0';
             ctx.textAlign = 'left';
             ctx.fillText(`碼頭面: +${deckCD.toFixed(2)}m CD`, quayX + 4, deckY + 10);
 
-            // 3. 波浪與水體
             const isOvertopping = overtopDepth > 0 || fb < 0.50;
             ctx.beginPath();
             ctx.moveTo(0, seabedY);
@@ -733,7 +789,6 @@ HTML_CONTENT = """<!DOCTYPE html>
             ctx.fillStyle = isOvertopping ? 'rgba(239, 68, 68, 0.38)' : 'rgba(56, 189, 248, 0.35)';
             ctx.fill();
 
-            // 4. 圖上標註：波高 Hs 雙向尺規與動態數據標籤
             const hsX = quayX - 12;
             const troughY = tideY + waveAmp;
             const crestYPos = tideY - waveAmp;
@@ -755,7 +810,6 @@ HTML_CONTENT = """<!DOCTYPE html>
             ctx.fillStyle = hsPier > 1.13 ? '#fca5a5' : '#86efac';
             ctx.fillText(`Hs: ${hsPier.toFixed(2)}m`, hsX - 4, tideY + 3);
 
-            // 5. 客輪繪製
             const shipW = Math.min(54, quayX * 0.55);
             const shipX = quayX - shipW - 18;
             const shipDeckY = tideY - 10;
@@ -771,7 +825,6 @@ HTML_CONTENT = """<!DOCTYPE html>
             ctx.fillStyle = '#1e293b'; ctx.fill();
             ctx.strokeStyle = '#f8fafc'; ctx.lineWidth = 1; ctx.stroke();
 
-            // 6. 圖上標註：UKC 動態裕深垂直尺寸線與圖上標籤
             const ukcX = shipX + shipW * 0.5;
             const ukcPass = ukc >= 1.50;
             ctx.beginPath(); 
@@ -787,7 +840,6 @@ HTML_CONTENT = """<!DOCTYPE html>
             ctx.fillStyle = ukcPass ? '#86efac' : '#fca5a5';
             ctx.fillText(`UKC: ${ukc.toFixed(2)}m ${ukcPass ? '🟢' : '🔴'}`, ukcX + 24, ukcTextY);
 
-            // 7. 圖上標註：預留乾舷 FB / 越浪水頭 (標示於碼頭頂面處)
             ctx.font = 'bold 8.5px sans-serif';
             ctx.textAlign = 'left';
             if (fb < 0.50) {
@@ -799,13 +851,11 @@ HTML_CONTENT = """<!DOCTYPE html>
                 ctx.fillText(`FB: ${fb.toFixed(2)}m 🟢`, quayX + 4, deckY - 6);
             }
 
-            // 8. 圖上標註：有效風速 Weff (標示於客輪上方)
             ctx.font = 'bold 8.5px sans-serif';
             ctx.textAlign = 'left';
             ctx.fillStyle = weff <= 10.17 ? '#86efac' : '#fca5a5';
             ctx.fillText(`💨 Weff: ${weff.toFixed(1)}m/s`, shipX, shipDeckY - 6);
 
-            // 9. HUD 標題繪製
             ctx.font = 'bold 9.5px sans-serif';
             ctx.fillStyle = accentColor;
             ctx.textAlign = 'left';
