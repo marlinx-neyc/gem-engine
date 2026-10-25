@@ -238,7 +238,7 @@
                 </div>
             </section>
 
-            <!-- 8. 🌀 颱風專區與防颱應變動態指南 (左下角收合版，填補左側桌面端版面空間) -->
+            <!-- 8. 🌀 颱風專區與防颱應變動態指南 (填補左下角版面空間) -->
             <details class="card border-[#ef4444] bg-[#180d1a]/90" open id="typhoonSpecialSection">
                 <summary class="card-header !text-red-400 list-none outline-none pb-0 border-b-0 cursor-pointer">
                     <span class="flex items-center gap-1 font-black text-[11.5px]">🌀 颱風專區與動態共振衝擊評估 (收合版)</span>
@@ -443,10 +443,10 @@
                 </div>
             </section>
 
-            <!-- 7. 🎯 態勢雷達圖 -->
+            <!-- 7. 🎯 態勢雷達圖（加大滿版 h-[420px]，填補版面下半部） -->
             <section class="card border-[#38bdf8]">
                 <div class="card-header !text-[#38bdf8]">
-                    <span class="flex items-center gap-1">🎯 態勢雷達圖與 5 大算子對比 (受游擊時序連動)</span>
+                    <span class="flex items-center gap-1 font-extrabold">🎯 態勢雷達圖與 5 大算子對比 (受游擊時序連動)</span>
                     <span class="badge badge-yellow text-[8px]">邊界防護</span>
                 </div>
 
@@ -459,7 +459,8 @@
                     </div>
                 </div>
 
-                <div class="canvas-container h-[260px] mb-1" id="radarContainer">
+                <!-- 畫布容器高度擴增至 420px，完美貼合底部 -->
+                <div class="canvas-container h-[420px] mb-1" id="radarContainer">
                     <canvas id="nativeRadarCanvas" class="w-full h-full block"></canvas>
                 </div>
 
@@ -1083,6 +1084,7 @@
             ctx.restore();
         }
 
+        // 雷達圖繪製優化 (畫布放大至 420px，雷達半徑 R 最大擴至 90)
         function drawRadarCanvas() {
             const canvas = getEl('nativeRadarCanvas');
             const container = getEl('radarContainer');
@@ -1115,7 +1117,7 @@
             const vetoSouth = (hsSouth > 1.13) || (weffSouth > 10.17) || (tpVal >= 11.5) || (ukcSouth < 1.50) || (fbSouth < 0.50);
 
             const w = container.clientWidth || 320;
-            const h = 260;
+            const h = container.clientHeight || 420; // 放大至 420px
             const dpr = window.devicePixelRatio || 1;
 
             canvas.width = w * dpr;
@@ -1130,8 +1132,9 @@
             ctx.fillRect(0, 0, w, h);
 
             const cx = w / 2;
-            const cy = h * 0.42;
-            const R = Math.min(w * 0.16, 48);
+            const cy = h * 0.44;
+            // 雷達半徑放大 2 倍 (最高 90px)，充滿視窗
+            const R = Math.min(w * 0.22, h * 0.26, 90);
             const count = 5;
             const angles = [];
             for (let i = 0; i < count; i++) angles.push(-Math.PI / 2 + (i * 2 * Math.PI) / count);
@@ -1146,8 +1149,8 @@
                 }
                 ctx.closePath();
                 ctx.strokeStyle = lvl === 1.0 ? '#facc15' : '#1e2d4a';
-                ctx.lineWidth = lvl === 1.0 ? 1.2 : 0.8;
-                if (lvl === 1.0) ctx.setLineDash([3, 3]); else ctx.setLineDash([]);
+                ctx.lineWidth = lvl === 1.0 ? 1.4 : 0.8;
+                if (lvl === 1.0) ctx.setLineDash([4, 4]); else ctx.setLineDash([]);
                 ctx.stroke();
             });
 
@@ -1199,20 +1202,21 @@
                 { title: "乾舷", val: fbDisp, limit: "≥0.50m", fail: fbFail }
             ];
 
-            ctx.font = 'bold 8.5px sans-serif';
+            // 文字大小調大為 10.5px，與大圖成比例
+            ctx.font = 'bold 10.5px sans-serif';
             for (let i = 0; i < count; i++) {
-                const r = R * 1.48;
+                const r = R * 1.35;
                 let x = cx + r * Math.cos(angles[i]);
                 let y = cy + r * Math.sin(angles[i]);
                 const item = dynamicLabels[i];
 
-                x = Math.max(8, Math.min(w - 8, x));
+                x = Math.max(12, Math.min(w - 12, x));
 
                 ctx.fillStyle = item.fail ? '#fca5a5' : '#86efac';
-                ctx.textAlign = x < cx - 8 ? 'right' : (x > cx + 8 ? 'left' : 'center');
+                ctx.textAlign = x < cx - 12 ? 'right' : (x > cx + 12 ? 'left' : 'center');
                 ctx.fillText(`${item.title}: ${item.val}`, x, y);
                 ctx.fillStyle = '#cbd5e1';
-                ctx.fillText(`(${item.limit}) ${item.fail ? '🔴' : '🟢'}`, x, y + 10);
+                ctx.fillText(`(${item.limit}) ${item.fail ? '🔴' : '🟢'}`, x, y + 12);
             }
 
             const activeText = currentRadarMode === 'NORTH' ? '【北岸】' :
@@ -1221,17 +1225,17 @@
             const activeVeto = isN ? vetoNorth : (isS ? vetoSouth : (vetoNorth && vetoSouth));
             const activeWarn = currentRadarMode === 'COMPARE' && (vetoNorth !== vetoSouth);
 
-            ctx.font = 'bold 10.5px sans-serif';
+            ctx.font = 'bold 12px sans-serif';
             ctx.textAlign = 'center';
             if (activeVeto && !activeWarn) {
                 ctx.fillStyle = '#ef4444';
-                ctx.fillText(`🔴 0.0% 物理 VETO 熔斷 (${activeText}) [時段: ${currentTimelineLabel}]`, cx, cy + R + 38);
+                ctx.fillText(`🔴 0.0% 物理 VETO 熔斷 (${activeText}) [時段: ${currentTimelineLabel}]`, cx, cy + R + 45);
             } else if (activeWarn) {
                 ctx.fillStyle = '#f59e0b';
-                ctx.fillText(`🟡 50.0% 條件機動靠泊 (${activeText}) [時段: ${currentTimelineLabel}]`, cx, cy + R + 38);
+                ctx.fillText(`🟡 50.0% 條件機動靠泊 (${activeText}) [時段: ${currentTimelineLabel}]`, cx, cy + R + 45);
             } else {
                 ctx.fillStyle = '#10b981';
-                ctx.fillText(`🟢 100% 物理安全通過 (${activeText}) [時段: ${currentTimelineLabel}]`, cx, cy + R + 38);
+                ctx.fillText(`🟢 100% 物理安全通過 (${activeText}) [時段: ${currentTimelineLabel}]`, cx, cy + R + 45);
             }
         }
 
@@ -1248,7 +1252,7 @@
             ctx.fillStyle = fillColor;
             ctx.fill();
             ctx.strokeStyle = strokeColor;
-            ctx.lineWidth = 1.8;
+            ctx.lineWidth = 2.2;
             ctx.setLineDash([]);
             ctx.stroke();
 
@@ -1258,7 +1262,7 @@
                 const x = cx + r * Math.cos(angles[i]);
                 const y = cy + r * Math.sin(angles[i]);
                 ctx.beginPath();
-                ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+                ctx.arc(x, y, 3.5, 0, Math.PI * 2);
                 ctx.fillStyle = strokeColor;
                 ctx.fill();
             }
