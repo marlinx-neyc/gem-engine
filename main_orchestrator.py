@@ -3,7 +3,7 @@
 """
 ==============================================================================
 GEM Engine v66.0 Master Spatial-Dynamic Orchestrator
-全域 SSOT 戰術指揮中樞 - Windy 動態地圖、游擊時序連動與雙端發布完整版
+全域 SSOT 戰術指揮中樞 - Windy 動態地圖、游擊時序連動與雙端發布完整修正版
 ==============================================================================
 """
 
@@ -54,7 +54,7 @@ class GEMMasterOrchestrator:
     async def execute_cycle(self):
         logging.info("🚀 GEM Engine v66.0 Master Orchestrator (Windy Map & Timeline Linkage) 啟動...")
         now_cst = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
-        
+
         ssot_payload = {
             "version": "GEM-ENG-SPEC-2026-V66",
             "timestamp": now_cst.strftime("%Y-%m-%d %H:%M:%S CST"),
@@ -79,18 +79,18 @@ class GEMMasterOrchestrator:
                 "matching_rate_pct": 95.8
             }
         }
-        
+
         # 寫入 SSOT JSON 檔
         with open("latest_decision.json", "w", encoding="utf-8") as f:
             json.dump(ssot_payload, f, ensure_ascii=False, indent=2)
-            
+
         # 同步寫入 index.html 與 mobile.html，雙端同步發布
         with open("index.html", "w", encoding="utf-8") as f:
             f.write(HTML_CONTENT)
-            
+
         with open("mobile.html", "w", encoding="utf-8") as f:
             f.write(HTML_CONTENT)
-            
+
         logging.info("✅ Windy 版本與連動發布完成：index.html, mobile.html, latest_decision.json")
 
 
@@ -143,7 +143,7 @@ HTML_CONTENT = """<!DOCTYPE html>
 </head>
 <body class="w-full max-w-[1700px] mx-auto">
     <div id="vetoBanner">🚨 警示：實體觸發物理 VETO 熔斷（浪高/風速/水深超標），強制執行防颱封島管制！</div>
-    
+
     <header class="bg-[#111c2e] border border-[#1e2d4a] border-l-[5px] border-l-[#ef4444] rounded-xl p-2.5 mb-2 shadow-xl w-full" id="headerMaster">
         <div class="flex flex-wrap justify-between items-center gap-1.5">
             <div class="flex items-center gap-2">
@@ -175,15 +175,15 @@ HTML_CONTENT = """<!DOCTYPE html>
                 </div>
                 <div class="p-1.5 space-y-1 text-[9.5px]">
                     <div class="grid grid-cols-3 gap-1 text-center font-mono">
-                        <div class="timeline-btn bg-black/40 p-1 rounded border border-slate-700 timeline-card-active" id="win1" data-hs="3.71" data-w="13.8" data-tp="15.5" data-theta="50" data-label="早盤 07:30~08:30">
+                        <div class="timeline-btn bg-black/40 p-1 rounded border border-slate-700 timeline-card-active" id="win1" data-hs="3.71" data-w="13.8" data-tp="15.5" data-theta="50" data-label="07:30~08:30 (早盤對算)">
                             <span class="text-slate-400 block text-[8px]">早盤對算</span>
                             <b class="text-amber-300 text-[9px]">07:30-08:30</b>
                         </div>
-                        <div class="timeline-btn bg-black/40 p-1 rounded border border-slate-700" id="win2" data-hs="2.05" data-w="9.5" data-tp="12.0" data-theta="40" data-label="午盤 11:30~12:30">
+                        <div class="timeline-btn bg-black/40 p-1 rounded border border-slate-700" id="win2" data-hs="2.05" data-w="9.5" data-tp="12.0" data-theta="40" data-label="11:30~12:30 (午盤對算)">
                             <span class="text-slate-400 block text-[8px]">午盤對算</span>
                             <b class="text-amber-300 text-[9px]">11:30-12:30</b>
                         </div>
-                        <div class="timeline-btn bg-black/40 p-1 rounded border border-slate-700" id="win3" data-hs="0.92" data-w="4.8" data-tp="9.0" data-theta="30" data-label="晚盤 16:30~17:30">
+                        <div class="timeline-btn bg-black/40 p-1 rounded border border-slate-700" id="win3" data-hs="0.92" data-w="4.8" data-tp="9.0" data-theta="30" data-label="16:30~17:30 (晚盤對算)">
                             <span class="text-slate-400 block text-[8px]">晚盤對算</span>
                             <b class="text-amber-300 text-[9px]">16:30-17:30</b>
                         </div>
@@ -234,11 +234,11 @@ HTML_CONTENT = """<!DOCTYPE html>
                         <div class="text-[9px] text-slate-300 mb-1 font-mono" id="tcPosLabel">
                             定位座標：24.843°N 121.952°E (龜山島中心點)
                         </div>
-                        
-                        <!-- 嵌入 Windy 動態實時氣象/風場地圖，徹底解決手機快取與圖片不更新痛點 -->
+
+                        <!-- 嵌入 Windy 動態實時氣象/風場地圖 -->
                         <div class="relative w-full rounded border border-slate-800 overflow-hidden bg-[#050a14] h-[260px]">
-                            <iframe id="windyFrame" 
-                                    src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=m%2Fs&zoom=7&overlay=wind&product=ecmwf&level=surface&lat=24.843&lon=121.952" 
+                            <iframe id="windyFrame"
+                                    src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=m%2Fs&zoom=7&overlay=wind&product=ecmwf&level=surface&lat=24.843&lon=121.952"
                                     class="w-full h-full block border-0 rounded"
                                     loading="lazy">
                             </iframe>
@@ -346,7 +346,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                         <button id="tabProfileCompare" class="tab-btn py-1 px-1 rounded text-[9px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚖️ 對比</button>
                     </div>
                 </div>
-                
+
                 <div class="canvas-container h-[200px] mb-1" id="profileContainer">
                     <canvas id="profileCanvas" class="w-full h-full block"></canvas>
                 </div>
@@ -412,7 +412,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                     <span class="flex items-center gap-1 font-bold text-[11.5px]">🔮 官方網頁公告 vs GEM模型 封島時程對比 & 再封島條件精算</span>
                     <span class="badge badge-yellow text-[8px]" id="rollingUpdateBadge">🔄 雙欄動態對比</span>
                 </div>
-                
+
                 <div class="p-1 space-y-1.5 text-[10px]">
                     <!-- 雙欄 Layout -->
                     <div class="grid grid-cols-2 gap-1.5 md:gap-2">
@@ -553,10 +553,6 @@ HTML_CONTENT = """<!DOCTYPE html>
             return (R * c).toFixed(1);
         }
 
-        function fmtTime(d) {
-            return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
-        }
-
         function checkDailySyncWindows(nowDate) {
             const h = nowDate.getHours();
             const m = nowDate.getMinutes();
@@ -619,16 +615,16 @@ HTML_CONTENT = """<!DOCTYPE html>
                 if (cyclones && cyclones.length > 0) {
                     const tc = cyclones[0];
                     const analysis = tc.analysisData?.fix?.slice(-1)[0];
-                    
+
                     if (analysis) {
                         const lat = parseFloat(analysis.latitude || analysis.lat || 0);
                         const lon = parseFloat(analysis.longitude || analysis.lon || 0);
                         const dist = (lat > 0 && lon > 0) ? getGuishanDist(lat, lon) : "--";
-                        
+
                         const tcNo = tc.cwaTyphoonNo || tc.typhoonNo || tc.typhoonNumber || "";
                         const tcName = tc.cwaTyphoonName || tc.typhoonName || "颱風";
                         const intensity = tc.cwaTyphoonIntensity || tc.typhoonIntensity || "警報";
-                        
+
                         const noStr = tcNo ? `第 ${tcNo} 號 ` : "";
                         setTxt('tcNameLabel', `🌀 ${noStr}${tcName} (${intensity}) 颱風警報生效中`);
                         setTxt('tcPosLabel', `中心位置：${lat}°N ${lon}°E (距龜山島 ${dist}km)`);
@@ -652,7 +648,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                 setTxt('stationHeartbeatClock', '● Windy 地圖實時連線正常');
 
             } catch (err) {
-                console.warn("API 備援切換，保持 Windy 動態地圖獨立即時運作:", err);
+                console.warn("API 備援切換，保持 Windy 動態地圖獨獨立運作:", err);
                 processGEMBackupHistoricalModel();
             }
         }
@@ -660,7 +656,6 @@ HTML_CONTENT = """<!DOCTYPE html>
         function processGEMBackupHistoricalModel() {
             const hs = parseFloat(getEl('rngHs')?.value || 3.71);
             const simulatedDist = Math.max(20, (350 - (hs * 35))).toFixed(1);
-            const simulatedIntensity = hs > 3.0 ? "強烈" : (hs > 1.8 ? "中度" : "輕度");
 
             setTxt('tcNameLabel', `🌀 龜山島周邊實時動態風場地圖 (Windy 實時渲染中)`);
             setTxt('tcPosLabel', `海象場推估能量等效距離：約 ${simulatedDist}km (PINN 離線對算)`);
@@ -678,7 +673,7 @@ HTML_CONTENT = """<!DOCTYPE html>
             setTxt('learningStatusTag', 'PINN 自主學習中');
         }
 
-        // 時序連動功能：點擊任何游擊時序或正常對算卡片，即時更新沙盤滑桿與剖面/雷達圖場
+        // 時序連動功能：點擊游擊時序或對算卡片，同步帶入沙盤滑桿並更新雙端視圖
         function applyTimelineLinkage(hs, w, tp, theta, labelText, targetEl) {
             currentTimelineLabel = labelText;
             setTxt('activeTimelineLabel', labelText);
@@ -698,18 +693,25 @@ HTML_CONTENT = """<!DOCTYPE html>
             setTxt('lblTp', `${tp}s`);
             setTxt('lblDeltaTheta', `${theta}°`);
 
-            // 清除所有卡片的高亮，並高亮當前點擊的卡片
+            // 清除所有卡片高亮，並為當前選中時段（含對應欄位）加上亮黃外框
             document.querySelectorAll('.timeline-btn').forEach(btn => btn.classList.remove('timeline-card-active'));
-            if (targetEl) targetEl.classList.add('timeline-card-active');
+            if (targetEl) {
+                targetEl.classList.add('timeline-card-active');
+                document.querySelectorAll('.timeline-btn').forEach(btn => {
+                    if (Math.abs(parseFloat(btn.getAttribute('data-hs')) - hs) < 0.01 &&
+                        Math.abs(parseFloat(btn.getAttribute('data-w')) - w) < 0.01) {
+                        btn.classList.add('timeline-card-active');
+                    }
+                });
+            }
 
-            // 重新計算並繪製 Canvas 剖面圖與雷達圖
+            // 觸發物理算子即時運算與圖場重繪
             recalculatePhysicsAndRender();
         }
 
         function initDashboard() {
             startClockAndWatchdog();
             initUIControls();
-            applyStateIsolation();
             recalculatePhysicsAndRender();
 
             fetchCWALiveData();
@@ -756,7 +758,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                 const d1 = new Date(now); d1.setDate(d1.getDate() + 1);
                 const d2 = new Date(now); d2.setDate(d2.getDate() + 2);
                 const fmtM = d => `${d.getMonth()+1}/${d.getDate()}`;
-                
+
                 const thD0 = getEl('thD0Day'); if (thD0) thD0.innerHTML = `今日 ${fmtM(d0)}`;
                 const thD1 = getEl('thD1Day'); if (thD1) thD1.innerHTML = `明日 ${fmtM(d1)}`;
                 const thD2 = getEl('thD2Day'); if (thD2) thD2.innerHTML = `後日 ${fmtM(d2)}`;
@@ -863,7 +865,7 @@ HTML_CONTENT = """<!DOCTYPE html>
             const fbNorth = deckNorth - crestNorth;
             const fbSouth = deckSouth - crestSouth;
 
-            // 即時更新極簡檢核表
+            // 即時更新物理算子表格數據與燈號
             setTxt('cmpHsVal', `${hsNorth.toFixed(2)} m`);
             const hsB = getEl('cmpHsBadge'); if (hsB) hsB.innerHTML = hsNorth > 1.13 ? '<span class="badge badge-veto text-[8px]">🔴 VETO</span>' : '<span class="badge badge-pass text-[8px]">🟢 通過</span>';
 
@@ -879,15 +881,96 @@ HTML_CONTENT = """<!DOCTYPE html>
             setTxt('cmpFbVal', `${fbNorth.toFixed(2)} m`);
             const fbB = getEl('cmpFbBadge'); if (fbB) fbB.innerHTML = fbNorth < 0.50 ? '<span class="badge badge-veto text-[8px]">🔴 VETO</span>' : '<span class="badge badge-pass text-[8px]">🟢 通過</span>';
 
-            renderAllCanvas();
-        }
+            // 動態判斷南北岸 VETO 熔斷條件
+            const vetoNorth = (hsNorth > 1.13) || (weffNorth > 10.17) || (tp >= 11.5) || (ukcNorth < 1.50) || (fbNorth < 0.50);
+            const vetoSouth = (hsSouth > 1.13) || (weffSouth > 10.17) || (tp >= 11.5) || (ukcSouth < 1.50) || (fbSouth < 0.50);
 
-        function applyStateIsolation() {
-            const verdictEl = getEl('txtRadarFinalVerdict');
-            if (verdictEl) {
-                verdictEl.innerText = "🔴 0.0% 物理 VETO 熔斷 / 【極端暴風長浪全線封島】禁絕一切船舶靠泊";
-                verdictEl.className = "text-[#fca5a5] font-extrabold text-[10.5px] mt-0.5 inline-block";
+            // 動態同步頂部 Banner 與標頭狀態燈號
+            const banner = getEl('vetoBanner');
+            const badgeDecision = getEl('badgeMobDecision');
+            const headerMaster = getEl('headerMaster');
+
+            if (vetoNorth && vetoSouth) {
+                if (banner) {
+                    banner.style.display = 'block';
+                    banner.style.background = 'var(--status-danger)';
+                    banner.style.boxShadow = '0 0 16px rgba(239, 68, 68, 0.5)';
+                    banner.innerText = '🚨 警示：實體觸發物理 VETO 熔斷（浪高/風速/水深/乾舷超標），強制執行防颱封島管制！';
+                }
+                setTxt('ssotDecisionBadge', '🔴 0.0% 熔斷');
+                if (badgeDecision) {
+                    badgeDecision.innerText = '🔴 熔斷封島管制';
+                    badgeDecision.className = 'badge badge-veto text-[9.5px] px-1.5 py-0.5';
+                }
+                if (headerMaster) headerMaster.style.borderLeftColor = '#ef4444';
+            } else if (vetoNorth || vetoSouth) {
+                if (banner) {
+                    banner.style.display = 'block';
+                    banner.style.background = 'var(--status-warn)';
+                    banner.style.boxShadow = '0 0 16px rgba(245, 158, 11, 0.5)';
+                    banner.innerText = '⚠️ 警告：單一泊位海象過載，實施單岸機動避風靠泊管制！';
+                }
+                setTxt('ssotDecisionBadge', '🟡 50.0% 條件開放');
+                if (badgeDecision) {
+                    badgeDecision.innerText = '🟡 條件機動靠泊';
+                    badgeDecision.className = 'badge badge-yellow text-[9.5px] px-1.5 py-0.5';
+                }
+                if (headerMaster) headerMaster.style.borderLeftColor = '#f59e0b';
+            } else {
+                if (banner) {
+                    banner.style.display = 'block';
+                    banner.style.background = 'var(--status-pass)';
+                    banner.style.boxShadow = '0 0 16px rgba(16, 185, 129, 0.5)';
+                    banner.innerText = '✅ 安全：全域海象與動態裕深完全符合剛性安全門檻，允許正常通航與靠泊！';
+                }
+                setTxt('ssotDecisionBadge', '🟢 100.0% 正常開放');
+                if (badgeDecision) {
+                    badgeDecision.innerText = '🟢 全線開放靠泊';
+                    badgeDecision.className = 'badge badge-pass text-[9.5px] px-1.5 py-0.5';
+                }
+                if (headerMaster) headerMaster.style.borderLeftColor = '#10b981';
             }
+
+            // 同步 GEM 雙生模型卡片燈號
+            const gemStatusEl = getEl('gemClosureStatus');
+            if (gemStatusEl) {
+                if (vetoNorth && vetoSouth) {
+                    gemStatusEl.innerText = '🔴 物理VETO';
+                    gemStatusEl.className = 'badge badge-veto text-[7.5px] px-1 py-0.5';
+                } else if (vetoNorth || vetoSouth) {
+                    gemStatusEl.innerText = '🟡 單岸條件開放';
+                    gemStatusEl.className = 'badge badge-yellow text-[7.5px] px-1 py-0.5';
+                } else {
+                    gemStatusEl.innerText = '🟢 全線正常開放';
+                    gemStatusEl.className = 'badge badge-pass text-[7.5px] px-1 py-0.5';
+                }
+            }
+
+            // 同步雷達圖下方裁決框 (#boxRadarFinalVerdict & #txtRadarFinalVerdict)
+            const activeVeto = currentRadarMode === 'NORTH' ? vetoNorth :
+                               currentRadarMode === 'SOUTH' ? vetoSouth : (vetoNorth && vetoSouth);
+            const activeText = currentRadarMode === 'NORTH' ? '【北岸】' :
+                               currentRadarMode === 'SOUTH' ? '【南岸】' : '【雙岸】';
+
+            const boxEl = getEl('boxRadarFinalVerdict');
+            const txtEl = getEl('txtRadarFinalVerdict');
+            if (boxEl && txtEl) {
+                if (activeVeto) {
+                    boxEl.className = 'box-alert-danger text-center';
+                    txtEl.innerText = `🔴 0.0% 物理 VETO 熔斷 / 【海象超標管制】 (${activeText}) [時段: ${currentTimelineLabel}]`;
+                    txtEl.className = 'text-[#fca5a5] font-extrabold text-[10.5px] mt-0.5 inline-block';
+                } else if ((currentRadarMode === 'COMPARE' && (vetoNorth || vetoSouth)) || (currentRadarMode !== 'COMPARE' && activeVeto)) {
+                    boxEl.className = 'bg-amber-950/60 border-l-4 border-amber-500 text-amber-200 p-1.5 text-center text-[10.5px] rounded-r';
+                    txtEl.innerText = `🟡 50.0% 條件開放 / 【單岸機動避風靠泊】 (${activeText}) [時段: ${currentTimelineLabel}]`;
+                    txtEl.className = 'text-amber-300 font-extrabold text-[10.5px] mt-0.5 inline-block';
+                } else {
+                    boxEl.className = 'bg-emerald-950/60 border-l-4 border-emerald-500 text-emerald-200 p-1.5 text-center text-[10.5px] rounded-r';
+                    txtEl.innerText = `🟢 100.0% 物理安全通過 / 【允許靠泊作業】 (${activeText}) [時段: ${currentTimelineLabel}]`;
+                    txtEl.className = 'text-emerald-300 font-extrabold text-[10.5px] mt-0.5 inline-block';
+                }
+            }
+
+            renderAllCanvas();
         }
 
         function renderAllCanvas() {
@@ -1039,11 +1122,11 @@ HTML_CONTENT = """<!DOCTYPE html>
 
             const ukcX = shipX + shipW * 0.5;
             const ukcPass = ukc >= 1.50;
-            ctx.beginPath(); 
-            ctx.moveTo(ukcX, keelY); 
+            ctx.beginPath();
+            ctx.moveTo(ukcX, keelY);
             ctx.lineTo(ukcX, seabedY);
-            ctx.strokeStyle = ukcPass ? '#10b981' : '#ef4444'; 
-            ctx.lineWidth = 1.8; 
+            ctx.strokeStyle = ukcPass ? '#10b981' : '#ef4444';
+            ctx.lineWidth = 1.8;
             ctx.stroke();
 
             ctx.font = 'bold 8.5px sans-serif';
@@ -1068,7 +1151,7 @@ HTML_CONTENT = """<!DOCTYPE html>
             ctx.fillStyle = weff <= 10.17 ? '#86efac' : '#fca5a5';
             ctx.fillText(`💨 Weff: ${weff.toFixed(1)}m/s`, shipX, shipDeckY - 6);
 
-            // 動態標註：顯示當前連動之游擊調度時段
+            // 動態標註：顯示當前連動之游擊調度時段標籤
             ctx.font = 'bold 9.5px sans-serif';
             ctx.fillStyle = accentColor;
             ctx.textAlign = 'left';
@@ -1104,6 +1187,9 @@ HTML_CONTENT = """<!DOCTYPE html>
             const crestSouth = tide + hsSouth * 0.68;
             const fbNorth = 3.20 - crestNorth;
             const fbSouth = 2.50 - crestSouth;
+
+            const vetoNorth = (hsNorth > 1.13) || (weffNorth > 10.17) || (tpVal >= 11.5) || (ukcNorth < 1.50) || (fbNorth < 0.50);
+            const vetoSouth = (hsSouth > 1.13) || (weffSouth > 10.17) || (tpVal >= 11.5) || (ukcSouth < 1.50) || (fbSouth < 0.50);
 
             const w = container.clientWidth || 320;
             const h = 260;
@@ -1161,9 +1247,11 @@ HTML_CONTENT = """<!DOCTYPE html>
                 drawRadarPoly(ctx, cx, cy, R, angles, getRatios(true), 'rgba(56, 189, 248, 0.3)', '#38bdf8');
                 drawRadarPoly(ctx, cx, cy, R, angles, getRatios(false), 'rgba(16, 185, 129, 0.3)', '#34d399');
             } else if (currentRadarMode === 'NORTH') {
-                drawRadarPoly(ctx, cx, cy, R, angles, getRatios(true), 'rgba(239, 68, 68, 0.35)', '#ef4444');
+                const isFail = vetoNorth;
+                drawRadarPoly(ctx, cx, cy, R, angles, getRatios(true), isFail ? 'rgba(239, 68, 68, 0.35)' : 'rgba(56, 189, 248, 0.35)', isFail ? '#ef4444' : '#38bdf8');
             } else {
-                drawRadarPoly(ctx, cx, cy, R, angles, getRatios(false), 'rgba(239, 68, 68, 0.35)', '#ef4444');
+                const isFail = vetoSouth;
+                drawRadarPoly(ctx, cx, cy, R, angles, getRatios(false), isFail ? 'rgba(239, 68, 68, 0.35)' : 'rgba(16, 185, 129, 0.35)', isFail ? '#ef4444' : '#34d399');
             }
 
             const isN = currentRadarMode === 'NORTH';
@@ -1207,10 +1295,21 @@ HTML_CONTENT = """<!DOCTYPE html>
             const activeText = currentRadarMode === 'NORTH' ? '【北岸】' :
                                currentRadarMode === 'SOUTH' ? '【南岸】' : '【雙岸】';
 
+            const activeVeto = isN ? vetoNorth : (isS ? vetoSouth : (vetoNorth && vetoSouth));
+            const activeWarn = currentRadarMode === 'COMPARE' && (vetoNorth !== vetoSouth);
+
             ctx.font = 'bold 10.5px sans-serif';
-            ctx.fillStyle = '#ef4444';
             ctx.textAlign = 'center';
-            ctx.fillText(`🔴 0.0% 物理 VETO 熔斷 (${activeText}) [時段: ${currentTimelineLabel}]`, cx, cy + R + 38);
+            if (activeVeto && !activeWarn) {
+                ctx.fillStyle = '#ef4444';
+                ctx.fillText(`🔴 0.0% 物理 VETO 熔斷 (${activeText}) [時段: ${currentTimelineLabel}]`, cx, cy + R + 38);
+            } else if (activeWarn) {
+                ctx.fillStyle = '#f59e0b';
+                ctx.fillText(`🟡 50.0% 條件機動靠泊 (${activeText}) [時段: ${currentTimelineLabel}]`, cx, cy + R + 38);
+            } else {
+                ctx.fillStyle = '#10b981';
+                ctx.fillText(`🟢 100% 物理安全通過 (${activeText}) [時段: ${currentTimelineLabel}]`, cx, cy + R + 38);
+            }
         }
 
         function drawRadarPoly(ctx, cx, cy, R, angles, ratios, fillColor, strokeColor) {
