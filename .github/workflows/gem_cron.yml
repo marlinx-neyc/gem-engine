@@ -27,11 +27,16 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
+          cache: 'pip' # ⚡ 啟用 Pip 快取，大幅加快排程執行速度
 
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; else pip install httpx numpy torch nest_asyncio folium pydantic requests google-genai notion-client; fi
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            pip install --prefer-binary httpx numpy torch nest_asyncio folium pydantic requests google-genai notion-client
+          fi
 
       - name: Execute Master Pipeline
         env:
@@ -59,7 +64,7 @@ jobs:
           git config --local user.name "GitHub Action Bot"
           git add latest_decision.json index.html mobile.html || true
           if ! git diff-index --quiet HEAD; then
-            git commit -m "Auto-assimilate TDX & CWA data stream [skip ci]"
+            git commit -m "chore(ssot): auto-assimilate TDX & CWA data stream [skip ci]"
             git pull --rebase origin main
             git push origin main
           fi
