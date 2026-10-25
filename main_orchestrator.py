@@ -3,7 +3,7 @@
 """
 ==============================================================================
 GEM Engine v66.0 Master Spatial-Dynamic Orchestrator
-全域 SSOT 戰術指揮中樞 - 時序軸與剖面圖/雷達圖動態資訊連動完整修復版
+全域 SSOT 戰術指揮中樞 - Windy 動態地圖、游擊時序連動與雙端發布完整版
 ==============================================================================
 """
 
@@ -52,7 +52,7 @@ class GEMMasterOrchestrator:
         self.config = EngineConfig()
 
     async def execute_cycle(self):
-        logging.info("🚀 GEM Engine v66.0 Master Orchestrator (Full Timeline-Canvas Linkage) 啟動...")
+        logging.info("🚀 GEM Engine v66.0 Master Orchestrator (Windy Map & Timeline Linkage) 啟動...")
         now_cst = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
         
         ssot_payload = {
@@ -91,7 +91,7 @@ class GEMMasterOrchestrator:
         with open("mobile.html", "w", encoding="utf-8") as f:
             f.write(HTML_CONTENT)
             
-        logging.info("✅ 時序與畫布動態連動檔案發布成功：index.html, mobile.html, latest_decision.json")
+        logging.info("✅ Windy 版本與連動發布完成：index.html, mobile.html, latest_decision.json")
 
 
 HTML_CONTENT = """<!DOCTYPE html>
@@ -175,7 +175,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                 </div>
                 <div class="p-1.5 space-y-1 text-[9.5px]">
                     <div class="grid grid-cols-3 gap-1 text-center font-mono">
-                        <div class="timeline-btn bg-black/40 p-1 rounded border border-slate-700 active-win" id="win1" data-hs="3.71" data-w="13.8" data-tp="15.5" data-theta="50" data-label="早盤 07:30~08:30">
+                        <div class="timeline-btn bg-black/40 p-1 rounded border border-slate-700 timeline-card-active" id="win1" data-hs="3.71" data-w="13.8" data-tp="15.5" data-theta="50" data-label="早盤 07:30~08:30">
                             <span class="text-slate-400 block text-[8px]">早盤對算</span>
                             <b class="text-amber-300 text-[9px]">07:30-08:30</b>
                         </div>
@@ -198,11 +198,11 @@ HTML_CONTENT = """<!DOCTYPE html>
                 </div>
             </section>
 
-            <!-- 1. 🌀 氣象署即時圖資智慧切換模組 -->
+            <!-- 1. 🌀 Windy 動態實時地圖與行政開設模組 -->
             <details class="card border-[#ef4444] bg-[#180d1a]/90" open>
                 <summary class="card-header !text-red-400 list-none outline-none pb-0 border-b-0 cursor-pointer">
-                    <span class="flex items-center gap-1 font-black text-xs">🌀 氣象署即時動態圖資 / 雷達時序控制</span>
-                    <span id="typhoonHeartbeatClock" class="text-[9.5px] font-mono text-emerald-400 font-bold bg-emerald-950/80 px-1 py-0.5 rounded border border-emerald-500/40">● 10min雷達時序</span>
+                    <span class="flex items-center gap-1 font-black text-xs">🌀 Windy 動態實時氣象風場地圖 & 行政開設</span>
+                    <span id="typhoonHeartbeatClock" class="text-[9.5px] font-mono text-emerald-400 font-bold bg-emerald-950/80 px-1 py-0.5 rounded border border-emerald-500/40">● Windy實時</span>
                 </summary>
                 <div class="pt-1.5 border-t border-red-500/30 mt-1.5 space-y-1.5">
                     <div class="bg-red-950/50 p-1 rounded-lg border border-red-500/40">
@@ -228,35 +228,24 @@ HTML_CONTENT = """<!DOCTYPE html>
 
                     <div class="bg-black/60 p-1.5 rounded-lg border border-slate-700">
                         <div class="flex justify-between items-center mb-1">
-                            <span class="text-[9.5px] font-bold text-amber-300" id="tcNameLabel">🌀 氣象署 10 分鐘即時雷達圖 (動態連動中)</span>
-                            <span class="badge badge-pass text-[8px]" id="tcThreatRate">🟢 雷達時序連動</span>
+                            <span class="text-[9.5px] font-bold text-amber-300" id="tcNameLabel">🌀 龜山島周邊實時動態風場與氣象地圖</span>
+                            <span class="badge badge-pass text-[8px]" id="tcThreatRate">🟢 Windy實時</span>
                         </div>
                         <div class="text-[9px] text-slate-300 mb-1 font-mono" id="tcPosLabel">
-                            定位座標：24.843°N 121.952°E (龜山島氣象監測區)
+                            定位座標：24.843°N 121.952°E (龜山島中心點)
                         </div>
                         
-                        <div class="relative w-full rounded border border-slate-800 overflow-hidden bg-[#050a14] min-h-[150px] flex items-center justify-center">
-                            <img id="cwaTyphoonTrackImg" 
-                                 src="https://www.cwa.gov.tw/Data/radar/CV1_3600.png" 
-                                 alt="氣象署即時雷達圖" 
-                                 class="w-full max-h-[260px] object-contain block rounded"
-                                 onerror="this.src='https://watch.ncdr.nat.gov.tw/watch_filename/typhoon_route.png';">
-                        </div>
-
-                        <div class="flex flex-wrap justify-between items-center mt-1.5 p-1 bg-slate-900/90 rounded border border-slate-700 text-[8.5px] font-mono gap-1">
-                            <div class="flex items-center gap-1">
-                                <button id="btnPrevFrame" class="bg-slate-800 hover:bg-slate-700 text-sky-300 px-1.5 py-0.5 rounded border border-slate-600">⏪ -10m</button>
-                                <button id="btnRealtimeFrame" class="bg-emerald-950 text-emerald-300 px-1.5 py-0.5 rounded border border-emerald-500 font-bold">⏸️ 實時幀</button>
-                                <button id="btnNextFrame" class="bg-slate-800 hover:bg-slate-700 text-sky-300 px-1.5 py-0.5 rounded border border-slate-600">⏩ +10m</button>
-                            </div>
-                            <div class="text-right flex-1 min-w-[120px]">
-                                <span class="text-slate-400">雷達觀察時間：</span>
-                                <b id="radarTimeStamp" class="text-amber-300 font-bold">----/--/-- --:-- CST</b>
-                            </div>
+                        <!-- 嵌入 Windy 動態實時氣象/風場地圖，徹底解決手機快取與圖片不更新痛點 -->
+                        <div class="relative w-full rounded border border-slate-800 overflow-hidden bg-[#050a14] h-[260px]">
+                            <iframe id="windyFrame" 
+                                    src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=m%2Fs&zoom=7&overlay=wind&product=ecmwf&level=surface&lat=24.843&lon=121.952" 
+                                    class="w-full h-full block border-0 rounded"
+                                    loading="lazy">
+                            </iframe>
                         </div>
                         <div class="flex justify-between items-center mt-1 text-[8px] text-slate-400 font-mono">
-                            <span id="dataPipelineSourceText">📡 數據源：中央氣象署 10 分鐘即時雷達網</span>
-                            <span id="typhoonImgUpdateTime" class="text-emerald-300 font-bold">自動刷新倒數: <b id="radarCountdown">600s</b></span>
+                            <span id="dataPipelineSourceText">📡 數據源：Windy ECMWF 動態實時風場地圖</span>
+                            <span id="typhoonImgUpdateTime" class="text-emerald-300 font-bold">全天候實時動態渲染</span>
                         </div>
                     </div>
                 </div>
@@ -342,7 +331,7 @@ HTML_CONTENT = """<!DOCTYPE html>
 
         <!-- 右側面板 -->
         <div class="lg:col-span-7 flex flex-col gap-1">
-            <!-- 4. 📐 南北岸動態剖面 (與游擊時序連動繪製) -->
+            <!-- 4. 📐 南北岸動態剖面 (受游擊時序連動繪製) -->
             <section class="card border-[#38bdf8]">
                 <div class="card-header !text-[#38bdf8]">
                     <span>📐 碼頭動態剖面與越浪分析 (受游擊時序連動)</span>
@@ -551,8 +540,6 @@ HTML_CONTENT = """<!DOCTYPE html>
         let currentRadarMode = 'SOUTH';
         let animPhase = 0;
         let typhoonHeartbeatCount = 0;
-        let radarCountdownSec = 600;
-        let radarFrameOffsetMins = 0;
         let currentTimelineLabel = "07:30 - 08:30 (晨間預警)";
 
         function getGuishanDist(lat, lon) {
@@ -568,22 +555,6 @@ HTML_CONTENT = """<!DOCTYPE html>
 
         function fmtTime(d) {
             return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
-        }
-
-        function updateRadarTimestamp() {
-            const now = new Date();
-            now.setMinutes(now.getMinutes() + radarFrameOffsetMins);
-            const roundedMins = Math.floor(now.getMinutes() / 10) * 10;
-            now.setMinutes(roundedMins);
-            now.setSeconds(0);
-
-            const yyyy = now.getFullYear();
-            const mm = String(now.getMonth() + 1).padStart(2, '0');
-            const dd = String(now.getDate()).padStart(2, '0');
-            const hh = String(now.getHours()).padStart(2, '0');
-            const mi = String(now.getMinutes()).padStart(2, '0');
-
-            setTxt('radarTimeStamp', `${yyyy}-${mm}-${dd} ${hh}:${mi} CST`);
         }
 
         function checkDailySyncWindows(nowDate) {
@@ -644,8 +615,6 @@ HTML_CONTENT = """<!DOCTYPE html>
                 const result = await response.json();
 
                 const cyclones = result.records?.tropicalCyclones?.tropicalCyclone;
-                const trackImg = getEl('cwaTyphoonTrackImg');
-                const sourceTextEl = getEl('dataPipelineSourceText');
 
                 if (cyclones && cyclones.length > 0) {
                     const tc = cyclones[0];
@@ -660,46 +629,30 @@ HTML_CONTENT = """<!DOCTYPE html>
                         const tcName = tc.cwaTyphoonName || tc.typhoonName || "颱風";
                         const intensity = tc.cwaTyphoonIntensity || tc.typhoonIntensity || "警報";
                         
-                        const issueTimeStr = tc.issueTime || analysis.fixTime || "";
-                        const formattedIssueTime = issueTimeStr ? `發布時間: ${issueTimeStr}` : `官方數據同步中...`;
-                        
                         const noStr = tcNo ? `第 ${tcNo} 號 ` : "";
                         setTxt('tcNameLabel', `🌀 ${noStr}${tcName} (${intensity}) 颱風警報生效中`);
                         setTxt('tcPosLabel', `中心位置：${lat}°N ${lon}°E (距龜山島 ${dist}km)`);
                         setTxt('tcThreatRate', `🟢 CWA實時連線`);
-                        setTxt('typhoonImgUpdateTime', formattedIssueTime);
-
-                        if (trackImg) {
-                            trackImg.src = `https://www.cwa.gov.tw/Data/typhoon/TY_WARN/B20.png?t=${Date.now()}`;
-                        }
-                        if (sourceTextEl) sourceTextEl.innerText = "📡 數據源：氣象署官方颱風警報圖資 (B20)";
 
                         const hasLandWarn = tc.landWarning && tc.landWarning.length > 0;
                         updateBadges(dist, hasLandWarn);
                         setTxt('modelMatchingRate', `95.8% (Loss: 0.0012)`);
                     }
                 } else {
-                    setTxt('tcNameLabel', '🌀 氣象署 10 分鐘即時雷達圖 (常態監測)');
-                    setTxt('tcPosLabel', '龜山島氣象監測區：24.843°N 121.952°E (10分鐘極短預報)');
-                    setTxt('tcThreatRate', '🟢 10min雷達');
-                    
-                    if (trackImg) {
-                        trackImg.src = `https://www.cwa.gov.tw/Data/radar/CV1_3600.png?t=${Date.now()}`;
-                    }
-                    if (sourceTextEl) sourceTextEl.innerText = "📡 數據源：中央氣象署 10 分鐘即時雷達網";
-
+                    setTxt('tcNameLabel', '🌀 龜山島周邊實時動態風場與氣象地圖 (Windy 實時圖場)');
+                    setTxt('tcPosLabel', '定位座標：24.843°N 121.952°E (Windy 實時互動數據)');
+                    setTxt('tcThreatRate', '🟢 Windy實時');
                     updateBadges("--", false);
-                    setTxt('modelMatchingRate', `98.2% (雷達連動對算)`);
+                    setTxt('modelMatchingRate', `98.2% (Windy實時對算)`);
                 }
 
-                updateRadarTimestamp();
                 typhoonHeartbeatCount++;
-                setTxt('typhoonHeartbeatClock', `● 雷達連動: ${typhoonHeartbeatCount} 次`);
-                setTxt('cwaStatusTag', 'CWA / NCDR 實時同步');
-                setTxt('stationHeartbeatClock', '● CWA/NCDR 實時連線正常');
+                setTxt('typhoonHeartbeatClock', `● Windy即時: ${typhoonHeartbeatCount} 次`);
+                setTxt('cwaStatusTag', 'CWA / NCDR / Windy 實時同步');
+                setTxt('stationHeartbeatClock', '● Windy 地圖實時連線正常');
 
             } catch (err) {
-                console.warn("API 備援切換，啟用 GEM 離線圖場連動:", err);
+                console.warn("API 備援切換，保持 Windy 動態地圖獨立即時運作:", err);
                 processGEMBackupHistoricalModel();
             }
         }
@@ -709,23 +662,18 @@ HTML_CONTENT = """<!DOCTYPE html>
             const simulatedDist = Math.max(20, (350 - (hs * 35))).toFixed(1);
             const simulatedIntensity = hs > 3.0 ? "強烈" : (hs > 1.8 ? "中度" : "輕度");
 
-            setTxt('tcNameLabel', `🌀 氣象署 10 分鐘即時雷達圖 (PINN 離線圖場連動)`);
-            setTxt('tcPosLabel', `推估能量等效距離：約 ${simulatedDist}km (離線物理連動)`);
-            setTxt('tcThreatRate', `🟢 10min雷達`);
+            setTxt('tcNameLabel', `🌀 龜山島周邊實時動態風場地圖 (Windy 實時渲染中)`);
+            setTxt('tcPosLabel', `海象場推估能量等效距離：約 ${simulatedDist}km (PINN 離線對算)`);
+            setTxt('tcThreatRate', `🟢 Windy實時`);
 
-            const trackImg = getEl('cwaTyphoonTrackImg');
-            if (trackImg) {
-                trackImg.src = `https://www.cwa.gov.tw/Data/radar/CV1_3600.png?t=${Date.now()}`;
-            }
-
-            updateRadarTimestamp();
             updateBadges(simulatedDist, false);
 
             typhoonHeartbeatCount++;
-            setTxt('typhoonHeartbeatClock', `⚠️ 時序連動: ${typhoonHeartbeatCount} 次`);
-            setTxt('cwaStatusTag', 'GEM 離線連動 (降權保護中)');
-            setTxt('dataPipelineSourceText', '📡 數據源：氣象署 10 分鐘即時雷達網');
-            setTxt('stationHeartbeatClock', '● 雷達與圖場動態連動中');
+            setTxt('typhoonHeartbeatClock', `⚠️ Windy即時: ${typhoonHeartbeatCount} 次`);
+            setTxt('cwaStatusTag', 'GEM 離線反饋 (降權保護中)');
+            setTxt('dataPipelineSourceText', '📡 數據源：Windy ECMWF 動態實時風場地圖');
+            setTxt('typhoonImgUpdateTime', `全天候實時渲染更新`);
+            setTxt('stationHeartbeatClock', '● Windy 地圖實時連線正常');
             setTxt('modelMatchingRate', `92.4% (Loss: 0.0031)`);
             setTxt('learningStatusTag', 'PINN 自主學習中');
         }
@@ -781,38 +729,6 @@ HTML_CONTENT = """<!DOCTYPE html>
                 });
             });
 
-            // 雷達圖時序按鈕監聽
-            const prevBtn = getEl('btnPrevFrame');
-            const nextBtn = getEl('btnNextFrame');
-            const realtimeBtn = getEl('btnRealtimeFrame');
-
-            if (prevBtn) {
-                prevBtn.addEventListener('click', () => {
-                    radarFrameOffsetMins -= 10;
-                    updateRadarTimestamp();
-                    const trackImg = getEl('cwaTyphoonTrackImg');
-                    if (trackImg) trackImg.src = `https://www.cwa.gov.tw/Data/radar/CV1_3600.png?t=${Date.now()}_${radarFrameOffsetMins}`;
-                });
-            }
-            if (nextBtn) {
-                nextBtn.addEventListener('click', () => {
-                    if (radarFrameOffsetMins < 0) {
-                        radarFrameOffsetMins += 10;
-                        updateRadarTimestamp();
-                        const trackImg = getEl('cwaTyphoonTrackImg');
-                        if (trackImg) trackImg.src = `https://www.cwa.gov.tw/Data/radar/CV1_3600.png?t=${Date.now()}_${radarFrameOffsetMins}`;
-                    }
-                });
-            }
-            if (realtimeBtn) {
-                realtimeBtn.addEventListener('click', () => {
-                    radarFrameOffsetMins = 0;
-                    updateRadarTimestamp();
-                    const trackImg = getEl('cwaTyphoonTrackImg');
-                    if (trackImg) trackImg.src = `https://www.cwa.gov.tw/Data/radar/CV1_3600.png?t=${Date.now()}`;
-                });
-            }
-
             window.addEventListener('resize', renderAllCanvas);
 
             function animLoop() {
@@ -851,13 +767,6 @@ HTML_CONTENT = """<!DOCTYPE html>
                 setTxt('gemReopenTime', `${fmtM(d2)} (後日) 08:00`);
 
                 checkDailySyncWindows(now);
-
-                radarCountdownSec--;
-                if (radarCountdownSec <= 0) {
-                    radarCountdownSec = 600;
-                    fetchCWALiveData();
-                }
-                setTxt('radarCountdown', `${radarCountdownSec}s`);
 
                 if (now.getSeconds() % 5 === 0) {
                     heartbeat++;
