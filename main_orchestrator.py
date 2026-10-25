@@ -3,7 +3,7 @@
 """
 ==============================================================================
 GEM Engine v66.0 Master Spatial-Dynamic Orchestrator
-全域 SSOT 戰術指揮中樞 - 多源 API 交叉比對、自主反饋校正與完全去矛盾版
+全域 SSOT 戰術指揮中樞 - 行政開設權責防誤報、多源 API 融合與完全去矛盾完整版
 ==============================================================================
 """
 
@@ -52,7 +52,7 @@ class GEMMasterOrchestrator:
         self.config = EngineConfig()
 
     async def execute_cycle(self):
-        logging.info("🚀 GEM Engine v66.0 Master Orchestrator (Multi-API Consensus & Learning Enabled) 啟動...")
+        logging.info("🚀 GEM Engine v66.0 Master Orchestrator 完整版啟動...")
         now_cst = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
         
         ssot_payload = {
@@ -160,11 +160,11 @@ HTML_CONTENT = """<!DOCTYPE html>
                     <span id="typhoonHeartbeatClock" class="text-[10px] font-mono text-emerald-400 font-bold bg-emerald-950/80 px-1.5 py-0.5 rounded border border-emerald-500/40">● 多源融合: 0次</span>
                 </summary>
                 <div class="pt-2 border-t border-red-500/30 mt-2 space-y-2">
-                    <!-- 行政開設狀態：多源 API 交叉比對與反饋校正（中央 / 宜蘭縣 / 新北市） -->
+                    <!-- 行政開設狀態：預設未開設，僅於官方授權陸警時切換，防止離線誤報 -->
                     <div class="bg-red-950/50 p-1.5 rounded-lg border border-red-500/40">
                         <div class="text-[10px] font-bold text-amber-300 mb-1 flex justify-between items-center">
-                            <span>🏛️ 政府行政應變中心（多源 API 交叉校正）：</span>
-                            <span class="text-[8.5px] font-mono text-emerald-300" id="cwaStatusTag">CWA+NCDR+EMIC 融合 (信心度 100%)</span>
+                            <span>🏛️ 政府行政應變中心（以官方發布為準）：</span>
+                            <span class="text-[8.5px] font-mono text-emerald-300" id="cwaStatusTag">CWA / NCDR 實時同步</span>
                         </div>
                         <div class="grid grid-cols-3 gap-1 text-[9.5px]">
                             <div class="bg-black/40 p-1 rounded border border-slate-700 flex flex-col items-center justify-center text-center">
@@ -185,7 +185,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                     <!-- 氣象署官方圖資與動態描述 -->
                     <div class="bg-black/60 p-1.5 rounded-lg border border-slate-700">
                         <div class="flex justify-between items-center mb-1">
-                            <span class="text-[10px] font-bold text-amber-300" id="tcNameLabel">🌀 多源 API 即時動態連線中...</span>
+                            <span class="text-[10px] font-bold text-amber-300" id="tcNameLabel">🌀 氣象署即時動態讀取中...</span>
                             <span class="badge badge-pass text-[8.5px]" id="tcThreatRate">即時連線</span>
                         </div>
                         <div class="text-[9.5px] text-slate-300 mb-1 font-mono" id="tcPosLabel">
@@ -200,7 +200,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                                  onerror="this.src='https://watch.ncdr.nat.gov.tw/watch_filename/typhoon_route.png';">
                         </div>
                         <div class="flex justify-between items-center mt-1 text-[8.5px] text-slate-400 font-mono">
-                            <span id="dataPipelineSourceText">📡 數據源：CWA / NCDR / EMIC 官方開放資料 API</span>
+                            <span id="dataPipelineSourceText">📡 數據源：CWA / NCDR 官方開放資料 API</span>
                             <span id="typhoonImgUpdateTime">更新於: --:--:--</span>
                         </div>
                     </div>
@@ -336,7 +336,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                     
                     <div class="bg-slate-900/80 p-2 rounded border border-slate-700 text-slate-300 text-[9.5px] leading-relaxed" id="historyAnalysisDesc">
                         <b>📜 多源 API 即時動態比對中：</b><br>
-                        系統正連線 CWA/NCDR/EMIC 獲取實時警報與開設動態。將依據 GEM 5 大剛性物理 VETO 門檻作為開停航與封島管制之最高戰術裁決。
+                        系統正連線 CWA/NCDR 獲取實時警報與開設動態。將依據 GEM 5 大剛性物理 VETO 門檻作為開停航與封島管制之最高戰術裁決。
                     </div>
                 </div>
 
@@ -404,7 +404,6 @@ HTML_CONTENT = """<!DOCTYPE html>
         let animPhase = 0;
         let typhoonHeartbeatCount = 0;
 
-        // 計算與龜山島之球面距離 (Haversine 演算法)
         function getGuishanDist(lat, lon) {
             const R = 6371;
             const dLat = (lat - 24.843) * Math.PI / 180;
@@ -420,8 +419,8 @@ HTML_CONTENT = """<!DOCTYPE html>
             return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
         }
 
-        // 多源 API 共識決：更新三處行政應變中心開設燈號 (中央 / 宜蘭縣 / 新北市)
-        function updateBadges(dist, hasRealLandAlert, emicData) {
+        // 行政開設防誤報核心函數：僅當有官方陸警且距離適宜時切換，否則無條件保持「🟢 未開設」
+        function updateBadges(dist, hasRealLandAlert) {
             const centralBadge = getEl('badgeCentralAlert');
             const yilanBadge = getEl('badgeYilanAlert');
             const ntpcBadge = getEl('badgeNtpCAlert');
@@ -432,37 +431,26 @@ HTML_CONTENT = """<!DOCTYPE html>
                 if (ntpcBadge) { ntpcBadge.innerText = nTxt; ntpcBadge.className = nCls; }
             };
 
-            // 1. 若 EMIC / NCDR 有直接明確之官方開放資料，優先採用
-            if (emicData && emicData.hasEocData) {
-                applyClass(
-                    emicData.centralLevel || '🟢 未開設', emicData.centralCls || 'badge badge-pass',
-                    emicData.yilanLevel || '🟢 未開設', emicData.yilanCls || 'badge badge-pass',
-                    emicData.ntpcLevel || '🟢 未開設', emicData.ntpcCls || 'badge badge-pass'
-                );
+            if (!hasRealLandAlert) {
+                applyClass('🟢 未開設', 'badge badge-pass', '🟢 未開設', 'badge badge-pass', '🟢 未開設', 'badge badge-pass');
                 return;
             }
 
-            // 2. 共識決備援：依 CWA 陸上警報名單與半徑推算
-            if (hasRealLandAlert && dist !== "--" && parseFloat(dist) < 300) {
+            if (dist !== "--" && parseFloat(dist) < 300) {
                 applyClass('🔴 一級開設', 'badge badge-veto', '🔴 一級開設', 'badge badge-veto', '🔴 一級開設', 'badge badge-veto');
-            } else if (hasRealLandAlert && dist !== "--" && parseFloat(dist) < 500) {
+            } else if (dist !== "--" && parseFloat(dist) < 500) {
                 applyClass('🟡 二級開設', 'badge badge-yellow', '🟡 二級開設', 'badge badge-yellow', '🟡 二級開設', 'badge badge-yellow');
             } else {
                 applyClass('🟢 未開設', 'badge badge-pass', '🟢 未開設', 'badge badge-pass', '🟢 未開設', 'badge badge-pass');
             }
         }
 
-        // 多源 API 融合管道 (CWA W-C0034-001 + NCDR + EMIC 避難開展備援)
         async function fetchCWALiveData() {
             const urlParams = new URLSearchParams(window.location.search);
             const userKey = urlParams.get('cwa_key') || 'CWA-YOUR-API-KEY-HERE';
             const cwaUrl = `https://opendata.cwa.gov.tw/api/v1/rest/datastore/W-C0034-001?Authorization=${userKey}`;
 
-            let cwaSuccess = false;
-            let emicResult = { hasEocData: false };
-
             try {
-                // 1. 發起 CWA 官方 API 請求
                 const response = await fetch(cwaUrl);
                 if (!response.ok) throw new Error(`CWA API error! status: ${response.status}`);
                 const result = await response.json();
@@ -484,46 +472,42 @@ HTML_CONTENT = """<!DOCTYPE html>
                         const noStr = tcNo ? `第 ${tcNo} 號 ` : "";
                         setTxt('tcNameLabel', `🌀 ${noStr}${tcName} (${intensity}) 颱風`);
                         setTxt('tcPosLabel', `中心位置：${lat}°N ${lon}°E (距龜山島 ${dist}km)`);
-                        setTxt('tcThreatRate', `🟢 多源 API 融合`);
+                        setTxt('tcThreatRate', `🟢 CWA實時連線`);
 
                         const descEl = getEl('historyAnalysisDesc');
                         if (descEl) {
-                            descEl.innerHTML = `<b>📜 CWA/NCDR【${tcName}】(${intensity}) 多源即時連線：</b><br>颱風中心距龜山島 <b>${dist}km</b>。長浪與風場受外圍環流影響極顯著。<b>建議依 GEM 5 大剛性物理 VETO 門檻為最高戰術依據，D0~D1 強制封島淨空；D2 視海象移防南岸條件開放；D3 恢復常態營運。</b>`;
+                            descEl.innerHTML = `<b>📜 CWA/NCDR【${tcName}】(${intensity}) 實時動態：</b><br>颱風中心距龜山島 <b>${dist}km</b>。長浪與風場受外圍環流影響極顯著。<b>建議依 GEM 5 大剛性物理 VETO 門檻為最高戰術依據，D0~D1 強制封島淨空；D2 視海象移防南岸條件開放；D3 恢復常態營運。</b>`;
                         }
 
-                        // 判斷是否有實質陸上警戒範圍
                         const hasLandWarn = tc.landWarning && tc.landWarning.length > 0;
-                        updateBadges(dist, hasLandWarn, emicResult);
-                        cwaSuccess = true;
+                        updateBadges(dist, hasLandWarn);
                     }
                 } else {
                     setTxt('tcNameLabel', '🌊 目前台灣海域無颱風警報發布中');
                     setTxt('tcPosLabel', '週邊海域維持常態動態監測 (無現存颱風威脅)');
                     setTxt('tcThreatRate', '常態監測');
-                    updateBadges("--", false, emicResult);
-                    cwaSuccess = true;
+                    updateBadges("--", false);
                 }
 
-                // 刷新氣象署即時圖資
                 const trackImg = getEl('cwaTyphoonTrackImg');
                 if (trackImg) {
                     trackImg.src = `https://www.cwa.gov.tw/Data/typhoon/TY_WARN/B20.png?t=${Date.now()}`;
                 }
 
                 typhoonHeartbeatCount++;
-                setTxt('typhoonHeartbeatClock', `● 多源融合: ${typhoonHeartbeatCount} 次`);
-                setTxt('cwaStatusTag', 'CWA+NCDR+EMIC 融合 (信心度 100%)');
-                setTxt('dataPipelineSourceText', '📡 數據源：CWA / NCDR / EMIC 官方開放資料 API');
+                setTxt('typhoonHeartbeatClock', `● CWA主線: ${typhoonHeartbeatCount} 次`);
+                setTxt('cwaStatusTag', 'CWA / NCDR 實時同步');
+                setTxt('dataPipelineSourceText', '📡 數據源：中央氣象署 (CWA) 官方警報圖資');
                 setTxt('typhoonImgUpdateTime', `更新於: ${fmtTime(new Date())}`);
-                setTxt('stationHeartbeatClock', '● CWA/NCDR/EMIC 實時連線正常');
+                setTxt('stationHeartbeatClock', '● CWA/NCDR 實時連線正常');
 
             } catch (err) {
-                console.warn("CWA 主線連線未響應，啟用 GEM 歷史模型與反饋機制:", err);
+                console.warn("無法取得氣象署即時資訊，啟動 GEM 歷史模型離線遞補:", err);
                 processGEMBackupHistoricalModel();
             }
         }
 
-        // 離線反饋與歷史模型遞補機制：絕不虛報假行政警報
+        // 離線模型遞補：僅進行水文物理場模擬，政府開設狀態一律反饋校正為「未開設」，嚴防誤報假警報
         function processGEMBackupHistoricalModel() {
             const hs = parseFloat(getEl('rngHs')?.value || 3.71);
             const w = parseFloat(getEl('rngW')?.value || 8.50);
@@ -540,8 +524,8 @@ HTML_CONTENT = """<!DOCTYPE html>
                 descEl.innerHTML = `<b>📜 GEM 歷史強化學習模型遞補 (離線模式)：</b><br>API 尚未連線，系統以物理場模擬。<b>行政應變中心維持「未開設」（以政府官方公告為準）；港埠依 GEM 剛性物理 VETO 門檻獨立執行防颱封島管制。</b>`;
             }
 
-            // 離線/未連線狀態下，政府開設狀態一律反饋校正為「未開設」，杜絕假警報
-            updateBadges(simulatedDist, false, { hasEocData: false });
+            // 強制校正行政開設燈號為「未開設」
+            updateBadges(simulatedDist, false);
 
             typhoonHeartbeatCount++;
             setTxt('typhoonHeartbeatClock', `⚠️ 備援遞補: ${typhoonHeartbeatCount} 次`);
