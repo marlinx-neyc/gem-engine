@@ -3,7 +3,7 @@
 """
 ==============================================================================
 GEM Engine v66.0 Master Spatial-Dynamic Orchestrator
-全域 SSOT 戰術指揮中樞 - 手機版 (Mobile RWD) 徹底修復版
+全域 SSOT 戰術指揮中樞 - 手機版 (Mobile RWD) CWA 實時連線修正版
 ==============================================================================
 """
 
@@ -51,7 +51,7 @@ class GEMMasterOrchestrator:
         self.config = EngineConfig()
 
     async def execute_cycle(self):
-        logging.info("🚀 GEM Engine v66.0 Master Orchestrator (Mobile Fixed) 啟動...")
+        logging.info("🚀 GEM Engine v66.0 Master Orchestrator (CWA Dynamic Enabled) 啟動...")
         now_cst = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
         
         ssot_payload = {
@@ -139,6 +139,7 @@ HTML_CONTENT = """<!DOCTYPE html>
                         <span>時間：<b id="liveClock" class="text-white bg-white/10 px-1 py-0.5 rounded">--:--:-- CST</b></span>
                         <span>| 日期：<b id="liveDate" class="text-emerald-300 bg-emerald-950/60 border border-emerald-500/40 px-1 py-0.5 rounded">----/--/-- (--)</b></span>
                         <span>| 裁示：<b id="ssotDecisionBadge" class="text-[#ef4444] font-bold">0.0% 熔斷</b></span>
+                        <span>| <span id="stationHeartbeatClock" class="text-[#38bdf8]">● 心跳 12s</span></span>
                     </div>
                 </div>
             </div>
@@ -396,11 +397,53 @@ HTML_CONTENT = """<!DOCTYPE html>
         let currentRadarMode = 'SOUTH';
         let animPhase = 0;
 
+        // === 方案 A 關鍵改動：前端異步動態拉取氣象署開放資料 API ===
+        async function fetchCWALiveData() {
+            const CWA_API_KEY = 'CWA-YOUR-API-KEY-HERE'; // 填入中央氣象署授權 API Key
+            const url = `https://opendata.cwa.gov.tw/api/v1/rest/datastore/W-C0034-001?Authorization=${CWA_API_KEY}`;
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const result = await response.json();
+
+                // 解析氣象署颱風動態
+                const cyclones = result.records?.tropicalCyclones?.tropicalCyclone;
+                if (cyclones && cyclones.length > 0) {
+                    const tc = cyclones[0];
+                    const analysis = tc.analysisData?.fix?.slice(-1)[0];
+                    
+                    const tcStatusEl = getEl('typhoonStatusTag');
+                    if (tcStatusEl && analysis) {
+                        const tcName = tc.cwaTyphoonName || tc.typhoonName || "最新颱風";
+                        tcStatusEl.innerText = `${tcName} (${analysis.latitude}°N, ${analysis.longitude}°E)`;
+                    }
+                }
+
+                // 成功抓取：更新心跳燈為實時連線狀態
+                const stnClock = getEl('stationHeartbeatClock');
+                if (stnClock) {
+                    stnClock.innerHTML = '<span style="color:#10b981; font-weight:bold;">● CWA API 實時連線正常</span>';
+                }
+            } catch (err) {
+                console.warn("氣象署 API 連線失敗或授權碼未填寫 (自動維持預設離線快照):", err);
+                const stnClock = getEl('stationHeartbeatClock');
+                if (stnClock) {
+                    stnClock.innerHTML = '<span style="color:#f59e0b; font-weight:bold;">⚠️ CWA API 離線模式 (快照)</span>';
+                }
+            }
+        }
+
         function initDashboard() {
             startClockAndWatchdog();
             initUIControls();
             applyStateIsolation();
             recalculatePhysicsAndRender();
+
+            // 啟動 API 動態拉取與 5 分鐘週期輪詢
+            fetchCWALiveData();
+            setInterval(fetchCWALiveData, 300000);
+
             window.addEventListener('resize', renderAllCanvas);
 
             function animLoop() {
@@ -438,7 +481,9 @@ HTML_CONTENT = """<!DOCTYPE html>
                 const targetLandfallTime = new Date('2026/10/23 14:00:00').getTime();
                 if (now.getTime() > targetLandfallTime && landfallEl) {
                     landfallEl.innerHTML = `<span style="color:#f59e0b; font-weight:bold;">已通過 (10/23 14:00)</span>`;
-                    if (statusTagEl) statusTagEl.innerText = "中心掠過，暴風圈持續籠罩";
+                    if (statusTagEl && statusTagEl.innerText === '➔ 🌀 ➔') {
+                        statusTagEl.innerText = "中心掠過，暴風圈持續籠罩";
+                    }
                 }
 
                 if (now.getSeconds() % 5 === 0) {
@@ -701,7 +746,7 @@ HTML_CONTENT = """<!DOCTYPE html>
             ctx.beginPath(); ctx.moveTo(ukcX, keelY); ctx.lineTo(ukcX, seabedY);
             ctx.strokeStyle = ukc < 1.50 ? '#ef4444' : '#10b981'; ctx.lineWidth = 1.8; ctx.stroke();
 
-            // 手機版 HUD (防重疊兩行繪製)
+            // HUD 標籤繪製
             ctx.font = 'bold 9px sans-serif';
             ctx.fillStyle = accentColor;
             ctx.fillText(`⚓ ${title}`, 6, 11);
@@ -713,7 +758,6 @@ HTML_CONTENT = """<!DOCTYPE html>
             ctx.restore();
         }
 
-        // 手機版雷達圖防裁切繪製 (Auto-scaling & Clipping Protection)
         function drawRadarCanvas() {
             const canvas = getEl('nativeRadarCanvas');
             const container = getEl('radarContainer');
@@ -759,13 +803,12 @@ HTML_CONTENT = """<!DOCTYPE html>
 
             const cx = w / 2;
             const cy = h * 0.42;
-            // 控制半徑，為手機寬度兩側留足標籤空間
             const R = Math.min(w * 0.16, 48);
             const count = 5;
             const angles = [];
             for (let i = 0; i < count; i++) angles.push(-Math.PI / 2 + (i * 2 * Math.PI) / count);
 
-            // 網格繪製
+            // 雷達網格
             [0.5, 1.0, 1.35].forEach(lvl => {
                 ctx.beginPath();
                 for (let i = 0; i < count; i++) {
@@ -805,7 +848,6 @@ HTML_CONTENT = """<!DOCTYPE html>
                 drawRadarPoly(ctx, cx, cy, R, angles, getRatios(false), 'rgba(239, 68, 68, 0.35)', '#ef4444');
             }
 
-            // 手機版防超界頂點標籤繪製
             const isN = currentRadarMode === 'NORTH';
             const isS = currentRadarMode === 'SOUTH';
 
@@ -835,7 +877,6 @@ HTML_CONTENT = """<!DOCTYPE html>
                 let y = cy + r * Math.sin(angles[i]);
                 const item = dynamicLabels[i];
 
-                // 防止 X 座標超出手機邊界
                 x = Math.max(8, Math.min(w - 8, x));
 
                 ctx.fillStyle = item.fail ? '#fca5a5' : '#86efac';
