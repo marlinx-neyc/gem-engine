@@ -177,6 +177,70 @@
                 </div>
             </section>
 
+            <!-- 1.5 ⚓ CWA 烏石/頭城 vs 蘇澳潮位雙站對比 (收合版) -->
+            <details class="card border-[#38bdf8] bg-[#081325]" id="detailsTideStationCompare">
+                <summary class="card-header !text-sky-300 list-none outline-none cursor-pointer flex justify-between items-center">
+                    <span class="font-extrabold text-[11px] flex items-center gap-1">
+                        ⚓ CWA 雙站潮位校正比對（烏石/頭城 vs 蘇澳潮位站）
+                    </span>
+                    <span class="badge badge-yellow text-[8px]">▼ 點擊展開雙站潮位詳情</span>
+                </summary>
+                <div class="pt-2 border-t border-sky-500/30 mt-1">
+                    <div class="overflow-x-auto">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>戰術時段</th>
+                                    <th>對齊時間</th>
+                                    <th class="text-center text-sky-300">烏石/龜山站潮位</th>
+                                    <th class="text-center text-emerald-300">蘇澳站潮位</th>
+                                    <th class="text-center text-amber-300">潮差/趨勢</th>
+                                    <th class="text-center">GEM 採用潮位</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="font-bold text-sky-300">🌅 早班時窗</td>
+                                    <td class="font-mono">08:00 CST</td>
+                                    <td class="text-center font-mono text-slate-300">+1.55m CD</td>
+                                    <td class="text-center font-mono text-slate-300">+1.48m CD</td>
+                                    <td class="text-center font-mono text-amber-300">▲ 滿潮 (潮漲)</td>
+                                    <td class="text-center font-mono font-bold text-sky-300">+1.55m CD</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold text-amber-300">☀️ 午班時窗</td>
+                                    <td class="font-mono">12:00 CST</td>
+                                    <td class="text-center font-mono text-slate-300">+0.80m CD</td>
+                                    <td class="text-center font-mono text-slate-300">+0.75m CD</td>
+                                    <td class="text-center font-mono text-amber-300">▼ 乾潮 (退潮)</td>
+                                    <td class="text-center font-mono font-bold text-sky-300">+0.80m CD</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-bold text-purple-300">🌇 黃昏時窗</td>
+                                    <td class="font-mono">17:00 CST</td>
+                                    <td class="text-center font-mono text-slate-300">+1.30m CD</td>
+                                    <td class="text-center font-mono text-slate-300">+1.25m CD</td>
+                                    <td class="text-center font-mono text-amber-300">▲ 次高潮</td>
+                                    <td class="text-center font-mono font-bold text-sky-300">+1.30m CD</td>
+                                </tr>
+                                <tr class="bg-red-950/20">
+                                    <td class="font-bold text-red-400">🚨 突發調動</td>
+                                    <td class="font-mono text-red-300">即時機動點</td>
+                                    <td class="text-center font-mono text-slate-300">+1.40m CD</td>
+                                    <td class="text-center font-mono text-slate-300">+1.35m CD</td>
+                                    <td class="text-center font-mono text-red-300">⚡ 機動監測</td>
+                                    <td class="text-center font-mono font-bold text-red-300">+1.40m CD</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-[8px] text-slate-400 mt-1.5 font-mono flex justify-between items-center px-1">
+                        <span>註：潮位高程基準統一為臺灣海圖基準面（Chart Datum, CD）</span>
+                        <a href="https://www.cwa.gov.tw/V8/C/M/tide.html" target="_blank" class="text-sky-400 underline hover:text-sky-300">前往 CWA 氣象署官網查詢即時曲線 ↗</a>
+                    </div>
+                </div>
+            </details>
+
             <!-- 2. 📅 每周戰術開放/封島預測總覽 -->
             <section class="card border-[#10b981] bg-[#0a1f18]">
                 <div class="card-header !text-emerald-400 flex justify-between items-center">
@@ -810,7 +874,7 @@
             ctx.setLineDash([]);
 
             ctx.font = 'bold 8.5px sans-serif';
-            ctx.fillStyle = isOvertopping ? '#fca5a5' : '#fcd34d';
+            ctx.fillStyle = isOvertopping ? '#fca5 a5' : '#fcd34d';
             ctx.textAlign = 'left';
             const crestTextY = crestY < 20 ? crestY + 11 : crestY - 3;
             ctx.fillText(`波頂/越浪線: +${crestCD.toFixed(2)}m CD ${isOvertopping ? '🚨 (越浪超標)' : '⚠️'}`, 6, crestTextY);
