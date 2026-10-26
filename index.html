@@ -320,7 +320,7 @@
         </div>
     </div>
 
-    <!-- 完整的 JS 繪圖與沙盤對算邏輯 -->
+    <!-- 完整的 Canvas 2D 繪圖與沙盤動態對算腳本 -->
     <script>
     (function() {
         const getEl = id => document.getElementById(id);
@@ -385,6 +385,16 @@
                     el.addEventListener('click', () => {
                         if (isRadar) currentRadarMode = mode.toUpperCase();
                         else currentProfileMode = mode.toUpperCase();
+                        
+                        // 更新按鈕樣式
+                        ['South', 'North', 'Compare'].forEach(m => {
+                            const btn = getEl(prefix + m);
+                            if (btn) {
+                                const active = m.toUpperCase() === (isRadar ? currentRadarMode : currentProfileMode);
+                                btn.className = `tab-btn py-0.5 px-1 rounded text-[8.5px] font-bold border text-center ${active ? (m==='South'?'tab-south-active':(m==='North'?'tab-north-active':'tab-compare-active')) : 'border-slate-700 bg-slate-800 text-slate-300'}`;
+                            }
+                        });
+                        
                         recalculatePhysicsAndRender();
                     });
                 }
@@ -423,45 +433,128 @@
             drawRadarCanvas();
         }
 
+        function drawSingleProfile(ctx, offsetX, offsetY, w, h, title, depthBase, deckCD, hsPier, weff, tp, tideCD, accentColor) {
+            ctx.save();
+            ctx.translate(offsetX, offsetY);
+
+            const cdToY = cd => ((5.0 - cd) / (5.0 - (-12.0))) * (h - 28) + 16;
+            const draft = 2.02;
+            const keelCD = tideCD - draft;
+            const ukc = depthBase + keelCD - hsPier * 0.5;
+            const crestCD = tideCD + hsPier * 0.68;
+            const overtopDepth = Math.max(0, crestCD - deckCD);
+            const fb = deckCD - crestCD;
+
+            const tideY = cdToY(tideCD);
+            const deckY = cdToY(deckCD);
+            const seabedY = cdToY(-depthBase);
+            const keelY = cdToY(keelCD);
+            const crestY = cdToY(crestCD);
+            const quayX = w * 0.52;
+
+            // 海底地層
+            ctx.fillStyle = '#1a1816';
+            ctx.fillRect(0, seabedY, w, Math.max(10, h - seabedY));
+            ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(0, seabedY); ctx.lineTo(w, seabedY); ctx.stroke();
+
+            ctx.font = '8px monospace'; ctx.fillStyle = '#94a3b8'; ctx.textAlign = 'right';
+            ctx.fillText(`海底: -${depthBase.toFixed(2)}m CD`, w - 6, seabedY + 10);
+
+            // 碼頭結構體
+            ctx.fillStyle = '#1e2d4a'; ctx.fillRect(quayX, deckY, w - quayX, seabedY - deckY);
+            ctx.strokeStyle = accentColor; ctx.lineWidth = 1.2;
+            ctx.strokeRect(quayX, deckY, w - quayX, seabedY - deckY);
+
+            ctx.fillStyle = '#e2e8f0'; ctx.textAlign = 'left';
+            ctx.fillText(`碼頭面: +${deckCD.toFixed(2)}m CD`, quayX + 4, deckY + 10);
+
+            // 水體與浪型動畫
+            const isOvertopping = overtopDepth > 0 || fb < 0.50;
+            ctx.beginPath();
+            ctx.moveTo(0, seabedY);
+            ctx.lineTo(0, tideY);
+            const waveAmp = Math.min(18, hsPier * 3.5);
+            for (let x = 0; x <= quayX; x += 4) {
+                const wy = tideY + Math.sin(x * 0.05 + animPhase) * waveAmp;
+                ctx.lineTo(x, wy);
+            }
+            if (isOvertopping) {
+                ctx.lineTo(quayX, crestY); ctx.lineTo(w, crestY + 1); ctx.lineTo(w, seabedY);
+            } else {
+                ctx.lineTo(quayX, tideY); ctx.lineTo(quayX, seabedY);
+            }
+            ctx.closePath();
+            ctx.fillStyle = isOvertopping ? 'rgba(239, 68, 68, 0.38)' : 'rgba(56, 189, 248, 0.35)';
+            ctx.fill();
+
+            // 潮位基準線
+            ctx.strokeStyle = '#38bdf8'; ctx.setLineDash([2, 2]);
+            ctx.beginPath(); ctx.moveTo(0, tideY); ctx.lineTo(quayX, tideY); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.font = '8px sans-serif'; ctx.fillStyle = '#38bdf8'; ctx.textAlign = 'left';
+            ctx.fillText(`潮位: ${tideCD >= 0 ? '+' : ''}${tideCD.toFixed(2)}m CD`, 6, tideY - 2);
+
+            // 靠泊客輪
+            const shipW = Math.min(54, quayX * 0.55);
+            const shipX = quayX - shipW - 14;
+            const shipDeckY = tideY - 10;
+            ctx.beginPath();
+            ctx.moveTo(shipX, shipDeckY); ctx.lineTo(shipX + shipW, shipDeckY);
+            ctx.lineTo(shipX + shipW, keelY - 3); ctx.lineTo(shipX + shipW - 4, keelY);
+            ctx.lineTo(shipX + 4, keelY); ctx.lineTo(shipX, keelY - 5);
+            ctx.closePath();
+            ctx.fillStyle = '#1e293b'; ctx.fill();
+            ctx.strokeStyle = '#f8fafc'; ctx.lineWidth = 1; ctx.stroke();
+
+            // 龍骨裕深 (UKC) 標示
+            const ukcX = shipX + shipW * 0.5;
+            const ukcPass = ukc >= 1.50;
+            ctx.beginPath(); ctx.moveTo(ukcX, keelY); ctx.lineTo(ukcX, seabedY);
+            ctx.strokeStyle = ukcPass ? '#10b981' : '#ef4444'; ctx.lineWidth = 1.8; ctx.stroke();
+
+            ctx.font = 'bold 8.5px sans-serif'; ctx.textAlign = 'center';
+            const ukcTextY = Math.min(seabedY - 3, Math.max(keelY + 10, (keelY + seabedY) / 2 + 3));
+            ctx.fillStyle = ukcPass ? '#86efac' : '#fca5a5';
+            ctx.fillText(`UKC: ${ukc.toFixed(2)}m ${ukcPass ? '🟢' : '🔴'}`, ukcX + 22, ukcTextY);
+
+            // 標題
+            ctx.font = 'bold 9.5px sans-serif'; ctx.fillStyle = accentColor; ctx.textAlign = 'left';
+            ctx.fillText(`⚓ ${title}`, 6, 12);
+            ctx.restore();
+        }
+
         function drawProfileCanvas() {
             const canvas = getEl('profileCanvas');
             const container = getEl('profileContainer');
             if (!canvas || !container) return;
 
+            const hs = parseFloat(getEl('rngHs')?.value || 3.71);
+            const wVal = parseFloat(getEl('rngW')?.value || 8.50);
+            const tp = parseFloat(getEl('rngTp')?.value || 15.5);
+            const tide = parseFloat(getEl('rngTide')?.value || 1.10);
+            const deltaTheta = parseFloat(getEl('rngDeltaTheta')?.value || 50);
+
+            const isCompare = currentProfileMode === 'COMPARE';
             const w = container.clientWidth || 320;
             const h = container.clientHeight || 200;
             const dpr = window.devicePixelRatio || 1;
+
             canvas.width = w * dpr; canvas.height = h * dpr;
             canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
 
             const ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr);
             ctx.fillStyle = '#050a14'; ctx.fillRect(0, 0, w, h);
 
-            const hs = parseFloat(getEl('rngHs')?.value || 3.71);
-            const tide = parseFloat(getEl('rngTide')?.value || 1.10);
-
-            // 碼頭與海床
-            const seabedY = h - 25;
-            const quayX = w * 0.55;
-            const tideY = h * 0.4 - tide * 12;
-
-            ctx.fillStyle = '#1e2d4a'; ctx.fillRect(quayX, h * 0.25, w - quayX, seabedY - h * 0.25);
-            ctx.strokeStyle = '#38bdf8'; ctx.strokeRect(quayX, h * 0.25, w - quayX, seabedY - h * 0.25);
-
-            // 動態波浪
-            ctx.beginPath();
-            ctx.moveTo(0, seabedY);
-            for (let x = 0; x <= quayX; x += 5) {
-                const wy = tideY + Math.sin(x * 0.05 + animPhase) * (hs * 3.5);
-                ctx.lineTo(x, wy);
+            if (isCompare) {
+                const subW = (w - 6) / 2;
+                drawSingleProfile(ctx, 0, 0, subW, h, '北岸 (主泊位 -8.5m)', 8.50, 3.20, hs * 1.06, wVal * Math.abs(Math.cos(deltaTheta * Math.PI/180)), tp, tide, '#38bdf8');
+                drawSingleProfile(ctx, subW + 6, 0, subW, h, '南岸 (權宜泊位 -9.8m)', 9.80, 2.50, hs * 0.62, wVal * Math.abs(Math.cos((90-deltaTheta) * Math.PI/180)), tp, tide, '#34d399');
+            } else if (currentProfileMode === 'NORTH') {
+                drawSingleProfile(ctx, 0, 0, w, h, '北岸碼頭 (主泊位 -8.50m CD)', 8.50, 3.20, hs * 1.06, wVal * Math.abs(Math.cos(deltaTheta * Math.PI/180)), tp, tide, '#38bdf8');
+            } else {
+                drawSingleProfile(ctx, 0, 0, w, h, '南岸碼頭 (權宜泊位 -9.80m CD)', 9.80, 2.50, hs * 0.62, wVal * Math.abs(Math.cos((90-deltaTheta) * Math.PI/180)), tp, tide, '#34d399');
             }
-            ctx.lineTo(quayX, seabedY); ctx.closePath();
-            ctx.fillStyle = 'rgba(56, 189, 248, 0.35)'; ctx.fill();
-
-            // 標籤文字
-            ctx.fillStyle = '#38bdf8'; ctx.font = 'bold 9px monospace';
-            ctx.fillText(`⚓ 碼頭動態剖面 [模式: ${currentProfileMode}]`, 8, 15);
-            ctx.fillText(`潮位: ${tide >= 0 ? '+' : ''}${tide.toFixed(2)}m CD`, 8, tideY - 5);
         }
 
         function drawRadarCanvas() {
@@ -469,51 +562,130 @@
             const container = getEl('radarContainer');
             if (!canvas || !container) return;
 
+            const hs = parseFloat(getEl('rngHs')?.value || 3.71);
+            const wVal = parseFloat(getEl('rngW')?.value || 8.50);
+            const tpVal = parseFloat(getEl('rngTp')?.value || 15.5);
+            const tideVal = parseFloat(getEl('rngTide')?.value || 1.10);
+            const deltaTheta = parseFloat(getEl('rngDeltaTheta')?.value || 50);
+
+            const radNorth = deltaTheta * (Math.PI / 180);
+            const hsNorth = hs * 1.06;
+            const hsSouth = hs * 0.62;
+            const weffNorth = wVal * Math.abs(Math.cos(radNorth));
+            const weffSouth = wVal * Math.abs(Math.cos((90-deltaTheta) * Math.PI / 180));
+            const draft = 2.02;
+
+            const ukcNorth = 8.50 + tideVal - draft - hsNorth * 0.5;
+            const ukcSouth = 9.80 + tideVal - draft - hsSouth * 0.5;
+            const crestNorth = tideVal + hsNorth * 0.68;
+            const crestSouth = tideVal + hsSouth * 0.68;
+            const fbNorth = 3.20 - crestNorth;
+            const fbSouth = 2.50 - crestSouth;
+
+            const vetoNorth = (hsNorth > 1.13) || (weffNorth > 10.17) || (tpVal >= 11.5) || (ukcNorth < 1.50) || (fbNorth < 0.50);
+            const vetoSouth = (hsSouth > 1.13) || (weffSouth > 10.17) || (tpVal >= 11.5) || (ukcSouth < 1.50) || (fbSouth < 0.50);
+
             const w = container.clientWidth || 320;
             const h = container.clientHeight || 260;
             const dpr = window.devicePixelRatio || 1;
+
             canvas.width = w * dpr; canvas.height = h * dpr;
             canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
 
             const ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr);
             ctx.fillStyle = '#050a14'; ctx.fillRect(0, 0, w, h);
 
-            const cx = w / 2, cy = h / 2, R = Math.min(w, h) * 0.35;
-            const angles = [-Math.PI/2, -Math.PI/10, Math.PI*3/10, Math.PI*7/10, Math.PI*11/10];
+            const cx = w / 2; const cy = h * 0.45;
+            const R = Math.min(w * 0.22, h * 0.28, 85);
+            const count = 5;
+            const angles = [];
+            for (let i = 0; i < count; i++) angles.push(-Math.PI / 2 + (i * 2 * Math.PI) / count);
 
-            // 多階幾何網格
-            [0.3, 0.6, 1.0].forEach(rRatio => {
+            // 幾何同心五邊形網格
+            [0.3, 0.6, 1.0, 1.25].forEach(lvl => {
                 ctx.beginPath();
-                for (let i = 0; i < 5; i++) {
-                    const x = cx + R * rRatio * Math.cos(angles[i]);
-                    const y = cy + R * rRatio * Math.sin(angles[i]);
+                for (let i = 0; i < count; i++) {
+                    const r = R * lvl;
+                    const x = cx + r * Math.cos(angles[i]);
+                    const y = cy + r * Math.sin(angles[i]);
                     if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
                 }
                 ctx.closePath();
-                ctx.strokeStyle = rRatio === 1.0 ? '#facc15' : '#1e2d4a';
-                ctx.lineWidth = 1; ctx.stroke();
+                ctx.strokeStyle = lvl === 1.0 ? '#facc15' : '#1e2d4a';
+                ctx.lineWidth = lvl === 1.0 ? 1.4 : 0.8;
+                if (lvl === 1.0) ctx.setLineDash([4, 4]); else ctx.setLineDash([]);
+                ctx.stroke();
             });
 
-            // 數據多邊形 (依門檻比例繪製)
-            const ratios = [0.95, 0.6, 0.85, 0.7, 0.9];
-            ctx.beginPath();
-            for (let i = 0; i < 5; i++) {
-                const x = cx + R * ratios[i] * Math.cos(angles[i]);
-                const y = cy + R * ratios[i] * Math.sin(angles[i]);
-                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            // 放射軸線
+            for (let i = 0; i < count; i++) {
+                ctx.beginPath(); ctx.moveTo(cx, cy);
+                ctx.lineTo(cx + R * 1.25 * Math.cos(angles[i]), cy + R * 1.25 * Math.sin(angles[i]));
+                ctx.strokeStyle = '#1e2d4a'; ctx.lineWidth = 0.8; ctx.setLineDash([]); ctx.stroke();
             }
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(239, 68, 68, 0.35)'; ctx.fill();
-            ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 2; ctx.stroke();
 
-            // 標籤
-            const labels = ["波高", "風速", "週期", "裕深", "乾舷"];
-            ctx.font = 'bold 9px sans-serif'; ctx.fillStyle = '#f8fafc';
-            for (let i = 0; i < 5; i++) {
-                const x = cx + (R + 15) * Math.cos(angles[i]);
-                const y = cy + (R + 15) * Math.sin(angles[i]);
-                ctx.textAlign = x < cx - 10 ? 'right' : (x > cx + 10 ? 'left' : 'center');
-                ctx.fillText(labels[i], x, y);
+            const getRatios = isNorth => {
+                const curHs = isNorth ? hsNorth : hsSouth;
+                const curWeff = isNorth ? weffNorth : weffSouth;
+                const curUkc = isNorth ? ukcNorth : ukcSouth;
+                const curFb = isNorth ? fbNorth : fbSouth;
+
+                const rHs = curHs / 1.13;
+                const rWeff = curWeff / 10.17;
+                const rTp = tpVal / 11.5;
+                const rUkc = curUkc < 1.50 ? (1.0 + (1.50 - curUkc) / 1.50) : Math.max(0.2, 0.8 - (curUkc - 1.50) / 10.0);
+                const rFb = curFb < 0.50 ? (1.0 + (0.50 - curFb) / 0.50) : Math.max(0.2, 0.8 - (curFb - 0.50) / 3.0);
+                return [rHs, rWeff, rTp, rUkc, rFb];
+            };
+
+            const drawRadarPoly = (ratios, fillColor, strokeColor) => {
+                ctx.beginPath();
+                for (let i = 0; i < count; i++) {
+                    const val = Math.max(0.2, Math.min(1.25, ratios[i]));
+                    const r = R * val;
+                    const x = cx + r * Math.cos(angles[i]);
+                    const y = cy + r * Math.sin(angles[i]);
+                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.fillStyle = fillColor; ctx.fill();
+                ctx.strokeStyle = strokeColor; ctx.lineWidth = 2; ctx.setLineDash([]); ctx.stroke();
+            };
+
+            if (currentRadarMode === 'COMPARE') {
+                drawRadarPoly(getRatios(true), 'rgba(56, 189, 248, 0.3)', '#38bdf8');
+                drawRadarPoly(getRatios(false), 'rgba(16, 185, 129, 0.3)', '#34d399');
+            } else if (currentRadarMode === 'NORTH') {
+                drawRadarPoly(getRatios(true), vetoNorth ? 'rgba(239, 68, 68, 0.35)' : 'rgba(56, 189, 248, 0.35)', vetoNorth ? '#ef4444' : '#38bdf8');
+            } else {
+                drawRadarPoly(getRatios(false), vetoSouth ? 'rgba(239, 68, 68, 0.35)' : 'rgba(16, 185, 129, 0.35)', vetoSouth ? '#ef4444' : '#34d399');
+            }
+
+            // 即時動態數值與燈號標籤
+            const isTargetNorth = currentRadarMode !== 'SOUTH';
+            const activeHs = isTargetNorth ? hsNorth : hsSouth;
+            const activeWeff = isTargetNorth ? weffNorth : weffSouth;
+            const activeUkc = isTargetNorth ? ukcNorth : ukcSouth;
+            const activeFb = isTargetNorth ? fbNorth : fbSouth;
+
+            const dynamicLabels = [
+                { title: "波高", val: `${activeHs.toFixed(2)}m`, fail: activeHs > 1.13 },
+                { title: "風速", val: `${activeWeff.toFixed(1)}m/s`, fail: activeWeff > 10.17 },
+                { title: "週期", val: `${tpVal.toFixed(1)}s`, fail: tpVal >= 11.5 },
+                { title: "裕深", val: `${activeUkc.toFixed(2)}m`, fail: activeUkc < 1.50 },
+                { title: "乾舷", val: `${activeFb.toFixed(2)}m`, fail: activeFb < 0.50 }
+            ];
+
+            ctx.font = 'bold 9.5px sans-serif';
+            for (let i = 0; i < count; i++) {
+                const r = R * 1.35;
+                let x = cx + r * Math.cos(angles[i]);
+                let y = cy + r * Math.sin(angles[i]);
+                const item = dynamicLabels[i];
+                x = Math.max(12, Math.min(w - 12, x));
+                ctx.fillStyle = item.fail ? '#fca5a5' : '#86efac';
+                ctx.textAlign = x < cx - 12 ? 'right' : (x > cx + 12 ? 'left' : 'center');
+                ctx.fillText(`${item.title}: ${item.val} ${item.fail ? '🔴' : '🟢'}`, x, y);
             }
         }
 
@@ -524,7 +696,7 @@
             pollLatestDecision();
             setInterval(pollLatestDecision, 12000);
 
-            // 啟動海浪動畫循環
+            // 啟動海浪動態動畫
             function animLoop() {
                 animPhase += 0.05;
                 drawProfileCanvas();
