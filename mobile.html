@@ -22,8 +22,8 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-dark); color: #f8fafc; padding: 6px; font-variant-numeric: tabular-nums; overflow-x: hidden; }
-        button, input[type="range"], .tab-btn, summary, .timeline-btn { cursor: pointer !important; user-select: none; transition: all 0.15s ease-in-out; touch-action: manipulation; }
-        button:hover, .tab-btn:hover, .timeline-btn:hover { filter: brightness(1.25); }
+        button, input[type="range"], .tab-btn, summary, .timeline-btn, a { cursor: pointer !important; user-select: none; transition: all 0.15s ease-in-out; touch-action: manipulation; }
+        button:hover, .tab-btn:hover, .timeline-btn:hover, a:hover { filter: brightness(1.25); }
         @keyframes pulseAlert { 0%, 100% { opacity: 1; } 50% { opacity: 0.85; } }
         #vetoBanner { display: block; background: var(--status-danger); color: #ffffff; padding: 8px 10px; border-radius: 8px; font-weight: 800; font-size: 11.5px; margin-bottom: 8px; text-align: center; box-shadow: 0 0 16px rgba(239, 68, 68, 0.5); animation: pulseAlert 2s infinite; }
         .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 8px; contain: content; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4); margin-bottom: 6px; width: 100%; }
@@ -126,7 +126,7 @@
         <!-- 左側面板：數據與控制 -->
         <div class="lg:col-span-6 flex flex-col gap-2">
 
-            <!-- 1. ⏱️ 官方公準時段與突發調動游擊戰術表（已刪除「圖場連動」欄位） -->
+            <!-- 1. ⏱️ 官方公準時段與突發調動游擊戰術表 -->
             <section class="card border-[#38bdf8] bg-[#0c182b]">
                 <div class="card-header !text-[#38bdf8] flex justify-between items-center">
                     <span class="font-extrabold text-[11.5px] flex items-center gap-1">⏱️ 官方公準時段與突發調動游擊戰術表</span>
@@ -177,7 +177,7 @@
                 </div>
             </section>
 
-            <!-- 2. 📅 每周戰術開放/封島預測總覽（建議泊位/備註內容修訂為「燈號 + 關鍵字」） -->
+            <!-- 2. 📅 每周戰術開放/封島預測總覽 -->
             <section class="card border-[#10b981] bg-[#0a1f18]">
                 <div class="card-header !text-emerald-400 flex justify-between items-center">
                     <span class="font-extrabold text-[11.5px]">📅 GEM 每周戰術開放/封島預測總覽 (7-Day Tactical Forecast)</span>
@@ -440,15 +440,19 @@
                 </div>
             </section>
 
-            <!-- 3. 🌀 Windy 動態實時圖場 -->
+            <!-- 3. 🌀 Windy 動態實時圖場與海流/潮位雙軌按鈕區 -->
             <section class="card border-[#ef4444] bg-[#180d1a]/90">
                 <div class="card-header !text-red-400 flex flex-wrap justify-between items-center gap-1">
                     <span class="font-black text-[11.5px]">🌀 Windy 動態實時圖場與氣象預報表</span>
-                    <div class="flex gap-1 text-[8.5px]">
+                    <div class="flex flex-wrap gap-1 text-[8.5px]">
                         <button onclick="changeWindyOverlay('wind')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-1.5 py-0.5 rounded border border-slate-700 font-bold">💨 風速</button>
                         <button onclick="changeWindyOverlay('waves')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-1.5 py-0.5 rounded border border-slate-700 font-bold">🌊 浪高</button>
                         <button onclick="changeWindyOverlay('gust')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-1.5 py-0.5 rounded border border-slate-700 font-bold">⚡ 陣風</button>
                         <button onclick="changeWindyOverlay('rain')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-1.5 py-0.5 rounded border border-slate-700 font-bold">🌧️ 雨量</button>
+                        <!-- 雙軌增設 1：Windy 原生動態海流按鈕 -->
+                        <button onclick="changeWindyOverlay('currents')" class="bg-cyan-950 hover:bg-cyan-800 text-cyan-200 px-1.5 py-0.5 rounded border border-cyan-600 font-bold">🌊 海流</button>
+                        <!-- 雙軌增設 2：中央氣象署 (CWA) 權威潮位站直連按鈕 -->
+                        <a href="https://www.cwa.gov.tw/V8/C/M/tide.html" target="_blank" class="bg-blue-900 hover:bg-blue-800 text-sky-200 px-1.5 py-0.5 rounded border border-sky-500 font-bold flex items-center justify-center">⚓ 潮位站</a>
                     </div>
                 </div>
                 <div class="relative w-full rounded border border-slate-800 overflow-hidden bg-[#050a14] h-[380px]" id="windyContainer">
@@ -791,7 +795,7 @@
             ctx.fillStyle = isOvertopping ? 'rgba(239, 68, 68, 0.4)' : 'rgba(56, 189, 248, 0.35)';
             ctx.fill();
 
-            // 潮位線（文字進行智慧避讓）
+            // 潮位線
             ctx.strokeStyle = '#38bdf8'; ctx.setLineDash([2, 2]);
             ctx.beginPath(); ctx.moveTo(0, tideY); ctx.lineTo(quayX, tideY); ctx.stroke();
             ctx.setLineDash([]);
@@ -799,7 +803,7 @@
             const tideTextY = Math.abs(tideY - crestY) < 14 ? tideY + 11 : tideY - 3;
             ctx.fillText(`潮位: ${tideCD >= 0 ? '+' : ''}${tideCD.toFixed(2)}m CD`, 6, tideTextY);
 
-            // 越浪線與數值（頂界避讓，防止與頂部重疊）
+            // 越浪線與數值
             ctx.strokeStyle = isOvertopping ? '#ef4444' : '#f59e0b';
             ctx.lineWidth = 1.5; ctx.setLineDash([4, 2]);
             ctx.beginPath(); ctx.moveTo(0, crestY); ctx.lineTo(w, crestY); ctx.stroke();
@@ -833,9 +837,7 @@
             ctx.fillStyle = ukcPass ? '#86efac' : '#fca5a5';
             ctx.fillText(`UKC: ${ukc.toFixed(2)}m ${ukcPass ? '🟢' : '🔴'}`, ukcX + 22, ukcTextY);
 
-            // 註：畫布內部不再畫重複的標題文字 `ctx.fillText('⚓ ' + title, 6, 12)`，已有 HTML 卡片標頭負責顯示
-
-            // HUD 數據卡片 (固定置於左下角，與海底線 seabedY 底線完全切齊)
+            // HUD 數據卡片
             const hudW = 142;
             const hudH = 75;
             const hudX = 6;
