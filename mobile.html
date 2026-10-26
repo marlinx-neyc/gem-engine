@@ -92,6 +92,36 @@
         </div>
     </section>
 
+    <!-- 3. 🎮 戰術沙盤演練調度 (移至子彈圖下方，可收合/展開滿版版面) -->
+    <details class="card border-[#2563eb] bg-[#0c182b] mb-2.5" open id="detailsSandbox">
+        <summary class="card-header !text-[#60a5fa] list-none outline-none cursor-pointer flex justify-between items-center">
+            <span class="font-extrabold text-[11.5px] flex items-center gap-1">🎮 戰術沙盤演練調度 (動態參數演練)</span>
+            <span class="badge badge-yellow text-[8px]">▼ 點擊收合/展開</span>
+        </summary>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5 pt-2 border-t border-[#1e2d4a] mt-1">
+            <div class="slider-item">
+                <div class="slider-header"><span>波高 Hs</span><span class="val" id="lblHs">3.71m</span></div>
+                <input type="range" id="rngHs" min="0.4" max="6.0" step="0.05" value="3.71">
+            </div>
+            <div class="slider-item">
+                <div class="slider-header"><span>風速 W</span><span class="val" id="lblW">8.50m/s</span></div>
+                <input type="range" id="rngW" min="2.0" max="22.0" step="0.2" value="8.50">
+            </div>
+            <div class="slider-item">
+                <div class="slider-header"><span>湧浪週期 Tp</span><span class="val" id="lblTp">15.5s</span></div>
+                <input type="range" id="rngTp" min="6.0" max="20.0" step="0.5" value="15.5">
+            </div>
+            <div class="slider-item">
+                <div class="slider-header"><span>天文潮位 Tide</span><span class="val" id="lblTide">+1.10m</span></div>
+                <input type="range" id="rngTide" min="-1.0" max="3.0" step="0.05" value="1.10">
+            </div>
+            <div class="slider-item col-span-2 md:col-span-4">
+                <div class="slider-header"><span>攻角 Δθ</span><span class="val" id="lblDeltaTheta">50°</span></div>
+                <input type="range" id="rngDeltaTheta" min="0" max="90" step="1" value="50">
+            </div>
+        </div>
+    </details>
+
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-2.5 w-full items-start">
         
         <!-- ==================== 左側面板：數據、控制與對比 (lg:col-span-6) ==================== -->
@@ -250,36 +280,7 @@
                 </div>
             </section>
 
-            <!-- 4. 🎮 戰術沙盤演練調度 -->
-            <section class="card border-[#2563eb] bg-[#0c182b]">
-                <div class="card-header !text-[#60a5fa]">
-                    <span class="font-extrabold text-[11.5px]">🎮 戰術沙盤演練調度</span>
-                </div>
-                <div class="grid grid-cols-2 gap-2 pt-1 border-t border-[#1e2d4a]">
-                    <div class="slider-item">
-                        <div class="slider-header"><span>波高 Hs</span><span class="val" id="lblHs">3.71m</span></div>
-                        <input type="range" id="rngHs" min="0.4" max="6.0" step="0.05" value="3.71">
-                    </div>
-                    <div class="slider-item">
-                        <div class="slider-header"><span>風速 W</span><span class="val" id="lblW">8.50m/s</span></div>
-                        <input type="range" id="rngW" min="2.0" max="22.0" step="0.2" value="8.50">
-                    </div>
-                    <div class="slider-item">
-                        <div class="slider-header"><span>湧浪週期 Tp</span><span class="val" id="lblTp">15.5s</span></div>
-                        <input type="range" id="rngTp" min="6.0" max="20.0" step="0.5" value="15.5">
-                    </div>
-                    <div class="slider-item">
-                        <div class="slider-header"><span>天文潮位 Tide</span><span class="val" id="lblTide">+1.10m</span></div>
-                        <input type="range" id="rngTide" min="-1.0" max="3.0" step="0.05" value="1.10">
-                    </div>
-                    <div class="slider-item col-span-2">
-                        <div class="slider-header"><span>攻角 Δθ</span><span class="val" id="lblDeltaTheta">50°</span></div>
-                        <input type="range" id="rngDeltaTheta" min="0" max="90" step="1" value="50">
-                    </div>
-                </div>
-            </section>
-
-            <!-- 5. 📅 未來一周 (7天) 滾動式開/封島預測表 (可折疊/收合) -->
+            <!-- 4. 📅 未來一周 (7天) 滾動式開/封島預測表 (可折疊/收合) -->
             <details class="card border-[#facc15] bg-[#1a180d]" open id="detailsWeeklyForecast">
                 <summary class="card-header !text-yellow-400 list-none outline-none cursor-pointer flex justify-between items-center">
                     <span class="font-extrabold text-[11.5px] flex items-center gap-1">
@@ -523,7 +524,7 @@
                 </div>
             </section>
 
-            <!-- 3. 🌀 Windy 動態實時海流/風場地圖 (detail=true, h-[480px]) -->
+            <!-- 3. 🌀 Windy 動態實時海流/風場地圖 -->
             <section class="card border-[#ef4444] bg-[#180d1a]/90">
                 <div class="card-header !text-red-400 flex flex-wrap justify-between items-center gap-1">
                     <span class="font-black text-[11.5px]">🌀 Windy 動態實時圖場與氣象預報表</span>
@@ -536,7 +537,7 @@
                 </div>
                 <div class="relative w-full rounded border border-slate-800 overflow-hidden bg-[#050a14] h-[480px]" id="windyContainer">
                     <iframe id="windyFrame"
-                            src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=m%2Fs&zoom=11&overlay=currents&product=ecmwf&level=surface&lat=24.843&lon=121.952&detailLat=24.843&detailLon=121.952&marker=true&detail=true"
+                            src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=m%2Fs&zoom=11&product=ecmwf&level=surface&lat=24.843&lon=121.952&detailLat=24.843&detailLon=121.952&marker=true&detail=true"
                             class="w-full h-full block border-0 rounded"
                             loading="lazy">
                     </iframe>
