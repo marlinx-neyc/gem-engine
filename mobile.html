@@ -43,6 +43,8 @@
         .tab-south-active { background: #059669 !important; color: #ffffff !important; border-color: #34d399 !important; box-shadow: 0 0 8px rgba(5, 150, 105, 0.5); }
         .tab-north-active { background: #2563eb !important; color: #ffffff !important; border-color: #60a5fa !important; box-shadow: 0 0 8px rgba(37, 99, 235, 0.5); }
         .tab-compare-active { background: #7c3aed !important; color: #ffffff !important; border-color: #a78bfa !important; box-shadow: 0 0 8px rgba(124, 58, 237, 0.5); }
+        .tab-schedule-active { background: #0284c7 !important; color: #ffffff !important; border-color: #38bdf8 !important; box-shadow: 0 0 8px rgba(56, 189, 248, 0.5); }
+        .tab-emergency-active { background: #dc2626 !important; color: #ffffff !important; border-color: #f87171 !important; box-shadow: 0 0 8px rgba(220, 38, 38, 0.5); }
     </style>
 </head>
 <body class="w-full max-w-[1700px] mx-auto">
@@ -125,7 +127,7 @@
         <!-- 左側面板：數據與控制 -->
         <div class="lg:col-span-6 flex flex-col gap-2">
 
-            <!-- 需求 5：⏱️ 戰術游擊通航時窗 (Guerrilla Navigation Windows) 補回此面板 -->
+            <!-- ⏱️ 戰術游擊通航時窗 (Guerrilla Navigation Windows) -->
             <section class="card border-[#38bdf8] bg-[#0c182b]">
                 <div class="card-header !text-[#38bdf8] flex justify-between items-center">
                     <span class="font-extrabold text-[11.5px] flex items-center gap-1">⏱️ 戰術游擊通航時窗 (Guerrilla Navigation Windows)</span>
@@ -208,7 +210,7 @@
                 </div>
             </section>
 
-            <!-- 需求 3：🤖 自主強化學習模組改為收合版 details 結構 -->
+            <!-- 🤖 自主強化學習與歷史回饋迭代中樞 (RL Loop) - 收合版 -->
             <details class="card border-[#a855f7] bg-[#160d2e]" id="detailsRLLoop">
                 <summary class="card-header !text-purple-300 list-none outline-none cursor-pointer flex justify-between items-center">
                     <span class="font-extrabold text-[11.5px] flex items-center gap-1">🤖 自主強化學習與歷史回饋迭代中樞 (RL Loop)</span>
@@ -300,10 +302,12 @@
                 </div>
                 <div class="bg-[#0b172a] border border-blue-500/50 p-1 rounded-lg mb-1 flex items-center justify-between gap-1">
                     <span class="text-[9px] font-bold text-slate-300 pl-0.5 whitespace-nowrap">⚓ 剖面:</span>
-                    <div class="grid grid-cols-3 gap-1 flex-1">
-                        <button id="tabProfileSouth" class="tab-btn py-0.5 px-1 rounded text-[8.5px] font-bold border text-center tab-south-active">⚓ 南岸</button>
-                        <button id="tabProfileNorth" class="tab-btn py-0.5 px-1 rounded text-[8.5px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚓ 北岸</button>
-                        <button id="tabProfileCompare" class="tab-btn py-0.5 px-1 rounded text-[8.5px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚖️ 對比</button>
+                    <div class="grid grid-cols-5 gap-1 flex-1">
+                        <button id="tabProfileSouth" class="tab-btn py-0.5 px-0.5 rounded text-[8px] font-bold border text-center tab-south-active">⚓ 南岸</button>
+                        <button id="tabProfileNorth" class="tab-btn py-0.5 px-0.5 rounded text-[8px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚓ 北岸</button>
+                        <button id="tabProfileCompare" class="tab-btn py-0.5 px-0.5 rounded text-[8px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚖️ 對比</button>
+                        <button id="tabProfileSchedule" class="tab-btn py-0.5 px-0.5 rounded text-[8px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">📅 時序</button>
+                        <button id="tabProfileEmergency" class="tab-btn py-0.5 px-0.5 rounded text-[8px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">🚨 調動</button>
                     </div>
                 </div>
                 <div class="canvas-container h-[200px]" id="profileContainer">
@@ -313,7 +317,6 @@
 
             <!-- 2. 🎯 態勢雷達圖 Canvas -->
             <section class="card border-[#38bdf8]">
-                <!-- 需求 4：雷達圖標頭增加南北案總裁示燈號 -->
                 <div class="card-header !text-[#38bdf8] flex justify-between items-center">
                     <span class="font-extrabold">🎯 態勢雷達圖與 5 大算子對比</span>
                     <div class="flex items-center gap-1.5">
@@ -323,10 +326,12 @@
                 </div>
                 <div class="bg-[#0b172a] border border-blue-500/50 p-1 rounded-lg mb-1 flex items-center justify-between gap-1">
                     <span class="text-[9px] font-bold text-slate-300 pl-0.5 whitespace-nowrap">📡 雷達:</span>
-                    <div class="grid grid-cols-3 gap-1 flex-1">
-                        <button id="tabRadarSouth" class="tab-btn py-0.5 px-1 rounded text-[8.5px] font-bold border text-center tab-south-active">⚓ 南岸</button>
-                        <button id="tabRadarNorth" class="tab-btn py-0.5 px-1 rounded text-[8.5px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚓ 北岸</button>
-                        <button id="tabRadarCompare" class="tab-btn py-0.5 px-1 rounded text-[8.5px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚖️ 雙岸</button>
+                    <div class="grid grid-cols-5 gap-1 flex-1">
+                        <button id="tabRadarSouth" class="tab-btn py-0.5 px-0.5 rounded text-[8px] font-bold border text-center tab-south-active">⚓ 南岸</button>
+                        <button id="tabRadarNorth" class="tab-btn py-0.5 px-0.5 rounded text-[8px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚓ 北岸</button>
+                        <button id="tabRadarCompare" class="tab-btn py-0.5 px-0.5 rounded text-[8px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚖️ 雙岸</button>
+                        <button id="tabRadarSchedule" class="tab-btn py-0.5 px-0.5 rounded text-[8px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">📅 時序</button>
+                        <button id="tabRadarEmergency" class="tab-btn py-0.5 px-0.5 rounded text-[8px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">🚨 調動</button>
                     </div>
                 </div>
                 <div class="canvas-container h-[260px]" id="radarContainer">
@@ -336,7 +341,6 @@
 
             <!-- 3. 🌀 Windy 動態實時圖場 -->
             <section class="card border-[#ef4444] bg-[#180d1a]/90">
-                <!-- 需求 2：Windy 面板修復圖場切換按鈕 -->
                 <div class="card-header !text-red-400 flex flex-wrap justify-between items-center gap-1">
                     <span class="font-black text-[11.5px]">🌀 Windy 動態實時圖場與氣象預報表</span>
                     <div class="flex gap-1 text-[8.5px]">
@@ -358,16 +362,15 @@
         </div>
     </div>
 
-    <!-- JS 邏輯腳本 -->
+    <!-- JS 邏輯腳本 (雙圖 5 模式全聯動機制) -->
     <script>
     (function() {
         const getEl = id => document.getElementById(id);
         const setTxt = (id, txt) => { const el = getEl(id); if (el) el.textContent = txt; };
 
-        let currentViewMode = 'SOUTH'; // 統一雙圖連動模式: 'SOUTH', 'NORTH', 'COMPARE'
+        let currentViewMode = 'SOUTH'; // 雙圖統一連動模式: 'SOUTH', 'NORTH', 'COMPARE', 'SCHEDULE', 'EMERGENCY'
         let animPhase = 0;
 
-        // 全域 Windy 圖場切換函數 (修復需求 2)
         window.changeWindyOverlay = function(overlay) {
             const frame = getEl('windyFrame');
             if (frame) {
@@ -410,17 +413,22 @@
         function setViewMode(modeName) {
             currentViewMode = modeName;
 
-            ['South', 'North', 'Compare'].forEach(m => {
+            ['South', 'North', 'Compare', 'Schedule', 'Emergency'].forEach(m => {
                 const modeUpper = m.toUpperCase();
                 const active = (modeUpper === currentViewMode);
-                const activeClass = (m==='South'?'tab-south-active':(m==='North'?'tab-north-active':'tab-compare-active'));
+                let activeClass = 'tab-south-active';
+                if (m === 'North') activeClass = 'tab-north-active';
+                else if (m === 'Compare') activeClass = 'tab-compare-active';
+                else if (m === 'Schedule') activeClass = 'tab-schedule-active';
+                else if (m === 'Emergency') activeClass = 'tab-emergency-active';
+
                 const inactiveClass = 'border-slate-700 bg-slate-800 text-slate-300';
 
                 const pBtn = getEl('tabProfile' + m);
                 const rBtn = getEl('tabRadar' + m);
 
-                if (pBtn) pBtn.className = `tab-btn py-0.5 px-1 rounded text-[8.5px] font-bold border text-center ${active ? activeClass : inactiveClass}`;
-                if (rBtn) rBtn.className = `tab-btn py-0.5 px-1 rounded text-[8.5px] font-bold border text-center ${active ? activeClass : inactiveClass}`;
+                if (pBtn) pBtn.className = `tab-btn py-0.5 px-0.5 rounded text-[8px] font-bold border text-center ${active ? activeClass : inactiveClass}`;
+                if (rBtn) rBtn.className = `tab-btn py-0.5 px-0.5 rounded text-[8px] font-bold border text-center ${active ? activeClass : inactiveClass}`;
             });
 
             recalculatePhysicsAndRender();
@@ -443,7 +451,7 @@
             bindInput('rngTide', 'lblTide', 'm', true);
             bindInput('rngDeltaTheta', 'lblDeltaTheta', '°');
 
-            ['South', 'North', 'Compare'].forEach(m => {
+            ['South', 'North', 'Compare', 'Schedule', 'Emergency'].forEach(m => {
                 const modeUpper = m.toUpperCase();
                 const pBtn = getEl('tabProfile' + m);
                 const rBtn = getEl('tabRadar' + m);
@@ -499,7 +507,7 @@
             const vetoNorth = (hsNorth > 1.13) || (weffNorth > 10.17) || (tp >= 11.5) || (ukcNorth < 1.50) || (fbNorth < 0.50);
             const vetoSouth = (hsSouth > 1.13) || (weffSouth > 10.17) || (tp >= 11.5) || (ukcSouth < 1.50) || (fbSouth < 0.50);
 
-            // 需求 4：動態更新雷達圖標頭南北案裁示燈號
+            // 更新雷達圖標頭南北案裁示燈號
             const rNorthB = getEl('radarNorthBadge');
             const rSouthB = getEl('radarSouthBadge');
             if (rNorthB) {
@@ -511,7 +519,7 @@
                 rSouthB.className = `badge ${vetoSouth ? 'badge-veto' : 'badge-pass'} text-[8px]`;
             }
 
-            // 需求 5：動態更新戰術游擊通航時窗燈號
+            // 更新戰術游擊通航時窗燈號
             ['winStatus1', 'winStatus2', 'winStatus3'].forEach(id => {
                 const el = getEl(id);
                 if (el) {
@@ -616,13 +624,13 @@
             const crestY = cdToY(crestCD);
             const quayX = w * 0.48;
 
-            // 需求 1：藍色可靠水位色塊保留，移除虛線標示線與文字說明
+            // 藍色可靠水位底色區塊
             const safeTideMinCD = -0.50;
             const safeTideMaxCD = +2.20;
             const safeTideMinY = cdToY(safeTideMinCD);
             const safeTideMaxY = cdToY(safeTideMaxCD);
 
-            ctx.fillStyle = 'rgba(14, 116, 144, 0.28)'; // 藍色可靠水位底色區塊
+            ctx.fillStyle = 'rgba(14, 116, 144, 0.28)';
             ctx.fillRect(0, safeTideMaxY, quayX, safeTideMinY - safeTideMaxY);
 
             // 海底地層線
@@ -675,7 +683,7 @@
             ctx.setLineDash([]);
 
             ctx.font = 'bold 8.5px sans-serif';
-            ctx.fillStyle = isOvertopping ? '#fca5 a5' : '#fcd34d';
+            ctx.fillStyle = isOvertopping ? '#fca5a5' : '#fcd34d';
             ctx.textAlign = 'left';
             ctx.fillText(`波頂/越浪線: +${crestCD.toFixed(2)}m CD ${isOvertopping ? '🚨 (越浪超標)' : '⚠️'}`, 6, crestY - 3);
 
@@ -705,7 +713,7 @@
             ctx.font = 'bold 9.5px sans-serif'; ctx.fillStyle = accentColor; ctx.textAlign = 'left';
             ctx.fillText(`⚓ ${title}`, 6, 12);
 
-            // HUD 數據卡片（切齊海底底部）
+            // HUD 數據卡片 (切齊海底底部)
             const hudW = 142;
             const hudH = 75;
             const hudX = Math.max(w - hudW - 4, quayX + 4);
@@ -750,7 +758,6 @@
             const tide = parseFloat(getEl('rngTide')?.value || 1.10);
             const deltaTheta = parseFloat(getEl('rngDeltaTheta')?.value || 50);
 
-            const isCompare = currentViewMode === 'COMPARE';
             const w = container.clientWidth || 320;
             const h = container.clientHeight || 200;
             const dpr = window.devicePixelRatio || 1;
@@ -761,12 +768,16 @@
             const ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr);
             ctx.fillStyle = '#050a14'; ctx.fillRect(0, 0, w, h);
 
-            if (isCompare) {
+            if (currentViewMode === 'COMPARE') {
                 const subW = (w - 6) / 2;
                 drawSingleProfile(ctx, 0, 0, subW, h, '北岸 (主泊位 -8.5m)', 8.50, 3.20, hs * 1.06, wVal * Math.abs(Math.cos(deltaTheta * Math.PI/180)), tp, tide, '#38bdf8');
                 drawSingleProfile(ctx, subW + 6, 0, subW, h, '南岸 (權宜泊位 -9.8m)', 9.80, 2.50, hs * 0.62, wVal * Math.abs(Math.cos((90-deltaTheta) * Math.PI/180)), tp, tide, '#34d399');
             } else if (currentViewMode === 'NORTH') {
                 drawSingleProfile(ctx, 0, 0, w, h, '北岸碼頭 (主泊位 -8.50m CD)', 8.50, 3.20, hs * 1.06, wVal * Math.abs(Math.cos(deltaTheta * Math.PI/180)), tp, tide, '#38bdf8');
+            } else if (currentViewMode === 'SCHEDULE') {
+                drawSingleProfile(ctx, 0, 0, w, h, '📅 船班時序動態剖面 (早/午/黃昏滾動靠泊)', 9.80, 2.50, hs * 0.75, wVal * 0.6, tp, tide, '#0284c7');
+            } else if (currentViewMode === 'EMERGENCY') {
+                drawSingleProfile(ctx, 0, 0, w, h, '🚨 突發調動極端剖面 (機動避風衝擊演練)', 8.50, 3.20, hs * 1.25, wVal * 1.1, tp, tide + 0.3, '#dc2626');
             } else {
                 drawSingleProfile(ctx, 0, 0, w, h, '南岸碼頭 (權宜泊位 -9.80m CD)', 9.80, 2.50, hs * 0.62, wVal * Math.abs(Math.cos((90-deltaTheta) * Math.PI/180)), tp, tide, '#34d399');
             }
@@ -872,11 +883,17 @@
                 drawRadarPoly(getRatios(false), 'rgba(16, 185, 129, 0.3)', '#34d399');
             } else if (currentViewMode === 'NORTH') {
                 drawRadarPoly(getRatios(true), vetoNorth ? 'rgba(239, 68, 68, 0.35)' : 'rgba(56, 189, 248, 0.35)', vetoNorth ? '#ef4444' : '#38bdf8');
+            } else if (currentViewMode === 'SCHEDULE') {
+                drawRadarPoly([hsNorth/1.13*0.8, weffNorth/10.17*0.8, tpVal/11.5*0.8, 0.6, 0.6], 'rgba(56, 189, 248, 0.25)', '#38bdf8');
+                drawRadarPoly(getRatios(false), 'rgba(250, 204, 21, 0.3)', '#facc15');
+            } else if (currentViewMode === 'EMERGENCY') {
+                const emRatios = getRatios(true).map(r => Math.min(1.25, r * 1.2));
+                drawRadarPoly(emRatios, 'rgba(239, 68, 68, 0.45)', '#ef4444');
             } else {
                 drawRadarPoly(getRatios(false), vetoSouth ? 'rgba(239, 68, 68, 0.35)' : 'rgba(16, 185, 129, 0.35)', vetoSouth ? '#ef4444' : '#34d399');
             }
 
-            const isTargetNorth = currentViewMode !== 'SOUTH';
+            const isTargetNorth = (currentViewMode === 'NORTH' || currentViewMode === 'EMERGENCY');
             const activeHs = isTargetNorth ? hsNorth : hsSouth;
             const activeWeff = isTargetNorth ? weffNorth : weffSouth;
             const activeUkc = isTargetNorth ? ukcNorth : ukcSouth;
