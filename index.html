@@ -43,7 +43,6 @@
         .tab-south-active { background: #059669 !important; color: #ffffff !important; border-color: #34d399 !important; box-shadow: 0 0 8px rgba(5, 150, 105, 0.5); }
         .tab-north-active { background: #2563eb !important; color: #ffffff !important; border-color: #60a5fa !important; box-shadow: 0 0 8px rgba(37, 99, 235, 0.5); }
         .tab-compare-active { background: #7c3aed !important; color: #ffffff !important; border-color: #a78bfa !important; box-shadow: 0 0 8px rgba(124, 58, 237, 0.5); }
-        .timeline-card-active { border-color: #facc15 !important; background: rgba(250, 204, 21, 0.15) !important; box-shadow: 0 0 10px rgba(250, 204, 21, 0.4); }
     </style>
 </head>
 <body class="w-full max-w-[1700px] mx-auto">
@@ -126,6 +125,31 @@
         <!-- 左側面板：數據與控制 -->
         <div class="lg:col-span-6 flex flex-col gap-2">
 
+            <!-- 需求 5：⏱️ 戰術游擊通航時窗 (Guerrilla Navigation Windows) 補回此面板 -->
+            <section class="card border-[#38bdf8] bg-[#0c182b]">
+                <div class="card-header !text-[#38bdf8] flex justify-between items-center">
+                    <span class="font-extrabold text-[11.5px] flex items-center gap-1">⏱️ 戰術游擊通航時窗 (Guerrilla Navigation Windows)</span>
+                    <span class="badge badge-pass text-[8px]">滾動時窗動態比對</span>
+                </div>
+                <div class="grid grid-cols-3 gap-1.5 pt-1 text-[9px] font-mono">
+                    <div class="bg-slate-900/90 p-1.5 rounded border border-slate-700 text-center">
+                        <span class="text-slate-400 text-[7.5px] block">早班游擊時窗</span>
+                        <b class="text-sky-300 text-[10px]">07:30 - 08:30</b>
+                        <div id="winStatus1" class="mt-0.5"><span class="badge badge-veto text-[7.5px]">🔴 熔斷</span></div>
+                    </div>
+                    <div class="bg-slate-900/90 p-1.5 rounded border border-slate-700 text-center">
+                        <span class="text-slate-400 text-[7.5px] block">午班游擊時窗</span>
+                        <b class="text-sky-300 text-[10px]">11:30 - 12:30</b>
+                        <div id="winStatus2" class="mt-0.5"><span class="badge badge-veto text-[7.5px]">🔴 熔斷</span></div>
+                    </div>
+                    <div class="bg-slate-900/90 p-1.5 rounded border border-slate-700 text-center">
+                        <span class="text-slate-400 text-[7.5px] block">黃昏游擊時窗</span>
+                        <b class="text-sky-300 text-[10px]">16:30 - 17:30</b>
+                        <div id="winStatus3" class="mt-0.5"><span class="badge badge-veto text-[7.5px]">🔴 熔斷</span></div>
+                    </div>
+                </div>
+            </section>
+
             <!-- 1. 📊 物理算子即時檢核表 -->
             <section class="card border-[#38bdf8] bg-[#0c1a2e]">
                 <div class="card-header !text-sky-400">
@@ -184,13 +208,16 @@
                 </div>
             </section>
 
-            <!-- 2. 🤖 自主強化學習模組 -->
-            <section class="card border-[#a855f7] bg-[#160d2e]">
-                <div class="card-header !text-purple-300 flex justify-between items-center">
-                    <span class="font-extrabold text-[11.5px]">🤖 自主強化學習與歷史回饋迭代中樞 (RL Loop)</span>
-                    <span class="badge badge-pass text-[8px]">每日3時段對比學習</span>
-                </div>
-                <div class="pt-1 space-y-1.5 text-[9px] font-mono">
+            <!-- 需求 3：🤖 自主強化學習模組改為收合版 details 結構 -->
+            <details class="card border-[#a855f7] bg-[#160d2e]" id="detailsRLLoop">
+                <summary class="card-header !text-purple-300 list-none outline-none cursor-pointer flex justify-between items-center">
+                    <span class="font-extrabold text-[11.5px] flex items-center gap-1">🤖 自主強化學習與歷史回饋迭代中樞 (RL Loop)</span>
+                    <div class="flex items-center gap-1">
+                        <span class="badge badge-pass text-[8px]">每日3時段對比學習</span>
+                        <span class="badge badge-yellow text-[8px]">▼ 點擊收合/展開</span>
+                    </div>
+                </summary>
+                <div class="pt-2 border-t border-purple-500/30 mt-1 space-y-1.5 text-[9px] font-mono">
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-1 text-center">
                         <div class="bg-black/50 p-1 rounded border border-purple-500/30">
                             <span class="text-slate-400 text-[7.5px] block">歷史學習樣本</span>
@@ -210,7 +237,7 @@
                         </div>
                     </div>
                 </div>
-            </section>
+            </details>
 
             <!-- 3. 🌀 颱風態勢專區與 GEM 應變比對 -->
             <details class="card border-[#ef4444] bg-[#180d1a]/90" open id="detailsTyphoonZone">
@@ -286,9 +313,13 @@
 
             <!-- 2. 🎯 態勢雷達圖 Canvas -->
             <section class="card border-[#38bdf8]">
-                <div class="card-header !text-[#38bdf8]">
+                <!-- 需求 4：雷達圖標頭增加南北案總裁示燈號 -->
+                <div class="card-header !text-[#38bdf8] flex justify-between items-center">
                     <span class="font-extrabold">🎯 態勢雷達圖與 5 大算子對比</span>
-                    <span class="badge badge-yellow text-[8px]">雷達圖場</span>
+                    <div class="flex items-center gap-1.5">
+                        <span id="radarNorthBadge" class="badge badge-veto text-[8px]">北岸 🔴 VETO</span>
+                        <span id="radarSouthBadge" class="badge badge-pass text-[8px]">南岸 🟢 通過</span>
+                    </div>
                 </div>
                 <div class="bg-[#0b172a] border border-blue-500/50 p-1 rounded-lg mb-1 flex items-center justify-between gap-1">
                     <span class="text-[9px] font-bold text-slate-300 pl-0.5 whitespace-nowrap">📡 雷達:</span>
@@ -305,8 +336,15 @@
 
             <!-- 3. 🌀 Windy 動態實時圖場 -->
             <section class="card border-[#ef4444] bg-[#180d1a]/90">
+                <!-- 需求 2：Windy 面板修復圖場切換按鈕 -->
                 <div class="card-header !text-red-400 flex flex-wrap justify-between items-center gap-1">
                     <span class="font-black text-[11.5px]">🌀 Windy 動態實時圖場與氣象預報表</span>
+                    <div class="flex gap-1 text-[8.5px]">
+                        <button onclick="changeWindyOverlay('wind')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-1.5 py-0.5 rounded border border-slate-700 font-bold">💨 風速</button>
+                        <button onclick="changeWindyOverlay('waves')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-1.5 py-0.5 rounded border border-slate-700 font-bold">🌊 浪高</button>
+                        <button onclick="changeWindyOverlay('gust')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-1.5 py-0.5 rounded border border-slate-700 font-bold">⚡ 陣風</button>
+                        <button onclick="changeWindyOverlay('rain')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-1.5 py-0.5 rounded border border-slate-700 font-bold">🌧️ 雨量</button>
+                    </div>
                 </div>
                 <div class="relative w-full rounded border border-slate-800 overflow-hidden bg-[#050a14] h-[380px]" id="windyContainer">
                     <iframe id="windyFrame"
@@ -320,7 +358,7 @@
         </div>
     </div>
 
-    <!-- 雙圖完全連動 + 越浪線數值/紅線 + 藍色可靠水位色塊 + HUD下移切齊 + 雷達警戒值完全修復 JS 腳本 -->
+    <!-- JS 邏輯腳本 -->
     <script>
     (function() {
         const getEl = id => document.getElementById(id);
@@ -328,6 +366,14 @@
 
         let currentViewMode = 'SOUTH'; // 統一雙圖連動模式: 'SOUTH', 'NORTH', 'COMPARE'
         let animPhase = 0;
+
+        // 全域 Windy 圖場切換函數 (修復需求 2)
+        window.changeWindyOverlay = function(overlay) {
+            const frame = getEl('windyFrame');
+            if (frame) {
+                frame.src = `https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=m%2Fs&zoom=11&product=ecmwf&level=surface&lat=24.843&lon=121.952&detailLat=24.843&detailLon=121.952&marker=true&detail=true&overlay=${overlay}`;
+            }
+        };
 
         function startClockAndWatchdog() {
             const update = () => {
@@ -361,7 +407,6 @@
             } catch (e) { console.warn("SSOT Polling skip:", e); }
         }
 
-        // 統一更新「剖面圖」與「雷達圖」之全域切換連動模式
         function setViewMode(modeName) {
             currentViewMode = modeName;
 
@@ -398,7 +443,6 @@
             bindInput('rngTide', 'lblTide', 'm', true);
             bindInput('rngDeltaTheta', 'lblDeltaTheta', '°');
 
-            // 綁定剖面與雷達切換按鈕 -> 雙向同步連動
             ['South', 'North', 'Compare'].forEach(m => {
                 const modeUpper = m.toUpperCase();
                 const pBtn = getEl('tabProfile' + m);
@@ -434,7 +478,7 @@
             const fbNorth = 3.20 - crestNorth;
             const fbSouth = 2.50 - crestSouth;
 
-            // 更新左側表格數據與燈號
+            // 更新表格數據與燈號
             setTxt('cmpHsVal', `${hsNorth.toFixed(2)} m`);
             const hsB = getEl('cmpHsBadge'); if (hsB) hsB.innerHTML = hsNorth > 1.13 ? '<span class="badge badge-veto text-[8px]">🔴 VETO</span>' : '<span class="badge badge-pass text-[8px]">🟢 通過</span>';
 
@@ -454,6 +498,32 @@
 
             const vetoNorth = (hsNorth > 1.13) || (weffNorth > 10.17) || (tp >= 11.5) || (ukcNorth < 1.50) || (fbNorth < 0.50);
             const vetoSouth = (hsSouth > 1.13) || (weffSouth > 10.17) || (tp >= 11.5) || (ukcSouth < 1.50) || (fbSouth < 0.50);
+
+            // 需求 4：動態更新雷達圖標頭南北案裁示燈號
+            const rNorthB = getEl('radarNorthBadge');
+            const rSouthB = getEl('radarSouthBadge');
+            if (rNorthB) {
+                rNorthB.innerHTML = vetoNorth ? '北岸 🔴 VETO' : '北岸 🟢 通過';
+                rNorthB.className = `badge ${vetoNorth ? 'badge-veto' : 'badge-pass'} text-[8px]`;
+            }
+            if (rSouthB) {
+                rSouthB.innerHTML = vetoSouth ? '南岸 🔴 VETO' : '南岸 🟢 通過';
+                rSouthB.className = `badge ${vetoSouth ? 'badge-veto' : 'badge-pass'} text-[8px]`;
+            }
+
+            // 需求 5：動態更新戰術游擊通航時窗燈號
+            ['winStatus1', 'winStatus2', 'winStatus3'].forEach(id => {
+                const el = getEl(id);
+                if (el) {
+                    if (vetoNorth && vetoSouth) {
+                        el.innerHTML = '<span class="badge badge-veto text-[7.5px]">🔴 熔斷封閉</span>';
+                    } else if (vetoNorth || vetoSouth) {
+                        el.innerHTML = '<span class="badge badge-yellow text-[7.5px]">🟡 單岸機動</span>';
+                    } else {
+                        el.innerHTML = '<span class="badge badge-pass text-[7.5px]">🟢 窗口開放</span>';
+                    }
+                }
+            });
 
             const banner = getEl('vetoBanner');
             const badgeDecision = getEl('badgeMobDecision');
@@ -524,7 +594,6 @@
             ctx.save();
             ctx.translate(offsetX, offsetY);
 
-            // CD 高程轉畫布 Y 軸座標 (+5.0m CD 至 -12.0m CD)
             const cdToY = cd => ((5.0 - cd) / (5.0 - (-12.0))) * (h - 28) + 14;
 
             const draft = 2.02;
@@ -534,7 +603,6 @@
             const overtopDepth = Math.max(0, crestCD - deckCD);
             const fb = deckCD - crestCD;
 
-            // 剛性門檻比對
             const hsPass = hsPier <= 1.13;
             const weffPass = weff <= 10.17;
             const tpPass = tp <= 11.5;
@@ -548,23 +616,14 @@
             const crestY = cdToY(crestCD);
             const quayX = w * 0.48;
 
-            // === 需求 2：南/北每日「可靠水位區間」用藍色色塊在海浪區標示 (-0.50m CD ~ +2.20m CD) ===
+            // 需求 1：藍色可靠水位色塊保留，移除虛線標示線與文字說明
             const safeTideMinCD = -0.50;
             const safeTideMaxCD = +2.20;
             const safeTideMinY = cdToY(safeTideMinCD);
             const safeTideMaxY = cdToY(safeTideMaxCD);
 
-            ctx.fillStyle = 'rgba(14, 116, 144, 0.28)'; // 藍綠/天藍色塊
+            ctx.fillStyle = 'rgba(14, 116, 144, 0.28)'; // 藍色可靠水位底色區塊
             ctx.fillRect(0, safeTideMaxY, quayX, safeTideMinY - safeTideMaxY);
-
-            ctx.strokeStyle = 'rgba(56, 189, 248, 0.6)'; ctx.setLineDash([3, 3]); ctx.lineWidth = 1;
-            ctx.beginPath(); ctx.moveTo(0, safeTideMaxY); ctx.lineTo(quayX, safeTideMaxY); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(0, safeTideMinY); ctx.lineTo(quayX, safeTideMinY); ctx.stroke();
-            ctx.setLineDash([]);
-
-            ctx.font = '8px sans-serif'; ctx.fillStyle = '#38bdf8'; ctx.textAlign = 'right';
-            ctx.fillText('可靠水位上限 +2.20m', quayX - 6, safeTideMaxY + 9);
-            ctx.fillText('可靠水位下限 -0.50m', quayX - 6, safeTideMinY - 3);
 
             // 海底地層線
             ctx.fillStyle = '#1e1b18';
@@ -609,14 +668,14 @@
             ctx.font = '8.5px sans-serif'; ctx.fillStyle = '#38bdf8'; ctx.textAlign = 'left';
             ctx.fillText(`潮位: ${tideCD >= 0 ? '+' : ''}${tideCD.toFixed(2)}m CD`, 6, tideY - 3);
 
-            // === 需求 1：剖面部明確畫出「越浪線 (紅/黃虛線)」與「波頂/越浪高程數值標示」===
+            // 越浪線與數值
             ctx.strokeStyle = isOvertopping ? '#ef4444' : '#f59e0b';
             ctx.lineWidth = 1.5; ctx.setLineDash([4, 2]);
             ctx.beginPath(); ctx.moveTo(0, crestY); ctx.lineTo(w, crestY); ctx.stroke();
             ctx.setLineDash([]);
 
             ctx.font = 'bold 8.5px sans-serif';
-            ctx.fillStyle = isOvertopping ? '#fca5a5' : '#fcd34d';
+            ctx.fillStyle = isOvertopping ? '#fca5 a5' : '#fcd34d';
             ctx.textAlign = 'left';
             ctx.fillText(`波頂/越浪線: +${crestCD.toFixed(2)}m CD ${isOvertopping ? '🚨 (越浪超標)' : '⚠️'}`, 6, crestY - 3);
 
@@ -646,11 +705,11 @@
             ctx.font = 'bold 9.5px sans-serif'; ctx.fillStyle = accentColor; ctx.textAlign = 'left';
             ctx.fillText(`⚓ ${title}`, 6, 12);
 
-            // === HUD 數據卡片「下移與海底底線 (seabedY) 完全切齊」===
+            // HUD 數據卡片（切齊海底底部）
             const hudW = 142;
             const hudH = 75;
             const hudX = Math.max(w - hudW - 4, quayX + 4);
-            const hudY = seabedY - hudH; // 底部切齊 seabedY
+            const hudY = seabedY - hudH;
 
             ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
             ctx.fillRect(hudX, hudY, hudW, hudH);
@@ -817,7 +876,6 @@
                 drawRadarPoly(getRatios(false), vetoSouth ? 'rgba(239, 68, 68, 0.35)' : 'rgba(16, 185, 129, 0.35)', vetoSouth ? '#ef4444' : '#34d399');
             }
 
-            // 雷達圖各軸點顯示「動態數值」與「警戒門檻值 (警戒值)」與「狀態燈號」
             const isTargetNorth = currentViewMode !== 'SOUTH';
             const activeHs = isTargetNorth ? hsNorth : hsSouth;
             const activeWeff = isTargetNorth ? weffNorth : weffSouth;
@@ -853,7 +911,6 @@
             pollLatestDecision();
             setInterval(pollLatestDecision, 12000);
 
-            // 啟動海浪動態動畫
             function animLoop() {
                 animPhase += 0.05;
                 drawProfileCanvas();
