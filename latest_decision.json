@@ -1,7 +1,6 @@
 {
-  "version": "GEM-ENG-SPEC-2026-V66-20261026_113932",
-  "timestamp": "2026-10-26 11:39:32 CST",
-  "decision_code": "Q4",
+  "version": "GEM-ENG-SPEC-2026-V66-20261026_114148",
+  "timestamp": "2026-10-26 11:41:48 CST",
   "typhoon_live": {
     "has_typhoon": false,
     "name": "無作用中颱風",
@@ -27,10 +26,5 @@
     "f1_score": 0.984,
     "reward_cum": "+1428.5",
     "iteration_epoch": 1260
-  },
-  "sync_windows": [
-    "07:30-08:30",
-    "11:30-12:30",
-    "16:30-17:30"
-  ]
+  }
 }
