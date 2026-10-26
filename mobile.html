@@ -320,13 +320,13 @@
         </div>
     </div>
 
-    <!-- 雙圖完全連動 + HUD 下移切齊 + 雷達圖警戒值完整 JS 腳本 -->
+    <!-- 雙圖完全連動 + 越浪線數值/紅線 + 藍色可靠水位色塊 + HUD下移切齊 + 雷達警戒值完全修復 JS 腳本 -->
     <script>
     (function() {
         const getEl = id => document.getElementById(id);
         const setTxt = (id, txt) => { const el = getEl(id); if (el) el.textContent = txt; };
 
-        let currentViewMode = 'SOUTH'; // 統一連動模式: 'SOUTH', 'NORTH', 'COMPARE'
+        let currentViewMode = 'SOUTH'; // 統一雙圖連動模式: 'SOUTH', 'NORTH', 'COMPARE'
         let animPhase = 0;
 
         function startClockAndWatchdog() {
@@ -398,7 +398,7 @@
             bindInput('rngTide', 'lblTide', 'm', true);
             bindInput('rngDeltaTheta', 'lblDeltaTheta', '°');
 
-            // 綁定剖面與雷達切換按鈕 -> 觸發雙向同步連動
+            // 綁定剖面與雷達切換按鈕 -> 雙向同步連動
             ['South', 'North', 'Compare'].forEach(m => {
                 const modeUpper = m.toUpperCase();
                 const pBtn = getEl('tabProfile' + m);
@@ -548,6 +548,24 @@
             const crestY = cdToY(crestCD);
             const quayX = w * 0.48;
 
+            // === 需求 2：南/北每日「可靠水位區間」用藍色色塊在海浪區標示 (-0.50m CD ~ +2.20m CD) ===
+            const safeTideMinCD = -0.50;
+            const safeTideMaxCD = +2.20;
+            const safeTideMinY = cdToY(safeTideMinCD);
+            const safeTideMaxY = cdToY(safeTideMaxCD);
+
+            ctx.fillStyle = 'rgba(14, 116, 144, 0.28)'; // 藍綠/天藍色塊
+            ctx.fillRect(0, safeTideMaxY, quayX, safeTideMinY - safeTideMaxY);
+
+            ctx.strokeStyle = 'rgba(56, 189, 248, 0.6)'; ctx.setLineDash([3, 3]); ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(0, safeTideMaxY); ctx.lineTo(quayX, safeTideMaxY); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(0, safeTideMinY); ctx.lineTo(quayX, safeTideMinY); ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.font = '8px sans-serif'; ctx.fillStyle = '#38bdf8'; ctx.textAlign = 'right';
+            ctx.fillText('可靠水位上限 +2.20m', quayX - 6, safeTideMaxY + 9);
+            ctx.fillText('可靠水位下限 -0.50m', quayX - 6, safeTideMinY - 3);
+
             // 海底地層線
             ctx.fillStyle = '#1e1b18';
             ctx.fillRect(0, seabedY, w, Math.max(10, h - seabedY));
@@ -591,6 +609,17 @@
             ctx.font = '8.5px sans-serif'; ctx.fillStyle = '#38bdf8'; ctx.textAlign = 'left';
             ctx.fillText(`潮位: ${tideCD >= 0 ? '+' : ''}${tideCD.toFixed(2)}m CD`, 6, tideY - 3);
 
+            // === 需求 1：剖面部明確畫出「越浪線 (紅/黃虛線)」與「波頂/越浪高程數值標示」===
+            ctx.strokeStyle = isOvertopping ? '#ef4444' : '#f59e0b';
+            ctx.lineWidth = 1.5; ctx.setLineDash([4, 2]);
+            ctx.beginPath(); ctx.moveTo(0, crestY); ctx.lineTo(w, crestY); ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.font = 'bold 8.5px sans-serif';
+            ctx.fillStyle = isOvertopping ? '#fca5a5' : '#fcd34d';
+            ctx.textAlign = 'left';
+            ctx.fillText(`波頂/越浪線: +${crestCD.toFixed(2)}m CD ${isOvertopping ? '🚨 (越浪超標)' : '⚠️'}`, 6, crestY - 3);
+
             // 客輪結構
             const shipW = Math.min(50, quayX * 0.5);
             const shipX = quayX - shipW - 10;
@@ -617,11 +646,11 @@
             ctx.font = 'bold 9.5px sans-serif'; ctx.fillStyle = accentColor; ctx.textAlign = 'left';
             ctx.fillText(`⚓ ${title}`, 6, 12);
 
-            // === 需求1：HUD 數據卡片「下移與海底底線 (seabedY) 完全切齊」===
+            // === HUD 數據卡片「下移與海底底線 (seabedY) 完全切齊」===
             const hudW = 142;
             const hudH = 75;
             const hudX = Math.max(w - hudW - 4, quayX + 4);
-            const hudY = seabedY - hudH; // 關鍵修復：底部對齊 seabedY
+            const hudY = seabedY - hudH; // 底部切齊 seabedY
 
             ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
             ctx.fillRect(hudX, hudY, hudW, hudH);
@@ -788,7 +817,7 @@
                 drawRadarPoly(getRatios(false), vetoSouth ? 'rgba(239, 68, 68, 0.35)' : 'rgba(16, 185, 129, 0.35)', vetoSouth ? '#ef4444' : '#34d399');
             }
 
-            // === 需求2：雷達圖各軸點顯示「動態數值」與「警戒門檻值 (警戒值)」===
+            // 雷達圖各軸點顯示「動態數值」與「警戒門檻值 (警戒值)」與「狀態燈號」
             const isTargetNorth = currentViewMode !== 'SOUTH';
             const activeHs = isTargetNorth ? hsNorth : hsSouth;
             const activeWeff = isTargetNorth ? weffNorth : weffSouth;
