@@ -8,6 +8,9 @@
     <meta http-equiv="Expires" content="0">
     <title>🌊 GEM Engine v66.0 龜山島全域戰術指揮中樞 (Unified Master)</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Leaflet.js 嵌入 (Windy + TDX AIS 多圖層地圖支援) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         :root {
             --bg-dark: #080e1a;
@@ -43,8 +46,8 @@
         .tab-south-active { background: #059669 !important; color: #ffffff !important; border-color: #34d399 !important; box-shadow: 0 0 8px rgba(5, 150, 105, 0.5); }
         .tab-north-active { background: #2563eb !important; color: #ffffff !important; border-color: #60a5fa !important; box-shadow: 0 0 8px rgba(37, 99, 235, 0.5); }
         .tab-compare-active { background: #7c3aed !important; color: #ffffff !important; border-color: #a78bfa !important; box-shadow: 0 0 8px rgba(124, 58, 237, 0.5); }
-        .tab-slot-active { background: #0284c7 !important; color: #ffffff !important; border-color: #38bdf8 !important; box-shadow: 0 0 8px rgba(56, 189, 248, 0.5); }
-        .tr-active-slot { background: rgba(56, 189, 248, 0.15) !important; border-left: 3px solid #38bdf8 !important; }
+        .tr-active-slot { background: rgba(56, 189, 248, 0.18) !important; border-left: 3px solid #38bdf8 !important; }
+        .vessel-label { background: rgba(15, 23, 42, 0.9); color: #38bdf8; border: 1px solid #38bdf8; font-size: 9.5px; padding: 1px 4px; border-radius: 4px; font-weight: bold; }
     </style>
 </head>
 <body class="w-full max-w-[1700px] mx-auto">
@@ -127,11 +130,11 @@
         <!-- 左側面板：數據與控制 -->
         <div class="lg:col-span-6 flex flex-col gap-2">
 
-            <!-- 需求 1：官方公準時段與突發調動游擊戰術表格 (點擊列即連動剖面/雷達) -->
+            <!-- 1. ⏱️ 官方公準時段與突發調動游擊戰術表 -->
             <section class="card border-[#38bdf8] bg-[#0c182b]">
                 <div class="card-header !text-[#38bdf8] flex justify-between items-center">
                     <span class="font-extrabold text-[11.5px] flex items-center gap-1">⏱️ 官方公準時段與突發調動游擊戰術表</span>
-                    <span class="badge badge-pass text-[8px]">點擊時段同步連動圖場</span>
+                    <span class="badge badge-pass text-[8px]">點擊列同步切換剖面/雷達圖</span>
                 </div>
                 <div class="overflow-x-auto pt-0.5">
                     <table class="data-table" id="tableScheduleGuerrilla">
@@ -183,10 +186,10 @@
                 </div>
             </section>
 
-            <!-- 需求 2：復原「每周預測開放/封島預報表」 -->
+            <!-- 2. 📅 每周戰術開放/封島預測總覽 (7-Day Forecast) -->
             <section class="card border-[#10b981] bg-[#0a1f18]">
                 <div class="card-header !text-emerald-400 flex justify-between items-center">
-                    <span class="font-extrabold text-[11.5px]">📅 GEM 每周戰術開放/封島預測總覽 (7-Day Tactical Forecast)</span>
+                    <span class="font-extrabold text-[11.5px]">📅 GEM 每周戰術開放/封島預測總覽 (7-Day Forecast)</span>
                     <span class="badge badge-pass text-[8px]">滾動數值預報</span>
                 </div>
                 <div class="overflow-x-auto pt-0.5">
@@ -201,7 +204,7 @@
                                 <th>建議泊位 / 備註</th>
                             </tr>
                         </thead>
-                        <tbody id="tbodyWeeklyForecast">
+                        <tbody>
                             <tr>
                                 <td class="font-bold text-white">10/27 (二) Day +1</td>
                                 <td class="text-center font-mono text-slate-300">0.82 m</td>
@@ -263,7 +266,7 @@
                 </div>
             </section>
 
-            <!-- 1. 📊 物理算子即時檢核表 -->
+            <!-- 3. 📊 物理算子即時檢核表 -->
             <section class="card border-[#38bdf8] bg-[#0c1a2e]">
                 <div class="card-header !text-sky-400">
                     <span class="font-extrabold text-[11.5px]">📊 物理算子即時檢核與剛性門檻（GEM 防線）</span>
@@ -321,7 +324,7 @@
                 </div>
             </section>
 
-            <!-- 🤖 自主強化學習與歷史回饋迭代中樞 (RL Loop) - 收合版 -->
+            <!-- 4. 🤖 自主強化學習模組 (可收合 details) -->
             <details class="card border-[#a855f7] bg-[#160d2e]" id="detailsRLLoop">
                 <summary class="card-header !text-purple-300 list-none outline-none cursor-pointer flex justify-between items-center">
                     <span class="font-extrabold text-[11.5px] flex items-center gap-1">🤖 自主強化學習與歷史回饋迭代中樞 (RL Loop)</span>
@@ -352,7 +355,7 @@
                 </div>
             </details>
 
-            <!-- 3. 🌀 颱風態勢專區與 GEM 應變比對 -->
+            <!-- 5. 🌀 颱風態勢專區與 GEM 應變比對 -->
             <details class="card border-[#ef4444] bg-[#180d1a]/90" open id="detailsTyphoonZone">
                 <summary class="card-header !text-red-400 font-bold flex justify-between cursor-pointer">
                     <span class="flex items-center gap-1">🌀 颱風態勢專區與 GEM 應變比對 (CWA + TDX 多手 API 即時實證)</span>
@@ -405,11 +408,11 @@
         <!-- 右側面板：圖場與 Canvas 畫布 -->
         <div class="lg:col-span-6 flex flex-col gap-2">
 
-            <!-- 1. 📐 碼頭動態剖面圖 Canvas (單一連動，不再重複分割 3 剖面) -->
+            <!-- 1. 📐 碼頭動態剖面圖 Canvas -->
             <section class="card border-[#38bdf8]">
                 <div class="card-header !text-[#38bdf8]">
                     <span id="lblProfileTitle">📐 碼頭動態剖面與越浪分析 (南岸碼頭)</span>
-                    <span class="badge badge-yellow text-[8px]" id="lblProfileSlotTag">時段連動中</span>
+                    <span class="badge badge-yellow text-[8px]" id="lblProfileSlotTag">即時單一連動</span>
                 </div>
                 <div class="bg-[#0b172a] border border-blue-500/50 p-1 rounded-lg mb-1 flex items-center justify-between gap-1">
                     <span class="text-[9px] font-bold text-slate-300 pl-0.5 whitespace-nowrap">⚓ 剖面:</span>
@@ -446,30 +449,21 @@
                 </div>
             </section>
 
-            <!-- 3. 🌀 Windy 動態實時圖場 -->
+            <!-- 3. 🚢 Windy 底圖 + TDX 船舶 AIS 實時動態向量圖台 -->
             <section class="card border-[#ef4444] bg-[#180d1a]/90">
                 <div class="card-header !text-red-400 flex flex-wrap justify-between items-center gap-1">
-                    <span class="font-black text-[11.5px]">🌀 Windy 動態實時圖場與氣象預報表</span>
-                    <div class="flex gap-1 text-[8.5px]">
-                        <button onclick="changeWindyOverlay('wind')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-1.5 py-0.5 rounded border border-slate-700 font-bold">💨 風速</button>
-                        <button onclick="changeWindyOverlay('waves')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-1.5 py-0.5 rounded border border-slate-700 font-bold">🌊 浪高</button>
-                        <button onclick="changeWindyOverlay('gust')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-1.5 py-0.5 rounded border border-slate-700 font-bold">⚡ 陣風</button>
-                        <button onclick="changeWindyOverlay('rain')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-1.5 py-0.5 rounded border border-slate-700 font-bold">🌧️ 雨量</button>
-                    </div>
+                    <span class="font-black text-[11.5px]">🚢 Windy 海象粒子底圖與 TDX 客輪 AIS 實時動態圖台</span>
+                    <span class="badge badge-pass text-[8px]">Leaflet 多圖層動態渲染</span>
                 </div>
-                <div class="relative w-full rounded border border-slate-800 overflow-hidden bg-[#050a14] h-[380px]" id="windyContainer">
-                    <iframe id="windyFrame"
-                            src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=m%2Fs&zoom=11&product=ecmwf&level=surface&lat=24.843&lon=121.952&detailLat=24.843&detailLon=121.952&marker=true&detail=true"
-                            class="w-full h-full block border-0 rounded"
-                            loading="lazy">
-                    </iframe>
+                <div class="relative w-full rounded border border-slate-800 overflow-hidden bg-[#050a14] h-[380px]" id="leafletMapContainer">
+                    <div id="vesselMap" class="w-full h-full block"></div>
                 </div>
             </section>
 
         </div>
     </div>
 
-    <!-- JS 邏輯腳本 (單一連動 + 游擊表格點擊觸發) -->
+    <!-- JS 邏輯腳本 (地圖 + 單一連動 + 游擊表格觸發) -->
     <script>
     (function() {
         const getEl = id => document.getElementById(id);
@@ -477,19 +471,64 @@
 
         let currentViewMode = 'SOUTH'; // 雙圖連動模式: 'SOUTH', 'NORTH', 'COMPARE', 'EARLY', 'NOON', 'EVE', 'DISPATCH'
         let animPhase = 0;
+        let leafletMap = null;
+        let vesselLayerGroup = null;
 
-        window.changeWindyOverlay = function(overlay) {
-            const frame = getEl('windyFrame');
-            if (frame) {
-                frame.src = `https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=m%2Fs&zoom=11&product=ecmwf&level=surface&lat=24.843&lon=121.952&detailLat=24.843&detailLon=121.952&marker=true&detail=true&overlay=${overlay}`;
-            }
-        };
+        // 初始化 Leaflet 船舶動態與 Windy 底圖圖台
+        function initVesselMap() {
+            if (!getEl('vesselMap')) return;
+            leafletMap = L.map('vesselMap', { zoomControl: false }).setView([24.843, 121.920], 12);
+            
+            // 加入深色海事底圖
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap &copy; CARTO',
+                maxZoom: 18
+            }).addTo(leafletMap);
 
-        // 需求 1：游擊時序表格點擊選取函數
+            vesselLayerGroup = L.layerGroup().addTo(leafletMap);
+
+            // TDX 實時/模擬客輪動態數據
+            const vessels = [
+                { mmsi: "416001001", name: "凱鯨號", lat: 24.858, lon: 121.885, cog: 85, sog: 18.2, status: "開往龜山島" },
+                { mmsi: "416001002", name: "蘭鯨號", lat: 24.848, lon: 121.930, cog: 90, sog: 16.5, status: "靠泊南岸中" },
+                { mmsi: "416001003", name: "新福豐號", lat: 24.835, lon: 121.905, cog: 260, sog: 19.0, status: "返航烏石港" }
+            ];
+
+            renderVessels(vessels);
+        }
+
+        function createVesselIcon(cogDeg, status) {
+            const isDocked = status.includes("靠泊");
+            const color = isDocked ? "#10b981" : "#38bdf8";
+            const svgIcon = `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="26" height="26" style="transform: rotate(${cogDeg}deg);">
+                    <path fill="${color}" stroke="#ffffff" stroke-width="1.5" d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"/>
+                </svg>`;
+            return L.divIcon({ html: svgIcon, className: '', iconSize: [26, 26], iconAnchor: [13, 13] });
+        }
+
+        function renderVessels(vessels) {
+            if (!vesselLayerGroup) return;
+            vesselLayerGroup.clearLayers();
+
+            vessels.forEach(v => {
+                const marker = L.marker([v.lat, v.lon], { icon: createVesselIcon(v.cog, v.status) });
+                marker.bindPopup(`
+                    <div style="font-size:11px; font-family:sans-serif; color:#0f172a;">
+                        <b style="color:#2563eb;">🚢 ${v.name} (${v.mmsi})</b><br/>
+                        <b>動態：</b>${v.status}<br/>
+                        <b>航速 (SOG)：</b>${v.sog} 節<br/>
+                        <b>航向 (COG)：</b>${v.cog}°
+                    </div>
+                `);
+                marker.bindTooltip(`${v.name} | ${v.sog}kts`, { permanent: true, direction: 'bottom', className: 'vessel-label' });
+                vesselLayerGroup.addLayer(marker);
+            });
+        }
+
         window.selectScheduleSlot = function(slotCode) {
             currentViewMode = slotCode;
 
-            // 清除表格高亮並加上選取樣式
             ['rowSlotEarly', 'rowSlotNoon', 'rowSlotEve', 'rowSlotDispatch'].forEach(id => {
                 const row = getEl(id);
                 if (row) row.classList.remove('tr-active-slot');
@@ -583,7 +622,6 @@
                 if (rBtn) rBtn.addEventListener('click', () => setViewMode(modeUpper));
             });
 
-            // 表格點擊列切換
             getEl('rowSlotEarly')?.addEventListener('click', () => selectScheduleSlot('EARLY'));
             getEl('rowSlotNoon')?.addEventListener('click', () => selectScheduleSlot('NOON'));
             getEl('rowSlotEve')?.addEventListener('click', () => selectScheduleSlot('EVE'));
@@ -615,7 +653,6 @@
             const fbNorth = 3.20 - crestNorth;
             const fbSouth = 2.50 - crestSouth;
 
-            // 更新左側表格數據與燈號
             setTxt('cmpHsVal', `${hsNorth.toFixed(2)} m`);
             const hsB = getEl('cmpHsBadge'); if (hsB) hsB.innerHTML = hsNorth > 1.13 ? '<span class="badge badge-veto text-[8px]">🔴 VETO</span>' : '<span class="badge badge-pass text-[8px]">🟢 通過</span>';
 
@@ -636,7 +673,6 @@
             const vetoNorth = (hsNorth > 1.13) || (weffNorth > 10.17) || (tp >= 11.5) || (ukcNorth < 1.50) || (fbNorth < 0.50);
             const vetoSouth = (hsSouth > 1.13) || (weffSouth > 10.17) || (tp >= 11.5) || (ukcSouth < 1.50) || (fbSouth < 0.50);
 
-            // 動態更新游擊時序表格各時段預估數值與靠泊燈號
             const updateCellSlot = (tideAdd, hsMult, cellTideId, cellHsId, cellBadgeId) => {
                 const sTide = tide + tideAdd;
                 const sHs = hsSouth * hsMult;
@@ -655,7 +691,6 @@
             updateCellSlot(+0.20, 0.95, 'cellEveTide', 'cellEveHs', 'cellEveBadge');
             updateCellSlot(+0.30, 1.25, 'cellDispTide', 'cellDispHs', 'cellDispBadge');
 
-            // 雷達圖南北案裁示燈號
             const rNorthB = getEl('radarNorthBadge');
             const rSouthB = getEl('radarSouthBadge');
             if (rNorthB) {
@@ -758,7 +793,6 @@
             const crestY = cdToY(crestCD);
             const quayX = w * 0.48;
 
-            // 藍色可靠水位底色區塊
             const safeTideMinCD = -0.50;
             const safeTideMaxCD = +2.20;
             const safeTideMinY = cdToY(safeTideMinCD);
@@ -767,7 +801,6 @@
             ctx.fillStyle = 'rgba(14, 116, 144, 0.28)';
             ctx.fillRect(0, safeTideMaxY, quayX, safeTideMinY - safeTideMaxY);
 
-            // 海底地層線
             ctx.fillStyle = '#1e1b18';
             ctx.fillRect(0, seabedY, w, Math.max(10, h - seabedY));
             ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
@@ -776,7 +809,6 @@
             ctx.font = '8.5px monospace'; ctx.fillStyle = '#94a3b8'; ctx.textAlign = 'right';
             ctx.fillText(`海底: -${depthBase.toFixed(2)}m CD`, w - 6, seabedY + 10);
 
-            // 碼頭結構
             ctx.fillStyle = '#1e2d4a'; ctx.fillRect(quayX, deckY, w - quayX, seabedY - deckY);
             ctx.strokeStyle = accentColor; ctx.lineWidth = 1.2;
             ctx.strokeRect(quayX, deckY, w - quayX, seabedY - deckY);
@@ -784,7 +816,6 @@
             ctx.fillStyle = '#e2e8f0'; ctx.textAlign = 'left'; ctx.font = 'bold 8.5px sans-serif';
             ctx.fillText(`碼頭面: +${deckCD.toFixed(2)}m CD`, quayX + 4, deckY + 10);
 
-            // 動態水體與越浪 Fill
             const isOvertopping = overtopDepth > 0 || fb < 0.50;
             ctx.beginPath();
             ctx.moveTo(0, seabedY);
@@ -803,14 +834,12 @@
             ctx.fillStyle = isOvertopping ? 'rgba(239, 68, 68, 0.4)' : 'rgba(56, 189, 248, 0.35)';
             ctx.fill();
 
-            // 潮位線
             ctx.strokeStyle = '#38bdf8'; ctx.setLineDash([2, 2]);
             ctx.beginPath(); ctx.moveTo(0, tideY); ctx.lineTo(quayX, tideY); ctx.stroke();
             ctx.setLineDash([]);
             ctx.font = '8.5px sans-serif'; ctx.fillStyle = '#38bdf8'; ctx.textAlign = 'left';
             ctx.fillText(`潮位: ${tideCD >= 0 ? '+' : ''}${tideCD.toFixed(2)}m CD`, 6, tideY - 3);
 
-            // 越浪線與數值
             ctx.strokeStyle = isOvertopping ? '#ef4444' : '#f59e0b';
             ctx.lineWidth = 1.5; ctx.setLineDash([4, 2]);
             ctx.beginPath(); ctx.moveTo(0, crestY); ctx.lineTo(w, crestY); ctx.stroke();
@@ -821,7 +850,6 @@
             ctx.textAlign = 'left';
             ctx.fillText(`波頂/越浪線: +${crestCD.toFixed(2)}m CD ${isOvertopping ? '🚨 (越浪超標)' : '⚠️'}`, 6, crestY - 3);
 
-            // 客輪結構
             const shipW = Math.min(50, quayX * 0.5);
             const shipX = quayX - shipW - 10;
             const shipDeckY = tideY - 9;
@@ -833,7 +861,6 @@
             ctx.fillStyle = '#1e293b'; ctx.fill();
             ctx.strokeStyle = '#f8fafc'; ctx.lineWidth = 1; ctx.stroke();
 
-            // UKC 動態裕深測距線
             const ukcX = shipX + shipW * 0.5;
             ctx.beginPath(); ctx.moveTo(ukcX, keelY); ctx.lineTo(ukcX, seabedY);
             ctx.strokeStyle = ukcPass ? '#10b981' : '#ef4444'; ctx.lineWidth = 1.8; ctx.stroke();
@@ -843,11 +870,9 @@
             ctx.fillStyle = ukcPass ? '#86efac' : '#fca5a5';
             ctx.fillText(`UKC: ${ukc.toFixed(2)}m ${ukcPass ? '🟢' : '🔴'}`, ukcX + 22, ukcTextY);
 
-            // 剖面標題
             ctx.font = 'bold 9.5px sans-serif'; ctx.fillStyle = accentColor; ctx.textAlign = 'left';
             ctx.fillText(`⚓ ${title}`, 6, 12);
 
-            // HUD 數據卡片 (切齊海底底部)
             const hudW = 142;
             const hudH = 75;
             const hudX = Math.max(w - hudW - 4, quayX + 4);
@@ -973,7 +998,6 @@
             const angles = [];
             for (let i = 0; i < count; i++) angles.push(-Math.PI / 2 + (i * 2 * Math.PI) / count);
 
-            // 同心五邊形網格
             [0.3, 0.6, 1.0, 1.25].forEach(lvl => {
                 ctx.beginPath();
                 for (let i = 0; i < count; i++) {
@@ -989,7 +1013,6 @@
                 ctx.stroke();
             });
 
-            // 放射軸線
             for (let i = 0; i < count; i++) {
                 ctx.beginPath(); ctx.moveTo(cx, cy);
                 ctx.lineTo(cx + R * 1.25 * Math.cos(angles[i]), cy + R * 1.25 * Math.sin(angles[i]));
@@ -1082,6 +1105,7 @@
         function initDashboard() {
             startClockAndWatchdog();
             initUIControls();
+            initVesselMap();
             recalculatePhysicsAndRender();
             pollLatestDecision();
             setInterval(pollLatestDecision, 12000);
