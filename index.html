@@ -271,6 +271,14 @@
                     <span>📐 碼頭動態剖面與越浪分析</span>
                     <span class="badge badge-yellow text-[8px]">含動態潮位</span>
                 </div>
+                <div class="bg-[#0b172a] border border-blue-500/50 p-1 rounded-lg mb-1 flex items-center justify-between gap-1">
+                    <span class="text-[9px] font-bold text-slate-300 pl-0.5 whitespace-nowrap">⚓ 剖面:</span>
+                    <div class="grid grid-cols-3 gap-1 flex-1">
+                        <button id="tabProfileSouth" class="tab-btn py-0.5 px-1 rounded text-[8.5px] font-bold border text-center tab-south-active">⚓ 南岸</button>
+                        <button id="tabProfileNorth" class="tab-btn py-0.5 px-1 rounded text-[8.5px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚓ 北岸</button>
+                        <button id="tabProfileCompare" class="tab-btn py-0.5 px-1 rounded text-[8.5px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚖️ 對比</button>
+                    </div>
+                </div>
                 <div class="canvas-container h-[200px]" id="profileContainer">
                     <canvas id="profileCanvas" class="w-full h-full block"></canvas>
                 </div>
@@ -281,6 +289,14 @@
                 <div class="card-header !text-[#38bdf8]">
                     <span class="font-extrabold">🎯 態勢雷達圖與 5 大算子對比</span>
                     <span class="badge badge-yellow text-[8px]">雷達圖場</span>
+                </div>
+                <div class="bg-[#0b172a] border border-blue-500/50 p-1 rounded-lg mb-1 flex items-center justify-between gap-1">
+                    <span class="text-[9px] font-bold text-slate-300 pl-0.5 whitespace-nowrap">📡 雷達:</span>
+                    <div class="grid grid-cols-3 gap-1 flex-1">
+                        <button id="tabRadarSouth" class="tab-btn py-0.5 px-1 rounded text-[8.5px] font-bold border text-center tab-south-active">⚓ 南岸</button>
+                        <button id="tabRadarNorth" class="tab-btn py-0.5 px-1 rounded text-[8.5px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚓ 北岸</button>
+                        <button id="tabRadarCompare" class="tab-btn py-0.5 px-1 rounded text-[8.5px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚖️ 雙岸</button>
+                    </div>
                 </div>
                 <div class="canvas-container h-[260px]" id="radarContainer">
                     <canvas id="nativeRadarCanvas" class="w-full h-full block"></canvas>
@@ -304,11 +320,15 @@
         </div>
     </div>
 
-    <!-- 前端 JS 邏輯：SSOT 12 秒心跳輪詢與數據連動 -->
+    <!-- 完整的 JS 繪圖與沙盤對算邏輯 -->
     <script>
     (function() {
         const getEl = id => document.getElementById(id);
         const setTxt = (id, txt) => { const el = getEl(id); if (el) el.textContent = txt; };
+
+        let currentProfileMode = 'SOUTH';
+        let currentRadarMode = 'SOUTH';
+        let animPhase = 0;
 
         function startClockAndWatchdog() {
             const update = () => {
@@ -342,10 +362,176 @@
             } catch (e) { console.warn("SSOT Polling skip:", e); }
         }
 
+        function initUIControls() {
+            const bindInput = (id, labelId, suffix, isTide = false) => {
+                const el = getEl(id);
+                if (el) {
+                    el.addEventListener('input', e => {
+                        const val = parseFloat(e.target.value);
+                        setTxt(labelId, isTide ? `${val >= 0 ? '+' : ''}${val.toFixed(2)}${suffix}` : `${val}${suffix}`);
+                        recalculatePhysicsAndRender();
+                    });
+                }
+            };
+            bindInput('rngHs', 'lblHs', 'm');
+            bindInput('rngW', 'lblW', 'm/s');
+            bindInput('rngTp', 'lblTp', 's');
+            bindInput('rngTide', 'lblTide', 'm', true);
+            bindInput('rngDeltaTheta', 'lblDeltaTheta', '°');
+
+            const bindTab = (prefix, mode, isRadar) => {
+                const el = getEl(prefix + mode);
+                if (el) {
+                    el.addEventListener('click', () => {
+                        if (isRadar) currentRadarMode = mode.toUpperCase();
+                        else currentProfileMode = mode.toUpperCase();
+                        recalculatePhysicsAndRender();
+                    });
+                }
+            };
+            ['South', 'North', 'Compare'].forEach(m => {
+                bindTab('tabProfile', m, false);
+                bindTab('tabRadar', m, true);
+            });
+        }
+
+        function recalculatePhysicsAndRender() {
+            const hs = parseFloat(getEl('rngHs')?.value || 3.71);
+            const w = parseFloat(getEl('rngW')?.value || 8.50);
+            const tp = parseFloat(getEl('rngTp')?.value || 15.5);
+            const tide = parseFloat(getEl('rngTide')?.value || 1.10);
+            const deltaTheta = parseFloat(getEl('rngDeltaTheta')?.value || 50);
+
+            const radNorth = deltaTheta * (Math.PI / 180);
+            const hsNorth = hs * 1.06;
+            const weffNorth = w * Math.abs(Math.cos(radNorth));
+            const ukcNorth = 8.50 + tide - 2.02 - hsNorth * 0.5;
+            const fbNorth = 3.20 - (tide + hsNorth * 0.68);
+
+            setTxt('cmpHsVal', `${hsNorth.toFixed(2)} m`);
+            setTxt('cmpWeffVal', `${weffNorth.toFixed(2)} m/s`);
+            setTxt('cmpTpVal', `${tp.toFixed(1)} s`);
+            setTxt('cmpTideVal', `${tide >= 0 ? '+' : ''}${tide.toFixed(2)} m CD`);
+            setTxt('cmpUkcVal', `${ukcNorth.toFixed(2)} m`);
+            setTxt('cmpFbVal', `${fbNorth.toFixed(2)} m`);
+
+            renderAllCanvas();
+        }
+
+        function renderAllCanvas() {
+            drawProfileCanvas();
+            drawRadarCanvas();
+        }
+
+        function drawProfileCanvas() {
+            const canvas = getEl('profileCanvas');
+            const container = getEl('profileContainer');
+            if (!canvas || !container) return;
+
+            const w = container.clientWidth || 320;
+            const h = container.clientHeight || 200;
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = w * dpr; canvas.height = h * dpr;
+            canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
+
+            const ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr);
+            ctx.fillStyle = '#050a14'; ctx.fillRect(0, 0, w, h);
+
+            const hs = parseFloat(getEl('rngHs')?.value || 3.71);
+            const tide = parseFloat(getEl('rngTide')?.value || 1.10);
+
+            // 碼頭與海床
+            const seabedY = h - 25;
+            const quayX = w * 0.55;
+            const tideY = h * 0.4 - tide * 12;
+
+            ctx.fillStyle = '#1e2d4a'; ctx.fillRect(quayX, h * 0.25, w - quayX, seabedY - h * 0.25);
+            ctx.strokeStyle = '#38bdf8'; ctx.strokeRect(quayX, h * 0.25, w - quayX, seabedY - h * 0.25);
+
+            // 動態波浪
+            ctx.beginPath();
+            ctx.moveTo(0, seabedY);
+            for (let x = 0; x <= quayX; x += 5) {
+                const wy = tideY + Math.sin(x * 0.05 + animPhase) * (hs * 3.5);
+                ctx.lineTo(x, wy);
+            }
+            ctx.lineTo(quayX, seabedY); ctx.closePath();
+            ctx.fillStyle = 'rgba(56, 189, 248, 0.35)'; ctx.fill();
+
+            // 標籤文字
+            ctx.fillStyle = '#38bdf8'; ctx.font = 'bold 9px monospace';
+            ctx.fillText(`⚓ 碼頭動態剖面 [模式: ${currentProfileMode}]`, 8, 15);
+            ctx.fillText(`潮位: ${tide >= 0 ? '+' : ''}${tide.toFixed(2)}m CD`, 8, tideY - 5);
+        }
+
+        function drawRadarCanvas() {
+            const canvas = getEl('nativeRadarCanvas');
+            const container = getEl('radarContainer');
+            if (!canvas || !container) return;
+
+            const w = container.clientWidth || 320;
+            const h = container.clientHeight || 260;
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = w * dpr; canvas.height = h * dpr;
+            canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
+
+            const ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr);
+            ctx.fillStyle = '#050a14'; ctx.fillRect(0, 0, w, h);
+
+            const cx = w / 2, cy = h / 2, R = Math.min(w, h) * 0.35;
+            const angles = [-Math.PI/2, -Math.PI/10, Math.PI*3/10, Math.PI*7/10, Math.PI*11/10];
+
+            // 多階幾何網格
+            [0.3, 0.6, 1.0].forEach(rRatio => {
+                ctx.beginPath();
+                for (let i = 0; i < 5; i++) {
+                    const x = cx + R * rRatio * Math.cos(angles[i]);
+                    const y = cy + R * rRatio * Math.sin(angles[i]);
+                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.strokeStyle = rRatio === 1.0 ? '#facc15' : '#1e2d4a';
+                ctx.lineWidth = 1; ctx.stroke();
+            });
+
+            // 數據多邊形 (依門檻比例繪製)
+            const ratios = [0.95, 0.6, 0.85, 0.7, 0.9];
+            ctx.beginPath();
+            for (let i = 0; i < 5; i++) {
+                const x = cx + R * ratios[i] * Math.cos(angles[i]);
+                const y = cy + R * ratios[i] * Math.sin(angles[i]);
+                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.35)'; ctx.fill();
+            ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 2; ctx.stroke();
+
+            // 標籤
+            const labels = ["波高", "風速", "週期", "裕深", "乾舷"];
+            ctx.font = 'bold 9px sans-serif'; ctx.fillStyle = '#f8fafc';
+            for (let i = 0; i < 5; i++) {
+                const x = cx + (R + 15) * Math.cos(angles[i]);
+                const y = cy + (R + 15) * Math.sin(angles[i]);
+                ctx.textAlign = x < cx - 10 ? 'right' : (x > cx + 10 ? 'left' : 'center');
+                ctx.fillText(labels[i], x, y);
+            }
+        }
+
         function initDashboard() {
             startClockAndWatchdog();
+            initUIControls();
+            recalculatePhysicsAndRender();
             pollLatestDecision();
             setInterval(pollLatestDecision, 12000);
+
+            // 啟動海浪動畫循環
+            function animLoop() {
+                animPhase += 0.05;
+                drawProfileCanvas();
+                requestAnimationFrame(animLoop);
+            }
+            requestAnimationFrame(animLoop);
+            window.addEventListener('resize', renderAllCanvas);
         }
 
         if (document.readyState === 'complete' || document.readyState === 'interactive') initDashboard();
