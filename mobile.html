@@ -155,7 +155,51 @@
                 </div>
             </section>
 
-            <!-- 2. ⚡ 游擊調度時窗與正常船班 (分頁併合卡片) -->
+            <!-- 2. 🤖 自主強化學習與歷史回饋迭代中樞 (RL Loop) -->
+            <section class="card border-[#a855f7] bg-[#160d2e]">
+                <div class="card-header !text-purple-300 flex justify-between items-center">
+                    <span class="font-extrabold text-[11.5px] flex items-center gap-1">
+                        🤖 自主強化學習與歷史回饋迭代中樞 (RL Loop)
+                    </span>
+                    <span class="badge badge-pass text-[8px]">每日3時段對比學習</span>
+                </div>
+                <div class="pt-1 space-y-1.5 text-[9px] font-mono">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-1 text-center">
+                        <div class="bg-black/50 p-1 rounded border border-purple-500/30">
+                            <span class="text-slate-400 text-[7.5px] block">歷史學習樣本</span>
+                            <b class="text-purple-300 text-[9.5px]">4,280 筆</b>
+                        </div>
+                        <div class="bg-black/50 p-1 rounded border border-purple-500/30">
+                            <span class="text-slate-400 text-[7.5px] block">模型預判精確度</span>
+                            <b class="text-emerald-300 text-[9.5px]">98.6% (F1:0.984)</b>
+                        </div>
+                        <div class="bg-black/50 p-1 rounded border border-purple-500/30">
+                            <span class="text-slate-400 text-[7.5px] block">強化學習累積獎勵</span>
+                            <b class="text-amber-300 text-[9.5px]">+1428.5 R</b>
+                        </div>
+                        <div class="bg-black/50 p-1 rounded border border-purple-500/30">
+                            <span class="text-slate-400 text-[7.5px] block">演化迭代回合</span>
+                            <b class="text-sky-300 text-[9.5px]">Epoch #1260</b>
+                        </div>
+                    </div>
+                    <div class="bg-black/60 p-1.5 rounded border border-purple-500/30 text-[8.5px] text-slate-300 space-y-0.5">
+                        <div class="flex justify-between items-center text-purple-300 font-bold border-b border-purple-500/20 pb-0.5">
+                            <span>🔄 3 時段定期抓取與自主權重調校機制：</span>
+                            <span class="text-emerald-400">● 運行中 (12s 輪詢)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>• 官方公告抓取視窗：</span>
+                            <span class="text-white">07:30 - 08:30 / 11:30 - 12:30 / 16:30 - 17:30</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>• 自動權重更新因子：</span>
+                            <span class="text-sky-300">折算波高 α: 1.06 | 風速攻角 β: 0.88</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. ⚡ 游擊調度時窗與正常船班 (分頁併合卡片) -->
             <section class="card border-[#eab308] bg-[#1a180d]">
                 <div class="card-header !text-amber-400 flex flex-wrap justify-between items-center gap-1">
                     <span class="font-bold text-[11.5px]">⚡ 游擊調度時窗與正常船班 (點擊帶入圖場對算)</span>
@@ -206,7 +250,7 @@
                 </div>
             </section>
 
-            <!-- 3. 🎮 戰術沙盤演練調度 -->
+            <!-- 4. 🎮 戰術沙盤演練調度 -->
             <section class="card border-[#2563eb] bg-[#0c182b]">
                 <div class="card-header !text-[#60a5fa]">
                     <span class="font-extrabold text-[11.5px]">🎮 戰術沙盤演練調度</span>
@@ -235,7 +279,7 @@
                 </div>
             </section>
 
-            <!-- 4. 📅 未來一周 (7天) 滾動式開/封島預測表 (可折疊/收合) -->
+            <!-- 5. 📅 未來一周 (7天) 滾動式開/封島預測表 (可折疊/收合) -->
             <details class="card border-[#facc15] bg-[#1a180d]" open id="detailsWeeklyForecast">
                 <summary class="card-header !text-yellow-400 list-none outline-none cursor-pointer flex justify-between items-center">
                     <span class="font-extrabold text-[11.5px] flex items-center gap-1">
@@ -325,27 +369,99 @@
                 </div>
             </details>
 
-            <!-- 5. 🏛️ 颱風專區與政府行政應變指南 (預設收合) -->
-            <details class="card border-[#ef4444] bg-[#180d1a]/90" id="detailsAdmin">
-                <summary class="card-header !text-red-400 list-none outline-none pb-0 border-b-0 cursor-pointer flex justify-between items-center">
-                    <span class="flex items-center gap-1 font-black text-[11.5px]">🌀 颱風專區與政府行政應變指南 (點擊展開)</span>
-                    <span class="badge badge-veto text-[8px]">預設收合</span>
+            <!-- 6. 🌀 颱風態勢專區與 GEM 應變比對 -->
+            <details class="card border-[#ef4444] bg-[#180d1a]/90" open id="detailsTyphoonZone">
+                <summary class="card-header !text-red-400 list-none outline-none cursor-pointer flex justify-between items-center">
+                    <span class="flex items-center gap-1 font-black text-[11.5px]">
+                        🌀 颱風態勢專區與 GEM 應變比對 (戰術影響值精算)
+                    </span>
+                    <span class="badge badge-veto text-[8px]">▼ 點擊收合/展開</span>
                 </summary>
-                <div class="pt-1.5 border-t border-red-500/30 mt-1.5 space-y-1.5 text-[9px]">
-                    <div class="grid grid-cols-3 gap-1">
-                        <div class="bg-black/40 p-1 rounded border border-slate-700 text-center">
-                            <span class="text-slate-300 text-[8px] block">中央應變</span>
-                            <span class="badge badge-pass text-[8px]" id="badgeCentralAlert">🟢 未開設</span>
+                
+                <div class="pt-2 border-t border-red-500/30 mt-1 space-y-2 text-[9px]">
+                    <div class="bg-black/60 p-2 rounded border border-red-500/40">
+                        <div class="font-extrabold text-red-300 border-b border-red-500/30 pb-1 mb-1.5 flex justify-between items-center">
+                            <span class="text-[10px]">🌀 氣象署即時颱風參數 (颱風情報)</span>
+                            <span class="badge badge-veto text-[7.5px]">強烈颱風強度</span>
                         </div>
-                        <div class="bg-black/40 p-1 rounded border border-slate-700 text-center">
-                            <span class="text-slate-300 text-[8px] block">宜蘭縣應變</span>
-                            <span class="badge badge-pass text-[8px]" id="badgeYilanAlert">🟢 未開設</span>
-                        </div>
-                        <div class="bg-black/40 p-1 rounded border border-slate-700 text-center">
-                            <span class="text-slate-300 text-[8px] block">新北市應變</span>
-                            <span class="badge badge-pass text-[8px]" id="badgeNtpCAlert">🟢 未開設</span>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 font-mono text-[8.5px]">
+                            <div class="bg-slate-900/80 p-1 rounded border border-slate-700">
+                                <span class="text-slate-400 block text-[7.5px]">颱風名稱/編號</span>
+                                <b class="text-white text-[9px]">強颱 康芮 (2421)</b>
+                            </div>
+                            <div class="bg-slate-900/80 p-1 rounded border border-slate-700">
+                                <span class="text-slate-400 block text-[7.5px]">中心氣壓 / 風速</span>
+                                <b class="text-amber-300 text-[9px]">925 hPa | 53 m/s</b>
+                            </div>
+                            <div class="bg-slate-900/80 p-1 rounded border border-slate-700">
+                                <span class="text-slate-400 block text-[7.5px]">暴風半徑 (7級/10級)</span>
+                                <b class="text-sky-300 text-[9px]">320 km / 120 km</b>
+                            </div>
+                            <div class="bg-slate-900/80 p-1 rounded border border-slate-700">
+                                <span class="text-slate-400 block text-[7.5px]">移速 / 移向</span>
+                                <b class="text-emerald-300 text-[9px]">西北西 22 km/h</b>
+                            </div>
+                            <div class="bg-slate-900/80 p-1 rounded border border-slate-700">
+                                <span class="text-slate-400 block text-[7.5px]">距龜山島距離</span>
+                                <b class="text-red-400 text-[9px]">280 km (進逼中)</b>
+                            </div>
+                            <div class="bg-red-950/60 p-1 rounded border border-red-500/50">
+                                <span class="text-red-300 block text-[7.5px]">龜山島影響時間預估</span>
+                                <b class="text-yellow-300 text-[9px]">長浪已抵達 / 暴風圈倒數 4h</b>
+                            </div>
                         </div>
                     </div>
+
+                    <div class="bg-black/60 p-2 rounded border border-yellow-500/40 space-y-1.5">
+                        <div class="flex justify-between items-center border-b border-yellow-500/30 pb-1">
+                            <span class="font-extrabold text-amber-300 text-[9.5px]">📊 綜合戰術影響值 (Impact Index) & 封島/整備時間比對</span>
+                            <span class="badge badge-veto text-[8px]" id="typhoonImpactBadge">💥 影響值：88.5 / 100 (極高危險)</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-2 text-[8.5px]">
+                            <div class="bg-slate-900/90 p-1.5 rounded border border-amber-500/30 space-y-1">
+                                <div class="font-bold text-amber-300 flex justify-between border-b border-amber-500/20 pb-0.5">
+                                    <span>🏛️ 官方（氣象署/風管處）</span>
+                                    <span class="text-red-400">海上陸上警報</span>
+                                </div>
+                                <div class="space-y-0.5 font-mono">
+                                    <div class="flex justify-between"><span>預警封島啟動：</span><b class="text-white">D0 (今日) 08:00</b></div>
+                                    <div class="flex justify-between"><span>氣象影響天數：</span><b class="text-amber-300">2 天</b></div>
+                                    <div class="flex justify-between"><span>官方復原整備：</span><b class="text-amber-300">+0.5 天</b></div>
+                                    <div class="flex justify-between border-t border-slate-700 pt-0.5"><span>官方預計總封島：</span><b class="text-red-400">共 2.5 天</b></div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-slate-900/90 p-1.5 rounded border border-sky-500/30 space-y-1">
+                                <div class="font-bold text-sky-300 flex justify-between border-b border-sky-500/20 pb-0.5">
+                                    <span>🤖 GEM 雙生模型精算</span>
+                                    <span class="text-red-400">物理 VETO 熔斷</span>
+                                </div>
+                                <div class="space-y-0.5 font-mono">
+                                    <div class="flex justify-between"><span>模型熔斷啟動：</span><b class="text-white">D0 (今日) 07:30</b></div>
+                                    <div class="flex justify-between"><span>物理超標天數：</span><b class="text-sky-300">2 天</b></div>
+                                    <div class="flex justify-between"><span>港埠清理/整備：</span><b class="text-sky-300">+1 天 (殘留湧浪)</b></div>
+                                    <div class="flex justify-between border-t border-slate-700 pt-0.5"><span>GEM 精算總封島：</span><b class="text-emerald-300">共 3.0 天 (含整備)</b></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-1">
+                        <div class="bg-black/40 p-1 rounded border border-slate-700 text-center">
+                            <span class="text-slate-300 text-[8px] block">中央應變中心</span>
+                            <span class="badge badge-veto text-[8px]" id="badgeCentralAlert">🔴 一級開設</span>
+                        </div>
+                        <div class="bg-black/40 p-1 rounded border border-slate-700 text-center">
+                            <span class="text-slate-300 text-[8px] block">宜蘭縣應變中心</span>
+                            <span class="badge badge-veto text-[8px]" id="badgeYilanAlert">🔴 一級開設</span>
+                        </div>
+                        <div class="bg-black/40 p-1 rounded border border-slate-700 text-center">
+                            <span class="text-slate-300 text-[8px] block">新北市應變中心</span>
+                            <span class="badge badge-veto text-[8px]" id="badgeNtpCAlert">🔴 一級開設</span>
+                        </div>
+                    </div>
+
                     <div class="bg-black/60 p-1.5 rounded border border-red-500/30 space-y-1">
                         <div class="flex justify-between items-center text-amber-300 font-bold">
                             <span>🛡️ 龜山島防颱撤離 SOP 檢核：</span>
@@ -407,7 +523,7 @@
                 </div>
             </section>
 
-            <!-- 3. 🌀 Windy 動態實時海流/風場地圖 (已修正 detail=true 與 480px 高度) -->
+            <!-- 3. 🌀 Windy 動態實時海流/風場地圖 (detail=true, h-[480px]) -->
             <section class="card border-[#ef4444] bg-[#180d1a]/90">
                 <div class="card-header !text-red-400 flex flex-wrap justify-between items-center gap-1">
                     <span class="font-black text-[11.5px]">🌀 Windy 動態實時圖場與氣象預報表</span>
