@@ -410,22 +410,43 @@
                 </div>
             </details>
 
-            <!-- 5. 🌀 颱風態勢專區與 GEM 應變比對 -->
-            <details class="card border-[#ef4444] bg-[#180d1a]/90" open id="detailsTyphoonZone">
-                <summary class="card-header !text-red-400 font-bold flex justify-between cursor-pointer">
-                    <span class="flex items-center gap-1">🌀 颱風態勢專區與 GEM 應變比對 (CWA + TDX 多手 API 即時實證)</span>
-                    <span class="badge badge-veto text-[9px]" id="cwaIntensityTag">一般海象</span>
+            <!-- 5. 🌀 颱風態勢專區與 GEM 應變比對 (收合版) -->
+            <details class="card border-[#ef4444] bg-[#180d1a]/90" id="detailsTyphoonZone">
+                <summary class="card-header !text-red-400 font-bold flex justify-between items-center cursor-pointer list-none outline-none">
+                    <span class="flex items-center gap-1 text-[11.5px]">🌀 颱風態勢專區與 GEM 應變比對 (CWA + TDX 多手 API 即時實證)</span>
+                    <div class="flex items-center gap-1.5">
+                        <span id="cwaIntensityTag"><span class="badge badge-pass text-[8.5px]">🟢 一般海象</span></span>
+                        <span class="badge badge-yellow text-[8px]">▼ 點擊展開詳情</span>
+                    </div>
                 </summary>
 
                 <div class="pt-2 border-t border-red-500/30 mt-1 space-y-2 text-[9px]">
+                    <!-- 航務狀態列 -->
                     <div class="bg-blue-950/60 p-1.5 rounded border border-blue-500/40 flex justify-between items-center text-[8.5px]">
                         <span class="text-sky-300 font-bold">🚢 交通部 TDX 航務即時狀態：</span>
                         <span class="text-amber-300 font-mono font-bold" id="tdxStatusText">TDX 未連動 (使用氣象預警)</span>
                     </div>
 
+                    <!-- 戰術指揮核心卡：預估封島時窗、模型比對、未來趨勢 -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-1.5 font-mono text-[8.5px]">
+                        <div class="bg-slate-900/90 p-2 rounded border border-slate-700">
+                            <span class="text-amber-300 font-sans font-bold block text-[7.5px] mb-0.5">⏱️ 預估封島時窗與天數</span>
+                            <b class="text-white text-[9px]" id="cwaClosureEstimate">🟢 無封島風險（全線正常營運靠泊）</b>
+                        </div>
+                        <div class="bg-slate-900/90 p-2 rounded border border-slate-700">
+                            <span class="text-sky-300 font-sans font-bold block text-[7.5px] mb-0.5">⚖️ 官方 vs GEM 模型決策對比</span>
+                            <b class="text-white text-[9px]" id="cwaModelVsOfficial">🟢 官方預報與 GEM 模型一致：維持開放</b>
+                        </div>
+                        <div class="bg-slate-900/90 p-2 rounded border border-slate-700">
+                            <span class="text-emerald-300 font-sans font-bold block text-[7.5px] mb-0.5">📈 未來動態影響趨勢</span>
+                            <b class="text-white text-[9px]" id="cwaFutureTrend">🟢 未來 72 小時海象平穩，風浪符合靠泊安全門檻</b>
+                        </div>
+                    </div>
+
+                    <!-- 氣象署/國際 API 颱風即時物理參數 -->
                     <div class="bg-black/60 p-2 rounded border border-red-500/40">
                         <div class="font-extrabold text-red-300 border-b border-red-500/30 pb-1 mb-1.5 flex justify-between items-center">
-                            <span class="text-[10px]">🌀 氣象署 / 國際 API 即時颱風動態</span>
+                            <span class="text-[10px]">🌀 氣象署 / 國際 API 即時颱風氣象參數</span>
                             <span class="badge badge-veto text-[7.5px]" id="cwaAlertStatus">未發布警報</span>
                         </div>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 font-mono text-[8.5px]">
@@ -587,9 +608,17 @@
                         setTxt('cwaMovement', t.movement);
                         setTxt('cwaDistance', t.distance_text);
                         setTxt('cwaImpact', `影響值：${t.impact_index} / 100`);
-                        setTxt('cwaIntensityTag', t.intensity);
                         setTxt('cwaAlertStatus', t.alert_status);
                         if (t.tdx_status) setTxt('tdxStatusText', t.tdx_status);
+                        
+                        // 動態更新颱風專區燈號與核心指標
+                        if (t.typhoon_badge) {
+                            const bTag = getEl('cwaIntensityTag');
+                            if (bTag) bTag.innerHTML = t.typhoon_badge;
+                        }
+                        if (t.closure_estimate) setTxt('cwaClosureEstimate', t.closure_estimate);
+                        if (t.model_vs_official) setTxt('cwaModelVsOfficial', t.model_vs_official);
+                        if (t.future_trend) setTxt('cwaFutureTrend', t.future_trend);
                     }
                 }
             } catch (e) { console.warn("SSOT Polling skip:", e); }
@@ -874,7 +903,7 @@
             ctx.setLineDash([]);
 
             ctx.font = 'bold 8.5px sans-serif';
-            ctx.fillStyle = isOvertopping ? '#fca5 a5' : '#fcd34d';
+            ctx.fillStyle = isOvertopping ? '#fca5a5' : '#fcd34d';
             ctx.textAlign = 'left';
             const crestTextY = crestY < 20 ? crestY + 11 : crestY - 3;
             ctx.fillText(`波頂/越浪線: +${crestCD.toFixed(2)}m CD ${isOvertopping ? '🚨 (越浪超標)' : '⚠️'}`, 6, crestTextY);
