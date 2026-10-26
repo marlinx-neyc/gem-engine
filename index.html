@@ -320,7 +320,7 @@
         </div>
     </div>
 
-    <!-- 完整的 Canvas 2D 繪圖與沙盤動態對算腳本 -->
+    <!-- 完整的 Canvas 2D 繪圖與沙盤動態對算腳本 (含剖面 HUD 數值/門檻/燈號與對比) -->
     <script>
     (function() {
         const getEl = id => document.getElementById(id);
@@ -385,8 +385,7 @@
                     el.addEventListener('click', () => {
                         if (isRadar) currentRadarMode = mode.toUpperCase();
                         else currentProfileMode = mode.toUpperCase();
-                        
-                        // 更新按鈕樣式
+
                         ['South', 'North', 'Compare'].forEach(m => {
                             const btn = getEl(prefix + m);
                             if (btn) {
@@ -394,7 +393,7 @@
                                 btn.className = `tab-btn py-0.5 px-1 rounded text-[8.5px] font-bold border text-center ${active ? (m==='South'?'tab-south-active':(m==='North'?'tab-north-active':'tab-compare-active')) : 'border-slate-700 bg-slate-800 text-slate-300'}`;
                             }
                         });
-                        
+
                         recalculatePhysicsAndRender();
                     });
                 }
@@ -413,17 +412,100 @@
             const deltaTheta = parseFloat(getEl('rngDeltaTheta')?.value || 50);
 
             const radNorth = deltaTheta * (Math.PI / 180);
-            const hsNorth = hs * 1.06;
-            const weffNorth = w * Math.abs(Math.cos(radNorth));
-            const ukcNorth = 8.50 + tide - 2.02 - hsNorth * 0.5;
-            const fbNorth = 3.20 - (tide + hsNorth * 0.68);
+            const radSouth = (90 - deltaTheta) * (Math.PI / 180);
 
+            const hsNorth = hs * 1.06;
+            const hsSouth = hs * 0.62;
+            const weffNorth = w * Math.abs(Math.cos(radNorth));
+            const weffSouth = w * Math.abs(Math.cos(radSouth));
+            const draft = 2.02;
+
+            const ukcNorth = 8.50 + tide - draft - hsNorth * 0.5;
+            const ukcSouth = 9.80 + tide - draft - hsSouth * 0.5;
+
+            const crestNorth = tide + hsNorth * 0.68;
+            const crestSouth = tide + hsSouth * 0.68;
+
+            const fbNorth = 3.20 - crestNorth;
+            const fbSouth = 2.50 - crestSouth;
+
+            // 更新左側表格數據與燈號
             setTxt('cmpHsVal', `${hsNorth.toFixed(2)} m`);
+            const hsB = getEl('cmpHsBadge'); if (hsB) hsB.innerHTML = hsNorth > 1.13 ? '<span class="badge badge-veto text-[8px]">🔴 VETO</span>' : '<span class="badge badge-pass text-[8px]">🟢 通過</span>';
+
             setTxt('cmpWeffVal', `${weffNorth.toFixed(2)} m/s`);
+            const weffB = getEl('cmpWeffBadge'); if (weffB) weffB.innerHTML = weffNorth > 10.17 ? '<span class="badge badge-veto text-[8px]">🔴 VETO</span>' : '<span class="badge badge-pass text-[8px]">🟢 通過</span>';
+
             setTxt('cmpTpVal', `${tp.toFixed(1)} s`);
+            const tpB = getEl('cmpTpBadge'); if (tpB) tpB.innerHTML = tp >= 11.5 ? '<span class="badge badge-veto text-[8px]">🔴 VETO</span>' : '<span class="badge badge-pass text-[8px]">🟢 通過</span>';
+
             setTxt('cmpTideVal', `${tide >= 0 ? '+' : ''}${tide.toFixed(2)} m CD`);
+
             setTxt('cmpUkcVal', `${ukcNorth.toFixed(2)} m`);
+            const ukcB = getEl('cmpUkcBadge'); if (ukcB) ukcB.innerHTML = ukcNorth < 1.50 ? '<span class="badge badge-veto text-[8px]">🔴 VETO</span>' : '<span class="badge badge-pass text-[8px]">🟢 通過</span>';
+
             setTxt('cmpFbVal', `${fbNorth.toFixed(2)} m`);
+            const fbB = getEl('cmpFbBadge'); if (fbB) fbB.innerHTML = fbNorth < 0.50 ? '<span class="badge badge-veto text-[8px]">🔴 VETO</span>' : '<span class="badge badge-pass text-[8px]">🟢 通過</span>';
+
+            const vetoNorth = (hsNorth > 1.13) || (weffNorth > 10.17) || (tp >= 11.5) || (ukcNorth < 1.50) || (fbNorth < 0.50);
+            const vetoSouth = (hsSouth > 1.13) || (weffSouth > 10.17) || (tp >= 11.5) || (ukcSouth < 1.50) || (fbSouth < 0.50);
+
+            const banner = getEl('vetoBanner');
+            const badgeDecision = getEl('badgeMobDecision');
+            const headerMaster = getEl('headerMaster');
+
+            const barYang = getEl('barBulletYang');
+            const barYin = getEl('barBulletYin');
+            const txtRatio = getEl('txtBulletRatio');
+            const txtYangP = getEl('txtYangPercent');
+            const txtYinP = getEl('txtYinPercent');
+
+            let yangPct = (!vetoNorth && !vetoSouth) ? 100 : ((!vetoNorth || !vetoSouth) ? 50 : 0);
+            let yinPct = 100 - yangPct;
+
+            if (barYang) barYang.style.width = `${yangPct}%`;
+            if (barYin) barYin.style.width = `${yinPct}%`;
+            if (txtRatio) txtRatio.textContent = `陽 (開放時窗): ${yangPct}% | 陰 (熔斷風險): ${yinPct}%`;
+            if (txtYangP) txtYangP.textContent = yangPct > 0 ? `${yangPct}% 陽` : '';
+            if (txtYinP) txtYinP.textContent = yinPct > 0 ? `${yinPct}% 陰 (熔斷)` : '';
+
+            if (vetoNorth && vetoSouth) {
+                if (banner) {
+                    banner.style.display = 'block';
+                    banner.style.background = 'var(--status-danger)';
+                    banner.innerText = '🚨 警示：實體觸發物理 VETO 熔斷（浪高/風速/水深/乾舷超標），強制執行防颱封島管制！';
+                }
+                setTxt('ssotDecisionBadge', '🔴 0.0% 熔斷');
+                if (badgeDecision) {
+                    badgeDecision.innerText = '🔴 熔斷封島管制';
+                    badgeDecision.className = 'badge badge-veto text-[9.5px] px-1.5 py-0.5';
+                }
+                if (headerMaster) headerMaster.style.borderLeftColor = '#ef4444';
+            } else if (vetoNorth || vetoSouth) {
+                if (banner) {
+                    banner.style.display = 'block';
+                    banner.style.background = 'var(--status-warn)';
+                    banner.innerText = '⚠️ 警告：單一泊位海象過載，實施單岸機動避風靠泊管制！';
+                }
+                setTxt('ssotDecisionBadge', '🟡 50.0% 條件開放');
+                if (badgeDecision) {
+                    badgeDecision.innerText = '🟡 條件機動靠泊';
+                    badgeDecision.className = 'badge badge-yellow text-[9.5px] px-1.5 py-0.5';
+                }
+                if (headerMaster) headerMaster.style.borderLeftColor = '#f59e0b';
+            } else {
+                if (banner) {
+                    banner.style.display = 'block';
+                    banner.style.background = 'var(--status-pass)';
+                    banner.innerText = '✅ 安全：全域海象與動態裕深完全符合剛性安全門檻，允許正常通航與靠泊！';
+                }
+                setTxt('ssotDecisionBadge', '🟢 100.0% 正常開放');
+                if (badgeDecision) {
+                    badgeDecision.innerText = '🟢 全線開放靠泊';
+                    badgeDecision.className = 'badge badge-pass text-[9.5px] px-1.5 py-0.5';
+                }
+                if (headerMaster) headerMaster.style.borderLeftColor = '#10b981';
+            }
 
             renderAllCanvas();
         }
@@ -437,7 +519,9 @@
             ctx.save();
             ctx.translate(offsetX, offsetY);
 
-            const cdToY = cd => ((5.0 - cd) / (5.0 - (-12.0))) * (h - 28) + 16;
+            // CD 高程轉畫布 Y 軸座標 (+5.0m CD 至 -12.0m CD)
+            const cdToY = cd => ((5.0 - cd) / (5.0 - (-12.0))) * (h - 28) + 14;
+
             const draft = 2.02;
             const keelCD = tideCD - draft;
             const ukc = depthBase + keelCD - hsPier * 0.5;
@@ -445,36 +529,43 @@
             const overtopDepth = Math.max(0, crestCD - deckCD);
             const fb = deckCD - crestCD;
 
+            // 剛性門檻比對
+            const hsPass = hsPier <= 1.13;
+            const weffPass = weff <= 10.17;
+            const tpPass = tp <= 11.5;
+            const ukcPass = ukc >= 1.50;
+            const fbPass = fb >= 0.50;
+
             const tideY = cdToY(tideCD);
             const deckY = cdToY(deckCD);
             const seabedY = cdToY(-depthBase);
             const keelY = cdToY(keelCD);
             const crestY = cdToY(crestCD);
-            const quayX = w * 0.52;
+            const quayX = w * 0.48;
 
             // 海底地層
-            ctx.fillStyle = '#1a1816';
+            ctx.fillStyle = '#1e1b18';
             ctx.fillRect(0, seabedY, w, Math.max(10, h - seabedY));
             ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
             ctx.beginPath(); ctx.moveTo(0, seabedY); ctx.lineTo(w, seabedY); ctx.stroke();
 
-            ctx.font = '8px monospace'; ctx.fillStyle = '#94a3b8'; ctx.textAlign = 'right';
+            ctx.font = '8.5px monospace'; ctx.fillStyle = '#94a3b8'; ctx.textAlign = 'right';
             ctx.fillText(`海底: -${depthBase.toFixed(2)}m CD`, w - 6, seabedY + 10);
 
-            // 碼頭結構體
+            // 碼頭結構
             ctx.fillStyle = '#1e2d4a'; ctx.fillRect(quayX, deckY, w - quayX, seabedY - deckY);
             ctx.strokeStyle = accentColor; ctx.lineWidth = 1.2;
             ctx.strokeRect(quayX, deckY, w - quayX, seabedY - deckY);
 
-            ctx.fillStyle = '#e2e8f0'; ctx.textAlign = 'left';
+            ctx.fillStyle = '#e2e8f0'; ctx.textAlign = 'left'; ctx.font = 'bold 8.5px sans-serif';
             ctx.fillText(`碼頭面: +${deckCD.toFixed(2)}m CD`, quayX + 4, deckY + 10);
 
-            // 水體與浪型動畫
+            // 動態水體與越浪 Fill
             const isOvertopping = overtopDepth > 0 || fb < 0.50;
             ctx.beginPath();
             ctx.moveTo(0, seabedY);
             ctx.lineTo(0, tideY);
-            const waveAmp = Math.min(18, hsPier * 3.5);
+            const waveAmp = Math.min(16, hsPier * 3.2);
             for (let x = 0; x <= quayX; x += 4) {
                 const wy = tideY + Math.sin(x * 0.05 + animPhase) * waveAmp;
                 ctx.lineTo(x, wy);
@@ -485,20 +576,20 @@
                 ctx.lineTo(quayX, tideY); ctx.lineTo(quayX, seabedY);
             }
             ctx.closePath();
-            ctx.fillStyle = isOvertopping ? 'rgba(239, 68, 68, 0.38)' : 'rgba(56, 189, 248, 0.35)';
+            ctx.fillStyle = isOvertopping ? 'rgba(239, 68, 68, 0.4)' : 'rgba(56, 189, 248, 0.35)';
             ctx.fill();
 
-            // 潮位基準線
+            // 潮位線
             ctx.strokeStyle = '#38bdf8'; ctx.setLineDash([2, 2]);
             ctx.beginPath(); ctx.moveTo(0, tideY); ctx.lineTo(quayX, tideY); ctx.stroke();
             ctx.setLineDash([]);
-            ctx.font = '8px sans-serif'; ctx.fillStyle = '#38bdf8'; ctx.textAlign = 'left';
-            ctx.fillText(`潮位: ${tideCD >= 0 ? '+' : ''}${tideCD.toFixed(2)}m CD`, 6, tideY - 2);
+            ctx.font = '8.5px sans-serif'; ctx.fillStyle = '#38bdf8'; ctx.textAlign = 'left';
+            ctx.fillText(`潮位: ${tideCD >= 0 ? '+' : ''}${tideCD.toFixed(2)}m CD`, 6, tideY - 3);
 
-            // 靠泊客輪
-            const shipW = Math.min(54, quayX * 0.55);
-            const shipX = quayX - shipW - 14;
-            const shipDeckY = tideY - 10;
+            // 客輪結構
+            const shipW = Math.min(50, quayX * 0.5);
+            const shipX = quayX - shipW - 10;
+            const shipDeckY = tideY - 9;
             ctx.beginPath();
             ctx.moveTo(shipX, shipDeckY); ctx.lineTo(shipX + shipW, shipDeckY);
             ctx.lineTo(shipX + shipW, keelY - 3); ctx.lineTo(shipX + shipW - 4, keelY);
@@ -507,9 +598,8 @@
             ctx.fillStyle = '#1e293b'; ctx.fill();
             ctx.strokeStyle = '#f8fafc'; ctx.lineWidth = 1; ctx.stroke();
 
-            // 龍骨裕深 (UKC) 標示
+            // UKC 動態裕深測距線
             const ukcX = shipX + shipW * 0.5;
-            const ukcPass = ukc >= 1.50;
             ctx.beginPath(); ctx.moveTo(ukcX, keelY); ctx.lineTo(ukcX, seabedY);
             ctx.strokeStyle = ukcPass ? '#10b981' : '#ef4444'; ctx.lineWidth = 1.8; ctx.stroke();
 
@@ -518,9 +608,41 @@
             ctx.fillStyle = ukcPass ? '#86efac' : '#fca5a5';
             ctx.fillText(`UKC: ${ukc.toFixed(2)}m ${ukcPass ? '🟢' : '🔴'}`, ukcX + 22, ukcTextY);
 
-            // 標題
+            // 剖面標題
             ctx.font = 'bold 9.5px sans-serif'; ctx.fillStyle = accentColor; ctx.textAlign = 'left';
             ctx.fillText(`⚓ ${title}`, 6, 12);
+
+            // === HUD 資訊方塊：實時數值與警戒門檻比對及燈號 ===
+            const hudX = Math.max(w - 148, quayX + 4);
+            const hudY = 14;
+            const hudW = 142;
+            const hudH = 75;
+
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+            ctx.fillRect(hudX, hudY, hudW, hudH);
+            ctx.strokeStyle = '#334155'; ctx.lineWidth = 1;
+            ctx.strokeRect(hudX, hudY, hudW, hudH);
+
+            ctx.font = 'bold 8.5px sans-serif';
+            ctx.textAlign = 'left';
+
+            const items = [
+                { label: `波高 Hs: ${hsPier.toFixed(2)}m`, limit: `≤1.13m`, pass: hsPass },
+                { label: `乾舷 FB: ${fb.toFixed(2)}m`, limit: `≥0.50m`, pass: fbPass },
+                { label: `裕深 UKC: ${ukc.toFixed(2)}m`, limit: `≥1.50m`, pass: ukcPass },
+                { label: `風速 Weff: ${weff.toFixed(1)}m/s`, limit: `≤10.17`, pass: weffPass },
+                { label: `週期 Tp: ${tp.toFixed(1)}s`, limit: `≤11.5s`, pass: tpPass }
+            ];
+
+            items.forEach((item, idx) => {
+                const iy = hudY + 12 + idx * 13;
+                ctx.fillStyle = item.pass ? '#86efac' : '#fca5a5';
+                ctx.fillText(item.label, hudX + 5, iy);
+                ctx.fillStyle = '#94a3b8';
+                ctx.fillText(`(${item.limit})`, hudX + 88, iy);
+                ctx.fillText(item.pass ? '🟢' : '🔴', hudX + 126, iy);
+            });
+
             ctx.restore();
         }
 
@@ -601,7 +723,7 @@
             const angles = [];
             for (let i = 0; i < count; i++) angles.push(-Math.PI / 2 + (i * 2 * Math.PI) / count);
 
-            // 幾何同心五邊形網格
+            // 同心五邊形網格
             [0.3, 0.6, 1.0, 1.25].forEach(lvl => {
                 ctx.beginPath();
                 for (let i = 0; i < count; i++) {
@@ -661,7 +783,7 @@
                 drawRadarPoly(getRatios(false), vetoSouth ? 'rgba(239, 68, 68, 0.35)' : 'rgba(16, 185, 129, 0.35)', vetoSouth ? '#ef4444' : '#34d399');
             }
 
-            // 即時動態數值與燈號標籤
+            // 雷達圖即時動態數值與燈號標籤
             const isTargetNorth = currentRadarMode !== 'SOUTH';
             const activeHs = isTargetNorth ? hsNorth : hsSouth;
             const activeWeff = isTargetNorth ? weffNorth : weffSouth;
