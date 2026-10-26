@@ -50,7 +50,8 @@
 <body class="w-full max-w-[1700px] mx-auto">
     <div id="vetoBanner">🚨 警示：實體觸發物理 VETO 熔斷（浪高/風速/水深/乾舷超標），強制執行防颱封島管制！</div>
     
-    <header class="bg-[#111c2e] border border-[#1e2d4a] border-l-[5px] border-l-[#ef4444] rounded-xl p-2.5 mb-2 shadow-xl w-full" id="headerMaster">
+    <!-- 1. 頂部標題列 -->
+    <header class="bg-[#111c2e] border border-[#1e2d4a] border-l-[5px] border-l-[#ef4444] rounded-xl p-2.5 mb-1.5 shadow-xl w-full" id="headerMaster">
         <div class="flex flex-wrap justify-between items-center gap-1.5">
             <div class="flex items-center gap-2">
                 <span class="text-lg">🌊</span>
@@ -69,6 +70,27 @@
             </div>
         </div>
     </header>
+
+    <!-- 2. ☯️ 陽 / 陰消長子彈圖 (Bullet Chart) -->
+    <section class="bg-[#0b172a] border border-[#1e2d4a] rounded-xl p-2 mb-2 shadow-lg w-full">
+        <div class="flex justify-between items-center text-[10.5px] font-extrabold mb-1">
+            <span class="text-sky-300 flex items-center gap-1">☯️ 全域通航戰術消長態勢（陽：可通航時窗 vs 陰：VETO 熔斷風險）</span>
+            <span class="font-mono text-[9.5px] text-amber-300" id="txtBulletRatio">陽 (開放時窗): 0% | 陰 (熔斷風險): 100%</span>
+        </div>
+        <div class="relative w-full h-3.5 bg-slate-900 rounded-full border border-slate-700 overflow-hidden flex shadow-inner">
+            <div id="barBulletYang" class="h-full bg-gradient-to-r from-emerald-500 to-sky-400 transition-all duration-500 flex items-center justify-center text-[8px] font-black text-black" style="width: 0%;">
+                <span id="txtYangPercent"></span>
+            </div>
+            <div id="barBulletYin" class="h-full bg-gradient-to-r from-red-600 to-amber-600 transition-all duration-500 flex items-center justify-center text-[8px] font-black text-white" style="width: 100%;">
+                <span id="txtYinPercent">100% 陰 (熔斷)</span>
+            </div>
+        </div>
+        <div class="flex justify-between text-[8px] font-mono text-slate-400 mt-0.5 px-0.5">
+            <span>0% (全線 VETO)</span>
+            <span>50% (單岸機動)</span>
+            <span>100% (雙岸完全開放)</span>
+        </div>
+    </section>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-2.5 w-full items-start">
         
@@ -133,13 +155,18 @@
                 </div>
             </section>
 
-            <!-- 2. ⚡ 每日 3 時段對算與游擊任務鏈 -->
+            <!-- 2. ⚡ 游擊調度時窗與正常船班 (分頁併合卡片) -->
             <section class="card border-[#eab308] bg-[#1a180d]">
-                <div class="card-header !text-amber-400">
-                    <span class="flex items-center gap-1 font-bold text-[11.5px]">⚡ 游擊調度時序與戰術機動任務鏈</span>
-                    <span class="badge badge-yellow text-[8px]">點擊帶入數據</span>
+                <div class="card-header !text-amber-400 flex flex-wrap justify-between items-center gap-1">
+                    <span class="font-bold text-[11.5px]">⚡ 游擊調度時窗與正常船班 (點擊帶入圖場對算)</span>
+                    <div class="flex gap-1">
+                        <button id="btnTabGuerrilla" class="bg-amber-600 text-white font-bold text-[8px] px-1.5 py-0.5 rounded border border-amber-400">⚡ 游擊機動時窗</button>
+                        <button id="btnTabRegular" class="bg-slate-800 text-slate-300 text-[8px] px-1.5 py-0.5 rounded border border-slate-700">🚢 正常固定船班</button>
+                    </div>
                 </div>
-                <div class="grid grid-cols-2 gap-1 font-mono text-[9px] pt-1">
+
+                <!-- 分頁 1: 游擊時窗 -->
+                <div id="panelGuerrilla" class="grid grid-cols-2 gap-1 font-mono text-[9px] pt-1">
                     <div class="timeline-btn bg-black/50 p-1.5 rounded border border-amber-500/30 flex justify-between items-center timeline-card-active" id="guerrilla1" data-hs="3.71" data-w="13.8" data-tp="15.5" data-tide="1.10" data-theta="50" data-label="07:30-08:30 (晨間預警)">
                         <div><span class="text-amber-300 font-bold">07:30-08:30</span><span class="text-slate-300 block text-[8px]">🌅 晨間預警對算</span></div>
                         <span class="badge badge-veto text-[7px]">預警對算</span>
@@ -155,6 +182,26 @@
                     <div class="timeline-btn bg-black/50 p-1.5 rounded border border-emerald-500/30 flex justify-between items-center" id="guerrilla5" data-hs="0.92" data-w="4.8" data-tp="9.0" data-tide="1.20" data-theta="30" data-label="16:30-17:30 (晚盤發布)">
                         <div><span class="text-emerald-300 font-bold">16:30-17:30</span><span class="text-slate-300 block text-[8px]">🌆 晚盤滾動發布</span></div>
                         <span class="badge badge-pass text-[7px]">滾動發布</span>
+                    </div>
+                </div>
+
+                <!-- 分頁 2: 正常固定船班 (預設隱藏) -->
+                <div id="panelRegular" class="grid grid-cols-2 gap-1 font-mono text-[9px] pt-1 hidden">
+                    <div class="timeline-btn bg-black/50 p-1.5 rounded border border-blue-500/30 flex justify-between items-center" data-hs="3.71" data-w="13.8" data-tp="15.5" data-tide="1.10" data-theta="50" data-label="08:30 登島/繞島班次">
+                        <div><span class="text-sky-300 font-bold">08:30 登島班次</span><span class="text-slate-300 block text-[8px]">🚢 烏石港出航 (160人)</span></div>
+                        <span class="badge badge-veto text-[7px]">🔴 熔斷</span>
+                    </div>
+                    <div class="timeline-btn bg-black/50 p-1.5 rounded border border-blue-500/30 flex justify-between items-center" data-hs="4.20" data-w="15.2" data-tp="16.0" data-tide="1.50" data-theta="55" data-label="10:30 龜山島主航線">
+                        <div><span class="text-sky-300 font-bold">10:30 登島班次</span><span class="text-slate-300 block text-[8px]">🚢 烏石港出航 (180人)</span></div>
+                        <span class="badge badge-veto text-[7px]">🔴 熔斷</span>
+                    </div>
+                    <div class="timeline-btn bg-black/50 p-1.5 rounded border border-blue-500/30 flex justify-between items-center" data-hs="2.50" data-w="11.0" data-tp="13.0" data-tide="0.80" data-theta="45" data-label="13:30 午後賞鯨/登島">
+                        <div><span class="text-sky-300 font-bold">13:30 午後班次</span><span class="text-slate-300 block text-[8px]">🚢 烏石港出航 (120人)</span></div>
+                        <span class="badge badge-veto text-[7px]">🔴 熔斷</span>
+                    </div>
+                    <div class="timeline-btn bg-black/50 p-1.5 rounded border border-emerald-500/30 flex justify-between items-center" data-hs="1.80" data-w="8.5" data-tp="10.5" data-tide="1.10" data-theta="35" data-label="15:30 觀光末班返航">
+                        <div><span class="text-emerald-300 font-bold">15:30 返航末班</span><span class="text-slate-300 block text-[8px]">🚢 龜山島返航烏石港</span></div>
+                        <span class="badge badge-yellow text-[7px]">🟡 機動</span>
                     </div>
                 </div>
             </section>
@@ -360,7 +407,7 @@
                 </div>
             </section>
 
-            <!-- 3. 🌀 Windy 動態實時海流/風場地圖 -->
+            <!-- 3. 🌀 Windy 動態實時海流/風場地圖 (已修正 detail=true 與 480px 高度) -->
             <section class="card border-[#ef4444] bg-[#180d1a]/90">
                 <div class="card-header !text-red-400 flex flex-wrap justify-between items-center gap-1">
                     <span class="font-black text-[11.5px]">🌀 Windy 動態實時圖場與氣象預報表</span>
@@ -457,6 +504,7 @@
         function initDashboard() {
             startClockAndWatchdog();
             initUIControls();
+            initTabSwitchers();
             recalculatePhysicsAndRender();
 
             // 綁定 Windy 按鈕事件
@@ -470,6 +518,7 @@
             if (btnWaves) btnWaves.addEventListener('click', () => setWindyView('waves', undefined));
             if (btnDetail) btnDetail.addEventListener('click', () => setWindyView(undefined, !isWindyDetailShow));
 
+            // 綁定所有時窗/船班按鈕點擊事件
             document.querySelectorAll('.timeline-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const card = e.currentTarget;
@@ -491,6 +540,29 @@
                 requestAnimationFrame(animLoop);
             }
             requestAnimationFrame(animLoop);
+        }
+
+        // 初始化游擊時窗 vs 正常船班分頁切換
+        function initTabSwitchers() {
+            const btnG = getEl('btnTabGuerrilla');
+            const btnR = getEl('btnTabRegular');
+            const panelG = getEl('panelGuerrilla');
+            const panelR = getEl('panelRegular');
+
+            if (btnG && btnR && panelG && panelR) {
+                btnG.addEventListener('click', () => {
+                    panelG.classList.remove('hidden');
+                    panelR.classList.add('hidden');
+                    btnG.className = "bg-amber-600 text-white font-bold text-[8px] px-1.5 py-0.5 rounded border border-amber-400";
+                    btnR.className = "bg-slate-800 text-slate-300 text-[8px] px-1.5 py-0.5 rounded border border-slate-700";
+                });
+                btnR.addEventListener('click', () => {
+                    panelR.classList.remove('hidden');
+                    panelG.classList.add('hidden');
+                    btnR.className = "bg-amber-600 text-white font-bold text-[8px] px-1.5 py-0.5 rounded border border-amber-400";
+                    btnG.className = "bg-slate-800 text-slate-300 text-[8px] px-1.5 py-0.5 rounded border border-slate-700";
+                });
+            }
         }
 
         function startClockAndWatchdog() {
@@ -625,6 +697,29 @@
             const banner = getEl('vetoBanner');
             const badgeDecision = getEl('badgeMobDecision');
             const headerMaster = getEl('headerMaster');
+
+            // 陽/陰消長子彈圖動態運算
+            const barYang = getEl('barBulletYang');
+            const barYin = getEl('barBulletYin');
+            const txtRatio = getEl('txtBulletRatio');
+            const txtYangP = getEl('txtYangPercent');
+            const txtYinP = getEl('txtYinPercent');
+
+            let yangPct = 0;
+            if (!vetoNorth && !vetoSouth) {
+                yangPct = 100;
+            } else if (!vetoNorth || !vetoSouth) {
+                yangPct = 50;
+            } else {
+                yangPct = 0;
+            }
+            let yinPct = 100 - yangPct;
+
+            if (barYang) barYang.style.width = `${yangPct}%`;
+            if (barYin) barYin.style.width = `${yinPct}%`;
+            if (txtRatio) txtRatio.textContent = `陽 (開放時窗): ${yangPct}% | 陰 (熔斷風險): ${yinPct}%`;
+            if (txtYangP) txtYangP.textContent = yangPct > 0 ? `${yangPct}% 陽` : '';
+            if (txtYinP) txtYinP.textContent = yinPct > 0 ? `${yinPct}% 陰 (熔斷)` : '';
 
             if (vetoNorth && vetoSouth) {
                 if (banner) {
