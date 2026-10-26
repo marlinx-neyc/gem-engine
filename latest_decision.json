@@ -1,19 +1,32 @@
 {
-  "version": "GEM-ENG-SPEC-2026-V66-20261026_143343",
-  "timestamp": "2026-10-26 14:33:43 CST",
+  "version": "GEM-ENG-SPEC-2026-V66-20261026_162850",
+  "timestamp": "2026-10-26 16:28:50 CST",
   "decision_code": "Q4",
-  "decision": {
-    "action_id": 0,
-    "tactical_instruction": "🔴 0.0% 物理 VETO 熔斷 (全線封島)",
-    "confidence": 100.0,
-    "is_closed": true
+  "typhoon_live": {
+    "has_typhoon": false,
+    "name": "無作用中颱風",
+    "intensity": "一般海象",
+    "pressure_wind": "1012 hPa | 4.2 m/s",
+    "radius": "--- km / --- km",
+    "movement": "靜止 / 0 km/h",
+    "distance_km": 0.0,
+    "distance_text": "無侵襲威脅",
+    "alert_status": "未發布警報",
+    "impact_index": 12.0,
+    "tdx_status": "TDX 未連動 (使用氣象預警)"
   },
-  "physics_metrics": {
-    "hs_pier_m": 3.71,
-    "w_local_ms": 5.46,
-    "ukc_m": -0.8,
-    "fb_pier_m": 0.15,
-    "has_veto": true
+  "decision": {
+    "action_id": 1,
+    "tactical_instruction": "🟢 100.0% 正常開放靠泊",
+    "confidence": 100.0,
+    "is_closed": false
+  },
+  "reinforcement_learning": {
+    "historical_samples": 4280,
+    "accuracy_pct": 98.6,
+    "f1_score": 0.984,
+    "reward_cum": "+1428.5",
+    "iteration_epoch": 1260
   },
   "sync_windows": [
     "07:30-08:30",
