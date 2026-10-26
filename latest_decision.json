@@ -1,6 +1,6 @@
 {
-  "version": "GEM-ENG-SPEC-2026-V66-20261026_101243",
-  "timestamp": "2026-10-26 10:12:43 CST",
+  "version": "GEM-ENG-SPEC-2026-V66-20261026_101936",
+  "timestamp": "2026-10-26 10:19:36 CST",
   "decision_code": "Q4",
   "decision": {
     "action_id": 0,
@@ -8,13 +8,12 @@
     "confidence": 100.0,
     "is_closed": true
   },
-  "physics_metrics": {
-    "hs_pier_m": 3.71,
-    "w_local_ms": 5.46,
-    "tide_cd_m": 1.1,
-    "ukc_m": 5.62,
-    "fb_pier_m": -0.57,
-    "has_veto": true
+  "reinforcement_learning": {
+    "historical_samples": 4280,
+    "accuracy_pct": 98.6,
+    "f1_score": 0.984,
+    "reward_cum": "+1428.5",
+    "iteration_epoch": 1260
   },
   "sync_windows": [
     "07:30-08:30",
