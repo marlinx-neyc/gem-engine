@@ -1,6 +1,6 @@
 {
-  "version": "GEM-ENG-SPEC-2026-V66-20261026_092122",
-  "timestamp": "2026-10-26 09:21:22 CST",
+  "version": "GEM-ENG-SPEC-2026-V66-20261026_092124",
+  "timestamp": "2026-10-26 09:21:24 CST",
   "decision_code": "Q4",
   "decision": {
     "action_id": 0,
@@ -11,8 +11,9 @@
   "physics_metrics": {
     "hs_pier_m": 3.71,
     "w_local_ms": 5.46,
-    "ukc_m": -0.8,
-    "fb_pier_m": 0.15,
+    "tide_cd_m": 1.1,
+    "ukc_m": 5.62,
+    "fb_pier_m": -0.57,
     "has_veto": true
   },
   "sync_windows": [
