@@ -1,6 +1,6 @@
 {
-  "version": "GEM-ENG-SPEC-2026-V66-20261026_204616",
-  "timestamp": "2026-10-26 20:46:16 CST",
+  "version": "GEM-ENG-SPEC-2026-V66-20261026_205809",
+  "timestamp": "2026-10-26 20:58:09 CST",
   "decision_code": "Q4",
   "typhoon_live": {
     "has_typhoon": false,
@@ -13,7 +13,11 @@
     "distance_text": "無侵襲威脅",
     "alert_status": "未發布警報",
     "impact_index": 12.0,
-    "tdx_status": "TDX 未連動 (使用氣象預警)"
+    "tdx_status": "TDX 未連動 (使用氣象預警)",
+    "typhoon_badge": "<span class=\"badge badge-pass text-[8.5px]\">🟢 一般海象</span>",
+    "closure_estimate": "🟢 無封島風險（全線正常營運靠泊）",
+    "model_vs_official": "🟢 官方預報與 GEM 模型一致：維持開放",
+    "future_trend": "🟢 未來 72 小時海象平穩，風浪符合靠泊安全門檻"
   },
   "decision": {
     "action_id": 1,
