@@ -463,7 +463,7 @@
         </div>
     </div>
 
-    <!-- JS 邏輯腳本 (單一連動 + 游擊表格點擊觸發) -->
+    <!-- JS 邏輯腳本 -->
     <script>
     (function() {
         const getEl = id => document.getElementById(id);
@@ -746,7 +746,7 @@
             const crestY = cdToY(crestCD);
             const quayX = w * 0.48;
 
-            // 藍色可靠水位底色區塊
+            // 藍色可靠水位底色區塊 (-0.50m CD ~ +2.20m CD)
             const safeTideMinCD = -0.50;
             const safeTideMaxCD = +2.20;
             const safeTideMinY = cdToY(safeTideMinCD);
@@ -791,14 +791,15 @@
             ctx.fillStyle = isOvertopping ? 'rgba(239, 68, 68, 0.4)' : 'rgba(56, 189, 248, 0.35)';
             ctx.fill();
 
-            // 潮位線
+            // 潮位線（文字進行智慧避讓）
             ctx.strokeStyle = '#38bdf8'; ctx.setLineDash([2, 2]);
             ctx.beginPath(); ctx.moveTo(0, tideY); ctx.lineTo(quayX, tideY); ctx.stroke();
             ctx.setLineDash([]);
             ctx.font = '8.5px sans-serif'; ctx.fillStyle = '#38bdf8'; ctx.textAlign = 'left';
-            ctx.fillText(`潮位: ${tideCD >= 0 ? '+' : ''}${tideCD.toFixed(2)}m CD`, 6, tideY - 3);
+            const tideTextY = Math.abs(tideY - crestY) < 14 ? tideY + 11 : tideY - 3;
+            ctx.fillText(`潮位: ${tideCD >= 0 ? '+' : ''}${tideCD.toFixed(2)}m CD`, 6, tideTextY);
 
-            // 越浪線與數值
+            // 越浪線與數值（頂界避讓，防止與頂部重疊）
             ctx.strokeStyle = isOvertopping ? '#ef4444' : '#f59e0b';
             ctx.lineWidth = 1.5; ctx.setLineDash([4, 2]);
             ctx.beginPath(); ctx.moveTo(0, crestY); ctx.lineTo(w, crestY); ctx.stroke();
@@ -807,7 +808,8 @@
             ctx.font = 'bold 8.5px sans-serif';
             ctx.fillStyle = isOvertopping ? '#fca5a5' : '#fcd34d';
             ctx.textAlign = 'left';
-            ctx.fillText(`波頂/越浪線: +${crestCD.toFixed(2)}m CD ${isOvertopping ? '🚨 (越浪超標)' : '⚠️'}`, 6, crestY - 3);
+            const crestTextY = crestY < 20 ? crestY + 11 : crestY - 3;
+            ctx.fillText(`波頂/越浪線: +${crestCD.toFixed(2)}m CD ${isOvertopping ? '🚨 (越浪超標)' : '⚠️'}`, 6, crestTextY);
 
             // 客輪結構
             const shipW = Math.min(50, quayX * 0.5);
@@ -831,15 +833,13 @@
             ctx.fillStyle = ukcPass ? '#86efac' : '#fca5a5';
             ctx.fillText(`UKC: ${ukc.toFixed(2)}m ${ukcPass ? '🟢' : '🔴'}`, ukcX + 22, ukcTextY);
 
-            // 剖面標題
-            ctx.font = 'bold 9.5px sans-serif'; ctx.fillStyle = accentColor; ctx.textAlign = 'left';
-            ctx.fillText(`⚓ ${title}`, 6, 12);
+            // 註：畫布內部不再畫重複的標題文字 `ctx.fillText('⚓ ' + title, 6, 12)`，已有 HTML 卡片標頭負責顯示
 
-            // === HUD 數據卡片 (統一置於左下角，並與底線/海底線完全切齊，避免任何重疊) ===
+            // HUD 數據卡片 (固定置於左下角，與海底線 seabedY 底線完全切齊)
             const hudW = 142;
             const hudH = 75;
-            const hudX = 6;                    // 左下角固定靠左
-            const hudY = seabedY - hudH;       // 底部與海底線 (seabedY) 完全切齊
+            const hudX = 6;
+            const hudY = seabedY - hudH;
 
             ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
             ctx.fillRect(hudX, hudY, hudW, hudH);
