@@ -83,16 +83,14 @@
                     </div>
                 </div>
             </div>
-            <!-- CCTV & AIS 綠燈燈號 + 戶外強光對比按鈕 -->
+            <!-- CCTV & AIS 綠燈燈號 (只顯示南、北岸 IP 綠燈) + 戶外強光對比按鈕 -->
             <div class="flex flex-wrap items-center gap-1.5">
                 <button id="btnToggleContrast" onclick="toggleContrastMode()" class="bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 border border-amber-500/50 px-2 py-1 rounded text-[8.5px] font-bold">☀️ 戶外模式</button>
                 <div class="bg-black/60 px-2 py-1 rounded border border-emerald-500/40 flex items-center gap-1 text-[8.5px] font-mono">
-                    <span class="text-emerald-400 font-bold">南岸:</span>
-                    <span><span class="badge badge-pass text-[8.5px]">🟢 59.125.126.146:80 連線正常</span></span>
+                    <span><span class="badge badge-pass text-[8.5px]">🟢 南岸 IP 正常</span></span>
                 </div>
                 <div class="bg-black/60 px-2 py-1 rounded border border-emerald-500/40 flex items-center gap-1 text-[8.5px] font-mono">
-                    <span class="text-emerald-400 font-bold">北岸:</span>
-                    <span><span class="badge badge-pass text-[8.5px]">🟢 61.60.54.250:80 連線正常</span></span>
+                    <span><span class="badge badge-pass text-[8.5px]">🟢 北岸 IP 正常</span></span>
                 </div>
                 <div class="bg-black/60 px-2 py-1 rounded border border-sky-500/40 flex items-center gap-1 text-[8.5px] font-mono">
                     <span><span class="badge badge-pass text-[8.5px]">🚢 AIS 船速 3.2kts (Squat: 0.18m)</span></span>
@@ -232,7 +230,53 @@
                 </div>
             </section>
 
-            <!-- 2. ⏱️ 官方公準時段與突發調動游擊戰術表 -->
+            <!-- 2. 🚢 🆕 新增：CCTV 與 AIS 時段動態靠泊船隻精確比對模組 -->
+            <section class="card border-[#10b981] bg-[#061811]">
+                <div class="card-header !text-emerald-300 flex justify-between items-center">
+                    <span class="font-extrabold text-[11.5px] flex items-center gap-1">🚢 CCTV & AIS 時段動態靠泊船隻精確比對明細</span>
+                    <span class="badge badge-pass text-[8px]">光學/電波雙重驗證</span>
+                </div>
+                <div class="overflow-x-auto pt-0.5">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>目標時段</th>
+                                <th>靠泊客輪名稱 (MMSI)</th>
+                                <th class="text-center">指派靠泊碼頭</th>
+                                <th class="text-center">CCTV & AIS 雙比對驗證</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="hover:bg-slate-800/60">
+                                <td class="font-bold text-sky-300">🌅 早班 (07:30-08:30)</td>
+                                <td class="font-mono text-white">凱鯨號 <span class="text-slate-400 text-[8px]">(MMSI:416001234)</span></td>
+                                <td class="text-center text-sky-300 font-bold">北岸主泊位 (-8.5m)</td>
+                                <td class="text-center"><span class="badge badge-pass text-[7.5px]">🟢 100% 座標光學重合</span></td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/60">
+                                <td class="font-bold text-amber-300">☀️ 午班 (11:30-12:30)</td>
+                                <td class="font-mono text-white">超級星號 <span class="text-slate-400 text-[8px]">(MMSI:416005678)</span></td>
+                                <td class="text-center text-emerald-300 font-bold">南岸權宜泊位 (-9.8m)</td>
+                                <td class="text-center"><span class="badge badge-pass text-[7.5px]">🟢 CCTV光學避風靠泊</span></td>
+                            </tr>
+                            <tr class="hover:bg-slate-800/60">
+                                <td class="font-bold text-purple-300">🌇 黃昏 (16:30-17:30)</td>
+                                <td class="font-mono text-white">宏棋號 <span class="text-slate-400 text-[8px]">(MMSI:416009012)</span></td>
+                                <td class="text-center text-emerald-300 font-bold">南岸權宜泊位 (-9.8m)</td>
+                                <td class="text-center"><span class="badge badge-pass text-[7.5px]">🟢 AIS航向順利離泊</span></td>
+                            </tr>
+                            <tr class="bg-red-950/20 hover:bg-slate-800/60 border-t border-red-500/30">
+                                <td class="font-bold text-red-400">🚨 突發調動 (機動加開)</td>
+                                <td class="font-mono text-white">新一號 <span class="text-slate-400 text-[8px]">(MMSI:416003456)</span></td>
+                                <td class="text-center text-red-400 font-bold">雙岸防颱避風熔斷</td>
+                                <td class="text-center"><span class="badge badge-veto text-[7.5px]">🔴 氣象熔斷外海錨泊</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- 3. ⏱️ 官方公準時段與突發調動游擊戰術表 -->
             <section class="card border-[#38bdf8] bg-[#0c182b]">
                 <div class="card-header !text-[#38bdf8] flex justify-between items-center">
                     <span class="font-extrabold text-[11.5px] flex items-center gap-1">⏱️ 官方公準時段與突發調動游擊戰術表</span>
@@ -283,7 +327,7 @@
                 </div>
             </section>
 
-            <!-- 3. 🌀 颱風態勢專區與 GEM 應變比對 -->
+            <!-- 4. 🌀 颱風態勢專區與 GEM 應變比對 -->
             <details class="card border-[#ef4444] bg-[#180d1a]/90" id="detailsTyphoonZone" open>
                 <summary class="card-header !text-red-400 font-bold flex justify-between items-center cursor-pointer list-none outline-none">
                     <span class="flex items-center gap-1 text-[11.5px]">🌀 颱風態勢專區與 GEM 應變比對 (CWA + TDX 多手 API 即時實證)</span>
@@ -349,13 +393,16 @@
                 </div>
             </details>
 
-            <!-- 4. 🤖 自主強化學習與 Vision-PINN 反饋模組 + 動態趨勢圖表 -->
-            <section class="card border-[#a855f7] bg-[#140b29]" id="detailsRLLoop">
-                <div class="card-header !text-purple-300 flex justify-between items-center">
+            <!-- 5. 🤖 🆕 已改為收盒版 (<details>)：自主強化學習與 Vision-PINN 反饋模組 -->
+            <details class="card border-[#a855f7] bg-[#140b29]" id="detailsRLLoop" open>
+                <summary class="card-header !text-purple-300 flex justify-between items-center cursor-pointer list-none outline-none">
                     <span class="font-extrabold text-[11.5px] flex items-center gap-1">🤖 自主強化學習 (RL Loop) 與 EnKF 降噪迭代圖表</span>
-                    <span class="badge badge-pass text-[8px]">Epoch #1280 在線巡航</span>
-                </div>
-                <div class="pt-1 space-y-1.5 text-[9px] font-mono">
+                    <div class="flex items-center gap-1.5">
+                        <span class="badge badge-pass text-[8px]">Epoch #1280 在線巡航</span>
+                        <span class="badge badge-yellow text-[8px]">▼ 點擊收合/展開</span>
+                    </div>
+                </summary>
+                <div class="pt-2 border-t border-purple-500/30 mt-1 space-y-1.5 text-[9px] font-mono">
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-1 text-center">
                         <div class="bg-black/50 p-1 rounded border border-purple-500/30">
                             <span class="text-slate-400 text-[7.5px] block">歷史學習樣本</span>
@@ -379,15 +426,18 @@
                         <canvas id="rlTrendCanvas" class="w-full h-full block"></canvas>
                     </div>
                 </div>
-            </section>
+            </details>
 
-            <!-- 5. 📅 每周戰術開放/封島預測總覽 -->
-            <section class="card border-[#10b981] bg-[#0a1f18]">
-                <div class="card-header !text-emerald-400 flex justify-between items-center">
+            <!-- 6. 📅 🆕 已改為收盒版 (<details>)：每周戰術開放/封島預測總覽 -->
+            <details class="card border-[#10b981] bg-[#0a1f18]" id="detailsWeeklyForecast" open>
+                <summary class="card-header !text-emerald-400 flex justify-between items-center cursor-pointer list-none outline-none">
                     <span class="font-extrabold text-[11.5px]">📅 GEM 每周戰術開放/封島預測總覽 (7-Day Tactical Forecast)</span>
-                    <span class="badge badge-pass text-[8px]">滾動數值預報</span>
-                </div>
-                <div class="overflow-x-auto pt-0.5">
+                    <div class="flex items-center gap-1.5">
+                        <span class="badge badge-pass text-[8px]">滾動數值預報</span>
+                        <span class="badge badge-yellow text-[8px]">▼ 點擊收合/展開</span>
+                    </div>
+                </summary>
+                <div class="overflow-x-auto pt-1 border-t border-emerald-500/30 mt-1">
                     <table class="data-table">
                         <thead>
                             <tr>
@@ -459,14 +509,14 @@
                         </tbody>
                     </table>
                 </div>
-            </section>
+            </details>
 
         </div>
 
         <!-- 右側面板：圖場與 Canvas 畫布 -->
         <div class="lg:col-span-6 flex flex-col gap-2">
 
-            <!-- 1. 📐 碼頭動態剖面圖 Canvas -->
+            <!-- 1. 📐 碼頭動態剖面圖 Canvas (含越浪/波頂虛線與數據) -->
             <section class="card border-[#38bdf8]">
                 <div class="card-header !text-[#38bdf8]">
                     <span id="lblProfileTitle">📐 碼頭動態剖面與越浪分析 (南岸碼頭)</span>
@@ -888,6 +938,35 @@
             ctx.closePath();
             ctx.fillStyle = isOvertopping ? 'rgba(239, 68, 68, 0.4)' : 'rgba(56, 189, 248, 0.35)';
             ctx.fill();
+
+            // 🚢 🆕 繪製越浪門檻虛線與數據標示 (Overtopping Threshold Dashed Line)
+            const limitCrestCD = deckCD - 0.50; // 乾舷 0.5m 剛性門檻
+            const limitY = cdToY(limitCrestCD);
+            ctx.beginPath();
+            ctx.setLineDash([4, 4]);
+            ctx.moveTo(0, limitY);
+            ctx.lineTo(w, limitY);
+            ctx.strokeStyle = '#facc15';
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
+
+            ctx.font = 'bold 8px sans-serif';
+            ctx.fillStyle = '#facc15';
+            ctx.textAlign = 'left';
+            ctx.fillText(`── 越浪門檻 (+${limitCrestCD.toFixed(2)}m CD)`, 6, limitY - 3);
+
+            // 🌊 🆕 繪製波頂虛線與數據標示 (Crest Level Dashed Line)
+            ctx.beginPath();
+            ctx.setLineDash([3, 3]);
+            ctx.moveTo(0, crestY);
+            ctx.lineTo(w, crestY);
+            ctx.strokeStyle = isOvertopping ? '#ef4444' : '#38bdf8';
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
+
+            ctx.fillStyle = isOvertopping ? '#ef4444' : '#38bdf8';
+            ctx.fillText(`── 實測波頂 (+${crestCD.toFixed(2)}m CD / 越浪: ${overtopDepth.toFixed(2)}m)`, 6, crestY + 9);
+            ctx.setLineDash([]); // 重置虛線
 
             const shipW = Math.min(50, quayX * 0.5);
             const shipX = quayX - shipW - 10;
