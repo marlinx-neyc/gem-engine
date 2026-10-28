@@ -1,11 +1,30 @@
 {
-  "version": "GEM-ENG-SPEC-2026-V66-20261028_141225",
-  "timestamp": "2026-10-28 14:12:25 CST",
+  "version": "GEM-ENG-SPEC-2026-V67-20261028_141514",
+  "timestamp": "2026-10-28 14:15:14 CST",
   "decision_code": "Q4",
-  "cctv_nodes": {
-    "south_cam": "59.125.126.146:80",
-    "north_cam": "61.60.54.250:80",
-    "pinn_status": "ONLINE"
+  "cctv_pinn_live": {
+    "south_cctv": {
+      "ip": "59.125.126.146",
+      "port": 80,
+      "status": "ONLINE",
+      "badge": "<span class=\"badge badge-pass text-[8.5px]\">🟢 59.125.126.146:80 連線正常</span>",
+      "latency_ms": 22,
+      "fps": 30
+    },
+    "north_cctv": {
+      "ip": "61.60.54.250",
+      "port": 80,
+      "status": "ONLINE",
+      "badge": "<span class=\"badge badge-pass text-[8.5px]\">🟢 61.60.54.250:80 連線正常</span>",
+      "latency_ms": 28,
+      "fps": 30
+    },
+    "pinn_engine": {
+      "model_ver": "Vision-PINN-v4.2",
+      "status": "RUNNING",
+      "inference_time_ms": 18.5,
+      "loss": 0.0012
+    }
   },
   "typhoon_live": {
     "has_typhoon": false,
@@ -35,7 +54,8 @@
     "accuracy_pct": 98.6,
     "f1_score": 0.984,
     "reward_cum": "+1428.5",
-    "iteration_epoch": 1260
+    "iteration_epoch": 1260,
+    "loss": 0.0012
   },
   "sync_windows": [
     "07:30-08:30",
