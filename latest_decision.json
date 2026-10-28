@@ -1,53 +1,23 @@
 {
-  "version": "GEM-ENG-SPEC-2026-V69.0-20261028_161656",
-  "timestamp": "2026-10-28 16:16:56 CST",
-  "cctv_pinn_live": {
-    "south_cctv": {
-      "ip": "59.125.126.146",
-      "port": 80,
-      "status": "ONLINE",
-      "badge": "<span class=\"badge badge-pass text-[8.5px]\">🟢 南岸 IP 正常</span>",
-      "latency_ms": 22,
-      "fps": 30
-    },
-    "north_cctv": {
-      "ip": "61.60.54.250",
-      "port": 80,
-      "status": "ONLINE",
-      "badge": "<span class=\"badge badge-pass text-[8.5px]\">🟢 北岸 IP 正常</span>",
-      "latency_ms": 28,
-      "fps": 30
-    },
-    "pinn_engine": {
-      "model_ver": "Vision-PINN-v69.0",
-      "status": "RUNNING",
-      "inference_time_ms": 16.2,
-      "loss": 0.001,
-      "f1_score": 0.988
-    }
+  "version": "GEM-ENG-SPEC-2026-V66-20261028_165443",
+  "timestamp": "2026-10-28 16:54:43 CST",
+  "decision_code": "Q4",
+  "decision": {
+    "action_id": 0,
+    "tactical_instruction": "🔴 0.0% 物理 VETO 熔斷 (全線封島)",
+    "confidence": 100.0,
+    "is_closed": true
   },
-  "ais_live": {
-    "vessel_name": "凱鯨號 (Ferry-01)",
-    "sog_kts": 3.2,
-    "cog_deg": 245.0,
-    "squat_m": 0.18,
-    "badge": "<span class=\"badge badge-pass text-[8.5px]\">🚢 AIS 船速 3.2kts (Squat: 0.18m)</span>"
+  "physics_metrics": {
+    "hs_pier_m": 3.71,
+    "w_local_ms": 5.46,
+    "ukc_m": -0.8,
+    "fb_pier_m": 0.15,
+    "has_veto": true
   },
-  "typhoon_live": {
-    "has_typhoon": false,
-    "name": "無作用中颱風",
-    "intensity": "一般海象",
-    "pressure_wind": "1012 hPa | 4.2 m/s",
-    "radius": "--- km / --- km",
-    "movement": "靜止 / 0 km/h",
-    "distance_km": 0.0,
-    "distance_text": "無侵襲威脅",
-    "alert_status": "未發布警報",
-    "impact_index": 12.0,
-    "tdx_status": "TDX 未連動 (使用氣象預警)",
-    "typhoon_badge": "<span class=\"badge badge-pass text-[8.5px]\">🟢 一般海象</span>",
-    "closure_estimate": "🟢 無封島風險（全線正常營運靠泊）",
-    "model_vs_official": "🟢 官方預報與 GEM 模型一致：維持開放",
-    "future_trend": "🟢 未來 72 小時海象平穩，風浪符合靠泊安全門檻"
-  }
+  "sync_windows": [
+    "07:30-08:30",
+    "11:30-12:30",
+    "16:30-17:30"
+  ]
 }
