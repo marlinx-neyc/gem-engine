@@ -1,19 +1,41 @@
 {
-  "version": "GEM-ENG-SPEC-2026-V66-20261028_102430",
-  "timestamp": "2026-10-28 10:24:30 CST",
+  "version": "GEM-ENG-SPEC-2026-V66-20261028_141225",
+  "timestamp": "2026-10-28 14:12:25 CST",
   "decision_code": "Q4",
-  "decision": {
-    "action_id": 0,
-    "tactical_instruction": "🔴 0.0% 物理 VETO 熔斷 (全線封島)",
-    "confidence": 100.0,
-    "is_closed": true
+  "cctv_nodes": {
+    "south_cam": "59.125.126.146:80",
+    "north_cam": "61.60.54.250:80",
+    "pinn_status": "ONLINE"
   },
-  "physics_metrics": {
-    "hs_pier_m": 3.71,
-    "w_local_ms": 5.46,
-    "ukc_m": -0.8,
-    "fb_pier_m": 0.15,
-    "has_veto": true
+  "typhoon_live": {
+    "has_typhoon": false,
+    "name": "無作用中颱風",
+    "intensity": "一般海象",
+    "pressure_wind": "1012 hPa | 4.2 m/s",
+    "radius": "--- km / --- km",
+    "movement": "靜止 / 0 km/h",
+    "distance_km": 0.0,
+    "distance_text": "無侵襲威脅",
+    "alert_status": "未發布警報",
+    "impact_index": 12.0,
+    "tdx_status": "TDX 未連動 (使用氣象預警)",
+    "typhoon_badge": "<span class=\"badge badge-pass text-[8.5px]\">🟢 一般海象</span>",
+    "closure_estimate": "🟢 無封島風險（全線正常營運靠泊）",
+    "model_vs_official": "🟢 官方預報與 GEM 模型一致：維持開放",
+    "future_trend": "🟢 未來 72 小時海象平穩，風浪符合靠泊安全門檻"
+  },
+  "decision": {
+    "action_id": 1,
+    "tactical_instruction": "🟢 100.0% 正常開放靠泊",
+    "confidence": 100.0,
+    "is_closed": false
+  },
+  "reinforcement_learning": {
+    "historical_samples": 4280,
+    "accuracy_pct": 98.6,
+    "f1_score": 0.984,
+    "reward_cum": "+1428.5",
+    "iteration_epoch": 1260
   },
   "sync_windows": [
     "07:30-08:30",
