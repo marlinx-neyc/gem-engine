@@ -1,6 +1,6 @@
 {
-  "version": "GEM-ENG-SPEC-2026-V68.0-20261028_143121",
-  "timestamp": "2026-10-28 14:31:21 CST",
+  "version": "GEM-ENG-SPEC-2026-V69.0-20261028_143558",
+  "timestamp": "2026-10-28 14:35:58 CST",
   "decision_code": "Q4",
   "cctv_pinn_live": {
     "south_cctv": {
@@ -20,12 +20,19 @@
       "fps": 30
     },
     "pinn_engine": {
-      "model_ver": "Vision-PINN-v4.8",
+      "model_ver": "Vision-PINN-v69.0",
       "status": "RUNNING",
-      "inference_time_ms": 18.5,
-      "loss": 0.0012,
-      "f1_score": 0.984
+      "inference_time_ms": 16.2,
+      "loss": 0.001,
+      "f1_score": 0.988
     }
+  },
+  "ais_live": {
+    "vessel_name": "凱鯨號 (Ferry-01)",
+    "sog_kts": 3.2,
+    "cog_deg": 245.0,
+    "squat_m": 0.18,
+    "badge": "<span class=\"badge badge-pass text-[8.5px]\">🚢 AIS 船速 3.2kts (Squat: 0.18m)</span>"
   },
   "typhoon_live": {
     "has_typhoon": false,
@@ -52,11 +59,11 @@
   },
   "reinforcement_learning": {
     "historical_samples": 4280,
-    "accuracy_pct": 98.6,
-    "f1_score": 0.984,
-    "reward_cum": "+1428.5",
-    "iteration_epoch": 1260,
-    "loss": 0.0012
+    "accuracy_pct": 98.8,
+    "f1_score": 0.988,
+    "reward_cum": "+1450.2",
+    "iteration_epoch": 1280,
+    "loss": 0.001
   },
   "sync_windows": [
     "07:30-08:30",
