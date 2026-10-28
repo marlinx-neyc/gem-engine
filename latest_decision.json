@@ -1,7 +1,6 @@
 {
-  "version": "GEM-ENG-SPEC-2026-V69.0-20261028_160726",
-  "timestamp": "2026-10-28 16:07:26 CST",
-  "decision_code": "Q4",
+  "version": "GEM-ENG-SPEC-2026-V69.0-20261028_161656",
+  "timestamp": "2026-10-28 16:16:56 CST",
   "cctv_pinn_live": {
     "south_cctv": {
       "ip": "59.125.126.146",
@@ -50,24 +49,5 @@
     "closure_estimate": "🟢 無封島風險（全線正常營運靠泊）",
     "model_vs_official": "🟢 官方預報與 GEM 模型一致：維持開放",
     "future_trend": "🟢 未來 72 小時海象平穩，風浪符合靠泊安全門檻"
-  },
-  "decision": {
-    "action_id": 1,
-    "tactical_instruction": "🟢 100.0% 正常開放靠泊",
-    "confidence": 100.0,
-    "is_closed": false
-  },
-  "reinforcement_learning": {
-    "historical_samples": 4280,
-    "accuracy_pct": 98.8,
-    "f1_score": 0.988,
-    "reward_cum": "+1450.2",
-    "iteration_epoch": 1280,
-    "loss": 0.001
-  },
-  "sync_windows": [
-    "07:30-08:30",
-    "11:30-12:30",
-    "16:30-17:30"
-  ]
+  }
 }
