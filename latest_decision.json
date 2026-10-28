@@ -1,6 +1,6 @@
 {
-  "version": "GEM-ENG-SPEC-2026-V67.5-20261028_142106",
-  "timestamp": "2026-10-28 14:21:06 CST",
+  "version": "GEM-ENG-SPEC-2026-V68.0-20261028_143121",
+  "timestamp": "2026-10-28 14:31:21 CST",
   "decision_code": "Q4",
   "cctv_pinn_live": {
     "south_cctv": {
@@ -20,10 +20,11 @@
       "fps": 30
     },
     "pinn_engine": {
-      "model_ver": "Vision-PINN-v4.2",
+      "model_ver": "Vision-PINN-v4.8",
       "status": "RUNNING",
       "inference_time_ms": 18.5,
-      "loss": 0.0012
+      "loss": 0.0012,
+      "f1_score": 0.984
     }
   },
   "typhoon_live": {
