@@ -35,7 +35,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-dark); color: var(--text-main); padding: 6px; font-variant-numeric: tabular-nums; overflow-x: hidden; transition: background-color 0.2s, color 0.2s; }
 
-        /* 防 FOUC 載入遮罩 */
+        /* 防 FOUC 閃爍遮罩 */
         #app-preloader {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background-color: #080e1a; z-index: 9999; display: flex; flex-direction: column;
@@ -62,7 +62,7 @@
         .slider-header span.val { font-family: monospace; font-weight: 800; color: var(--accent-blue); font-size: 10.5px; }
         .slider-item input[type="range"] { width: 100%; height: 6px; background: #1e2d4a; border-radius: 3px; outline: none; accent-color: var(--accent-blue); }
 
-        /* Canvas 嚴格容器邊界約束 */
+        /* Canvas 嚴格容器邊界約束，避免撐破排版 */
         .canvas-container { position: relative; width: 100%; border-radius: 8px; overflow: hidden; background: #050a14; border: 1px solid #1e2d4a; display: flex; justify-content: center; align-items: center; }
         .canvas-container canvas { max-width: 100% !important; height: auto !important; display: block; }
 
@@ -88,7 +88,7 @@
                 <span class="text-lg">🌊</span>
                 <div>
                     <h1 class="text-xs md:text-base font-extrabold text-white flex items-center gap-1.5">
-                        龜山島戰術指揮中樞 <span class="text-[10px] text-[#38bdf8] font-mono">(v69.0 跨端同構)</span>
+                        龜山島戰術指揮中樞 <span class="text-[10px] text-[#38bdf8] font-mono">(v69.0 雙端同構)</span>
                     </h1>
                     <div class="text-[9px] sm:text-[9.5px] text-[#cbd5e1] mt-0.5 flex flex-wrap gap-1.5 items-center font-mono">
                         <span>時間：<b id="liveClock" class="text-white bg-white/10 px-1 py-0.5 rounded">--:--:-- CST</b></span>
@@ -114,24 +114,24 @@
         </div>
     </header>
 
-    <!-- 2. ☯️ 陽 / 陰消長子彈圖 -->
+    <!-- 2. ☯️ 陽 / 陰消長子彈圖 (奇門時空生門開放 vs 陰煞杜死門熔斷) -->
     <section class="bg-[#0b172a] border border-[#1e2d4a] rounded-xl p-2 mb-2 shadow-lg w-full">
         <div class="flex justify-between items-center text-[10.5px] font-extrabold mb-1">
-            <span class="text-sky-300 flex items-center gap-1">☯️ 全域通航戰術消長態勢（陽：可通航時窗 vs 陰：VETO 熔斷風險）</span>
-            <span class="font-mono text-[9.5px] text-amber-300" id="txtBulletRatio">陽 (開放時窗): 0% | 陰 (熔斷風險): 100%</span>
+            <span class="text-sky-300 flex items-center gap-1">☯️ 全域通航戰術消長態勢（奇門生門時窗 vs 陰煞杜死門熔斷）</span>
+            <span class="font-mono text-[9.5px] text-amber-300" id="txtBulletRatio">生門 (開放時窗): 0% | 杜死門 (熔斷煞位): 100%</span>
         </div>
         <div class="relative w-full h-3.5 bg-slate-900 rounded-full border border-slate-700 overflow-hidden flex shadow-inner">
             <div id="barBulletYang" class="h-full bg-gradient-to-r from-emerald-500 to-sky-400 transition-all duration-500 flex items-center justify-center text-[8px] font-black text-black" style="width: 0%;">
                 <span id="txtYangPercent"></span>
             </div>
             <div id="barBulletYin" class="h-full bg-gradient-to-r from-red-600 to-amber-600 transition-all duration-500 flex items-center justify-center text-[8px] font-black text-white" style="width: 100%;">
-                <span id="txtYinPercent">100% 陰 (熔斷)</span>
+                <span id="txtYinPercent">100% 杜死門 (熔斷)</span>
             </div>
         </div>
         <div class="flex justify-between text-[8px] font-mono text-slate-400 mt-0.5 px-0.5">
-            <span>0% (全線 VETO)</span>
-            <span>50% (單岸機動)</span>
-            <span>100% (雙岸完全開放)</span>
+            <span>0% (全線 VETO 閉鎖)</span>
+            <span>50% (單岸奇門機動避風)</span>
+            <span>100% (雙岸開門完全通航)</span>
         </div>
     </section>
 
@@ -339,10 +339,10 @@
                 </div>
             </section>
 
-            <!-- 4. 颱風態勢專區與 GEM 應變比對 -->
+            <!-- 4. 颱風態勢專區與 GEM 應變比對 (含 CCTV 今日浪高極值) -->
             <details class="card border-[#ef4444] bg-[#180d1a]/90" id="detailsTyphoonZone" open>
                 <summary class="card-header !text-red-400 font-bold flex justify-between items-center cursor-pointer list-none outline-none">
-                    <span class="flex items-center gap-1 text-[11.5px]">🌀 颱風態勢專區與 GEM 應變比對 (CWA + TDX 多手 API 即時實證)</span>
+                    <span class="flex items-center gap-1 text-[11.5px]">🌀 颱風態勢專區與 GEM 應變比對 (CWA + TDX + CCTV 極值實證)</span>
                     <div class="flex items-center gap-1.5">
                         <span id="cwaIntensityTag"><span class="badge badge-pass text-[8.5px]">🟢 一般海象</span></span>
                         <span class="badge badge-yellow text-[8px]">▼ 點擊收合/展開</span>
@@ -372,7 +372,7 @@
 
                     <div class="bg-black/60 p-2 rounded border border-red-500/40">
                         <div class="font-extrabold text-red-300 border-b border-red-500/30 pb-1 mb-1.5 flex justify-between items-center">
-                            <span class="text-[10px]">🌀 氣象署 / 國際 API 即時颱風氣象參數</span>
+                            <span class="text-[10px]">🌀 氣象署 / CCTV 即時颱風氣象極值參數</span>
                             <span class="badge badge-veto text-[7.5px]" id="cwaAlertStatus">未發布警報</span>
                         </div>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 font-mono text-[8.5px]">
@@ -396,9 +396,9 @@
                                 <span class="text-slate-400 block text-[7.5px]">距龜山島實時距離</span>
                                 <b class="text-red-400 text-[9.5px]" id="cwaDistance">無侵襲威脅</b>
                             </div>
-                            <div class="bg-red-950/60 p-1.5 rounded border border-red-500/50">
-                                <span class="text-red-300 block text-[7.5px]">戰術影響值 (Impact Index)</span>
-                                <b class="text-yellow-300 text-[9.5px]" id="cwaImpact">影響值：12.0 / 100</b>
+                            <div class="bg-purple-950/60 p-1.5 rounded border border-purple-500/50">
+                                <span class="text-purple-300 block text-[7.5px]">📷 CCTV 今日浪高極值 (Hpeak)</span>
+                                <b class="text-pink-300 text-[9.5px]" id="cwaHpeak">1.05m CD (安全)</b>
                             </div>
                         </div>
                     </div>
@@ -526,7 +526,7 @@
 
         <!-- 右側面板 -->
         <div class="lg:col-span-6 flex flex-col gap-2">
-            <!-- 1. 碼頭動態剖面圖 Canvas -->
+            <!-- 1. 碼頭動態剖面圖 Canvas (防重疊錯位算法) -->
             <section class="card border-[#38bdf8]">
                 <div class="card-header !text-[#38bdf8]">
                     <span id="lblProfileTitle">📐 碼頭動態剖面與越浪分析 (南岸碼頭)</span>
@@ -774,9 +774,9 @@
 
             if (barYang) barYang.style.width = `${yangPct}%`;
             if (barYin) barYin.style.width = `${yinPct}%`;
-            if (txtRatio) txtRatio.textContent = `陽 (開放時窗): ${yangPct}% | 陰 (熔斷風險): ${yinPct}%`;
-            if (txtYangP) txtYangP.textContent = yangPct > 0 ? `${yangPct}% 陽` : '';
-            if (txtYinP) txtYinP.textContent = yinPct > 0 ? `${yinPct}% 陰 (熔斷)` : '';
+            if (txtRatio) txtRatio.textContent = `生門 (開放時窗): ${yangPct}% | 杜死門 (熔斷煞位): ${yinPct}%`;
+            if (txtYangP) txtYangP.textContent = yangPct > 0 ? `${yangPct}% 生門` : '';
+            if (txtYinP) txtYinP.textContent = yinPct > 0 ? `${yinPct}% 杜死門` : '';
 
             if (vetoNorth && vetoSouth) {
                 if (banner) {
@@ -930,16 +930,19 @@
             ctx.beginPath();
             ctx.setLineDash([4, 4]);
             ctx.moveTo(0, limitY); ctx.lineTo(w, limitY);
-            ctx.strokeStyle = '#facc15'; ctx.lineWidth = 1.2; ctx.stroke();
+            ctx.strokeStyle = '#facc15';
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
 
             // 實測波頂虛線
             ctx.beginPath();
             ctx.setLineDash([3, 3]);
             ctx.moveTo(0, crestY); ctx.lineTo(w, crestY);
             ctx.strokeStyle = isOvertopping ? '#ef4444' : '#38bdf8';
-            ctx.lineWidth = 1.2; ctx.stroke();
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
 
-            // 防重疊 Y 軸強制作動錯位
+            // 防重疊 Y 軸強制作動上下錯位
             let limitTextY = limitY - 3;
             let crestTextY = crestY - 3;
             if (Math.abs(limitY - crestY) < 15) {
