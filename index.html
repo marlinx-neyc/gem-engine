@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>🌊 GEM Engine v67.5 龜山島全域戰術指揮中樞 (全功能完整版)</title>
+    <title>🌊 GEM Engine v68.0 龜山島全域戰術指揮中樞 (CCTV-PINN 極致優化版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
@@ -56,7 +56,7 @@
                 <span class="text-lg">🌊</span>
                 <div>
                     <h1 class="text-xs md:text-base font-extrabold text-white flex items-center gap-1.5">
-                        龜山島戰術指揮中樞 <span class="text-[10px] text-[#38bdf8] font-mono">(v67.5)</span>
+                        龜山島戰術指揮中樞 <span class="text-[10px] text-[#38bdf8] font-mono">(v68.0)</span>
                     </h1>
                     <div class="text-[9px] sm:text-[9.5px] text-[#cbd5e1] mt-0.5 flex flex-wrap gap-1.5 items-center font-mono">
                         <span>時間：<b id="liveClock" class="text-white bg-white/10 px-1 py-0.5 rounded">--:--:-- CST</b></span>
@@ -258,7 +258,7 @@
                 </div>
             </section>
 
-            <!-- 3. 🌀 颱風態勢專區與 GEM 應變比對 (完整復原) -->
+            <!-- 3. 🌀 颱風態勢專區與 GEM 應變比對 -->
             <details class="card border-[#ef4444] bg-[#180d1a]/90" id="detailsTyphoonZone" open>
                 <summary class="card-header !text-red-400 font-bold flex justify-between items-center cursor-pointer list-none outline-none">
                     <span class="flex items-center gap-1 text-[11.5px]">🌀 颱風態勢專區與 GEM 應變比對 (CWA + TDX 多手 API 即時實證)</span>
@@ -645,8 +645,8 @@
             const cvNorth = fbNorth < 0.50 ? Math.min(12.0, (0.50 - fbNorth) * 3.5) : 0.00;
             const cvSouth = fbSouth < 0.50 ? Math.min(12.0, (0.50 - fbSouth) * 3.5) : 0.00;
 
-            const vetoNorth = (hsNorth > 1.13) || (weffNorth > 10.17) || (tp >= 11.5) || (ukcNorth < 1.50) || (fbNorth < 0.50);
-            const vetoSouth = (hsSouth > 1.13) || (weffSouth > 10.17) || (tp >= 11.5) || (ukcSouth < 1.50) || (fbSouth < 0.50);
+            const vetoNorth = (hsNorth > 1.13) || (weffNorth > 10.17) || (tp >= 11.5) || (ukcNorth < 1.50) || (fbNorth < 0.50) || (cvNorth > 0.50);
+            const vetoSouth = (hsSouth > 1.13) || (weffSouth > 10.17) || (tp >= 11.5) || (ukcSouth < 1.50) || (fbSouth < 0.50) || (cvSouth > 0.50);
 
             setTxt('cmpHsSouth', `${hsSouth.toFixed(2)} m`);
             setTxt('cmpHsNorth', `${hsNorth.toFixed(2)} m`);
@@ -711,7 +711,7 @@
                 if (banner) {
                     banner.style.display = 'block';
                     banner.style.background = 'var(--status-danger)';
-                    banner.innerText = '🚨 警示：實體觸發物理 VETO 熔斷（浪高/風速/水深/乾舷超標），強制執行防颱封島管制！';
+                    banner.innerText = '🚨 警示：實體觸發物理 VETO 熔斷（浪高/風速/水深/乾舷/越浪超標），強制執行防颱封島管制！';
                 }
                 setTxt('ssotDecisionBadge', '🔴 0.0% 熔斷');
                 if (badgeDecision) {
