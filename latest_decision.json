@@ -1,8 +1,15 @@
 {
-  "version": "GEM-ENG-SPEC-2026-V69.0-20261028_192000",
-  "timestamp": "2026-10-28 19:20:00 CST",
+  "version": "GEM-ULTIMATE-V69.0-20261028_195207",
+  "timestamp": "2026-10-28 19:52:07 CST",
+  "cctv_live_telemetry": {
+    "tide_cd_m": 1.07,
+    "hs_pier_m": 0.69,
+    "hmax_cd_m": 1.54,
+    "freeboard_m": 0.96,
+    "overtopping_cv": 0.0,
+    "is_veto": false
+  },
   "typhoon_live": {
-    "has_typhoon": false,
     "name": "無作用中颱風",
     "intensity": "一般海象",
     "pressure_wind": "1012 hPa | 4.2 m/s",
@@ -11,8 +18,8 @@
     "distance_text": "無侵襲威脅",
     "alert_status": "未發布警報",
     "impact_index": 12.0,
-    "cctv_hpeak": "1.05m CD (常態)",
-    "tdx_status": "TDX 未連動 (使用氣象預警)",
+    "cctv_hpeak": "1.54m CD (常態安全)",
+    "tdx_status": "TDX 異步查詢備援",
     "typhoon_badge": "<span class=\"badge badge-pass text-[8.5px]\">🟢 一般海象</span>",
     "closure_estimate": "🟢 無封島風險（全線正常營運靠泊）",
     "model_vs_official": "🟢 官方預報與 GEM 模型一致：維持開放",
