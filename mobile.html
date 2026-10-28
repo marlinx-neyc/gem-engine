@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>🌊 GEM Engine v69.0 龜山島全域戰術指揮中樞 (AIS 動態蹲沉/戶外對比模式)</title>
+    <title>🌊 GEM Engine v69.0 龜山島全域戰術指揮中樞 (雙端同步版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
@@ -64,7 +64,7 @@
     </style>
 </head>
 <body class="w-full max-w-[1700px] mx-auto">
-    <div id="vetoBanner">🚨 警示：實體觸發物理 VETO 熔斷（浪高/風速/水深/乾舷/越浪超標），強制執行防颱封島管制！</div>
+    <div id="vetoBanner">🚨 警示：實體觸發物理 VETO 熔斷（浪高/風速/水深/乾舷/越浪/蹲沉超標），強制執行防颱封島管制！</div>
 
     <!-- 1. 頂部標題列 -->
     <header class="bg-[#111c2e] border border-[#1e2d4a] border-l-[5px] border-l-[#ef4444] rounded-xl p-2.5 mb-1.5 shadow-xl w-full" id="headerMaster">
@@ -73,7 +73,7 @@
                 <span class="text-lg">🌊</span>
                 <div>
                     <h1 class="text-xs md:text-base font-extrabold text-white flex items-center gap-1.5">
-                        龜山島戰術指揮中樞 <span class="text-[10px] text-[#38bdf8] font-mono">(v69.0)</span>
+                        龜山島戰術指揮中樞 <span class="text-[10px] text-[#38bdf8] font-mono">(v69.0 雙端同步)</span>
                     </h1>
                     <div class="text-[9px] sm:text-[9.5px] text-[#cbd5e1] mt-0.5 flex flex-wrap gap-1.5 items-center font-mono">
                         <span>時間：<b id="liveClock" class="text-white bg-white/10 px-1 py-0.5 rounded">--:--:-- CST</b></span>
@@ -660,9 +660,7 @@
             const sog = parseFloat(getEl('rngSog')?.value || 3.2);
             const deltaTheta = parseFloat(getEl('rngDeltaTheta')?.value || 50);
 
-            // 計算動態 AIS 淺水蹲沉 Squat 量 (以船速 sog 算)
             const squat = Math.min(0.80, 0.05 * Math.pow(sog, 1.6));
-
             const radNorth = deltaTheta * (Math.PI / 180);
             const radSouth = (90 - deltaTheta) * (Math.PI / 180);
 
@@ -891,7 +889,6 @@
             ctx.fillStyle = isOvertopping ? 'rgba(239, 68, 68, 0.4)' : 'rgba(56, 189, 248, 0.35)';
             ctx.fill();
 
-            // 客輪結構與 Squat 幾何
             const shipW = Math.min(50, quayX * 0.5);
             const shipX = quayX - shipW - 10;
             const shipDeckY = tideY - 9;
