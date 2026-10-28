@@ -1,11 +1,11 @@
 {
-  "version": "GEM-ULTIMATE-V69.0-20261028_195207",
-  "timestamp": "2026-10-28 19:52:07 CST",
+  "version": "GEM-ULTIMATE-V69.0-20261028_200015",
+  "timestamp": "2026-10-28 20:00:15 CST",
   "cctv_live_telemetry": {
-    "tide_cd_m": 1.07,
-    "hs_pier_m": 0.69,
-    "hmax_cd_m": 1.54,
-    "freeboard_m": 0.96,
+    "tide_cd_m": 1.1,
+    "hs_pier_m": 0.74,
+    "hmax_cd_m": 1.6,
+    "freeboard_m": 0.9,
     "overtopping_cv": 0.0,
     "is_veto": false
   },
@@ -18,7 +18,7 @@
     "distance_text": "無侵襲威脅",
     "alert_status": "未發布警報",
     "impact_index": 12.0,
-    "cctv_hpeak": "1.54m CD (常態安全)",
+    "cctv_hpeak": "1.6m CD (常態安全)",
     "tdx_status": "TDX 異步查詢備援",
     "typhoon_badge": "<span class=\"badge badge-pass text-[8.5px]\">🟢 一般海象</span>",
     "closure_estimate": "🟢 無封島風險（全線正常營運靠泊）",
