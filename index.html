@@ -35,7 +35,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-dark); color: var(--text-main); padding: 6px; font-variant-numeric: tabular-nums; overflow-x: hidden; transition: background-color 0.2s, color 0.2s; }
 
-        /* 防 FOUC 閃爍遮罩 */
         #app-preloader {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             background-color: #080e1a; z-index: 9999; display: flex; flex-direction: column;
@@ -62,7 +61,6 @@
         .slider-header span.val { font-family: monospace; font-weight: 800; color: var(--accent-blue); font-size: 10.5px; }
         .slider-item input[type="range"] { width: 100%; height: 6px; background: #1e2d4a; border-radius: 3px; outline: none; accent-color: var(--accent-blue); }
 
-        /* Canvas 嚴格容器邊界約束，避免撐破排版 */
         .canvas-container { position: relative; width: 100%; border-radius: 8px; overflow: hidden; background: #050a14; border: 1px solid #1e2d4a; display: flex; justify-content: center; align-items: center; }
         .canvas-container canvas { max-width: 100% !important; height: auto !important; display: block; }
 
@@ -114,7 +112,7 @@
         </div>
     </header>
 
-    <!-- 2. ☯️ 陽 / 陰消長子彈圖 (奇門時空生門開放 vs 陰煞杜死門熔斷) -->
+    <!-- 2. ☯️ 陽 / 陰消長子彈圖 -->
     <section class="bg-[#0b172a] border border-[#1e2d4a] rounded-xl p-2 mb-2 shadow-lg w-full">
         <div class="flex justify-between items-center text-[10.5px] font-extrabold mb-1">
             <span class="text-sky-300 flex items-center gap-1">☯️ 全域通航戰術消長態勢（奇門生門時窗 vs 陰煞杜死門熔斷）</span>
@@ -339,7 +337,7 @@
                 </div>
             </section>
 
-            <!-- 4. 颱風態勢專區與 GEM 應變比對 (含 CCTV 今日浪高極值) -->
+            <!-- 4. 颱風態勢專區與 GEM 應變比對 -->
             <details class="card border-[#ef4444] bg-[#180d1a]/90" id="detailsTyphoonZone" open>
                 <summary class="card-header !text-red-400 font-bold flex justify-between items-center cursor-pointer list-none outline-none">
                     <span class="flex items-center gap-1 text-[11.5px]">🌀 颱風態勢專區與 GEM 應變比對 (CWA + TDX + CCTV 極值實證)</span>
@@ -398,7 +396,7 @@
                             </div>
                             <div class="bg-purple-950/60 p-1.5 rounded border border-purple-500/50">
                                 <span class="text-purple-300 block text-[7.5px]">📷 CCTV 今日浪高極值 (Hpeak)</span>
-                                <b class="text-pink-300 text-[9.5px]" id="cwaHpeak">1.05m CD (安全)</b>
+                                <b class="text-pink-300 text-[9.5px]" id="cwaHpeak">1.05m CD (常態)</b>
                             </div>
                         </div>
                     </div>
@@ -526,7 +524,7 @@
 
         <!-- 右側面板 -->
         <div class="lg:col-span-6 flex flex-col gap-2">
-            <!-- 1. 碼頭動態剖面圖 Canvas (防重疊錯位算法) -->
+            <!-- 1. 碼頭動態剖面圖 Canvas (防重疊算法) -->
             <section class="card border-[#38bdf8]">
                 <div class="card-header !text-[#38bdf8]">
                     <span id="lblProfileTitle">📐 碼頭動態剖面與越浪分析 (南岸碼頭)</span>
@@ -930,8 +928,7 @@
             ctx.beginPath();
             ctx.setLineDash([4, 4]);
             ctx.moveTo(0, limitY); ctx.lineTo(w, limitY);
-            ctx.strokeStyle = '#facc15';
-            ctx.lineWidth = 1.2;
+            ctx.strokeStyle = '#facc15'; ctx.lineWidth = 1.2;
             ctx.stroke();
 
             // 實測波頂虛線
@@ -942,7 +939,7 @@
             ctx.lineWidth = 1.2;
             ctx.stroke();
 
-            // 防重疊 Y 軸強制作動上下錯位
+            // 防重疊 Y 軸強制作動上下避讓錯位
             let limitTextY = limitY - 3;
             let crestTextY = crestY - 3;
             if (Math.abs(limitY - crestY) < 15) {
