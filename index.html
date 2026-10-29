@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🌊 GEM Engine v71.0 龜山島全域戰術指揮中樞</title>
+    <title>🌊 GEM Engine v71.1 龜山島全域戰術指揮中樞</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
@@ -49,7 +49,7 @@
 <body class="w-full max-w-[1700px] mx-auto">
     <div id="app-preloader">
         <div class="spinner"></div>
-        <div class="font-bold text-[12px] font-mono tracking-widest text-sky-400">GEM ENGINE v71.0</div>
+        <div class="font-bold text-[12px] font-mono tracking-widest text-sky-400">GEM ENGINE v71.1</div>
         <div class="text-[9px] mt-1 text-slate-400">次世代 AI 多模態與巡航引擎啟動中...</div>
     </div>
 
@@ -62,7 +62,7 @@
                 <span class="text-lg">🌊</span>
                 <div>
                     <h1 class="text-xs md:text-base font-extrabold text-white flex items-center gap-1.5">
-                        龜山島戰術指揮中樞 <span class="text-[10px] text-[#38bdf8] font-mono">(v71.0 動態巡航版)</span>
+                        龜山島戰術指揮中樞 <span class="text-[10px] text-[#38bdf8] font-mono">(v71.1 動態巡航版)</span>
                     </h1>
                     <div class="text-[9px] sm:text-[9.5px] text-[#cbd5e1] mt-0.5 flex flex-wrap gap-1.5 items-center font-mono">
                         <span>時間：<b id="liveClock" class="text-white bg-white/10 px-1 py-0.5 rounded">--:--:-- CST</b></span>
@@ -135,7 +135,7 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-2.5 w-full items-start">
         <div class="lg:col-span-6 flex flex-col gap-2">
-            <!-- 1. 南岸 vs 北岸 關鍵數據實時比對 -->
+            <!-- 1. 南岸 vs 北岸 關鍵數據實時比對 (已加回 CV 列) -->
             <section class="card border-[#38bdf8] bg-[#091526]">
                 <div class="card-header !text-sky-300 flex justify-between items-center">
                     <span class="font-extrabold text-[11.5px]">⚖️ 南岸 vs 北岸 關鍵數據與 CCTV 光學解算側向比對</span>
@@ -175,6 +175,13 @@
                                 <td class="text-center font-mono font-bold" id="cmpFbSouth">-0.16 m</td>
                                 <td class="text-center font-mono font-bold" id="cmpFbNorth">-0.57 m</td>
                                 <td class="text-center font-mono">≥ 0.50 m</td>
+                            </tr>
+                            <!-- 🚀 修復：補回越浪率 (CV) 列 -->
+                            <tr class="bg-blue-950/40 border-t border-sky-500/30">
+                                <td class="font-bold text-sky-200">📷 實測越浪率 (CV)</td>
+                                <td class="text-center font-mono font-bold" id="cmpCvSouth">0.00 p/min</td>
+                                <td class="text-center font-mono font-bold" id="cmpCvNorth">0.00 p/min</td>
+                                <td class="text-center font-mono">≤ 0.50 p/min</td>
                             </tr>
                             <tr class="bg-black/50">
                                 <td class="font-bold text-yellow-300">🚦 泊位決策燈號</td>
@@ -302,7 +309,7 @@
                         <button onclick="changeWindyOverlay('wind')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-1.5 py-0.5 rounded border border-slate-700 font-bold">💨 風速</button>
                         <button onclick="changeWindyOverlay('waves')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-1.5 py-0.5 rounded border border-slate-700 font-bold">🌊 浪高</button>
                         <button onclick="changeWindyOverlay('gust')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-1.5 py-0.5 rounded border border-slate-700 font-bold">⚡ 陣風</button>
-                        <a href="https://www.cwa.gov.tw/V8/C/M/tide.html" target="_blank" class="bg-blue-900 hover:bg-blue-800 text-sky-200 px-1.5 py-0.5 rounded border border-sky-500 font-bold flex items-center justify-center">⚓ 潮位站</a>
+                        <a href="url?id=4" target="_blank" class="bg-blue-900 hover:bg-blue-800 text-sky-200 px-1.5 py-0.5 rounded border border-sky-500 font-bold flex items-center justify-center">⚓ 潮位站</a>
                     </div>
                 </div>
                 <div class="relative w-full rounded border border-slate-800 overflow-hidden bg-[#050a14] h-[340px]" id="windyContainer">
@@ -489,8 +496,12 @@
             const fbNorth = 3.20 - crestNorth;
             const fbSouth = 2.50 - crestSouth;
 
-            const vetoNorth = (hsNorth > 1.13) || (weffNorth > 10.17) || (tp >= 11.5) || (ukcNorth < 1.50) || (fbNorth < 0.50);
-            const vetoSouth = (hsSouth > 1.13) || (weffSouth > 10.17) || (tp >= 11.5) || (ukcSouth < 1.50) || (fbSouth < 0.50);
+            // 🚀 修復：加入 CV 計算邏輯
+            const cvNorth = fbNorth < 0.50 ? Math.min(12.0, (0.50 - fbNorth) * 3.5) : 0.00;
+            const cvSouth = fbSouth < 0.50 ? Math.min(12.0, (0.50 - fbSouth) * 3.5) : 0.00;
+
+            const vetoNorth = (hsNorth > 1.13) || (weffNorth > 10.17) || (tp >= 11.5) || (ukcNorth < 1.50) || (fbNorth < 0.50) || (cvNorth > 0.50);
+            const vetoSouth = (hsSouth > 1.13) || (weffSouth > 10.17) || (tp >= 11.5) || (ukcSouth < 1.50) || (fbSouth < 0.50) || (cvSouth > 0.50);
 
             setTxt('cmpHsSouth', `${hsSouth.toFixed(2)} m`);
             setTxt('cmpHsNorth', `${hsNorth.toFixed(2)} m`);
@@ -500,6 +511,17 @@
             setTxt('cmpUkcNorth', `${ukcNorth.toFixed(2)} m`);
             setTxt('cmpFbSouth', `${fbSouth.toFixed(2)} m`);
             setTxt('cmpFbNorth', `${fbNorth.toFixed(2)} m`);
+
+            // 🚀 修復：更新 CV 在表格中的數值及狀態顏色
+            const setCvTxt = (id, val) => {
+                const el = getEl(id);
+                if (el) {
+                    el.innerText = `${val.toFixed(2)} p/min`;
+                    el.className = `text-center font-mono font-bold ${val > 0.50 ? 'text-red-400' : 'text-emerald-300'}`;
+                }
+            };
+            setCvTxt('cmpCvSouth', cvSouth);
+            setCvTxt('cmpCvNorth', cvNorth);
 
             const bS = getEl('cmpBadgeSouth');
             if (bS) bS.innerHTML = vetoSouth ? '<span class="badge badge-veto text-[7.5px]">🔴 VETO</span>' : '<span class="badge badge-pass text-[7.5px]">🟢 通過</span>';
