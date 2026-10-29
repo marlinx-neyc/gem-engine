@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🌊 GEM Engine v72.2 龜山島全域戰術指揮中樞</title>
+    <title>🌊 GEM Engine v72.3 龜山島全域戰術指揮中樞</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
@@ -49,7 +49,7 @@
 <body class="w-full max-w-[1700px] mx-auto">
     <div id="app-preloader">
         <div class="spinner"></div>
-        <div class="font-bold text-[12px] font-mono tracking-widest text-sky-400">GEM ENGINE v72.2</div>
+        <div class="font-bold text-[12px] font-mono tracking-widest text-sky-400">GEM ENGINE v72.3</div>
         <div class="text-[9px] mt-1 text-slate-400">滿血回歸修復版啟動中...</div>
     </div>
 
@@ -61,7 +61,7 @@
                 <span class="text-lg">🌊</span>
                 <div>
                     <h1 class="text-xs md:text-base font-extrabold text-white flex items-center gap-1.5">
-                        龜山島戰術指揮中樞 <span class="text-[10px] text-[#38bdf8] font-mono">(v72.2 滿血回歸版)</span>
+                        龜山島戰術指揮中樞 <span class="text-[10px] text-[#38bdf8] font-mono">(v72.3 雷達燈號修復版)</span>
                     </h1>
                     <div class="text-[9px] sm:text-[9.5px] text-[#cbd5e1] mt-0.5 flex flex-wrap gap-1.5 items-center font-mono">
                         <span>時間：<b id="liveClock" class="text-white bg-white/10 px-1 py-0.5 rounded">--:--:-- CST</b></span>
@@ -405,7 +405,7 @@
                 </div>
             </section>
 
-            <!-- 3. Windy 動態實時圖場區 (🚀 修復網址) -->
+            <!-- 3. Windy 動態實時圖場區 -->
             <section class="card border-[#ef4444] bg-[#180d1a]/90">
                 <div class="card-header !text-red-400 flex flex-wrap justify-between items-center gap-1">
                     <span class="font-black text-[11.5px]">🌀 Windy 動態實時圖場與氣象預報表</span>
@@ -424,7 +424,7 @@
                     </iframe>
                 </div>
             </section>
-
+            
             <!-- 5. 颱風態勢專區與 GEM 應變比對 -->
             <details class="card border-[#ef4444] bg-[#180d1a]/90" id="detailsTyphoonZone" open>
                 <summary class="card-header !text-red-400 font-bold flex justify-between items-center cursor-pointer list-none outline-none">
@@ -669,6 +669,13 @@
                 const rBtn = getEl('tabRadar' + m);
                 if (rBtn) rBtn.className = `tab-btn py-0.5 px-0.5 rounded text-[8.5px] font-bold border text-center ${active ? activeClass : inactiveClass}`;
             });
+            
+            // 🚀 動態更新雷達圖左上角標題
+            const lblTitle = getEl('lblRadarTitle');
+            if (lblTitle) {
+                 const modeText = currentRadarMode === 'NORTH' ? '北岸' : currentRadarMode === 'SOUTH' ? '南岸' : '雙岸';
+                 lblTitle.innerText = `🎯 態勢雷達圖與 5 大算子對比 (${modeText})`;
+            }
             debouncedRender();
         };
 
@@ -685,7 +692,6 @@
             debouncedRender();
         };
 
-        // 🚀 修復：還原為正確帶有完整網址與參數的 Windy iFrame URL
         window.changeWindyOverlay = function(overlay) {
             const frame = getEl('windyFrame');
             if (frame) {
@@ -797,10 +803,22 @@
             setCvTxt('cmpCvSouth', cvSouth);
             setCvTxt('cmpCvNorth', cvNorth);
 
+            // 🚀 修復：動態連動更新表格燈號 與 雷達圖右上角總燈號
             const bS = getEl('cmpBadgeSouth');
             if (bS) bS.innerHTML = vetoSouth ? '<span class="badge badge-veto text-[7.5px]">🔴 VETO</span>' : '<span class="badge badge-pass text-[7.5px]">🟢 通過</span>';
             const bN = getEl('cmpBadgeNorth');
             if (bN) bN.innerHTML = vetoNorth ? '<span class="badge badge-veto text-[7.5px]">🔴 VETO</span>' : '<span class="badge badge-pass text-[7.5px]">🟢 通過</span>';
+
+            const rNB = getEl('radarNorthBadge');
+            if (rNB) {
+                rNB.className = vetoNorth ? 'badge badge-veto text-[8px]' : 'badge badge-pass text-[8px]';
+                rNB.innerHTML = vetoNorth ? '北岸 🔴 VETO' : '北岸 🟢 通過';
+            }
+            const rSB = getEl('radarSouthBadge');
+            if (rSB) {
+                rSB.className = vetoSouth ? 'badge badge-veto text-[8px]' : 'badge badge-pass text-[8px]';
+                rSB.innerHTML = vetoSouth ? '南岸 🔴 VETO' : '南岸 🟢 通過';
+            }
 
             // 🔬 6 軸微觀水動力演算
             const activeHs = (currentProfileMode === 'NORTH') ? hsNorth : hsSouth;
