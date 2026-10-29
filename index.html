@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🌊 GEM Engine v72.1 龜山島全域戰術指揮中樞</title>
+    <title>🌊 GEM Engine v72.2 龜山島全域戰術指揮中樞</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
@@ -49,7 +49,7 @@
 <body class="w-full max-w-[1700px] mx-auto">
     <div id="app-preloader">
         <div class="spinner"></div>
-        <div class="font-bold text-[12px] font-mono tracking-widest text-sky-400">GEM ENGINE v72.1</div>
+        <div class="font-bold text-[12px] font-mono tracking-widest text-sky-400">GEM ENGINE v72.2</div>
         <div class="text-[9px] mt-1 text-slate-400">滿血回歸修復版啟動中...</div>
     </div>
 
@@ -61,7 +61,7 @@
                 <span class="text-lg">🌊</span>
                 <div>
                     <h1 class="text-xs md:text-base font-extrabold text-white flex items-center gap-1.5">
-                        龜山島戰術指揮中樞 <span class="text-[10px] text-[#38bdf8] font-mono">(v72.1 滿血回歸版)</span>
+                        龜山島戰術指揮中樞 <span class="text-[10px] text-[#38bdf8] font-mono">(v72.2 滿血回歸版)</span>
                     </h1>
                     <div class="text-[9px] sm:text-[9.5px] text-[#cbd5e1] mt-0.5 flex flex-wrap gap-1.5 items-center font-mono">
                         <span>時間：<b id="liveClock" class="text-white bg-white/10 px-1 py-0.5 rounded">--:--:-- CST</b></span>
@@ -131,7 +131,7 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-2.5 w-full items-start">
         <div class="lg:col-span-6 flex flex-col gap-2">
-            <!-- 1. 南岸 vs 北岸 關鍵數據實時比對 (基準數據回歸) -->
+            <!-- 1. 南岸 vs 北岸 關鍵數據實時比對 -->
             <section class="card border-[#38bdf8] bg-[#091526]">
                 <div class="card-header !text-sky-300 flex justify-between items-center">
                     <span class="font-extrabold text-[11.5px]">⚖️ 南岸 vs 北岸 關鍵數據與 CCTV 光學解算側向比對</span>
@@ -148,7 +148,6 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- 🚀 修復：補回被誤刪的水深與高程基準列 -->
                             <tr>
                                 <td class="font-bold">水深高程 (Chart Depth)</td>
                                 <td class="text-center font-mono text-emerald-300">-9.80 m CD</td>
@@ -202,7 +201,7 @@
                 </div>
             </section>
 
-            <!-- 2. 🚀 修復：補回 CCTV 6 軸微觀水力剛性遙測面板 -->
+            <!-- 2. CCTV 去經驗主義 6 軸微觀水力剛性遙測 -->
             <section class="card border-[#06b6d4] bg-[#081b26]">
                 <div class="card-header !text-cyan-300 flex justify-between items-center">
                     <span class="font-extrabold text-[11.5px] flex items-center gap-1">🔬 CCTV 去經驗主義 6 軸微觀水力剛性遙測</span>
@@ -262,7 +261,7 @@
                 </div>
             </section>
 
-            <!-- 3. 🚀 修復：補回 CCTV & AIS 時段動態靠泊船隻精確比對 (收合版) -->
+            <!-- 3. CCTV & AIS 時段動態靠泊船隻精確比對 -->
             <details class="card border-[#10b981] bg-[#061811]" open>
                 <summary class="card-header !text-emerald-300 flex justify-between items-center cursor-pointer list-none outline-none">
                     <span class="font-extrabold text-[11.5px] flex items-center gap-1">🚢 CCTV & AIS 時段動態靠泊船隻精確比對明細</span>
@@ -311,7 +310,7 @@
                 </div>
             </details>
 
-            <!-- 4. 🚀 修復：補回 官方公準時段與突發調動游擊戰術表 -->
+            <!-- 4. 官方公準時段與突發調動游擊戰術表 -->
             <section class="card border-[#38bdf8] bg-[#0c182b]">
                 <div class="card-header !text-[#38bdf8] flex justify-between items-center">
                     <span class="font-extrabold text-[11.5px] flex items-center gap-1">⏱️ 官方公準時段與突發調動游擊戰術表</span>
@@ -361,6 +360,70 @@
                     </table>
                 </div>
             </section>
+        </div>
+
+        <!-- 右側面板 -->
+        <div class="lg:col-span-6 flex flex-col gap-2">
+            <!-- 1. 碼頭動態剖面圖 Canvas -->
+            <section class="card border-[#38bdf8]">
+                <div class="card-header !text-[#38bdf8]">
+                    <span id="lblProfileTitle">📐 碼頭動態剖面與越浪分析 (南岸碼頭)</span>
+                    <span class="badge badge-yellow text-[8px]" id="lblProfileSlotTag">時段連動中</span>
+                </div>
+                <div class="bg-[#0b172a] border border-blue-500/50 p-1 rounded-lg mb-1 flex items-center justify-between gap-1">
+                    <span class="text-[9px] font-bold text-slate-300 pl-0.5 whitespace-nowrap">⚓ 剖面:</span>
+                    <div class="grid grid-cols-3 gap-1 flex-1">
+                        <button id="tabProfileSouth" onclick="setProfileViewMode('SOUTH')" class="tab-btn py-0.5 px-0.5 rounded text-[8.5px] font-bold border text-center tab-south-active">⚓ 南岸</button>
+                        <button id="tabProfileNorth" onclick="setProfileViewMode('NORTH')" class="tab-btn py-0.5 px-0.5 rounded text-[8.5px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚓ 北岸</button>
+                        <button id="tabProfileCompare" onclick="setProfileViewMode('COMPARE')" class="tab-btn py-0.5 px-0.5 rounded text-[8.5px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚖️ 對比</button>
+                    </div>
+                </div>
+                <div class="canvas-container h-[210px]" id="profileContainer">
+                    <canvas id="profileCanvas" class="w-full h-full block"></canvas>
+                </div>
+            </section>
+
+            <!-- 2. 態勢雷達圖 Canvas -->
+            <section class="card border-[#38bdf8]">
+                <div class="card-header !text-[#38bdf8] flex justify-between items-center">
+                    <span class="font-extrabold" id="lblRadarTitle">🎯 態勢雷達圖與 5 大算子對比 (南岸)</span>
+                    <div class="flex items-center gap-1.5">
+                        <span id="radarNorthBadge" class="badge badge-veto text-[8px]">北岸 🔴 VETO</span>
+                        <span id="radarSouthBadge" class="badge badge-pass text-[8px]">南岸 🟢 通過</span>
+                    </div>
+                </div>
+                <div class="bg-[#0b172a] border border-blue-500/50 p-1 rounded-lg mb-1 flex items-center justify-between gap-1">
+                    <span class="text-[9px] font-bold text-slate-300 pl-0.5 whitespace-nowrap">📡 雷達:</span>
+                    <div class="grid grid-cols-3 gap-1 flex-1">
+                        <button id="tabRadarSouth" onclick="setRadarViewMode('SOUTH')" class="tab-btn py-0.5 px-0.5 rounded text-[8.5px] font-bold border text-center tab-south-active">⚓ 南岸</button>
+                        <button id="tabRadarNorth" onclick="setRadarViewMode('NORTH')" class="tab-btn py-0.5 px-0.5 rounded text-[8.5px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚓ 北岸</button>
+                        <button id="tabRadarCompare" onclick="setRadarViewMode('COMPARE')" class="tab-btn py-0.5 px-0.5 rounded text-[8.5px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚖️ 雙岸</button>
+                    </div>
+                </div>
+                <div class="canvas-container h-[260px]" id="radarContainer">
+                    <canvas id="nativeRadarCanvas" class="w-full h-full block"></canvas>
+                </div>
+            </section>
+
+            <!-- 3. Windy 動態實時圖場區 (🚀 修復網址) -->
+            <section class="card border-[#ef4444] bg-[#180d1a]/90">
+                <div class="card-header !text-red-400 flex flex-wrap justify-between items-center gap-1">
+                    <span class="font-black text-[11.5px]">🌀 Windy 動態實時圖場與氣象預報表</span>
+                    <div class="flex flex-wrap gap-1 text-[8.5px]">
+                        <button onclick="changeWindyOverlay('wind')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-1.5 py-0.5 rounded border border-slate-700 font-bold">💨 風速</button>
+                        <button onclick="changeWindyOverlay('waves')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-1.5 py-0.5 rounded border border-slate-700 font-bold">🌊 浪高</button>
+                        <button onclick="changeWindyOverlay('gust')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-1.5 py-0.5 rounded border border-slate-700 font-bold">⚡ 陣風</button>
+                        <a href="https://www.cwa.gov.tw/V8/C/M/tide.html" target="_blank" class="bg-blue-900 hover:bg-blue-800 text-sky-200 px-1.5 py-0.5 rounded border border-sky-500 font-bold flex items-center justify-center">⚓ 潮位站</a>
+                    </div>
+                </div>
+                <div class="relative w-full rounded border border-slate-800 overflow-hidden bg-[#050a14] h-[340px]" id="windyContainer">
+                    <iframe id="windyFrame"
+                            src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=m%2Fs&zoom=11&overlay=wind&product=ecmwf&level=surface&lat=24.843&lon=121.952&detailLat=24.843&detailLon=121.952&marker=true&detail=true"
+                            class="w-full h-full block border-0 rounded"
+                            loading="lazy">
+                    </iframe>
+                </div>
+            </section>
 
             <!-- 5. 颱風態勢專區與 GEM 應變比對 -->
             <details class="card border-[#ef4444] bg-[#180d1a]/90" id="detailsTyphoonZone" open>
@@ -399,7 +462,7 @@
                 </div>
             </details>
 
-            <!-- 6. 🚀 修復：補回 自主強化學習與 Vision-PINN 反饋模組 (收盒版) -->
+            <!-- 6. 自主強化學習與 Vision-PINN 反饋模組 (收盒版) -->
             <details class="card border-[#a855f7] bg-[#140b29]" id="detailsRLLoop" open>
                 <summary class="card-header !text-purple-300 flex justify-between items-center cursor-pointer list-none outline-none">
                     <span class="font-extrabold text-[11.5px] flex items-center gap-1">🤖 自主強化學習 (RL Loop) 與 EnKF 降噪迭代圖表</span>
@@ -433,7 +496,7 @@
                 </div>
             </details>
 
-            <!-- 7. 🚀 修復：補回 每周戰術開放/封島預測總覽 (收盒版) -->
+            <!-- 7. 每周戰術開放/封島預測總覽 (收盒版) -->
             <details class="card border-[#10b981] bg-[#0a1f18]" id="detailsWeeklyForecast" open>
                 <summary class="card-header !text-emerald-400 flex justify-between items-center cursor-pointer list-none outline-none">
                     <span class="font-extrabold text-[11.5px]">📅 GEM 每周戰術開放/封島預測總覽 (7-Day Tactical Forecast)</span>
@@ -515,70 +578,6 @@
                     </table>
                 </div>
             </details>
-        </div>
-
-        <!-- 右側面板 -->
-        <div class="lg:col-span-6 flex flex-col gap-2">
-            <!-- 1. 碼頭動態剖面圖 Canvas -->
-            <section class="card border-[#38bdf8]">
-                <div class="card-header !text-[#38bdf8]">
-                    <span id="lblProfileTitle">📐 碼頭動態剖面與越浪分析 (南岸碼頭)</span>
-                    <span class="badge badge-yellow text-[8px]" id="lblProfileSlotTag">時段連動中</span>
-                </div>
-                <div class="bg-[#0b172a] border border-blue-500/50 p-1 rounded-lg mb-1 flex items-center justify-between gap-1">
-                    <span class="text-[9px] font-bold text-slate-300 pl-0.5 whitespace-nowrap">⚓ 剖面:</span>
-                    <div class="grid grid-cols-3 gap-1 flex-1">
-                        <button id="tabProfileSouth" onclick="setProfileViewMode('SOUTH')" class="tab-btn py-0.5 px-0.5 rounded text-[8.5px] font-bold border text-center tab-south-active">⚓ 南岸</button>
-                        <button id="tabProfileNorth" onclick="setProfileViewMode('NORTH')" class="tab-btn py-0.5 px-0.5 rounded text-[8.5px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚓ 北岸</button>
-                        <button id="tabProfileCompare" onclick="setProfileViewMode('COMPARE')" class="tab-btn py-0.5 px-0.5 rounded text-[8.5px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚖️ 對比</button>
-                    </div>
-                </div>
-                <div class="canvas-container h-[210px]" id="profileContainer">
-                    <canvas id="profileCanvas" class="w-full h-full block"></canvas>
-                </div>
-            </section>
-
-            <!-- 2. 態勢雷達圖 Canvas -->
-            <section class="card border-[#38bdf8]">
-                <div class="card-header !text-[#38bdf8] flex justify-between items-center">
-                    <span class="font-extrabold" id="lblRadarTitle">🎯 態勢雷達圖與 5 大算子對比 (南岸)</span>
-                    <div class="flex items-center gap-1.5">
-                        <span id="radarNorthBadge" class="badge badge-veto text-[8px]">北岸 🔴 VETO</span>
-                        <span id="radarSouthBadge" class="badge badge-pass text-[8px]">南岸 🟢 通過</span>
-                    </div>
-                </div>
-                <div class="bg-[#0b172a] border border-blue-500/50 p-1 rounded-lg mb-1 flex items-center justify-between gap-1">
-                    <span class="text-[9px] font-bold text-slate-300 pl-0.5 whitespace-nowrap">📡 雷達:</span>
-                    <div class="grid grid-cols-3 gap-1 flex-1">
-                        <button id="tabRadarSouth" onclick="setRadarViewMode('SOUTH')" class="tab-btn py-0.5 px-0.5 rounded text-[8.5px] font-bold border text-center tab-south-active">⚓ 南岸</button>
-                        <button id="tabRadarNorth" onclick="setRadarViewMode('NORTH')" class="tab-btn py-0.5 px-0.5 rounded text-[8.5px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚓ 北岸</button>
-                        <button id="tabRadarCompare" onclick="setRadarViewMode('COMPARE')" class="tab-btn py-0.5 px-0.5 rounded text-[8.5px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚖️ 雙岸</button>
-                    </div>
-                </div>
-                <div class="canvas-container h-[260px]" id="radarContainer">
-                    <canvas id="nativeRadarCanvas" class="w-full h-full block"></canvas>
-                </div>
-            </section>
-
-            <!-- 3. Windy 動態實時圖場區 -->
-            <section class="card border-[#ef4444] bg-[#180d1a]/90">
-                <div class="card-header !text-red-400 flex flex-wrap justify-between items-center gap-1">
-                    <span class="font-black text-[11.5px]">🌀 Windy 動態實時圖場與氣象預報表</span>
-                    <div class="flex flex-wrap gap-1 text-[8.5px]">
-                        <button onclick="changeWindyOverlay('wind')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-1.5 py-0.5 rounded border border-slate-700 font-bold">💨 風速</button>
-                        <button onclick="changeWindyOverlay('waves')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-1.5 py-0.5 rounded border border-slate-700 font-bold">🌊 浪高</button>
-                        <button onclick="changeWindyOverlay('gust')" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-1.5 py-0.5 rounded border border-slate-700 font-bold">⚡ 陣風</button>
-                        <a href="https://www.cwa.gov.tw/V8/C/M/tide.html" target="_blank" class="bg-blue-900 hover:bg-blue-800 text-sky-200 px-1.5 py-0.5 rounded border border-sky-500 font-bold flex items-center justify-center">⚓ 潮位站</a>
-                    </div>
-                </div>
-                <div class="relative w-full rounded border border-slate-800 overflow-hidden bg-[#050a14] h-[340px]" id="windyContainer">
-                    <iframe id="windyFrame"
-                            src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=m%2Fs&zoom=11&product=ecmwf&level=surface&lat=24.843&lon=121.952&marker=true&detail=true"
-                            class="w-full h-full block border-0 rounded"
-                            loading="lazy">
-                    </iframe>
-                </div>
-            </section>
         </div>
     </div>
 
@@ -686,10 +685,11 @@
             debouncedRender();
         };
 
+        // 🚀 修復：還原為正確帶有完整網址與參數的 Windy iFrame URL
         window.changeWindyOverlay = function(overlay) {
             const frame = getEl('windyFrame');
             if (frame) {
-                frame.src = `https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=m%2Fs&zoom=11&product=ecmwf&level=surface&lat=24.843&lon=121.952&marker=true&detail=true&overlay=${overlay}`;
+                frame.src = `https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=m%2Fs&zoom=11&overlay=${overlay}&product=ecmwf&level=surface&lat=24.843&lon=121.952&detailLat=24.843&detailLon=121.952&marker=true&detail=true`;
             }
         };
 
