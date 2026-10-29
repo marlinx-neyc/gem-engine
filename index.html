@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🌊 GEM Engine v76.0 龜山島全域戰術指揮中樞</title>
+    <title>🌊 GEM Engine v77.0 龜山島全域戰術指揮中樞</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
@@ -48,13 +48,15 @@
         /* 時空標籤特規色 */
         .tag-d0 { color: #2dd4bf; border: 1px solid rgba(45, 212, 191, 0.4); background: rgba(45, 212, 191, 0.1); padding: 1px 4px; border-radius: 4px; margin-right: 4px; font-weight: 900; }
         .tag-d1 { color: #c084fc; border: 1px solid rgba(192, 132, 252, 0.4); background: rgba(192, 132, 252, 0.1); padding: 1px 4px; border-radius: 4px; margin-right: 4px; font-weight: 900; }
+        /* HUD 特化光暈 */
+        .hud-red-glow { box-shadow: 0 0 10px rgba(239, 68, 68, 0.8); }
     </style>
 </head>
 <body class="w-full max-w-[1700px] mx-auto">
     <div id="app-preloader">
         <div class="spinner"></div>
-        <div class="font-bold text-[12px] font-mono tracking-widest text-sky-400">GEM ENGINE v76.0</div>
-        <div class="text-[9px] mt-1 text-slate-400">時空標籤隔離版啟動中...</div>
+        <div class="font-bold text-[12px] font-mono tracking-widest text-sky-400">GEM ENGINE v77.0</div>
+        <div class="text-[9px] mt-1 text-slate-400">飛官 HUD 直覺儀表板啟動中...</div>
     </div>
 
     <!-- 🚀 動態決策警報橫幅 -->
@@ -67,7 +69,7 @@
                 <span class="text-lg">🌊</span>
                 <div>
                     <h1 class="text-xs md:text-base font-extrabold text-white flex items-center gap-1.5">
-                        龜山島戰術指揮中樞 <span class="text-[10px] text-[#38bdf8] font-mono">(v76.0 時空分區版)</span>
+                        龜山島戰術指揮中樞 <span class="text-[10px] text-[#38bdf8] font-mono">(v77.0 HUD 儀表板版)</span>
                     </h1>
                     <div class="text-[9px] sm:text-[9.5px] text-[#cbd5e1] mt-0.5 flex flex-wrap gap-1.5 items-center font-mono">
                         <span>時間：<b id="liveClock" class="text-white bg-white/10 px-1 py-0.5 rounded">--:--:-- CST</b></span>
@@ -118,28 +120,70 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-2.5 w-full items-start">
         <div class="lg:col-span-6 flex flex-col gap-2">
-            <!-- 1. 南岸 vs 北岸 關鍵數據實時比對 -->
+            <!-- 1. 🚀 v77.0 HUD 直覺視覺化儀表板 (取代原本的數據表格) -->
             <section class="card border-[#38bdf8] bg-[#091526]">
                 <div class="card-header text-sky-300 flex justify-between items-center">
-                    <span class="font-extrabold text-[11.5px] flex items-center gap-1"><span class="tag-d0">D0 現場</span> 雙岸關鍵數據與 CCTV 光學解算側向比對</span>
-                    <span class="badge badge-pass text-[8px]">雙岸動態比對</span>
+                    <span class="font-extrabold text-[11.5px] flex items-center gap-1"><span class="tag-d0">D0 現場</span> 雙岸 HUD 戰術直覺儀表板</span>
+                    <span class="badge badge-pass text-[8px]">能量條防線</span>
                 </div>
-                <div class="overflow-x-auto pt-0.5">
-                    <table class="data-table">
-                        <thead>
-                            <tr><th>關鍵指標參數</th><th class="text-center text-emerald-400">南岸 (權宜泊位)</th><th class="text-center text-sky-400">北岸 (主泊位)</th><th class="text-center text-amber-300">安全門檻</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr><td class="font-bold">水深高程 (Chart Depth)</td><td class="text-center font-mono text-emerald-300">-9.80 m CD</td><td class="text-center font-mono text-sky-300">-8.50 m CD</td><td class="text-center font-mono text-slate-400">---</td></tr>
-                            <tr><td class="font-bold">頂面高程 (Deck CD)</td><td class="text-center font-mono text-emerald-300">+2.50 m CD</td><td class="text-center font-mono text-sky-300">+3.20 m CD</td><td class="text-center font-mono text-slate-400">---</td></tr>
-                            <tr><td class="font-bold">折算波高 (Hs,pier)</td><td class="text-center font-mono font-bold" id="cmpHsSouth">--</td><td class="text-center font-mono font-bold" id="cmpHsNorth">--</td><td class="text-center font-mono">≤ 1.13 m</td></tr>
-                            <tr><td class="font-bold">有效風速 (Weff)</td><td class="text-center font-mono font-bold" id="cmpWeffSouth">--</td><td class="text-center font-mono font-bold" id="cmpWeffNorth">--</td><td class="text-center font-mono">≤ 10.17 m/s</td></tr>
-                            <tr><td class="font-bold">動態裕深 (UKC,含蹲沉)</td><td class="text-center font-mono font-bold" id="cmpUkcSouth">--</td><td class="text-center font-mono font-bold" id="cmpUkcNorth">--</td><td class="text-center font-mono">≥ 1.50 m</td></tr>
-                            <tr><td class="font-bold">預留乾舷 (FB)</td><td class="text-center font-mono font-bold" id="cmpFbSouth">--</td><td class="text-center font-mono font-bold" id="cmpFbNorth">--</td><td class="text-center font-mono">≥ 0.50 m</td></tr>
-                            <tr class="bg-blue-950/40 border-t border-sky-500/30"><td class="font-bold text-sky-200">📷 實測越浪率 (CV)</td><td class="text-center font-mono font-bold" id="cmpCvSouth">--</td><td class="text-center font-mono font-bold" id="cmpCvNorth">--</td><td class="text-center font-mono">≤ 0.50 p/min</td></tr>
-                            <tr class="bg-black/50"><td class="font-bold text-yellow-300">🚦 泊位決策燈號</td><td class="text-center" id="cmpBadgeSouth">--</td><td class="text-center" id="cmpBadgeNorth">--</td><td class="text-center font-mono">雙岸判定</td></tr>
-                        </tbody>
-                    </table>
+                <div class="pt-1">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <!-- ⚓ 南岸 HUD -->
+                        <div class="space-y-2 bg-slate-900/50 p-2 rounded border border-emerald-900/50">
+                            <div class="text-emerald-400 font-bold border-b border-emerald-900/80 pb-1 mb-1.5 flex justify-between items-center text-[10px]">
+                                <span>⚓ 南岸 (權宜泊位 -9.8m)</span>
+                                <span id="hudBadgeSouth" class="badge badge-pass text-[7.5px]">🟢 通過</span>
+                            </div>
+                            <div class="relative">
+                                <div class="flex justify-between text-[8px] text-slate-300 mb-0.5"><span>🌊 港池波高 (Hs)</span><span id="hudHsSouth" class="font-mono font-bold">--</span></div>
+                                <div class="w-full bg-slate-800 h-1.5 rounded-full relative overflow-hidden"><div class="absolute top-0 bottom-0 w-0.5 bg-yellow-400 z-10 shadow-[0_0_4px_#facc15]" style="left: 37.6%;"></div><div id="barHsSouth" class="h-full bg-emerald-500" style="width:0%"></div></div>
+                            </div>
+                            <div class="relative">
+                                <div class="flex justify-between text-[8px] text-slate-300 mb-0.5"><span>💨 攻角風速 (Weff)</span><span id="hudWeffSouth" class="font-mono font-bold">--</span></div>
+                                <div class="w-full bg-slate-800 h-1.5 rounded-full relative overflow-hidden"><div class="absolute top-0 bottom-0 w-0.5 bg-yellow-400 z-10 shadow-[0_0_4px_#facc15]" style="left: 50.85%;"></div><div id="barWeffSouth" class="h-full bg-emerald-500" style="width:0%"></div></div>
+                            </div>
+                            <div class="relative">
+                                <div class="flex justify-between text-[8px] text-slate-300 mb-0.5"><span>📏 湧浪週期 (Tp)</span><span id="hudTpSouth" class="font-mono font-bold">--</span></div>
+                                <div class="w-full bg-slate-800 h-1.5 rounded-full relative overflow-hidden"><div class="absolute top-0 bottom-0 w-0.5 bg-yellow-400 z-10 shadow-[0_0_4px_#facc15]" style="left: 57.5%;"></div><div id="barTpSouth" class="h-full bg-emerald-500" style="width:0%"></div></div>
+                            </div>
+                            <div class="relative">
+                                <div class="flex justify-between text-[8px] text-slate-300 mb-0.5"><span>🚢 動態裕深 (UKC)</span><span id="hudUkcSouth" class="font-mono font-bold">--</span></div>
+                                <div class="w-full bg-slate-800 h-1.5 rounded-full relative overflow-hidden"><div class="absolute top-0 bottom-0 w-0.5 bg-yellow-400 z-10 shadow-[0_0_4px_#facc15]" style="left: 30%;"></div><div id="barUkcSouth" class="h-full bg-emerald-500" style="width:0%"></div></div>
+                            </div>
+                            <div class="relative">
+                                <div class="flex justify-between text-[8px] text-slate-300 mb-0.5"><span>🧱 預留乾舷 (FB)</span><span id="hudFbSouth" class="font-mono font-bold">--</span></div>
+                                <div class="w-full bg-slate-800 h-1.5 rounded-full relative overflow-hidden"><div class="absolute top-0 bottom-0 w-0.5 bg-yellow-400 z-10 shadow-[0_0_4px_#facc15]" style="left: 16.6%;"></div><div id="barFbSouth" class="h-full bg-emerald-500" style="width:0%"></div></div>
+                            </div>
+                        </div>
+
+                        <!-- ⚓ 北岸 HUD -->
+                        <div class="space-y-2 bg-slate-900/50 p-2 rounded border border-sky-900/50">
+                            <div class="text-sky-400 font-bold border-b border-sky-900/80 pb-1 mb-1.5 flex justify-between items-center text-[10px]">
+                                <span>⚓ 北岸 (主泊位 -8.5m)</span>
+                                <span id="hudBadgeNorth" class="badge badge-pass text-[7.5px]">🟢 通過</span>
+                            </div>
+                            <div class="relative">
+                                <div class="flex justify-between text-[8px] text-slate-300 mb-0.5"><span>🌊 港池波高 (Hs)</span><span id="hudHsNorth" class="font-mono font-bold">--</span></div>
+                                <div class="w-full bg-slate-800 h-1.5 rounded-full relative overflow-hidden"><div class="absolute top-0 bottom-0 w-0.5 bg-yellow-400 z-10 shadow-[0_0_4px_#facc15]" style="left: 37.6%;"></div><div id="barHsNorth" class="h-full bg-emerald-500" style="width:0%"></div></div>
+                            </div>
+                            <div class="relative">
+                                <div class="flex justify-between text-[8px] text-slate-300 mb-0.5"><span>💨 攻角風速 (Weff)</span><span id="hudWeffNorth" class="font-mono font-bold">--</span></div>
+                                <div class="w-full bg-slate-800 h-1.5 rounded-full relative overflow-hidden"><div class="absolute top-0 bottom-0 w-0.5 bg-yellow-400 z-10 shadow-[0_0_4px_#facc15]" style="left: 50.85%;"></div><div id="barWeffNorth" class="h-full bg-emerald-500" style="width:0%"></div></div>
+                            </div>
+                            <div class="relative">
+                                <div class="flex justify-between text-[8px] text-slate-300 mb-0.5"><span>📏 湧浪週期 (Tp)</span><span id="hudTpNorth" class="font-mono font-bold">--</span></div>
+                                <div class="w-full bg-slate-800 h-1.5 rounded-full relative overflow-hidden"><div class="absolute top-0 bottom-0 w-0.5 bg-yellow-400 z-10 shadow-[0_0_4px_#facc15]" style="left: 57.5%;"></div><div id="barTpNorth" class="h-full bg-emerald-500" style="width:0%"></div></div>
+                            </div>
+                            <div class="relative">
+                                <div class="flex justify-between text-[8px] text-slate-300 mb-0.5"><span>🚢 動態裕深 (UKC)</span><span id="hudUkcNorth" class="font-mono font-bold">--</span></div>
+                                <div class="w-full bg-slate-800 h-1.5 rounded-full relative overflow-hidden"><div class="absolute top-0 bottom-0 w-0.5 bg-yellow-400 z-10 shadow-[0_0_4px_#facc15]" style="left: 30%;"></div><div id="barUkcNorth" class="h-full bg-emerald-500" style="width:0%"></div></div>
+                            </div>
+                            <div class="relative">
+                                <div class="flex justify-between text-[8px] text-slate-300 mb-0.5"><span>🧱 預留乾舷 (FB)</span><span id="hudFbNorth" class="font-mono font-bold">--</span></div>
+                                <div class="w-full bg-slate-800 h-1.5 rounded-full relative overflow-hidden"><div class="absolute top-0 bottom-0 w-0.5 bg-yellow-400 z-10 shadow-[0_0_4px_#facc15]" style="left: 16.6%;"></div><div id="barFbNorth" class="h-full bg-emerald-500" style="width:0%"></div></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -539,7 +583,7 @@
             debouncedRender();
         };
 
-        // 🚀 點擊時段表，連動沙盤拉桿並重新計算
+        // 🚀 修復：點擊時段表，連動沙盤拉桿並重新計算
         window.selectScheduleSlot = function(slotCode, hs, w, tp, tide) {
             currentSlotMode = slotCode;
             ['rowSlotEarly', 'rowSlotNoon', 'rowSlotEve', 'rowSlotDispatch'].forEach(id => {
@@ -600,6 +644,24 @@
             bindInput('rngTide', 'lblTide', 'm', true);
             bindInput('rngSog', 'lblSog', 'kts');
             bindInput('rngDeltaTheta', 'lblDeltaTheta', '°');
+        }
+
+        // 🚀 HUD 儀表條更新函數
+        function updateHUDBar(idBar, idTxt, val, limit, maxVal, isInverse) {
+            const bar = getEl(idBar); const txt = getEl(idTxt);
+            if(!bar || !txt) return;
+            let pct = Math.min(100, Math.max(0, (val / maxVal) * 100));
+            bar.style.width = pct + '%';
+            txt.innerText = `${val.toFixed(2)} / ${limit.toFixed(2)}`;
+
+            let isFail = isInverse ? val < limit : val > limit;
+            if (isFail) {
+                bar.className = 'h-full bg-red-500 hud-red-glow transition-all duration-300';
+                txt.className = 'font-mono font-bold text-red-400';
+            } else {
+                bar.className = 'h-full bg-emerald-500 transition-all duration-300';
+                txt.className = 'font-mono font-bold text-emerald-400';
+            }
         }
 
         function recalculatePhysicsAndRender() {
@@ -728,30 +790,26 @@
             updateGzPanel('gzRiskNorth', 'barGzNorth', 'txtGzNorth', totalRiskNorth, vetoNorth, isGrayZoneNorth, gzReasonsNorth);
             updateGzPanel('gzRiskSouth', 'barGzSouth', 'txtGzSouth', totalRiskSouth, vetoSouth, isGrayZoneSouth, gzReasonsSouth);
 
-            // 數據更新
-            setTxt('cmpHsSouth', `${hsSouth.toFixed(2)} m`);
-            setTxt('cmpHsNorth', `${hsNorth.toFixed(2)} m`);
-            setTxt('cmpWeffSouth', `${weffSouth.toFixed(2)} m/s`);
-            setTxt('cmpWeffNorth', `${weffNorth.toFixed(2)} m/s`);
-            setTxt('cmpUkcSouth', `${ukcSouth.toFixed(2)} m`);
-            setTxt('cmpUkcNorth', `${ukcNorth.toFixed(2)} m`);
-            setTxt('cmpFbSouth', `${fbSouth.toFixed(2)} m`);
-            setTxt('cmpFbNorth', `${fbNorth.toFixed(2)} m`);
+            // 🚀 更新 HUD 能量儀表
+            updateHUDBar('barHsSouth', 'hudHsSouth', hsSouth, 1.13, 3.0, false);
+            updateHUDBar('barWeffSouth', 'hudWeffSouth', weffSouth, 10.17, 20.0, false);
+            updateHUDBar('barTpSouth', 'hudTpSouth', tp, 11.5, 20.0, false);
+            updateHUDBar('barUkcSouth', 'hudUkcSouth', ukcSouth, 1.50, 5.0, true);
+            updateHUDBar('barFbSouth', 'hudFbSouth', fbSouth, 0.50, 3.0, true);
 
-            const setCvTxt = (id, val) => {
-                const el = getEl(id);
-                if (el) {
-                    el.innerText = `${val.toFixed(2)} p/min`;
-                    el.className = `text-center font-mono font-bold ${val > 0.50 ? 'text-red-400' : 'text-emerald-300'}`;
-                }
-            };
-            setCvTxt('cmpCvSouth', cvSouth);
-            setCvTxt('cmpCvNorth', cvNorth);
+            updateHUDBar('barHsNorth', 'hudHsNorth', hsNorth, 1.13, 3.0, false);
+            updateHUDBar('barWeffNorth', 'hudWeffNorth', weffNorth, 10.17, 20.0, false);
+            updateHUDBar('barTpNorth', 'hudTpNorth', tp, 11.5, 20.0, false);
+            updateHUDBar('barUkcNorth', 'hudUkcNorth', ukcNorth, 1.50, 5.0, true);
+            updateHUDBar('barFbNorth', 'hudFbNorth', fbNorth, 0.50, 3.0, true);
 
-            const bS = getEl('cmpBadgeSouth');
-            if (bS) bS.innerHTML = vetoSouth ? '<span class="badge badge-veto text-[7.5px]">🔴 VETO</span>' : (isGrayZoneSouth ? '<span class="badge badge-orange text-[7.5px]">🟠 預警</span>' : '<span class="badge badge-pass text-[7.5px]">🟢 通過</span>');
-            const bN = getEl('cmpBadgeNorth');
-            if (bN) bN.innerHTML = vetoNorth ? '<span class="badge badge-veto text-[7.5px]">🔴 VETO</span>' : (isGrayZoneNorth ? '<span class="badge badge-orange text-[7.5px]">🟠 預警</span>' : '<span class="badge badge-pass text-[7.5px]">🟢 通過</span>');
+            const bS = getEl('hudBadgeSouth');
+            if (bS) bS.innerHTML = vetoSouth ? '🔴 VETO' : (isGrayZoneSouth ? '🟠 預警' : '🟢 通過');
+            if (bS) bS.className = vetoSouth ? 'badge badge-veto text-[7.5px]' : (isGrayZoneSouth ? 'badge badge-orange text-[7.5px]' : 'badge badge-pass text-[7.5px]');
+            
+            const bN = getEl('hudBadgeNorth');
+            if (bN) bN.innerHTML = vetoNorth ? '🔴 VETO' : (isGrayZoneNorth ? '🟠 預警' : '🟢 通過');
+            if (bN) bN.className = vetoNorth ? 'badge badge-veto text-[7.5px]' : (isGrayZoneNorth ? 'badge badge-orange text-[7.5px]' : 'badge badge-pass text-[7.5px]');
 
             const rNB = getEl('radarNorthBadge');
             if (rNB) {
@@ -785,22 +843,23 @@
             setTel('telemetryTension', tensionVal, "≤60%", "%", tensionVal > 60);
             setTel('telemetryShear', shearVal, "≤0.80kts", "kts", parseFloat(shearVal) > 0.80);
 
-            // 時窗表更新
-            const updateCellSlot = (tideAdd, hsMult, cellTideId, cellHsId, cellBadgeId) => {
-                const sTide = tide + tideAdd;
-                const sHs = hsSouth * hsMult;
-                setTxt(cellTideId, `${sTide >= 0 ? '+' : ''}${sTide.toFixed(2)}m CD`);
-                setTxt(cellHsId, `${sHs.toFixed(2)}m`);
-                const sVeto = sHs > 1.13 || tp >= 11.5;
+            // 🚀 更新時段表格連動燈號 (基於預估波高與剛性門檻 1.13m)
+            const updateCellSlot = (hsMult, cellHsId, cellBadgeId) => {
                 const bEl = getEl(cellBadgeId);
-                if (bEl) bEl.innerHTML = sVeto ? '<span class="badge badge-veto text-[7.5px]">🔴 熔斷</span>' : '<span class="badge badge-pass text-[7.5px]">🟢 准予靠泊</span>';
+                const hsEl = getEl(cellHsId);
+                if(hsEl && bEl) {
+                    const localHs = parseFloat(hsEl.innerText.replace('m',''));
+                    const sVeto = localHs > 1.13;
+                    bEl.innerHTML = sVeto ? '<span class="badge badge-veto text-[7.5px]">🔴 熔斷</span>' : '<span class="badge badge-pass text-[7.5px]">🟢 准予靠泊</span>';
+                }
             };
-            updateCellSlot(+0.45, 0.85, 'cellEarlyTide', 'cellEarlyHs', 'cellEarlyBadge');
-            updateCellSlot(-0.30, 1.15, 'cellNoonTide', 'cellNoonHs', 'cellNoonBadge');
-            updateCellSlot(+0.20, 0.95, 'cellEveTide', 'cellEveHs', 'cellEveBadge');
-            updateCellSlot(+0.30, 1.25, 'cellDispTide', 'cellDispHs', 'cellDispBadge');
+            updateCellSlot(0.85, 'cellEarlyHs', 'cellEarlyBadge');
+            updateCellSlot(1.15, 'cellNoonHs', 'cellNoonBadge');
+            updateCellSlot(0.95, 'cellEveHs', 'cellEveBadge');
+            updateCellSlot(1.25, 'cellDispHs', 'cellDispBadge');
 
 
+            // 更新總狀態橫幅
             const banner = getEl('vetoBanner');
             const headerMaster = getEl('headerMaster');
             const badgeDecision = getEl('badgeMobDecision');
@@ -819,7 +878,6 @@
             if (txtYangP) txtYangP.textContent = yangPct > 0 ? `${yangPct}% 生門` : '';
             if (txtYinP) txtYinP.textContent = yinPct > 0 ? `${yinPct}% 杜死門` : '';
 
-            // 🚀 修改警報橫幅為 D0 當下，隔離未來預報
             if (vetoNorth && vetoSouth) {
                 let allReasons = [...new Set([...vetoReasonsNorth, ...vetoReasonsSouth])].join('/');
                 if (banner) {
