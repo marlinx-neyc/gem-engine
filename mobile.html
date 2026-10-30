@@ -3,169 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes">
-    <meta http-equiv="refresh" content="300">
     <title>🌊 GEM Engine v80.0 龜山島全域戰術指揮中樞</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root { --bg-dark: #080e1a; --card-bg: #111c2e; --card-border: #1e2d4a; --status-pass: #10b981; --status-danger: #ef4444; }
-        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background-color: var(--bg-dark); color: #f8fafc; padding: 12px; font-size: 14px; }
-        .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
-        .card-header { font-size: 15px; font-weight: 800; margin-bottom: 10px; display: flex; justify-content: space-between; border-bottom: 1px solid var(--card-border); padding-bottom: 6px; }
-        .badge { font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 4px; display: inline-block; }
+        :root { --bg-dark: #080e1a; --card-bg: #111c2e; --card-border: #1e2d4a; --accent-blue: #38bdf8; --status-pass: #10b981; --status-danger: #ef4444; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-dark); color: #f8fafc; padding: 12px; font-size: 14px; overflow-x: hidden; }
+        .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 16px; margin-bottom: 12px; width: 100%; }
+        .card-header { font-size: 15px; font-weight: 800; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border); padding-bottom: 6px; }
+        .badge { font-size: 12px; font-weight: 700; padding: 4px 8px; border-radius: 4px; display: inline-block; }
         .badge-pass { background: rgba(16, 185, 129, 0.25); color: #86efac; border: 1px solid #10b981; }
         .badge-veto { background: rgba(239, 68, 68, 0.25); color: #fca5a5; border: 1px solid #ef4444; }
         .tab-active { border-bottom: 3px solid #38bdf8; color: #38bdf8; font-weight: bold; background: rgba(56,189,248,0.1); }
-        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        .data-table th, .data-table td { padding: 8px 10px; border-bottom: 1px solid var(--card-border); }
-        .canvas-container { width: 100%; border-radius: 8px; background: #050a14; border: 1px solid #1e2d4a; overflow: hidden; height: 220px; }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; border: 1px solid var(--card-border); border-radius: 8px; overflow: hidden; }
+        .data-table th, .data-table td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--card-border); }
+        .data-table th { background: rgba(56, 189, 248, 0.12); color: #f8fafc; font-weight: 700; }
+        .slider-item { display: flex; flex-direction: column; gap: 4px; }
+        .slider-header { display: flex; justify-content: space-between; font-size: 12px; color: #cbd5e1; font-weight: 600; }
+        .slider-header span.val { font-family: monospace; font-weight: 800; color: #38bdf8; font-size: 14px; }
+        .slider-item input[type="range"] { width: 100%; height: 8px; background: #1e2d4a; border-radius: 4px; outline: none; accent-color: #38bdf8; }
+        .canvas-container { position: relative; width: 100%; border-radius: 8px; overflow: hidden; background: #050a14; border: 1px solid #1e2d4a; height: 240px; }
         canvas { width: 100% !important; height: 100% !important; display: block; }
-        .tag-d0 { color: #2dd4bf; border: 1px solid rgba(45,212,191,0.4); background: rgba(45,212,191,0.1); padding: 2px 5px; border-radius: 4px; font-weight: 900; }
     </style>
 </head>
 <body class="w-full mx-auto space-y-3">
 
-    <div id="vetoBanner" class="bg-emerald-600 text-white p-3 rounded-lg font-bold text-center text-base shadow-lg">✅ [D0 今日] 系統檢測：全域海象平穩，准予靠泊作業！</div>
-
-    <!-- 頁頭 -->
-    <header class="bg-[#111c2e] border border-[#1e2d4a] border-l-[6px] border-l-[#10b981] rounded-xl p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+    <!-- 頂部頁頭 -->
+    <header class="bg-[#111c2e] border border-[#1e2d4a] border-l-[6px] border-l-[#10b981] rounded-xl p-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
         <div>
-            <h1 class="text-xl font-extrabold text-white flex items-center gap-2">🌊 龜山島戰術指揮中樞 <span class="text-xs text-[#38bdf8] font-mono">(v80.0 無截斷完整版)</span></h1>
-            <p class="text-xs text-slate-400 mt-1">更新時間：<span id="liveClock" class="text-white font-mono">{{UPDATE_TIME}}</span></p>
+            <h1 class="text-xl font-extrabold text-white flex items-center gap-2">🌊 龜山島戰術指揮中樞 <span class="text-xs text-[#38bdf8] font-mono">(v80.0 畫布完全復原版)</span></h1>
+            <p class="text-xs text-slate-400 mt-1">即時算力更新：<span class="text-blue-300 font-mono">{{UPDATE_TIME}}</span></p>
         </div>
         <div class="flex items-center gap-2">
-            <button id="btnAutoPilot" onclick="toggleAutoPilot()" class="bg-indigo-500/20 text-indigo-300 border border-indigo-500/50 px-3 py-1.5 rounded text-xs font-bold">🤖 風暴模擬</button>
-            <span class="badge badge-pass text-xs px-2.5 py-1" id="badgeMobDecision">🟢 今日全線開放</span>
+            <button id="btnAutoPilot" onclick="toggleAutoPilot()" class="bg-indigo-500/20 text-indigo-300 border border-indigo-500/50 px-3 py-1.5 rounded text-xs font-bold">🤖 啟動風暴模擬</button>
+            <span class="badge badge-pass text-xs px-2.5 py-1" id="badgeStatus">🟢 今日全線開放</span>
         </div>
     </header>
-
-    <!-- 奇門戰術消長態勢 -->
-    <section class="bg-[#0b172a] border border-[#1e2d4a] rounded-xl p-3">
-        <div class="flex justify-between items-center text-xs font-bold mb-1.5"><span class="text-sky-300"><span class="tag-d0">D0 現場</span> 奇門通航戰術消長態勢</span><span id="txtBulletRatio" class="text-amber-300 font-mono">生門: 100% | 死門: 0%</span></div>
-        <div class="w-full h-3.5 bg-slate-900 rounded-full border border-slate-700 overflow-hidden flex">
-            <div id="barBulletYang" class="h-full bg-gradient-to-r from-emerald-500 to-sky-400 transition-all duration-500 text-[10px] text-black font-black flex items-center justify-center" style="width:100%">100% 生門</div>
-            <div id="barBulletYin" class="h-full bg-gradient-to-r from-red-600 to-amber-600 transition-all duration-500" style="width:0%"></div>
-        </div>
-    </section>
 
     <!-- 雙分頁區 -->
     <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
         <div class="flex border-b border-slate-700">
-            <button id="tab-btn-normal" onclick="switchTab('normal')" class="flex-1 py-3 text-center text-sm font-bold tab-active">🟢 常規船班 (標準4時序)</button>
-            <button id="tab-btn-guerrilla" onclick="switchTab('guerrilla')" class="flex-1 py-3 text-center text-sm font-bold text-slate-400">⚡ 游擊調撥與特區警示</button>
+            <button id="btnTabNormal" onclick="switchTab('normal')" class="flex-1 py-3 text-center text-sm font-bold tab-active">🟢 常規船班 (標準4時序)</button>
+            <button id="btnTabGuerrilla" onclick="switchTab('guerrilla')" class="flex-1 py-3 text-center text-sm font-bold text-slate-400">⚡ 游擊調撥與警示</button>
         </div>
-        <div id="tab-content-normal" class="p-3 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        <div id="tabNormal" class="p-3 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <div class="bg-slate-700/50 p-2.5 rounded-lg border border-slate-600 flex justify-between items-center"><div><div class="text-xs text-slate-400">上午初班</div><div class="text-sm font-bold">08:00 – 09:30</div></div><span class="badge badge-pass text-xs">🟢 正常靠泊</span></div>
             <div class="bg-slate-700/50 p-2.5 rounded-lg border border-slate-600 flex justify-between items-center"><div><div class="text-xs text-slate-400">上午次班</div><div class="text-sm font-bold">10:00 – 11:30</div></div><span class="badge badge-pass text-xs">🟢 正常靠泊</span></div>
             <div class="bg-slate-700/50 p-2.5 rounded-lg border border-slate-600 flex justify-between items-center"><div><div class="text-xs text-slate-400">下午初班</div><div class="text-sm font-bold">13:00 – 14:30</div></div><span class="badge badge-pass text-xs">🟢 正常靠泊</span></div>
             <div class="bg-slate-700/50 p-2.5 rounded-lg border border-slate-600 flex justify-between items-center"><div><div class="text-xs text-slate-400">下午末班</div><div class="text-sm font-bold">15:00 – 16:30</div></div><span class="badge badge-pass text-xs">🟢 正常靠泊</span></div>
         </div>
-        <div id="tab-content-guerrilla" class="p-3 space-y-2 hidden">
-            <div class="bg-slate-700/50 p-2.5 rounded-lg border border-yellow-500/30 flex justify-between items-center"><div><span class="text-xs font-bold text-yellow-400">10:00 滿潮觀測點</span><div class="text-xs text-slate-300">潮峰 +1.42m ｜ 引橋乾舷 1.25m</div></div><span class="badge badge-yellow text-xs">⚠️ 警戒監視</span></div>
+        <div id="tabGuerrilla" class="p-3 space-y-2 hidden">
+            <div class="bg-slate-700/50 p-2.5 rounded-lg border border-yellow-500/30 flex justify-between items-center"><div><span class="text-xs font-bold text-yellow-400">10:00 滿潮觀測點</span><div class="text-xs text-slate-300">潮峰 +1.42m ｜ 引橋乾舷 1.25m</div></div><span class="badge badge-pass text-xs">⚠️ 警戒監視</span></div>
             <div class="bg-slate-700/50 p-2.5 rounded-lg border border-red-500/30 flex justify-between items-center"><div><span class="text-xs font-bold text-red-400">牛奶海強酸湧升特區</span><div class="text-xs text-slate-300">pH 1.8 湧升極值 ｜ 戒護外推 200m</div></div><span class="badge badge-veto text-xs">🔴 禁絕水上活動</span></div>
         </div>
     </div>
 
-    <!-- 戰術沙盤拉桿 -->
+    <!-- 戰術沙盤演練拉桿 -->
     <details class="card border-[#2563eb] bg-[#0c182b]" open>
-        <summary class="card-header text-[#60a5fa] cursor-pointer"><span>📐 戰術沙盤演練 (拖曳拉桿即時推算)</span><span class="text-xs text-amber-300">▼ 收合</span></summary>
+        <summary class="card-header text-[#60a5fa] cursor-pointer"><span>📐 戰術沙盤演練 (拖曳拉桿即時驅動畫布)</span><span class="text-xs text-amber-300">▼ 收合</span></summary>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2 border-t border-[#1e2d4a]">
-            <div><div class="flex justify-between text-xs"><span>波高 Hs</span><b id="lblHs" class="text-sky-400">0.85m</b></div><input type="range" id="rngHs" min="0.4" max="5.0" step="0.05" value="0.85" oninput="updatePhysics()"></div>
-            <div><div class="flex justify-between text-xs"><span>風速 W</span><b id="lblW" class="text-sky-400">6.50m/s</b></div><input type="range" id="rngW" min="2.0" max="20.0" step="0.2" value="6.50" oninput="updatePhysics()"></div>
-            <div><div class="flex justify-between text-xs"><span>週期 Tp</span><b id="lblTp" class="text-sky-400">8.5s</b></div><input type="range" id="rngTp" min="6.0" max="18.0" step="0.5" value="8.5" oninput="updatePhysics()"></div>
-            <div><div class="flex justify-between text-xs"><span>潮位 Tide</span><b id="lblTide" class="text-sky-400">+1.10m</b></div><input type="range" id="rngTide" min="-1.0" max="2.5" step="0.05" value="1.10" oninput="updatePhysics()"></div>
+            <div class="slider-item"><div class="slider-header"><span>波高 Hs</span><span class="val" id="lblHs">0.85m</span></div><input type="range" id="rngHs" min="0.4" max="5.0" step="0.05" value="0.85"></div>
+            <div class="slider-item"><div class="slider-header"><span>風速 W</span><span class="val" id="lblW">6.50m/s</span></div><input type="range" id="rngW" min="2.0" max="20.0" step="0.2" value="6.50"></div>
+            <div class="slider-item"><div class="slider-header"><span>週期 Tp</span><span class="val" id="lblTp">8.5s</span></div><input type="range" id="rngTp" min="6.0" max="18.0" step="0.5" value="8.5"></div>
+            <div class="slider-item"><div class="slider-header"><span>潮位 Tide</span><span class="val" id="lblTide">+1.10m</span></div><input type="range" id="rngTide" min="-1.0" max="2.5" step="0.05" value="1.10"></div>
         </div>
     </details>
 
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 w-full">
-        <!-- 左側物理數據與遙測 -->
-        <div class="lg:col-span-6 space-y-3">
-            <!-- 雙岸比對矩陣 -->
-            <section class="card border-[#38bdf8] bg-[#091526]">
-                <div class="card-header text-sky-300"><span>📊 雙岸水動力學數據比對</span><span class="badge badge-pass text-xs">含 CV 越浪率</span></div>
-                <div class="overflow-x-auto">
-                    <table class="data-table">
-                        <thead><tr><th>指標</th><th class="text-emerald-400 text-center">南岸 (-9.8m)</th><th class="text-sky-400 text-center">北岸 (-8.5m)</th><th class="text-amber-300 text-center">安全門檻</th></tr></thead>
-                        <tbody>
-                            <tr><td class="font-bold">折算波高 (Hs)</td><td id="cmpHsSouth" class="text-center font-mono font-bold">0.53 m</td><td id="cmpHsNorth" class="text-center font-mono font-bold">0.90 m</td><td class="text-center font-mono">≤ 1.13 m</td></tr>
-                            <tr><td class="font-bold">動態裕深 (UKC)</td><td id="cmpUkcSouth" class="text-center font-mono font-bold">6.85 m</td><td id="cmpUkcNorth" class="text-center font-mono font-bold">5.55 m</td><td class="text-center font-mono">≥ 1.50 m</td></tr>
-                            <tr class="bg-blue-950/40"><td class="font-bold text-sky-200">📷 實測越浪 (CV)</td><td id="cmpCvSouth" class="text-center font-mono font-bold">0.00 p/min</td><td id="cmpCvNorth" class="text-center font-mono font-bold">0.00 p/min</td><td class="text-center font-mono">≤ 0.50 p/min</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- DTW 模糊地帶診斷 -->
-            <section class="card border-[#f97316] bg-[#1a0f05]">
-                <div class="card-header text-orange-400"><span>DTW 歷史時序與模糊地帶診斷</span></div>
-                <div class="grid grid-cols-2 gap-2 text-xs font-mono">
-                    <div class="bg-black/60 p-2 rounded"><div class="flex justify-between"><span>南岸風險</span><b id="gzRiskSouth" class="text-emerald-400">10%</b></div><div id="txtGzSouth" class="text-[10px] text-emerald-400 mt-1">常態安全區間</div></div>
-                    <div class="bg-black/60 p-2 rounded"><div class="flex justify-between"><span>北岸風險</span><b id="gzRiskNorth" class="text-emerald-400">15%</b></div><div id="txtGzNorth" class="text-[10px] text-emerald-400 mt-1">常態安全區間</div></div>
-                </div>
-            </section>
-
-            <!-- CCTV 6軸遙測 -->
-            <section class="card border-[#06b6d4] bg-[#081b26]">
-                <div class="card-header text-cyan-300"><span>CCTV 6 軸微觀水力剛性遙測</span></div>
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-mono">
-                    <div class="bg-black/50 p-2 rounded"><span class="text-slate-400 block text-[10px]">客輪橫搖角</span><b class="text-cyan-300">1.2° 🟢</b></div>
-                    <div class="bg-black/50 p-2 rounded"><span class="text-slate-400 block text-[10px]">垂盪幅值</span><b class="text-cyan-300">0.18m 🟢</b></div>
-                    <div class="bg-black/50 p-2 rounded"><span class="text-slate-400 block text-[10px]">跳板滑移量</span><b class="text-amber-300">4.5cm 🟢</b></div>
-                </div>
-            </section>
-        </div>
-
-        <!-- 右側動態畫布與預報 -->
-        <div class="lg:col-span-6 space-y-3">
-            <section class="card border-[#38bdf8]">
-                <div class="card-header text-[#38bdf8]"><span>📐 碼頭動態水深與越浪剖面</span></div>
-                <div class="canvas-container"><canvas id="profileCanvas"></canvas></div>
-            </section>
-            <section class="card border-[#38bdf8]">
-                <div class="card-header text-[#38bdf8]"><span>🎯 5 大算子態勢雷達圖</span></div>
-                <div class="canvas-container"><canvas id="radarCanvas"></canvas></div>
-            </section>
-        </div>
-    </div>
-
-    <!-- 颱風態勢與未來預報區間 -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        <section class="card border-[#c084fc] bg-[#1a0f2e]">
-            <div class="card-header text-purple-300"><span>D0-D2 官方 vs GEM 開封島對比</span></div>
-            <div class="p-2 space-y-2 text-xs">
-                <div class="bg-black/60 p-2 rounded border border-purple-500/40">
-                    <span class="font-bold text-sky-300">🚢 TDX 航務：</span><span class="text-amber-300 font-mono">TDX 異步查詢備援</span>
-                </div>
-                <div class="bg-black/60 p-2 rounded border border-purple-500/40">
-                    <span class="font-bold text-purple-300">🌀 CWA 颱風現況：</span><span class="text-white font-mono">無作用中颱風 (1012 hPa | 4.2 m/s)</span>
-                </div>
-            </div>
+    <!-- Canvas 動態畫布區 -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 w-full">
+        <section class="card border-[#38bdf8]">
+            <div class="card-header text-[#38bdf8]"><span>📐 碼頭動態水深與越浪剖面</span></div>
+            <div class="canvas-container"><canvas id="profileCanvas"></canvas></div>
         </section>
-        <section class="card border-[#c084fc] bg-[#140b29]">
-            <div class="card-header text-purple-300"><span>D+1~D+7 GEM 每週預測總覽</span></div>
-            <div class="overflow-x-auto">
-                <table class="data-table text-xs">
-                    <thead><tr><th>日期</th><th>預估波高</th><th>GEM 裁示</th><th>調度建議</th></tr></thead>
-                    <tbody>
-                        <tr class="bg-emerald-950/30"><td>D0 (今日)</td><td class="font-mono">0.82m</td><td><span class="badge badge-pass text-xs">🟢 全線開放</span></td><td>北岸常態靠泊營運</td></tr>
-                        <tr class="bg-emerald-950/30"><td>D+1 (明日)</td><td class="font-mono">0.95m</td><td><span class="badge badge-pass text-xs">🟢 全線開放</span></td><td>優先北岸主泊位</td></tr>
-                        <tr><td>D+2 (後日)</td><td class="font-mono">1.25m</td><td><span class="badge badge-yellow text-xs">🟡 游擊調撥</span></td><td>移防南岸權宜碼頭</td></tr>
-                        <tr class="bg-red-950/30"><td>D+3 (大後日)</td><td class="font-mono text-red-400">2.15m</td><td><span class="badge badge-veto text-xs">🔴 預防熔斷</span></td><td>長浪防線全線封島</td></tr>
-                    </tbody>
-                </table>
-            </div>
+        <section class="card border-[#38bdf8]">
+            <div class="card-header text-[#38bdf8]"><span>🎯 5 大算子態勢雷達圖</span></div>
+            <div class="canvas-container"><canvas id="radarCanvas"></canvas></div>
         </section>
     </div>
 
+    <!-- 雙岸數據比對表 -->
+    <section class="card border-[#38bdf8] bg-[#091526]">
+        <div class="card-header text-sky-300"><span>📊 雙岸水動力學精算矩陣</span></div>
+        <div class="overflow-x-auto">
+            <table class="data-table">
+                <thead><tr><th>物理指標</th><th class="text-center text-emerald-400">南岸 (-9.8m)</th><th class="text-center text-sky-400">北岸 (-8.5m)</th><th class="text-center text-amber-300">安全門檻</th></tr></thead>
+                <tbody>
+                    <tr><td class="font-bold">折算波高 (Hs)</td><td id="cmpHsSouth" class="text-center font-mono font-bold">0.53 m</td><td id="cmpHsNorth" class="text-center font-mono font-bold">0.90 m</td><td class="text-center font-mono">≤ 1.13 m</td></tr>
+                    <tr><td class="font-bold">動態裕深 (UKC)</td><td id="cmpUkcSouth" class="text-center font-mono font-bold">6.85 m</td><td id="cmpUkcNorth" class="text-center font-mono font-bold">5.55 m</td><td class="text-center font-mono">≥ 1.50 m</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- JavaScript 完整畫布引擎 -->
     <script>
     (function() {
         const getEl = id => document.getElementById(id);
+        const setTxt = (id, txt) => { const el = getEl(id); if (el) el.textContent = txt; };
+
         let animPhase = 0, isStorming = false, autoPilotTimer = null;
 
         window.switchTab = function(tab) {
-            getEl('tab-content-normal').classList.toggle('hidden', tab !== 'normal');
-            getEl('tab-content-guerrilla').classList.toggle('hidden', tab === 'normal');
-            getEl('tab-btn-normal').className = tab === 'normal' ? 'flex-1 py-3 text-center text-sm font-bold tab-active' : 'flex-1 py-3 text-center text-sm font-bold text-slate-400';
-            getEl('tab-btn-guerrilla').className = tab !== 'normal' ? 'flex-1 py-3 text-center text-sm font-bold tab-active' : 'flex-1 py-3 text-center text-sm font-bold text-slate-400';
+            getEl('tabNormal').classList.toggle('hidden', tab !== 'normal');
+            getEl('tabGuerrilla').classList.toggle('hidden', tab === 'normal');
+            getEl('btnTabNormal').className = tab === 'normal' ? 'flex-1 py-3 text-center text-sm font-bold tab-active' : 'flex-1 py-3 text-center text-sm font-bold text-slate-400';
+            getEl('btnTabGuerrilla').className = tab !== 'normal' ? 'flex-1 py-3 text-center text-sm font-bold tab-active' : 'flex-1 py-3 text-center text-sm font-bold text-slate-400';
         };
 
         window.toggleAutoPilot = function() {
@@ -184,17 +125,16 @@
 
         function updatePhysics() {
             const hs = parseFloat(getEl('rngHs').value);
-            getEl('lblHs').innerText = hs + 'm';
-            getEl('lblW').innerText = getEl('rngW').value + 'm/s';
-            getEl('lblTp').innerText = getEl('rngTp').value + 's';
-            getEl('lblTide').innerText = getEl('rngTide').value + 'm';
+            setTxt('lblHs', hs + 'm');
+            setTxt('lblW', getEl('rngW').value + 'm/s');
+            setTxt('lblTp', getEl('rngTp').value + 's');
+            setTxt('lblTide', getEl('rngTide').value + 'm');
 
-            const hsNorth = (hs * 1.06).toFixed(2);
-            const hsSouth = (hs * 0.62).toFixed(2);
-            getEl('cmpHsNorth').innerText = hsNorth + ' m';
-            getEl('cmpHsSouth').innerText = hsSouth + ' m';
+            setTxt('cmpHsNorth', (hs * 1.06).toFixed(2) + ' m');
+            setTxt('cmpHsSouth', (hs * 0.62).toFixed(2) + ' m');
 
-            drawProfileCanvas(); drawRadarCanvas();
+            drawProfileCanvas();
+            drawRadarCanvas();
         }
 
         function drawProfileCanvas() {
@@ -205,29 +145,48 @@
 
             ctx.clearRect(0, 0, w, h); ctx.fillStyle = '#050a14'; ctx.fillRect(0, 0, w, h);
             ctx.beginPath(); ctx.moveTo(0, h * 0.5);
-            for (let x = 0; x <= w; x += 10) ctx.lineTo(x, h * 0.5 + Math.sin(x * 0.03 + animPhase) * (hs * 8));
-            ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath();
-            ctx.fillStyle = hs > 1.13 ? 'rgba(239, 68, 68, 0.4)' : 'rgba(56, 189, 248, 0.35)'; ctx.fill();
-            ctx.fillStyle = '#1e2d4a'; ctx.fillRect(w * 0.6, h * 0.3, w * 0.4, h * 0.7);
+            for (let x = 0; x <= w * 0.6; x += 6) {
+                let y = h * 0.5 + Math.sin(x * 0.04 + animPhase) * (hs * 10);
+                ctx.lineTo(x, y);
+            }
+            ctx.lineTo(w * 0.6, h); ctx.lineTo(0, h); ctx.closePath();
+            ctx.fillStyle = hs > 1.13 ? 'rgba(239, 68, 68, 0.45)' : 'rgba(56, 189, 248, 0.4)';
+            ctx.fill();
+
+            // 碼頭結構與客輪
+            ctx.fillStyle = '#1e2d4a'; ctx.fillRect(w * 0.6, h * 0.35, w * 0.4, h * 0.65);
+            let shipX = w * 0.25, shipY = h * 0.45 + Math.sin(animPhase * 1.2) * 3;
+            ctx.fillStyle = '#334155'; ctx.fillRect(shipX, shipY, 55, 18);
+            ctx.strokeStyle = '#f8fafc'; ctx.strokeRect(shipX, shipY, 55, 18);
         }
 
         function drawRadarCanvas() {
             const canvas = getEl('radarCanvas'); if (!canvas) return;
             canvas.width = canvas.parentElement.clientWidth; canvas.height = canvas.parentElement.clientHeight;
-            const ctx = canvas.getContext('2d'), w = canvas.width, h = canvas.height, cx = w/2, cy = h/2, R = Math.min(w,h)*0.35;
+            const ctx = canvas.getContext('2d'), w = canvas.width, h = canvas.height, cx = w / 2, cy = h / 2, R = Math.min(w, h) * 0.35;
             const hs = parseFloat(getEl('rngHs').value);
 
             ctx.clearRect(0, 0, w, h); ctx.fillStyle = '#050a14'; ctx.fillRect(0, 0, w, h);
-            ctx.strokeStyle = '#1e2d4a'; [0.5, 1.0].forEach(r => { ctx.beginPath(); ctx.arc(cx, cy, R*r, 0, Math.PI*2); ctx.stroke(); });
-            const val = Math.min(1.2, hs / 1.13);
+            ctx.strokeStyle = '#1e2d4a'; [0.5, 1.0].forEach(r => { ctx.beginPath(); ctx.arc(cx, cy, R * r, 0, Math.PI * 2); ctx.stroke(); });
+
+            const r = Math.min(1.25, hs / 1.13);
             ctx.beginPath();
             for (let i = 0; i < 5; i++) {
                 const a = (i * Math.PI * 2 / 5) - Math.PI / 2;
-                ctx.lineTo(cx + R * val * Math.cos(a), cy + R * val * Math.sin(a));
+                const x = cx + R * r * Math.cos(a);
+                const y = cy + R * r * Math.sin(a);
+                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
             }
             ctx.closePath();
-            ctx.fillStyle = hs > 1.13 ? 'rgba(239, 68, 68, 0.4)' : 'rgba(16, 185, 129, 0.4)'; ctx.fill();
-            ctx.strokeStyle = hs > 1.13 ? '#ef4444' : '#10b981'; ctx.stroke();
+            ctx.fillStyle = hs > 1.13 ? 'rgba(239, 68, 68, 0.45)' : 'rgba(16, 185, 129, 0.4)'; ctx.fill();
+            ctx.strokeStyle = hs > 1.13 ? '#ef4444' : '#10b981'; ctx.lineWidth = 2; ctx.stroke();
+
+            const labels = ['波高', '風速', '週期', '裕深', '乾舷'];
+            ctx.font = '11px sans-serif'; ctx.fillStyle = '#cbd5e1'; ctx.textAlign = 'center';
+            for (let i = 0; i < 5; i++) {
+                const a = (i * Math.PI * 2 / 5) - Math.PI / 2;
+                ctx.fillText(labels[i], cx + (R + 18) * Math.cos(a), cy + (R + 18) * Math.sin(a) + 4);
+            }
         }
 
         window.onload = () => {
@@ -236,8 +195,6 @@
             });
             updatePhysics();
             setInterval(() => { animPhase += 0.05; drawProfileCanvas(); }, 50);
-            const preloader = getEl('app-preloader');
-            if (preloader) preloader.remove();
         };
     })();
     </script>
