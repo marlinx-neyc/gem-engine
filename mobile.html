@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <!-- 每 10 分鐘自動重整頁面抓取最新 HTML，對應後台推播頻率 -->
-    <meta http-equiv="refresh" content="600">
+    <meta http-equiv="refresh" content="60">
     <title>🌊 GEM Engine v80.0 龜山島全域戰術指揮中樞</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -429,7 +428,6 @@
                         <button id="tabProfileCompare" onclick="setProfileViewMode('COMPARE')" class="tab-btn py-1.5 px-2 rounded text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚖️ 對比</button>
                     </div>
                 </div>
-                <!-- 👉 Canvas 高度增至 280px 以適合手機觀看 -->
                 <div class="canvas-container h-[280px]" id="profileContainer">
                     <canvas id="profileCanvas" class="w-full h-full block"></canvas>
                 </div>
@@ -449,7 +447,6 @@
                         <button id="tabRadarCompare" onclick="setRadarViewMode('COMPARE')" class="tab-btn py-1.5 px-2 rounded text-xs font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚖️ 雙岸</button>
                     </div>
                 </div>
-                <!-- 👉 Canvas 高度增至 320px 以適合手機雷達觀看 -->
                 <div class="canvas-container h-[320px]" id="radarContainer">
                     <canvas id="nativeRadarCanvas" class="w-full h-full block"></canvas>
                 </div>
@@ -599,7 +596,7 @@
         <div class="overflow-x-auto pt-3 border-t border-purple-500/30 mt-2">
             <table class="data-table text-sm">
                 <thead>
-                    <tr><th class="py-3 px-2">預測日期</th><th class="text-center py-3">預估波高</th><th class="text-center py-3">預估風速</th><th class="text-center py-3">潮位區間</th><th class="text-center py-3">GEM 預測裁示</th><th class="py-3">建議泊位 / 備註</th></tr>
+                    <tr><th class="py-3 px-2">預測日期</th><th class="text-center py-3">預估波高</th><th class="text-center py-3">預估風速</th><th class="text-center py-3">潮位區間</th><th class="text-center py-3">GEM 預測裁示</th><th>建議泊位 / 備註</th></tr>
                 </thead>
                 <tbody id="tbodyWeeklyForecast">
                     <tr class="bg-red-950/30"><td class="font-bold text-red-300 py-3">Day +1 (明日)</td><td class="text-center font-mono text-red-400 font-bold">2.05 m</td><td class="text-center font-mono text-red-400 font-bold">9.5 m/s</td><td class="text-center font-mono">+0.2~+2.1m</td><td class="text-center"><span class="badge badge-veto text-xs px-2 py-1">🔴 預防熔斷</span></td><td class="text-red-400 font-bold">🔴 停航預警｜長浪過載與防颱清理 (+1天)</td></tr>
@@ -608,7 +605,7 @@
                     <tr><td class="font-bold text-slate-300 py-3">Day +4</td><td class="text-center font-mono text-red-400">2.45 m</td><td class="text-center font-mono text-red-400">13.5 m/s</td><td class="text-center font-mono">+0.1~+2.1m</td><td class="text-center"><span class="badge badge-veto text-xs px-2 py-1">🔴 VETO 熔斷</span></td><td class="text-red-300 font-bold">🔴 預防封島｜低壓長浪</td></tr>
                     <tr><td class="font-bold text-slate-300 py-3">Day +5</td><td class="text-center font-mono text-red-400">3.10 m</td><td class="text-center font-mono text-red-400">15.2 m/s</td><td class="text-center font-mono">+0.3~+2.3m</td><td class="text-center"><span class="badge badge-veto text-xs px-2 py-1">🔴 VETO 熔斷</span></td><td class="text-red-300 font-bold">🔴 強制停航｜越浪超標</td></tr>
                     <tr><td class="font-bold text-slate-300 py-3">Day +6</td><td class="text-center font-mono text-amber-300">1.35 m</td><td class="text-center font-mono">9.1 m/s</td><td class="text-center font-mono">-0.2~+1.9m</td><td class="text-center"><span class="badge badge-yellow text-xs px-2 py-1">🟡 機動單岸</span></td><td class="text-amber-300 font-bold">🟡 評估開窗｜風浪趨緩</td></tr>
-                    <tr><td class="font-bold text-slate-300 py-3">Day +7</td><td class="text-center font-mono">0.90 m</td><td class="text-center font-mono">6.0 m/s</td><td class="text-center font-mono">-0.4~+1.7m</td><td class="text-center"><span class="badge badge-pass text-xs px-2 py-1">🟢 全線開放</span></td><td class="text-emerald-300 font-bold">🟢 全面復航｜恢復常態</td></tr>
+                    <tr><td class="font-bold text-slate-300 py-3">Day +7</td><td class="text-center font-mono">0.90 m</td><td class="text-center font-mono">6.0 m/s</td><td class="text-center font-mono">-0.4~+1.7m</td><td class="text-center"><span class="badge badge-pass text-xs px-2 py-1">🟢 全面復航</span></td><td class="text-emerald-300 font-bold">🟢 全面復航｜恢復常態</td></tr>
                 </tbody>
             </table>
         </div>
@@ -622,7 +619,6 @@
 
         let currentProfileMode = 'SOUTH';
         let currentRadarMode = 'SOUTH';
-        let currentSlotMode = 'NONE';
         let animPhase = 0;
         let resizeTimer = null;
         let autoPilotTimer = null; 
@@ -879,7 +875,7 @@
                 const el = getEl(id);
                 if (el) {
                     el.innerText = `${val.toFixed(2)} p/min`;
-                    el.className = `text-center font-mono font-bold text-sm ${val > 0.50 ? 'text-red-400' : 'text-emerald-300'}`;
+                    el.className = `text-center font-mono font-bold text-xs ${val > 0.50 ? 'text-red-400' : 'text-emerald-300'}`;
                 }
             };
             setCvTxt('cmpCvSouth', cvSouth); setCvTxt('cmpCvNorth', cvNorth);
@@ -896,16 +892,36 @@
             updateBadge('hudBadgeNorth', vetoNorth);
             
             const cmpBS = getEl('cmpBadgeSouth');
-            if (cmpBS) cmpBS.innerHTML = vetoSouth ? '<span class="badge badge-veto text-sm px-3 py-1.5">🔴 VETO 熔斷</span>' : '<span class="badge badge-pass text-sm px-3 py-1.5">🟢 准予靠泊</span>';
+            if (cmpBS) cmpBS.innerHTML = vetoSouth ? '<span class="badge badge-veto text-xs px-2 py-1">🔴 VETO 熔斷</span>' : '<span class="badge badge-pass text-xs px-2 py-1">🟢 准予靠泊</span>';
             const cmpBN = getEl('cmpBadgeNorth');
-            if (cmpBN) cmpBN.innerHTML = vetoNorth ? '<span class="badge badge-veto text-sm px-3 py-1.5">🔴 VETO 熔斷</span>' : '<span class="badge badge-pass text-sm px-3 py-1.5">🟢 准予靠泊</span>';
+            if (cmpBN) cmpBN.innerHTML = vetoNorth ? '<span class="badge badge-veto text-xs px-2 py-1">🔴 VETO 熔斷</span>' : '<span class="badge badge-pass text-xs px-2 py-1">🟢 准予靠泊</span>';
 
             const rNB = getEl('radarNorthBadge');
             if (rNB) { rNB.className = vetoNorth ? 'badge badge-veto text-xs' : 'badge badge-pass text-xs'; rNB.innerHTML = vetoNorth ? '北岸 🔴 VETO' : '北岸 🟢 通過'; }
             const rSB = getEl('radarSouthBadge');
             if (rSB) { rSB.className = vetoSouth ? 'badge badge-veto text-xs' : 'badge badge-pass text-xs'; rSB.innerHTML = vetoSouth ? '南岸 🔴 VETO' : '南岸 🟢 通過'; }
 
-            // 更新 DTW 風險面板 (含高危原因)
+            // 點擊時窗徽章同步更新
+            const updateCellSlot = (hsValue, badgeId) => {
+                const bEl = getEl(badgeId);
+                if(bEl) {
+                    const sVeto = hsValue > 1.13;
+                    if (sVeto) {
+                        bEl.innerHTML = '🔴 熔斷停航';
+                        bEl.className = 'badge badge-veto text-sm';
+                    } else {
+                        bEl.innerHTML = '🟢 正常靠泊';
+                        bEl.className = 'badge badge-pass text-sm';
+                    }
+                }
+            };
+            updateCellSlot(0.85, 'badgeSlotEarly');
+            updateCellSlot(1.15, 'badgeSlotNoon');
+            updateCellSlot(0.95, 'badgeSlotAfternoon');
+            updateCellSlot(0.80, 'badgeSlotEve');
+            updateCellSlot(2.87, 'badgeSlotDispatch');
+
+            // 更新 DTW 風險面板
             const updateGzPanel = (idRisk, idBar, idTxt, riskVal, isVeto, isGz, reasons) => {
                 const elRisk = getEl(idRisk); const elBar = getEl(idBar); const elTxt = getEl(idTxt);
                 if (!elRisk || !elBar || !elTxt) return;
@@ -926,15 +942,13 @@
             updateGzPanel('gzRiskNorth', 'barGzNorth', 'txtGzNorth', totalRiskNorth, vetoNorth, isGrayZoneNorth, gzReasonsNorth);
             updateGzPanel('gzRiskSouth', 'barGzSouth', 'txtGzSouth', totalRiskSouth, vetoSouth, isGrayZoneSouth, gzReasonsSouth);
 
-            // 6 軸微觀水力剛性遙測
-            const activeHs = (currentProfileMode === 'NORTH') ? hsNorth : hsSouth;
-            const activeWeff = (currentProfileMode === 'NORTH') ? weffNorth : weffSouth;
-            const rollVal = Math.min(8.0, activeHs * 1.65 * (activeWeff / 8.0)).toFixed(1);
-            const heaveVal = Math.min(0.90, activeHs * 0.22).toFixed(2);
-            const slipVal = Math.min(30.0, activeHs * 5.2 + (tp / 15.5) * 4.0).toFixed(1);
-            const filmVal = (activeHs > 2.0) ? ((activeHs - 2.0) * 4.5).toFixed(1) : "0.0";
-            const tensionVal = Math.min(100, Math.round(activeHs * 18 + activeWeff * 2.2));
-            const shearVal = Math.min(2.5, 0.25 + activeWeff * 0.04).toFixed(2);
+            // 6 軸遙測
+            const rollVal = Math.min(8.0, hs * 1.65 * (wVal / 8.0)).toFixed(1);
+            const heaveVal = Math.min(0.90, hs * 0.22).toFixed(2);
+            const slipVal = Math.min(30.0, hs * 5.2 + (tp / 15.5) * 4.0).toFixed(1);
+            const filmVal = (hs > 2.0) ? ((hs - 2.0) * 4.5).toFixed(1) : "0.0";
+            const tensionVal = Math.min(100, Math.round(hs * 18 + wVal * 2.2));
+            const shearVal = Math.min(2.5, 0.25 + wVal * 0.04).toFixed(2);
 
             const setTel = (id, val, limit, unit, fail) => {
                 const el = getEl(id);
@@ -947,7 +961,7 @@
             setTel('telemetryTension', tensionVal, "≤60%", "%", tensionVal > 60);
             setTel('telemetryShear', shearVal, "≤0.80kts", "kts", parseFloat(shearVal) > 0.80);
 
-            // 奇門調度比對
+            // 奇門比對
             let windFactor = (wVal / 15.0) * 60, angleFactor = (Math.abs(deltaTheta - 45) / 45.0) * 40;
             let qimenWindMatch = Math.min(99.9, windFactor + angleFactor + (Math.random() * 5));
             let tideFactor = (Math.abs(tide - 1.5) / 1.5) * 50, tpFactor = (tp / 15.0) * 50;
@@ -962,7 +976,7 @@
                     qmActionEl.innerHTML = `🔴 【極限調度】歷史災難特徵高度吻合，建議立即取消靠泊，外海滯留！`;
                     qmActionEl.className = 'text-red-400 text-sm';
                 } else if (qimenWindMatch > 90) {
-                    qmActionEl.innerHTML = `🟡 【位置調度】季風向突變特徵匹配，北岸風壓過大，建議改靠南岸。`;
+                    qmActionEl.innerHTML = `🟡 【位置調度】季風向突變特徵匹配，風壓過大，建議改靠南岸。`;
                     qmActionEl.className = 'text-yellow-300 text-sm';
                 } else if (qimenTideMatch > 90) {
                     qmActionEl.innerHTML = `🟡 【時間調度】湧浪與潮位共振特徵匹配，建議延遲靠泊避開極值。`;
@@ -972,26 +986,6 @@
                     qmActionEl.className = 'text-emerald-400 text-sm';
                 }
             }
-
-            // 更新官方公準時段與突發調動燈號
-            const updateCellSlot = (hsValue, badgeId) => {
-                const bEl = getEl(badgeId);
-                if(bEl) {
-                    const sVeto = hsValue > 1.13;
-                    if (sVeto) {
-                        bEl.innerHTML = '🔴 熔斷停航';
-                        bEl.className = 'badge badge-veto text-sm';
-                    } else {
-                        bEl.innerHTML = '🟢 正常靠泊';
-                        bEl.className = 'badge badge-pass text-sm';
-                    }
-                }
-            };
-            updateCellSlot(0.85, 'badgeSlotEarly');
-            updateCellSlot(1.15, 'badgeSlotNoon');
-            updateCellSlot(0.95, 'badgeSlotAfternoon');
-            updateCellSlot(0.80, 'badgeSlotEve');
-            updateCellSlot(2.87, 'badgeSlotDispatch');
 
             // 橫幅與總裁示
             const banner = getEl('vetoBanner');
@@ -1055,7 +1049,7 @@
                 if (headerMaster) headerMaster.style.borderLeftColor = '#10b981';
             }
 
-            // 保存全域狀態供畫布函數讀取
+            // 保存全域狀態供畫布讀取
             window.lastDiagnostics = {
                 vetoNorth, vetoSouth, 
                 isGrayZoneNorth, isGrayZoneSouth,
@@ -1154,22 +1148,18 @@
             const crestY = cdToY(crestCD);
             const quayX = w * 0.48;
 
-            // 水中背景色
             ctx.fillStyle = 'rgba(14, 116, 144, 0.28)';
             ctx.fillRect(0, cdToY(+2.20), quayX, cdToY(-0.50) - cdToY(+2.20));
 
-            // 海底
             ctx.fillStyle = '#1e1b18';
             ctx.fillRect(0, seabedY, w, Math.max(10, h - seabedY));
             ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
             ctx.beginPath(); ctx.moveTo(0, seabedY); ctx.lineTo(w, seabedY); ctx.stroke();
 
-            // 碼頭
             ctx.fillStyle = '#1e2d4a'; ctx.fillRect(quayX, deckY, w - quayX, seabedY - deckY);
             ctx.strokeStyle = accentColor; ctx.lineWidth = 1.2;
             ctx.strokeRect(quayX, deckY, w - quayX, seabedY - deckY);
 
-            // 動態水波繪製
             const isOvertopping = overtopDepth > 0 || fb < 0.50;
             ctx.beginPath();
             ctx.moveTo(0, seabedY); ctx.lineTo(0, tideY);
@@ -1187,7 +1177,6 @@
             ctx.fillStyle = isOvertopping ? 'rgba(239, 68, 68, 0.4)' : 'rgba(56, 189, 248, 0.35)';
             ctx.fill();
 
-            // 虛線警戒線 (乾舷門檻 & 浪頂)
             const limitCrestCD = deckCD - 0.50;
             const limitY = cdToY(limitCrestCD);
             ctx.beginPath(); ctx.setLineDash([4, 4]); ctx.moveTo(0, limitY); ctx.lineTo(w, limitY);
@@ -1212,7 +1201,6 @@
             ctx.fillText(`── 實測波頂 (+${crestCD.toFixed(2)}m CD / 越浪: ${overtopDepth.toFixed(2)}m)`, 8, crestTextY);
             ctx.setLineDash([]);
 
-            // 客船浮姿
             const shipW = Math.min(70, quayX * 0.5);
             const shipX = quayX - shipW - 12;
             const shipDeckY = tideY - 14 + Math.sin(animPhase*1.2)*2;
@@ -1226,7 +1214,6 @@
             ctx.fillStyle = '#1e293b'; ctx.fill();
             ctx.strokeStyle = '#f8fafc'; ctx.lineWidth = 1.5; ctx.stroke();
 
-            // UKC 底阻動態線
             const ukcX = shipX + shipW * 0.5;
             ctx.beginPath(); ctx.moveTo(ukcX, shipKeelY); ctx.lineTo(ukcX, seabedY);
             ctx.strokeStyle = ukcPass ? '#10b981' : '#ef4444'; ctx.lineWidth = 2.5; ctx.stroke();
@@ -1323,7 +1310,6 @@
             const angles = [];
             for (let i = 0; i < count; i++) angles.push(-Math.PI / 2 + (i * 2 * Math.PI) / count);
 
-            // 雷達網格環 (加入些微的旋轉呼吸感)
             ctx.save();
             ctx.translate(cx, cy);
             ctx.rotate(Math.sin(animPhase * 0.5) * 0.02);
@@ -1344,7 +1330,6 @@
                 ctx.stroke();
             });
 
-            // 放射軸線
             for (let i = 0; i < count; i++) {
                 ctx.beginPath(); ctx.moveTo(cx, cy);
                 ctx.lineTo(cx + R * 1.25 * Math.cos(angles[i]), cy + R * 1.25 * Math.sin(angles[i]));
@@ -1373,7 +1358,6 @@
                 ctx.beginPath();
                 for (let i = 0; i < count; i++) {
                     const val = Math.max(0.1, Math.min(1.25, ratios[i]));
-                    // 雷達多邊形加入與海浪同步的微弱呼吸感
                     const breath = 1.0 + Math.sin(animPhase + i) * 0.015;
                     const r = R * val * breath;
                     const x = cx + r * Math.cos(angles[i]);
@@ -1461,7 +1445,7 @@
                 ctx.fillText(`[ ${gzText} ]`, cx, cy + R + 68);
             } else {
                 ctx.fillStyle = '#10b981';
-                ctx.fillText(`🟢 物理安全通過 ${activeText}`, cx, cy + R + 55);
+                ctx.fillText(`🟢 物理安全通過 ${activeText}`, cx, cy + R + 50);
             }
         }
 
