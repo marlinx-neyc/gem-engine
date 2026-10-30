@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <meta http-equiv="refresh" content="45">
+    <meta http-equiv="refresh" content="60">
     <title>🌊 GEM Engine v80.0 龜山島全域戰術指揮中樞</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -181,7 +181,7 @@
     <!-- 戰術沙盤控制區 (拖曳拉桿觀察畫布變化) -->
     <details class="card border-[#2563eb] bg-[#0c182b] mb-2.5" open id="detailsSandbox">
         <summary class="card-header text-[#60a5fa] cursor-pointer list-none outline-none">
-            <span class="font-extrabold text-xs flex items-center gap-1"><span class="tag-d0">D0 現場</span> 戰術沙盤演練調度 (拖曳拉桿觀察全系統連動)</span>
+            <span class="font-extrabold text-xs flex items-center gap-1"><span class="tag-d0">D0 現場</span> 戰術沙盤演練調度 (拖曳拉桿觀察畫布即時渲染)</span>
             <span class="badge badge-yellow text-xs">▼ 點擊收合</span>
         </summary>
         <div class="grid grid-cols-2 md:grid-cols-6 gap-3 pt-2 border-t border-[#1e2d4a] mt-1">
@@ -263,7 +263,7 @@
                 </div>
             </section>
 
-            <!-- 1.5. 雙岸關鍵數據比對明細表 -->
+            <!-- 1.5. 雙岸關鍵數據比對明細表 (含 CV 越浪率完全復原) -->
             <section class="card border-[#38bdf8] bg-[#091526]">
                 <div class="card-header text-sky-300 flex justify-between items-center">
                     <span class="font-extrabold text-xs flex items-center gap-1"><span class="tag-d0">D0 現場</span> 雙岸關鍵物理數值側向比對</span>
@@ -316,6 +316,7 @@
                                 <td class="text-center font-mono font-bold text-xs" id="cmpFbNorth">--</td>
                                 <td class="text-center font-mono text-xs">≥ 0.50 m</td>
                             </tr>
+                            <!-- 🚀 CV 越浪率滿血回歸橫列 -->
                             <tr class="bg-blue-950/40 border-t border-sky-500/30">
                                 <td class="font-bold text-sky-200 text-xs">📷 實測越浪率 (CV)</td>
                                 <td class="text-center font-mono font-bold text-xs" id="cmpCvSouth">0.00 p/min</td>
@@ -623,7 +624,6 @@
 
         let currentProfileMode = 'SOUTH';
         let currentRadarMode = 'SOUTH';
-        let currentSlotMode = 'NONE';
         let animPhase = 0;
         let resizeTimer = null;
         let autoPilotTimer = null; 
@@ -720,7 +720,6 @@
         };
 
         window.selectScheduleSlot = function(slotCode, hs, w, tp, tide) {
-            currentSlotMode = slotCode;
             ['btnSlotEarly', 'btnSlotNoon', 'btnSlotAfternoon', 'btnSlotEve', 'btnSlotDispatch'].forEach(id => {
                 const btn = getEl(id);
                 if (btn) btn.classList.remove('border-blue-500', 'shadow-[0_0_10px_#3b82f6]');
@@ -897,15 +896,9 @@
             if (cmpBN) cmpBN.innerHTML = vetoNorth ? '<span class="badge badge-veto text-xs px-2 py-1">🔴 VETO 熔斷</span>' : '<span class="badge badge-pass text-xs px-2 py-1">🟢 准予靠泊</span>';
 
             const rNB = getEl('radarNorthBadge');
-            if (rNB) {
-                rNB.className = vetoNorth ? 'badge badge-veto text-[10px]' : 'badge badge-pass text-[10px]';
-                rNB.innerHTML = vetoNorth ? '北岸 🔴 VETO' : '北岸 🟢 通過';
-            }
+            if (rNB) { rNB.className = vetoNorth ? 'badge badge-veto text-[10px]' : 'badge badge-pass text-[10px]'; rNB.innerHTML = vetoNorth ? '北岸 🔴 VETO' : '北岸 🟢 通過'; }
             const rSB = getEl('radarSouthBadge');
-            if (rSB) {
-                rSB.className = vetoSouth ? 'badge badge-veto text-[10px]' : 'badge badge-pass text-[10px]';
-                rSB.innerHTML = vetoSouth ? '南岸 🔴 VETO' : '南岸 🟢 通過';
-            }
+            if (rSB) { rSB.className = vetoSouth ? 'badge badge-veto text-[10px]' : 'badge badge-pass text-[10px]'; rSB.innerHTML = vetoSouth ? '南岸 🔴 VETO' : '南岸 🟢 通過'; }
 
             // 點擊時窗徽章同步更新
             const updateCellSlot = (hsValue, badgeId) => {
@@ -949,14 +942,12 @@
             updateGzPanel('gzRiskSouth', 'barGzSouth', 'txtGzSouth', totalRiskSouth, vetoSouth, isGrayZoneSouth, gzReasonsSouth);
 
             // 6 軸微觀水力剛性遙測
-            const activeHs = (currentProfileMode === 'NORTH') ? hsNorth : hsSouth;
-            const activeWeff = (currentProfileMode === 'NORTH') ? weffNorth : weffSouth;
-            const rollVal = Math.min(8.0, activeHs * 1.65 * (activeWeff / 8.0)).toFixed(1);
-            const heaveVal = Math.min(0.90, activeHs * 0.22).toFixed(2);
-            const slipVal = Math.min(30.0, activeHs * 5.2 + (tp / 15.5) * 4.0).toFixed(1);
-            const filmVal = (activeHs > 2.0) ? ((activeHs - 2.0) * 4.5).toFixed(1) : "0.0";
-            const tensionVal = Math.min(100, Math.round(activeHs * 18 + activeWeff * 2.2));
-            const shearVal = Math.min(2.5, 0.25 + activeWeff * 0.04).toFixed(2);
+            const rollVal = Math.min(8.0, hs * 1.65 * (wVal / 8.0)).toFixed(1);
+            const heaveVal = Math.min(0.90, hs * 0.22).toFixed(2);
+            const slipVal = Math.min(30.0, hs * 5.2 + (tp / 15.5) * 4.0).toFixed(1);
+            const filmVal = (hs > 2.0) ? ((hs - 2.0) * 4.5).toFixed(1) : "0.0";
+            const tensionVal = Math.min(100, Math.round(hs * 18 + wVal * 2.2));
+            const shearVal = Math.min(2.5, 0.25 + wVal * 0.04).toFixed(2);
 
             const setTel = (id, val, limit, unit, fail) => {
                 const el = getEl(id);
@@ -984,7 +975,7 @@
                     qmActionEl.innerHTML = `🔴 【極限調度】歷史災難特徵高度吻合，建議立即取消靠泊，外海滯留！`;
                     qmActionEl.className = 'text-red-400 text-xs';
                 } else if (qimenWindMatch > 90) {
-                    qmActionEl.innerHTML = `🟡 【位置調度】季風向突變特徵匹配，北岸風壓過大，建議改靠南岸。`;
+                    qmActionEl.innerHTML = `🟡 【位置調度】季風向突變特徵匹配，風壓過大，建議改靠南岸。`;
                     qmActionEl.className = 'text-yellow-300 text-xs';
                 } else if (qimenTideMatch > 90) {
                     qmActionEl.innerHTML = `🟡 【時間調度】湧浪與潮位共振特徵匹配，建議延遲靠泊避開極值。`;
@@ -1134,7 +1125,7 @@
         // ==========================================
         // 畫布繪製函式：剖面圖 (單一泊位)
         // ==========================================
-        function drawSingleProfile(ctx, offsetX, offsetY, w, h, title, depthBase, deckCD, hsPier, weff, tp, tideCD, accentColor) {
+        function drawSingleProfile(ctx, offsetX, offsetY, w, h, title, depthBase, deckCD, hsPier, tideCD, accentColor) {
             ctx.save();
             ctx.translate(offsetX, offsetY);
             const cdToY = cd => ((5.0 - cd) / (5.0 - (-12.0))) * (h - 28) + 14;
@@ -1253,11 +1244,7 @@
             if (!canvas || !container) return;
 
             const hs = parseFloat(getEl('rngHs')?.value || 0.85);
-            const wVal = parseFloat(getEl('rngW')?.value || 6.50);
-            const tp = parseFloat(getEl('rngTp')?.value || 8.5);
             const tide = parseFloat(getEl('rngTide')?.value || 1.10);
-            const deltaTheta = parseFloat(getEl('rngDeltaTheta')?.value || 50);
-
             const w = container.clientWidth || 320;
             const h = container.clientHeight || 220;
             const dpr = window.devicePixelRatio || 1;
@@ -1272,14 +1259,14 @@
             if (currentProfileMode === 'COMPARE') {
                 const subW = (w - 6) / 2;
                 setTxt('lblProfileTitle', '📐 碼頭動態剖面對比 (北岸 vs 南岸)');
-                drawSingleProfile(ctx, 0, 0, subW, h, '北岸 (主泊位 -8.5m)', 8.50, 3.20, hs * 1.06, wVal * Math.abs(Math.cos(deltaTheta * Math.PI/180)), tp, tide, '#38bdf8');
-                drawSingleProfile(ctx, subW + 6, 0, subW, h, '南岸 (權宜泊位 -9.8m)', 9.80, 2.50, hs * 0.62, wVal * Math.abs(Math.cos((90-deltaTheta) * Math.PI/180)), tp, tide, '#34d399');
+                drawSingleProfile(ctx, 0, 0, subW, h, '北岸 (主泊位 -8.5m)', 8.50, 3.20, hs * 1.06, tide, '#38bdf8');
+                drawSingleProfile(ctx, subW + 6, 0, subW, h, '南岸 (權宜泊位 -9.8m)', 9.80, 2.50, hs * 0.62, tide, '#34d399');
             } else if (currentProfileMode === 'NORTH') {
                 setTxt('lblProfileTitle', '📐 碼頭動態剖面與越浪分析 (北岸)');
-                drawSingleProfile(ctx, 0, 0, w, h, '北岸碼頭 (主泊位 -8.50m CD)', 8.50, 3.20, hs * 1.06, wVal * Math.abs(Math.cos(deltaTheta * Math.PI/180)), tp, tide, '#38bdf8');
+                drawSingleProfile(ctx, 0, 0, w, h, '北岸碼頭 (主泊位 -8.50m CD)', 8.50, 3.20, hs * 1.06, tide, '#38bdf8');
             } else {
                 setTxt('lblProfileTitle', '📐 碼頭動態剖面與越浪分析 (南岸)');
-                drawSingleProfile(ctx, 0, 0, w, h, '南岸碼頭 (權宜泊位 -9.80m CD)', 9.80, 2.50, hs * 0.62, wVal * Math.abs(Math.cos((90-deltaTheta) * Math.PI/180)), tp, tide, '#34d399');
+                drawSingleProfile(ctx, 0, 0, w, h, '南岸碼頭 (權宜泊位 -9.80m CD)', 9.80, 2.50, hs * 0.62, tide, '#34d399');
             }
         }
 
