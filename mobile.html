@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <meta http-equiv="refresh" content="30">
     <title>🌊 GEM Engine v80.0 龜山島全域戰術指揮中樞</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -19,10 +19,14 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg-dark); color: var(--text-main); padding: 8px; font-variant-numeric: tabular-nums; overflow-x: hidden; transition: background-color 0.2s, color 0.2s; }
-        .tab-active { border-bottom: 3px solid #38bdf8; color: #38bdf8; font-weight: bold; }
+        #app-preloader { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #080e1a; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #38bdf8; transition: opacity 0.4s ease; }
+        .spinner { border: 3px solid rgba(56, 189, 248, 0.2); border-top: 3px solid #38bdf8; border-radius: 50%; width: 36px; height: 36px; animation: spin 0.8s linear infinite; margin-bottom: 12px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         button, input[type="range"], .tab-btn, summary, a { cursor: pointer !important; user-select: none; transition: all 0.15s ease-in-out; touch-action: manipulation; }
-        #vetoBanner { display: block; background: var(--status-pass); color: #ffffff; padding: 10px; border-radius: 8px; font-weight: 800; font-size: 13px; margin-bottom: 10px; text-align: center; box-shadow: 0 0 16px rgba(16, 185, 129, 0.3); }
-        .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 10px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2); margin-bottom: 10px; width: 100%; }
+        button:hover, .tab-btn:hover, a:hover { filter: brightness(1.25); }
+        .tab-active { border-bottom: 3px solid #38bdf8; color: #38bdf8; font-weight: bold; }
+        #vetoBanner { display: block; background: var(--status-pass); color: #ffffff; padding: 10px; border-radius: 8px; font-weight: 800; font-size: 13px; margin-bottom: 10px; text-align: center; box-shadow: 0 0 16px rgba(16, 185, 129, 0.3); transition: all 0.3s ease; }
+        .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 10px; contain: content; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2); margin-bottom: 10px; width: 100%; }
         .card-header { font-size: 13px; font-weight: 800; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border); padding-bottom: 6px; }
         .badge { font-size: 11px; font-weight: 700; padding: 3px 7px; border-radius: 4px; display: inline-block; white-space: nowrap; }
         .badge-veto { background: rgba(239, 68, 68, 0.25); color: #fca5a5; border: 1px solid var(--status-danger); }
@@ -41,33 +45,58 @@
         .tab-south-active { background: #059669 !important; color: #ffffff !important; border-color: #34d399 !important; }
         .tab-north-active { background: #2563eb !important; color: #ffffff !important; border-color: #60a5fa !important; }
         .tab-compare-active { background: #7c3aed !important; color: #ffffff !important; border-color: #a78bfa !important; }
+        .tr-active-slot { background: rgba(56, 189, 248, 0.18) !important; border-left: 3px solid #38bdf8 !important; }
         .tag-d0 { color: #2dd4bf; border: 1px solid rgba(45, 212, 191, 0.4); background: rgba(45, 212, 191, 0.1); padding: 2px 6px; border-radius: 4px; font-weight: 900; }
         .tag-d1 { color: #c084fc; border: 1px solid rgba(192, 132, 252, 0.4); background: rgba(192, 132, 252, 0.1); padding: 2px 6px; border-radius: 4px; font-weight: 900; }
         .hud-red-glow { box-shadow: 0 0 10px rgba(239, 68, 68, 0.8); }
     </style>
 </head>
 <body class="w-full max-w-full mx-auto space-y-3">
+    <div id="app-preloader">
+        <div class="spinner"></div>
+        <div class="font-bold text-[12px] font-mono tracking-widest text-sky-400">GEM ENGINE v80.0</div>
+        <div class="text-[9px] mt-1 text-slate-400">GEM 物理模型 SSOT 與畫布渲染啟動中...</div>
+    </div>
 
     <!-- 🚀 動態決策警報橫幅 -->
     <div id="vetoBanner">✅ [D0 今日] 系統檢測：全域海象平穩，動態裕深符合安全規範，准予靠泊作業！</div>
 
-    <!-- 頂部標題列 -->
-    <header class="bg-[#111c2e] border border-[#1e2d4a] border-l-[5px] border-l-[#10b981] rounded-xl p-3 shadow-xl w-full flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2" id="headerMaster">
+    <!-- 1. 頂部標題列 -->
+    <header class="bg-[#111c2e] border border-[#1e2d4a] border-l-[5px] border-l-[#10b981] rounded-xl p-3 shadow-xl w-full flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 transition-colors" id="headerMaster">
         <div class="flex items-center gap-2">
             <span class="text-xl">🌊</span>
             <div>
                 <h1 class="text-base sm:text-lg font-extrabold text-white flex items-center gap-2">
-                    龜山島戰術指揮中樞 <span class="text-xs text-[#38bdf8] font-mono">(v80.0 終極滿血版)</span>
+                    龜山島戰術指揮中樞 <span class="text-xs text-[#38bdf8] font-mono">(v80.0 Canvas 動態渲染版)</span>
                 </h1>
-                <p class="text-xs text-slate-400 mt-0.5">時間：<b id="liveClock" class="text-white font-mono">--:--:-- CST</b> ｜ 裁定：<b id="ssotDecisionBadge" class="text-[#10b981]">100.0% 正常開放</b></p>
+                <div class="text-xs text-[#cbd5e1] mt-0.5 flex flex-wrap gap-2 items-center font-mono">
+                    <span>時間：<b id="liveClock" class="text-white bg-white/10 px-1 py-0.5 rounded">--:--:-- CST</b></span>
+                    <span>| 裁定：<b id="ssotDecisionBadge" class="text-[#10b981] font-bold">100.0% 正常開放</b></span>
+                </div>
             </div>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-            <button id="btnAutoPilot" onclick="toggleAutoPilot()" class="bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-300 border border-indigo-500/50 px-2.5 py-1 rounded text-xs font-bold">🤖 風暴模擬</button>
+            <button id="btnAutoPilot" onclick="toggleAutoPilot()" class="bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-300 border border-indigo-500/50 px-2.5 py-1 rounded text-xs font-bold flex items-center gap-1 transition-all">🤖 啟動風暴模擬</button>
             <button id="btnToggleContrast" onclick="toggleContrastMode()" class="bg-amber-500/20 hover:bg-amber-500/40 text-amber-300 border border-amber-500/50 px-2.5 py-1 rounded text-xs font-bold">☀️ 戶外模式</button>
             <span class="badge badge-pass text-xs px-2 py-1" id="badgeMobDecision">🟢 今日全線開放</span>
         </div>
     </header>
+
+    <!-- 🌟 奇門通航戰術消長態勢（生門 vs 杜死門） -->
+    <section class="bg-[#0b172a] border border-[#1e2d4a] rounded-xl p-3 mb-2 shadow-lg w-full">
+        <div class="flex justify-between items-center text-xs font-extrabold mb-2">
+            <span class="text-sky-300 flex items-center gap-1"><span class="tag-d0">D0 現場</span> 奇門通航戰術消長態勢（生門時窗 vs 杜死門熔斷）</span>
+            <span class="font-mono text-[10px] text-amber-300" id="txtBulletRatio">生門 (開放時窗): 100% | 杜死門 (熔斷煞位): 0%</span>
+        </div>
+        <div class="relative w-full h-4 bg-slate-900 rounded-full border border-slate-700 overflow-hidden flex shadow-inner">
+            <div id="barBulletYang" class="h-full bg-gradient-to-r from-emerald-500 to-sky-400 transition-all duration-500 flex items-center justify-center text-[10px] font-black text-black" style="width: 100%;">
+                <span id="txtYangPercent">100% 生門</span>
+            </div>
+            <div id="barBulletYin" class="h-full bg-gradient-to-r from-red-600 to-amber-600 transition-all duration-500 flex items-center justify-center text-[10px] font-black text-white" style="width: 0%;">
+                <span id="txtYinPercent"></span>
+            </div>
+        </div>
+    </section>
 
     <!-- 分頁導覽 (常規船班 vs 游擊調撥) -->
     <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
@@ -141,9 +170,9 @@
     </div>
 
     <!-- 戰術沙盤控制區 (拖曳拉桿觀察畫布變化) -->
-    <details class="card border-[#2563eb] bg-[#0c182b]" open id="detailsSandbox">
-        <summary class="card-header text-[#60a5fa] cursor-pointer list-none outline-none">
-            <span class="font-extrabold text-xs flex items-center gap-1"><span class="tag-d0">D0 現場</span> 戰術沙盤演練調度 (拖曳拉桿觀察全系統連動)</span>
+    <details class="card border-[#2563eb] bg-[#0c182b] mb-2.5" open id="detailsSandbox">
+        <summary class="card-header text-[#60a5fa] list-none outline-none cursor-pointer flex justify-between items-center">
+            <span class="font-extrabold text-xs flex items-center gap-1"><span class="tag-d0">D0 現場</span> 戰術沙盤演練調度 (拖曳拉桿觀察畫布即時渲染)</span>
             <span class="badge badge-yellow text-xs">▼ 點擊收合</span>
         </summary>
         <div class="grid grid-cols-2 md:grid-cols-6 gap-3 pt-2 border-t border-[#1e2d4a] mt-1">
@@ -225,10 +254,10 @@
                 </div>
             </section>
 
-            <!-- 1.5. 雙岸關鍵數據比對明細表 (含 CV 越浪率) -->
+            <!-- 1.5. 雙岸關鍵數據比對明細表 (含 CV 越浪率完全復原) -->
             <section class="card border-[#38bdf8] bg-[#091526]">
                 <div class="card-header text-sky-300 flex justify-between items-center">
-                    <span class="font-extrabold text-xs flex items-center gap-1"><span class="tag-d0">D0 現場</span> 雙岸關鍵物理數值比對</span>
+                    <span class="font-extrabold text-xs flex items-center gap-1"><span class="tag-d0">D0 現場</span> 雙岸關鍵物理數值側向比對</span>
                     <span class="badge badge-pass text-xs">含 CV 越浪率</span>
                 </div>
                 <div class="overflow-x-auto pt-1">
@@ -238,7 +267,7 @@
                                 <th>關鍵指標參數</th>
                                 <th class="text-center text-emerald-400">南岸 (權宜泊位)</th>
                                 <th class="text-center text-sky-400">北岸 (主泊位)</th>
-                                <th class="text-center text-amber-300">安全門檻</th>
+                                <th class="text-center text-amber-300">剛性安全門檻</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -278,6 +307,7 @@
                                 <td class="text-center font-mono font-bold text-xs" id="cmpFbNorth">--</td>
                                 <td class="text-center font-mono text-xs">≥ 0.50 m</td>
                             </tr>
+                            <!-- 🚀 CV 越浪率滿血回歸橫列 -->
                             <tr class="bg-blue-950/40 border-t border-sky-500/30">
                                 <td class="font-bold text-sky-200 text-xs">📷 實測越浪率 (CV)</td>
                                 <td class="text-center font-mono font-bold text-xs" id="cmpCvSouth">0.00 p/min</td>
@@ -288,7 +318,7 @@
                                 <td class="font-bold text-yellow-300 text-xs">🚦 泊位決策燈號</td>
                                 <td class="text-center py-2" id="cmpBadgeSouth">--</td>
                                 <td class="text-center py-2" id="cmpBadgeNorth">--</td>
-                                <td class="text-center font-mono text-xs">雙岸判定</td>
+                                <td class="text-center font-mono text-xs">雙岸獨立判定</td>
                             </tr>
                         </tbody>
                     </table>
@@ -375,6 +405,25 @@
                     </table>
                 </div>
             </details>
+
+            <!-- 7. 官方公準時段與突發調動游擊戰術表 -->
+            <section class="card border-[#38bdf8] bg-[#0c182b]">
+                <div class="card-header text-[#38bdf8] flex justify-between items-center">
+                    <span class="font-extrabold text-xs flex items-center gap-1"><span class="tag-d0">D0 今日</span> 官方公準時窗與突發調動游擊表</span>
+                    <span class="badge badge-pass text-[10px]">點擊時窗帶入雷達推演</span>
+                </div>
+                <div class="overflow-x-auto pt-0.5">
+                    <table class="data-table" id="tableScheduleGuerrilla">
+                        <thead><tr><th>班次類別</th><th>官方時段</th><th class="text-center">預估潮位</th><th class="text-center">預估波高</th><th class="text-center">靠泊燈號</th></tr></thead>
+                        <tbody>
+                            <tr id="rowSlotEarly" onclick="selectScheduleSlot('EARLY', 1.95, 8.5, 9.5, 1.55)" class="cursor-pointer hover:bg-slate-800/80 transition-colors"><td class="font-bold text-sky-300">🌅 早班時窗</td><td class="font-mono">07:30 - 08:30</td><td class="text-center font-mono" id="cellEarlyTide">+1.55m CD</td><td class="text-center font-mono" id="cellEarlyHs">1.95m</td><td class="text-center" id="cellEarlyBadge"><span class="badge badge-veto text-[10px]">🔴 熔斷</span></td></tr>
+                            <tr id="rowSlotNoon" onclick="selectScheduleSlot('NOON', 2.64, 12.5, 10.5, 0.80)" class="cursor-pointer hover:bg-slate-800/80 transition-colors"><td class="font-bold text-amber-300">☀️ 午班時窗</td><td class="font-mono">11:30 - 12:30</td><td class="text-center font-mono" id="cellNoonTide">+0.80m CD</td><td class="text-center font-mono" id="cellNoonHs">2.64m</td><td class="text-center" id="cellNoonBadge"><span class="badge badge-veto text-[10px]">🔴 熔斷</span></td></tr>
+                            <tr id="rowSlotEve" onclick="selectScheduleSlot('EVE', 2.18, 9.2, 9.0, 1.30)" class="cursor-pointer hover:bg-slate-800/80 transition-colors"><td class="font-bold text-purple-300">🌇 黃昏時窗</td><td class="font-mono">16:30 - 17:30</td><td class="text-center font-mono" id="cellEveTide">+1.30m CD</td><td class="text-center font-mono" id="cellEveHs">2.18m</td><td class="text-center" id="cellEveBadge"><span class="badge badge-veto text-[10px]">🔴 熔斷</span></td></tr>
+                            <tr id="rowSlotDispatch" onclick="selectScheduleSlot('DISPATCH', 2.87, 15.0, 12.0, 1.40)" class="cursor-pointer hover:bg-slate-800/80 transition-colors bg-red-950/20 border-t border-red-500/30"><td class="font-bold text-red-400">🚨 突發調動</td><td class="font-mono text-red-300">機動即時加開</td><td class="text-center font-mono" id="cellDispTide">+1.40m CD</td><td class="text-center font-mono" id="cellDispHs">2.87m</td><td class="text-center" id="cellDispBadge"><span class="badge badge-veto text-[10px]">🔴 熔斷</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
         </div>
 
         <!-- 右半邊：Canvas 畫布與氣象預報面板 -->
@@ -506,7 +555,7 @@
         <details class="card border-[#c084fc] bg-[#140b29]" id="detailsTyphoonZone" open>
             <summary class="card-header text-purple-300 font-bold flex justify-between items-center cursor-pointer list-none outline-none">
                 <span class="flex items-center gap-1 text-xs"><span class="tag-d1">D0-D7 預報</span> 颱風態勢專區與 GEM 應變比對</span>
-                <div class="flex items-center gap-1.5"><span id="cwaIntensityTag"><span class="badge badge-pass text-[10px]">🟢 一般海象</span></span><span class="badge badge-yellow text-xs">▼</span></div>
+                <div class="flex items-center gap-1.5"><span id="cwaIntensityTag"><span class="badge badge-pass text-xs">🟢 一般海象</span></span><span class="badge badge-yellow text-xs">▼</span></div>
             </summary>
             <div class="pt-2 border-t border-purple-500/30 mt-1 space-y-2 text-xs">
                 <div class="bg-blue-950/60 p-2 rounded border border-blue-500/40 flex justify-between items-center">
@@ -585,6 +634,7 @@
 
         let currentProfileMode = 'SOUTH';
         let currentRadarMode = 'SOUTH';
+        let currentSlotMode = 'NONE';
         let animPhase = 0;
         let resizeTimer = null;
         let autoPilotTimer = null; 
@@ -669,12 +719,28 @@
                 const rBtn = getEl('tabRadar' + m);
                 if (rBtn) rBtn.className = `tab-btn py-1 px-1 rounded text-xs font-bold border text-center ${active ? (m === 'North' ? 'tab-north-active' : m === 'Compare' ? 'tab-compare-active' : 'tab-south-active') : 'border-slate-700 bg-slate-800 text-slate-300'}`;
             });
-            
             const lblTitle = getEl('lblRadarTitle');
             if (lblTitle) {
-                 const modeText = currentRadarMode === 'NORTH' ? '北岸' : currentRadarMode === 'SOUTH' ? '南岸' : '雙岸';
+                 const modeText = currentRadarMode === 'NORTH' ? '北岸' : (currentRadarMode === 'SOUTH' ? '南岸' : '雙岸');
                  lblTitle.innerHTML = `🎯 <span class="tag-d0">D0 現場</span> 態勢雷達圖與 5 大算子對比 (${modeText})`;
             }
+            debouncedRender();
+        };
+
+        window.selectScheduleSlot = function(slotCode, hs, w, tp, tide) {
+            currentSlotMode = slotCode;
+            ['rowSlotEarly', 'rowSlotNoon', 'rowSlotEve', 'rowSlotDispatch'].forEach(id => {
+                const row = getEl(id);
+                if (row) row.classList.remove('tr-active-slot');
+            });
+            const activeRowId = 'rowSlot' + slotCode.charAt(0).toUpperCase() + slotCode.slice(1).toLowerCase();
+            const activeRow = getEl(activeRowId);
+            if (activeRow) activeRow.classList.add('tr-active-slot');
+
+            const rngHs = getEl('rngHs'); if(rngHs) { rngHs.value = hs; setTxt('lblHs', `${hs}m`); }
+            const rngW = getEl('rngW'); if(rngW) { rngW.value = w; setTxt('lblW', `${w}m/s`); }
+            const rngTp = getEl('rngTp'); if(rngTp) { rngTp.value = tp; setTxt('lblTp', `${tp}s`); }
+            const rngTide = getEl('rngTide'); if(rngTide) { rngTide.value = tide; setTxt('lblTide', `${tide >= 0 ? '+' : ''}${tide}m`); }
             debouncedRender();
         };
 
@@ -684,10 +750,12 @@
         };
 
         function startClockAndWatchdog() {
-            setInterval(() => {
+            const update = () => {
                 const now = new Date();
                 setTxt('liveClock', `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} CST`);
-            }, 1000);
+            };
+            update();
+            setInterval(update, 1000);
         }
 
         let renderTimeout = null;
@@ -717,13 +785,14 @@
             let pct = Math.min(100, Math.max(0, (val / maxVal) * 100));
             bar.style.width = pct + '%';
             txt.innerText = `${val.toFixed(2)} / ${limit.toFixed(2)}`;
+
             let isFail = isInverse ? val < limit : val > limit;
             if (isFail) {
                 bar.className = 'h-full bg-red-500 hud-red-glow transition-all duration-300';
-                txt.className = 'font-mono font-bold text-red-400 text-xs';
+                txt.className = 'font-mono font-bold text-red-400 text-[10px]';
             } else {
                 bar.className = 'h-full bg-emerald-500 transition-all duration-300';
-                txt.className = 'font-mono font-bold text-emerald-400 text-xs';
+                txt.className = 'font-mono font-bold text-emerald-400 text-[10px]';
             }
         }
 
@@ -777,6 +846,21 @@
             const vetoNorth = vetoReasonsNorth.length > 0;
             const vetoSouth = vetoReasonsSouth.length > 0;
 
+            let riskScoreNorth = 15; let riskScoreSouth = 10;
+            let gzReasonsNorth = []; let gzReasonsSouth = [];
+
+            if (hsNorth >= 0.90 && hsNorth <= 1.13 && tp >= 9.5) { riskScoreNorth += 45; gzReasonsNorth.push("長浪共振"); }
+            if (hsSouth >= 0.90 && hsSouth <= 1.13 && tp >= 9.5) { riskScoreSouth += 45; gzReasonsSouth.push("長浪共振"); }
+            if (weffNorth > 8.0 && weffNorth <= 10.17) { riskScoreNorth += 25; gzReasonsNorth.push("臨界風壓"); }
+            if (weffSouth > 8.0 && weffSouth <= 10.17) { riskScoreSouth += 25; gzReasonsSouth.push("臨界風壓"); }
+            if (ukcNorth >= 1.50 && ukcNorth < 2.50) { riskScoreNorth += 25; gzReasonsNorth.push("淺水效應"); }
+            if (ukcSouth >= 1.50 && ukcSouth < 2.50) { riskScoreSouth += 25; gzReasonsSouth.push("淺水效應"); }
+
+            const totalRiskNorth = vetoNorth ? 100 : Math.min(100, riskScoreNorth);
+            const totalRiskSouth = vetoSouth ? 100 : Math.min(100, riskScoreSouth);
+            const isGrayZoneNorth = !vetoNorth && totalRiskNorth >= 75;
+            const isGrayZoneSouth = !vetoSouth && totalRiskSouth >= 75;
+
             // HUD 更新
             updateHUDBar('barHsSouth', 'hudHsSouth', hsSouth, 1.13, 3.0, false);
             updateHUDBar('barWeffSouth', 'hudWeffSouth', weffSouth, 10.17, 20.0, false);
@@ -790,7 +874,7 @@
             updateHUDBar('barUkcNorth', 'hudUkcNorth', ukcNorth, 1.50, 5.0, true);
             updateHUDBar('barFbNorth', 'hudFbNorth', fbNorth, 0.50, 3.0, true);
 
-            // 關鍵指標與越浪表
+            // 關鍵指標對比表文字更新
             setTxt('cmpHsSouth', `${hsSouth.toFixed(2)} m`); setTxt('cmpHsNorth', `${hsNorth.toFixed(2)} m`);
             setTxt('cmpWeffSouth', `${weffSouth.toFixed(2)} m/s`); setTxt('cmpWeffNorth', `${weffNorth.toFixed(2)} m/s`);
             setTxt('cmpUkcSouth', `${ukcSouth.toFixed(2)} m`); setTxt('cmpUkcNorth', `${ukcNorth.toFixed(2)} m`);
@@ -806,15 +890,15 @@
             setCvTxt('cmpCvSouth', cvSouth); setCvTxt('cmpCvNorth', cvNorth);
 
             // 狀態徽章更新
-            const updateBadge = (id, isVeto) => {
+            const updateBadge = (id, isVeto, size) => {
                 const el = getEl(id);
                 if (el) {
                     el.innerHTML = isVeto ? '🔴 VETO' : '🟢 通過';
-                    el.className = `badge ${isVeto ? 'badge-veto' : 'badge-pass'} text-[10px]`;
+                    el.className = `badge ${isVeto ? 'badge-veto' : 'badge-pass'} text-[${size}px]`;
                 }
             };
-            updateBadge('hudBadgeSouth', vetoSouth);
-            updateBadge('hudBadgeNorth', vetoNorth);
+            updateBadge('hudBadgeSouth', vetoSouth, 10);
+            updateBadge('hudBadgeNorth', vetoNorth, 10);
             
             const cmpBS = getEl('cmpBadgeSouth');
             if (cmpBS) cmpBS.innerHTML = vetoSouth ? '<span class="badge badge-veto text-xs px-2 py-1">🔴 VETO 熔斷</span>' : '<span class="badge badge-pass text-xs px-2 py-1">🟢 准予靠泊</span>';
@@ -822,32 +906,32 @@
             if (cmpBN) cmpBN.innerHTML = vetoNorth ? '<span class="badge badge-veto text-xs px-2 py-1">🔴 VETO 熔斷</span>' : '<span class="badge badge-pass text-xs px-2 py-1">🟢 准予靠泊</span>';
 
             const rNB = getEl('radarNorthBadge');
-            if (rNB) { rNB.className = vetoNorth ? 'badge badge-veto text-[10px]' : 'badge badge-pass text-[10px]'; rNB.innerHTML = vetoNorth ? '北岸 🔴 VETO' : '北岸 🟢 通過'; }
+            if (rNB) {
+                rNB.className = vetoNorth ? 'badge badge-veto text-[10px]' : 'badge badge-pass text-[10px]';
+                rNB.innerHTML = vetoNorth ? '北岸 🔴 VETO' : '北岸 🟢 通過';
+            }
             const rSB = getEl('radarSouthBadge');
-            if (rSB) { rSB.className = vetoSouth ? 'badge badge-veto text-[10px]' : 'badge badge-pass text-[10px]'; rSB.innerHTML = vetoSouth ? '南岸 🔴 VETO' : '南岸 🟢 通過'; }
+            if (rSB) {
+                rSB.className = vetoSouth ? 'badge badge-veto text-[10px]' : 'badge badge-pass text-[10px]';
+                rSB.innerHTML = vetoSouth ? '南岸 🔴 VETO' : '南岸 🟢 通過';
+            }
 
-            // DTW 模糊地帶與風險率
-            let riskScoreNorth = 15, riskScoreSouth = 10;
-            if (hsNorth >= 0.90 && hsNorth <= 1.13 && tp >= 9.5) riskScoreNorth += 45;
-            if (hsSouth >= 0.90 && hsSouth <= 1.13 && tp >= 9.5) riskScoreSouth += 45;
-            if (weffNorth > 8.0 && weffNorth <= 10.17) riskScoreNorth += 25;
-            if (weffSouth > 8.0 && weffSouth <= 10.17) riskScoreSouth += 25;
-            if (ukcNorth >= 1.50 && ukcNorth < 2.50) riskScoreNorth += 25;
-            if (ukcSouth >= 1.50 && ukcSouth < 2.50) riskScoreSouth += 25;
-
-            const totalRiskNorth = vetoNorth ? 100 : Math.min(100, riskScoreNorth);
-            const totalRiskSouth = vetoSouth ? 100 : Math.min(100, riskScoreSouth);
-            
-            const updateGzPanel = (idRisk, idBar, idTxt, riskVal, isVeto) => {
+            // 更新 DTW 風險面板 (含高危原因)
+            const updateGzPanel = (idRisk, idBar, idTxt, riskVal, isVeto, isGz, reasons) => {
                 const elRisk = getEl(idRisk); const elBar = getEl(idBar); const elTxt = getEl(idTxt);
                 if (!elRisk || !elBar || !elTxt) return;
                 elRisk.innerText = `${riskVal.toFixed(1)}%`;
                 elBar.style.width = `${riskVal}%`;
-                if (isVeto || riskVal >= 75) {
+                if (isVeto) {
                     elRisk.className = 'text-red-400';
                     elBar.className = 'bg-red-500 h-full transition-all duration-300';
                     elTxt.className = 'text-[10px] text-red-400 font-bold mt-2 relative z-10';
-                    elTxt.innerText = isVeto ? '🔴 已達剛性熔斷門檻' : '🟠 模糊地帶高危預警';
+                    elTxt.innerText = '🔴 已達剛性熔斷門檻';
+                } else if (isGz) {
+                    elRisk.className = 'text-orange-400';
+                    elBar.className = 'bg-orange-500 h-full transition-all duration-300';
+                    elTxt.className = 'text-[10px] text-orange-400 font-bold mt-2 relative z-10';
+                    elTxt.innerText = `🟠 高危共振: ${reasons.join('/')}`;
                 } else {
                     elRisk.className = 'text-emerald-400';
                     elBar.className = 'bg-emerald-500 h-full transition-all duration-300';
@@ -855,8 +939,8 @@
                     elTxt.innerText = '歷史常態安全區間';
                 }
             };
-            updateGzPanel('gzRiskNorth', 'barGzNorth', 'txtGzNorth', totalRiskNorth, vetoNorth);
-            updateGzPanel('gzRiskSouth', 'barGzSouth', 'txtGzSouth', totalRiskSouth, vetoSouth);
+            updateGzPanel('gzRiskNorth', 'barGzNorth', 'txtGzNorth', totalRiskNorth, vetoNorth, isGrayZoneNorth, gzReasonsNorth);
+            updateGzPanel('gzRiskSouth', 'barGzSouth', 'txtGzSouth', totalRiskSouth, vetoSouth, isGrayZoneSouth, gzReasonsSouth);
 
             // 6 軸微觀水力剛性遙測
             const activeHs = (currentProfileMode === 'NORTH') ? hsNorth : hsSouth;
@@ -905,39 +989,101 @@
                 }
             }
 
+            // 更新官方公準時段與突發調動燈號
+            const updateCellSlot = (hsMult, cellHsId, cellBadgeId) => {
+                const bEl = getEl(cellBadgeId);
+                const hsEl = getEl(cellHsId);
+                if(hsEl && bEl) {
+                    const localHs = parseFloat(hsEl.innerText.replace('m',''));
+                    const sVeto = localHs > 1.13;
+                    bEl.innerHTML = sVeto ? '<span class="badge badge-veto text-[10px]">🔴 熔斷</span>' : '<span class="badge badge-pass text-[10px]">🟢 准予靠泊</span>';
+                }
+            };
+            updateCellSlot(0.85, 'cellEarlyHs', 'cellEarlyBadge');
+            updateCellSlot(1.15, 'cellNoonHs', 'cellNoonBadge');
+            updateCellSlot(0.95, 'cellEveHs', 'cellEveBadge');
+            updateCellSlot(1.25, 'cellDispHs', 'cellDispBadge');
+
             // 橫幅與總裁示
             const banner = getEl('vetoBanner');
             const headerMaster = getEl('headerMaster');
             const badgeDecision = getEl('badgeMobDecision');
+            const barYang = getEl('barBulletYang');
+            const barYin = getEl('barBulletYin');
+            const txtRatio = getEl('txtBulletRatio');
+            const txtYangP = getEl('txtYangPercent');
+            const txtYinP = getEl('txtYinPercent');
+
+            let yangPct = (!vetoNorth && !vetoSouth) ? 100 : ((!vetoNorth || !vetoSouth) ? 50 : 0);
+            let yinPct = 100 - yangPct;
+
+            if (barYang) barYang.style.width = `${yangPct}%`;
+            if (barYin) barYin.style.width = `${yinPct}%`;
+            if (txtRatio) txtRatio.textContent = `生門 (開放時窗): ${yangPct}% | 杜死門 (熔斷煞位): ${yinPct}%`;
+            if (txtYangP) txtYangP.textContent = yangPct > 0 ? `${yangPct}% 生門` : '';
+            if (txtYinP) txtYinP.textContent = yinPct > 0 ? `${yinPct}% 杜死門` : '';
 
             if (vetoNorth && vetoSouth) {
                 let allReasons = [...new Set([...vetoReasonsNorth, ...vetoReasonsSouth])].join('/');
-                if (banner) { banner.style.display = 'block'; banner.style.background = 'var(--status-danger)'; banner.innerText = `🚨 [D0 今日] 警示：實體觸發物理 VETO 熔斷 【過載原因：${allReasons}】，強制執行防颱封島管制！`; }
+                if (banner) {
+                    banner.style.display = 'block';
+                    banner.style.background = 'var(--status-danger)';
+                    banner.style.boxShadow = '0 0 16px rgba(239, 68, 68, 0.5)';
+                    banner.innerText = `🚨 [D0 今日] 警示：實體觸發物理 VETO 熔斷 【過載原因：${allReasons}】，強制執行防颱封島管制！`;
+                }
                 setTxt('ssotDecisionBadge', '🔴 0.0% 熔斷');
-                if (badgeDecision) { badgeDecision.innerText = '🔴 今日封島管制'; badgeDecision.className = 'badge badge-veto text-[10px] px-2 py-1'; }
+                if (badgeDecision) {
+                    badgeDecision.innerText = '🔴 今日封島管制';
+                    badgeDecision.className = 'badge badge-veto text-[10px] px-2 py-1';
+                }
                 if (headerMaster) headerMaster.style.borderLeftColor = '#ef4444';
             } else if (vetoNorth || vetoSouth) {
                 let warnMsg = vetoNorth ? `北岸過載 (${vetoReasonsNorth.join('/')})` : `南岸過載 (${vetoReasonsSouth.join('/')})`;
-                if (banner) { banner.style.display = 'block'; banner.style.background = 'var(--status-warn)'; banner.innerText = `⚠️ [D0 今日] 警告：單一泊位海象過載 【${warnMsg}】，實施單岸機動避風靠泊管制！`; }
+                if (banner) {
+                    banner.style.display = 'block';
+                    banner.style.background = 'var(--status-warn)';
+                    banner.style.boxShadow = '0 0 16px rgba(245, 158, 11, 0.5)';
+                    banner.innerText = `⚠️ [D0 今日] 警告：單一泊位海象過載 【${warnMsg}】，實施單岸機動避風靠泊管制！`;
+                }
                 setTxt('ssotDecisionBadge', '🟡 50.0% 條件開放');
-                if (badgeDecision) { badgeDecision.innerText = '🟡 今日機動靠泊'; badgeDecision.className = 'badge badge-yellow text-[10px] px-2 py-1'; }
+                if (badgeDecision) {
+                    badgeDecision.innerText = '🟡 今日機動靠泊';
+                    badgeDecision.className = 'badge badge-yellow text-[10px] px-2 py-1';
+                }
                 if (headerMaster) headerMaster.style.borderLeftColor = '#f59e0b';
             } else {
-                if (banner) { banner.style.display = 'block'; banner.style.background = 'var(--status-pass)'; banner.innerText = '✅ [D0 今日] 系統檢測：全域海象平穩，動態裕深符合安全規範，准予靠泊作業！'; }
+                if (banner) {
+                    banner.style.display = 'block';
+                    banner.style.background = 'var(--status-pass)';
+                    banner.style.boxShadow = '0 0 16px rgba(16, 185, 129, 0.3)';
+                    banner.innerText = '✅ [D0 今日] 系統檢測：全域海象平穩，動態裕深符合安全規範，准予靠泊作業！';
+                }
                 setTxt('ssotDecisionBadge', '🟢 100.0% 正常開放');
-                if (badgeDecision) { badgeDecision.innerText = '🟢 今日全線開放'; badgeDecision.className = 'badge badge-pass text-[10px] px-2 py-1'; }
+                if (badgeDecision) {
+                    badgeDecision.innerText = '🟢 今日全線開放';
+                    badgeDecision.className = 'badge badge-pass text-[10px] px-2 py-1';
+                }
                 if (headerMaster) headerMaster.style.borderLeftColor = '#10b981';
             }
 
-            window.lastDiagnostics = { vetoNorth, vetoSouth, reasonsNorth: vetoReasonsNorth, reasonsSouth: vetoReasonsSouth };
+            // 保存全域狀態供畫布函數讀取，加入所有必要的陣列以防止 TypeError
+            window.lastDiagnostics = {
+                vetoNorth, vetoSouth, 
+                isGrayZoneNorth, isGrayZoneSouth,
+                reasonsNorth: vetoReasonsNorth, reasonsSouth: vetoReasonsSouth,
+                gzReasonsNorth, gzReasonsSouth
+            };
 
-            // 觸發所有畫布重新渲染
+            // 觸發畫布渲染
             if (!window.isDrawing) {
                 window.isDrawing = true;
-                drawProfileCanvas();
-                drawRadarCanvas();
-                drawRLTrendCanvas();
-                window.isDrawing = false;
+                try {
+                    drawProfileCanvas();
+                    drawRadarCanvas();
+                    drawRLTrendCanvas();
+                } finally {
+                    window.isDrawing = false;
+                }
             }
         }
 
@@ -950,8 +1096,9 @@
             if (!canvas || !container) return;
 
             const w = container.clientWidth || 320;
-            const h = container.clientHeight || 160;
+            const h = container.clientHeight || 140;
             const dpr = window.devicePixelRatio || 1;
+
             canvas.width = w * dpr; canvas.height = h * dpr;
             canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
 
@@ -960,7 +1107,7 @@
             ctx.fillStyle = isHigh ? '#f1f5f9' : '#050a14'; ctx.fillRect(0, 0, w, h);
 
             ctx.strokeStyle = isHigh ? '#cbd5e1' : '#1e2d4a'; ctx.lineWidth = 0.8;
-            for (let y = 30; y < h; y += 30) {
+            for (let y = 20; y < h; y += 30) {
                 ctx.beginPath(); ctx.moveTo(30, y); ctx.lineTo(w - 10, y); ctx.stroke();
             }
 
@@ -972,7 +1119,7 @@
             for (let i = 0; i < points; i++) {
                 const x = 30 + i * stepX;
                 const lossVal = 0.05 * Math.exp(-i * 0.25) + 0.0010 + Math.sin(i + animPhase) * 0.0005;
-                const y = h - 25 - (lossVal / 0.05) * (h - 55);
+                const y = h - 20 - (lossVal / 0.05) * (h - 40);
                 if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
             }
             ctx.strokeStyle = '#a855f7'; ctx.lineWidth = 2.5; ctx.stroke();
@@ -982,21 +1129,21 @@
             for (let i = 0; i < points; i++) {
                 const x = 30 + i * stepX;
                 const rewardVal = 1000 + (i / points) * 450 + Math.cos(i * 0.8 + animPhase) * 12;
-                const y = h - 25 - ((rewardVal - 1000) / 500) * (h - 55);
+                const y = h - 20 - ((rewardVal - 1000) / 500) * (h - 40);
                 if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
             }
             ctx.strokeStyle = '#10b981'; ctx.lineWidth = 2.5; ctx.stroke();
 
             // 圖例
             ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'left';
-            ctx.fillStyle = '#a855f7'; ctx.fillText('── PINN Loss 降噪收斂', 35, 18);
-            ctx.fillStyle = '#10b981'; ctx.fillText('── RL 累積獎勵遞增', 180, 18);
+            ctx.fillStyle = '#a855f7'; ctx.fillText('── PINN Loss 降噪收斂', 35, 14);
+            ctx.fillStyle = '#10b981'; ctx.fillText('── RL 累積獎勵遞增', 180, 14);
         }
 
         // ==========================================
         // 畫布繪製函式：剖面圖 (單一泊位)
         // ==========================================
-        function drawSingleProfile(ctx, offsetX, offsetY, w, h, title, depthBase, deckCD, hsPier, tideCD, accentColor) {
+        function drawSingleProfile(ctx, offsetX, offsetY, w, h, title, depthBase, deckCD, hsPier, weff, tp, tideCD, accentColor) {
             ctx.save();
             ctx.translate(offsetX, offsetY);
             const cdToY = cd => ((5.0 - cd) / (5.0 - (-12.0))) * (h - 28) + 14;
@@ -1018,13 +1165,22 @@
             const crestY = cdToY(crestCD);
             const quayX = w * 0.48;
 
-            ctx.fillStyle = 'rgba(14, 116, 144, 0.28)'; ctx.fillRect(0, cdToY(+2.20), quayX, cdToY(-0.50) - cdToY(+2.20));
-            ctx.fillStyle = '#1e1b18'; ctx.fillRect(0, seabedY, w, Math.max(10, h - seabedY));
-            ctx.strokeStyle = '#475569'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, seabedY); ctx.lineTo(w, seabedY); ctx.stroke();
+            // 水中背景色
+            ctx.fillStyle = 'rgba(14, 116, 144, 0.28)';
+            ctx.fillRect(0, cdToY(+2.20), quayX, cdToY(-0.50) - cdToY(+2.20));
 
+            // 海底
+            ctx.fillStyle = '#1e1b18';
+            ctx.fillRect(0, seabedY, w, Math.max(10, h - seabedY));
+            ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo(0, seabedY); ctx.lineTo(w, seabedY); ctx.stroke();
+
+            // 碼頭
             ctx.fillStyle = '#1e2d4a'; ctx.fillRect(quayX, deckY, w - quayX, seabedY - deckY);
-            ctx.strokeStyle = accentColor; ctx.lineWidth = 1.2; ctx.strokeRect(quayX, deckY, w - quayX, seabedY - deckY);
+            ctx.strokeStyle = accentColor; ctx.lineWidth = 1.2;
+            ctx.strokeRect(quayX, deckY, w - quayX, seabedY - deckY);
 
+            // 動態水波繪製
             const isOvertopping = overtopDepth > 0 || fb < 0.50;
             ctx.beginPath();
             ctx.moveTo(0, seabedY); ctx.lineTo(0, tideY);
@@ -1039,28 +1195,38 @@
                 ctx.lineTo(quayX, tideY); ctx.lineTo(quayX, seabedY);
             }
             ctx.closePath();
-            ctx.fillStyle = isOvertopping ? 'rgba(239, 68, 68, 0.4)' : 'rgba(56, 189, 248, 0.35)'; ctx.fill();
+            ctx.fillStyle = isOvertopping ? 'rgba(239, 68, 68, 0.4)' : 'rgba(56, 189, 248, 0.35)';
+            ctx.fill();
 
-            const limitCrestCD = deckCD - 0.50; const limitY = cdToY(limitCrestCD);
+            // 虛線警戒線 (乾舷門檻 & 浪頂)
+            const limitCrestCD = deckCD - 0.50;
+            const limitY = cdToY(limitCrestCD);
             ctx.beginPath(); ctx.setLineDash([4, 4]); ctx.moveTo(0, limitY); ctx.lineTo(w, limitY);
             ctx.strokeStyle = '#facc15'; ctx.lineWidth = 1.2; ctx.stroke();
 
             ctx.beginPath(); ctx.setLineDash([3, 3]); ctx.moveTo(0, crestY); ctx.lineTo(w, crestY);
             ctx.strokeStyle = isOvertopping ? '#ef4444' : '#38bdf8'; ctx.lineWidth = 1.2; ctx.stroke();
 
-            let limitTextY = limitY - 3; let crestTextY = crestY - 3;
+            let limitTextY = limitY - 3;
+            let crestTextY = crestY - 3;
             if (Math.abs(limitY - crestY) < 16) {
-                if (limitY <= crestY) { limitTextY = limitY - 4; crestTextY = crestY + 12; } else { limitTextY = limitY + 12; crestTextY = crestY - 4; }
+                if (limitY <= crestY) {
+                    limitTextY = limitY - 4; crestTextY = crestY + 12;
+                } else {
+                    limitTextY = limitY + 12; crestTextY = crestY - 4;
+                }
             }
 
             ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'left';
             ctx.fillStyle = '#facc15'; ctx.fillText(`── 越浪門檻 (+${limitCrestCD.toFixed(2)}m CD)`, 6, limitTextY);
-            ctx.fillStyle = isOvertopping ? '#ef4444' : '#38bdf8'; ctx.fillText(`── 實測波頂 (+${crestCD.toFixed(2)}m CD / 越浪: ${overtopDepth.toFixed(2)}m)`, 6, crestTextY);
+            ctx.fillStyle = isOvertopping ? '#ef4444' : '#38bdf8';
+            ctx.fillText(`── 實測波頂 (+${crestCD.toFixed(2)}m CD / 越浪: ${overtopDepth.toFixed(2)}m)`, 6, crestTextY);
             ctx.setLineDash([]);
 
+            // 客船浮姿
             const shipW = Math.min(55, quayX * 0.5);
             const shipX = quayX - shipW - 10;
-            const shipDeckY = tideY - 12 + Math.sin(animPhase*1.2)*2;
+            const shipDeckY = tideY - 12 + Math.sin(animPhase*1.2)*2; // 加入浮動感
             const shipKeelY = keelY + Math.sin(animPhase*1.2)*2;
             
             ctx.beginPath();
@@ -1068,18 +1234,22 @@
             ctx.lineTo(shipX + shipW, shipKeelY - 3); ctx.lineTo(shipX + shipW - 4, shipKeelY);
             ctx.lineTo(shipX + 4, shipKeelY); ctx.lineTo(shipX, shipKeelY - 5);
             ctx.closePath();
-            ctx.fillStyle = '#1e293b'; ctx.fill(); ctx.strokeStyle = '#f8fafc'; ctx.lineWidth = 1.2; ctx.stroke();
+            ctx.fillStyle = '#1e293b'; ctx.fill();
+            ctx.strokeStyle = '#f8fafc'; ctx.lineWidth = 1.2; ctx.stroke();
 
+            // UKC 底阻動態線
             const ukcX = shipX + shipW * 0.5;
             ctx.beginPath(); ctx.moveTo(ukcX, shipKeelY); ctx.lineTo(ukcX, seabedY);
             ctx.strokeStyle = ukcPass ? '#10b981' : '#ef4444'; ctx.lineWidth = 2.0; ctx.stroke();
 
-            ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
+            ctx.font = 'bold 10.5px sans-serif'; ctx.textAlign = 'center';
             const ukcTextY = Math.min(seabedY - 5, Math.max(shipKeelY + 12, (shipKeelY + seabedY) / 2 + 3));
-            ctx.fillStyle = ukcPass ? '#10b981' : '#ef4444'; ctx.fillText(`UKC: ${ukc.toFixed(2)}m (Squat:${squat.toFixed(2)}m) ${ukcPass ? '🟢' : '🔴'}`, ukcX + 32, ukcTextY);
+            ctx.fillStyle = ukcPass ? '#10b981' : '#ef4444';
+            ctx.fillText(`UKC: ${ukc.toFixed(2)}m (Squat:${squat.toFixed(2)}m) ${ukcPass ? '🟢' : '🔴'}`, ukcX + 32, ukcTextY);
 
             ctx.font = 'bold 11px sans-serif'; ctx.fillStyle = accentColor; ctx.textAlign = 'left';
             ctx.fillText(title, 8, 16);
+
             ctx.restore();
         }
 
@@ -1092,7 +1262,11 @@
             if (!canvas || !container) return;
 
             const hs = parseFloat(getEl('rngHs')?.value || 0.85);
+            const wVal = parseFloat(getEl('rngW')?.value || 6.50);
+            const tp = parseFloat(getEl('rngTp')?.value || 8.5);
             const tide = parseFloat(getEl('rngTide')?.value || 1.10);
+            const deltaTheta = parseFloat(getEl('rngDeltaTheta')?.value || 50);
+
             const w = container.clientWidth || 320;
             const h = container.clientHeight || 220;
             const dpr = window.devicePixelRatio || 1;
@@ -1107,14 +1281,14 @@
             if (currentProfileMode === 'COMPARE') {
                 const subW = (w - 6) / 2;
                 setTxt('lblProfileTitle', '📐 碼頭動態剖面對比 (北岸 vs 南岸)');
-                drawSingleProfile(ctx, 0, 0, subW, h, '北岸 (主泊位 -8.5m)', 8.50, 3.20, hs * 1.06, tide, '#38bdf8');
-                drawSingleProfile(ctx, subW + 6, 0, subW, h, '南岸 (權宜泊位 -9.8m)', 9.80, 2.50, hs * 0.62, tide, '#34d399');
+                drawSingleProfile(ctx, 0, 0, subW, h, '北岸 (主泊位 -8.5m)', 8.50, 3.20, hs * 1.06, wVal * Math.abs(Math.cos(deltaTheta * Math.PI/180)), tp, tide, '#38bdf8');
+                drawSingleProfile(ctx, subW + 6, 0, subW, h, '南岸 (權宜泊位 -9.8m)', 9.80, 2.50, hs * 0.62, wVal * Math.abs(Math.cos((90-deltaTheta) * Math.PI/180)), tp, tide, '#34d399');
             } else if (currentProfileMode === 'NORTH') {
                 setTxt('lblProfileTitle', '📐 碼頭動態剖面與越浪分析 (北岸)');
-                drawSingleProfile(ctx, 0, 0, w, h, '北岸碼頭 (主泊位 -8.50m CD)', 8.50, 3.20, hs * 1.06, tide, '#38bdf8');
+                drawSingleProfile(ctx, 0, 0, w, h, '北岸碼頭 (主泊位 -8.50m CD)', 8.50, 3.20, hs * 1.06, wVal * Math.abs(Math.cos(deltaTheta * Math.PI/180)), tp, tide, '#38bdf8');
             } else {
                 setTxt('lblProfileTitle', '📐 碼頭動態剖面與越浪分析 (南岸)');
-                drawSingleProfile(ctx, 0, 0, w, h, '南岸碼頭 (權宜泊位 -9.80m CD)', 9.80, 2.50, hs * 0.62, tide, '#34d399');
+                drawSingleProfile(ctx, 0, 0, w, h, '南岸碼頭 (權宜泊位 -9.80m CD)', 9.80, 2.50, hs * 0.62, wVal * Math.abs(Math.cos((90-deltaTheta) * Math.PI/180)), tp, tide, '#34d399');
             }
         }
 
@@ -1128,8 +1302,8 @@
 
             const hs = parseFloat(getEl('rngHs')?.value || 0.85);
             const wVal = parseFloat(getEl('rngW')?.value || 6.50);
-            const tp = parseFloat(getEl('rngTp')?.value || 8.5);
-            const tide = parseFloat(getEl('rngTide')?.value || 1.10);
+            const tpVal = parseFloat(getEl('rngTp')?.value || 8.5);
+            const tideVal = parseFloat(getEl('rngTide')?.value || 1.10);
             const sogVal = parseFloat(getEl('rngSog')?.value || 3.2);
             const deltaTheta = parseFloat(getEl('rngDeltaTheta')?.value || 50);
 
@@ -1142,10 +1316,10 @@
             const weffSouth = wVal * Math.abs(Math.cos(radSouth));
             const draft = 2.02;
 
-            const ukcNorth = 8.50 + tide - draft - squat - hsNorth * 0.5;
-            const ukcSouth = 9.80 + tide - draft - squat - hsSouth * 0.5;
-            const fbNorth = 3.20 - (tide + hsNorth * 0.68);
-            const fbSouth = 2.50 - (tide + hsSouth * 0.68);
+            const ukcNorth = 8.50 + tideVal - draft - squat - hsNorth * 0.5;
+            const ukcSouth = 9.80 + tideVal - draft - squat - hsSouth * 0.5;
+            const fbNorth = 3.20 - (tideVal + hsNorth * 0.68);
+            const fbSouth = 2.50 - (tideVal + hsSouth * 0.68);
 
             const w = container.clientWidth || 320;
             const h = container.clientHeight || 260;
@@ -1218,18 +1392,23 @@
                 ctx.strokeStyle = strokeColor; ctx.lineWidth = 2; ctx.setLineDash([]); ctx.stroke();
             };
 
-            const diag = window.lastDiagnostics || { vetoNorth: false, vetoSouth: false, reasonsNorth: [], reasonsSouth: [] };
+            const diag = window.lastDiagnostics || { 
+                vetoNorth: false, vetoSouth: false, 
+                isGrayZoneNorth: false, isGrayZoneSouth: false, 
+                reasonsNorth: [], reasonsSouth: [], 
+                gzReasonsNorth: [], gzReasonsSouth: [] 
+            };
 
             if (currentRadarMode === 'COMPARE') {
                 drawRadarPoly(getRatiosCustom(hsNorth, wVal, tpVal, tideVal, true), 'rgba(56, 189, 248, 0.35)', '#38bdf8');
                 drawRadarPoly(getRatiosCustom(hsSouth, wVal, tpVal, tideVal, false), 'rgba(16, 185, 129, 0.35)', '#34d399');
             } else if (currentRadarMode === 'NORTH') {
-                let color = diag.vetoNorth ? 'rgba(239, 68, 68, 0.4)' : 'rgba(56, 189, 248, 0.4)';
-                let border = diag.vetoNorth ? '#ef4444' : '#38bdf8';
+                let color = diag.vetoNorth ? 'rgba(239, 68, 68, 0.4)' : (diag.isGrayZoneNorth ? 'rgba(249, 115, 22, 0.4)' : 'rgba(56, 189, 248, 0.4)');
+                let border = diag.vetoNorth ? '#ef4444' : (diag.isGrayZoneNorth ? '#f97316' : '#38bdf8');
                 drawRadarPoly(getRatiosCustom(hsNorth, wVal, tpVal, tideVal, true), color, border);
             } else {
-                let color = diag.vetoSouth ? 'rgba(239, 68, 68, 0.4)' : 'rgba(16, 185, 129, 0.4)';
-                let border = diag.vetoSouth ? '#ef4444' : '#34d399';
+                let color = diag.vetoSouth ? 'rgba(239, 68, 68, 0.4)' : (diag.isGrayZoneSouth ? 'rgba(249, 115, 22, 0.4)' : 'rgba(16, 185, 129, 0.4)');
+                let border = diag.vetoSouth ? '#ef4444' : (diag.isGrayZoneSouth ? '#f97316' : '#34d399');
                 drawRadarPoly(getRatiosCustom(hsSouth, wVal, tpVal, tideVal, false), color, border);
             }
 
@@ -1262,13 +1441,17 @@
             const activeText = currentRadarMode === 'NORTH' ? '【北岸】' : currentRadarMode === 'SOUTH' ? '【南岸】' : '【雙岸】';
             const activeVeto = isTargetNorth ? diag.vetoNorth : (currentRadarMode === 'SOUTH' ? diag.vetoSouth : (diag.vetoNorth && diag.vetoSouth));
             const activeWarn = currentRadarMode === 'COMPARE' && (diag.vetoNorth !== diag.vetoSouth);
+            const activeGz = isTargetNorth ? diag.isGrayZoneNorth : (currentRadarMode === 'SOUTH' ? diag.isGrayZoneSouth : (diag.isGrayZoneNorth || diag.isGrayZoneSouth));
             
             let diagText = "";
+            let gzText = "";
             if (currentRadarMode === 'COMPARE') {
                 if (activeVeto) diagText = `根因: ${[...new Set([...diag.reasonsNorth, ...diag.reasonsSouth])].join('/')}`;
                 else if (activeWarn) diagText = `根因: ${diag.vetoNorth ? diag.reasonsNorth.join('/') : diag.reasonsSouth.join('/')}`;
+                gzText = `潛在危險: ${[...new Set([...(diag.gzReasonsNorth || []), ...(diag.gzReasonsSouth || [])])].join('/')}`;
             } else {
                 diagText = isTargetNorth ? `根因: ${diag.reasonsNorth.join('/')}` : `根因: ${diag.reasonsSouth.join('/')}`;
+                gzText = isTargetNorth ? `潛在危險: ${(diag.gzReasonsNorth || []).join('/')}` : `潛在危險: ${(diag.gzReasonsSouth || []).join('/')}`;
             }
 
             ctx.font = 'bold 12px sans-serif';
@@ -1283,6 +1466,11 @@
                 ctx.fillText(`🟡 條件機動避風靠泊 ${activeText}`, cx, cy + R + 45);
                 ctx.font = '10px sans-serif';
                 ctx.fillText(`[ 單岸 ${diagText} 警報 ]`, cx, cy + R + 60);
+            } else if (activeGz && !activeVeto) {
+                ctx.fillStyle = '#f97316';
+                ctx.fillText(`🟠 模糊地帶高危預警 ${activeText}`, cx, cy + R + 45);
+                ctx.font = '10px sans-serif';
+                ctx.fillText(`[ ${gzText} ]`, cx, cy + R + 60);
             } else {
                 ctx.fillStyle = '#10b981';
                 ctx.fillText(`🟢 物理安全通過 ${activeText}`, cx, cy + R + 50);
