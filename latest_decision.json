@@ -1,9 +1,9 @@
 {
-  "version": "GEM-ULTIMATE-V80.0-20261030_204233",
-  "timestamp": "2026-10-30 20:42:33 CST",
+  "version": "GEM-ULTIMATE-V80.0-20261030_204259",
+  "timestamp": "2026-10-30 20:42:59 CST",
   "cctv_live_telemetry": {
     "tide_cd_m": 1.26,
-    "hs_pier_m": 0.55,
+    "hs_pier_m": 0.56,
     "hmax_cd_m": 1.64,
     "freeboard_m": 0.86,
     "overtopping_cv": 0.0,
