@@ -81,7 +81,7 @@
         </div>
     </header>
 
-    <!-- 1. 南北岸 CCTV 監視燈號連線監視列 (已刪除 IP 數值) -->
+    <!-- 1. 南北岸 CCTV 監視燈號連線監視列 -->
     <section class="bg-[#0b172a] border border-[#1e2d4a] rounded-xl p-2 mb-2.5 shadow-md w-full">
         <div class="flex flex-wrap justify-between items-center text-[10px] gap-2 font-mono">
             <div class="flex items-center gap-2.5">
@@ -99,7 +99,7 @@
         </div>
     </section>
 
-    <!-- 戰術沙盤演練 (隱藏式拉桿，用於即時模擬數據) -->
+    <!-- 戰術沙盤演練 -->
     <details class="card border-[#2563eb] bg-[#0c182b] mb-2.5 hidden lg:block" open id="detailsSandbox">
         <summary class="card-header text-[#60a5fa] list-none outline-none cursor-pointer flex justify-between items-center">
             <span class="font-extrabold text-[11.5px] flex items-center gap-1"><span class="tag-d0">D0 現場</span> 戰術沙盤物理調度演練 (拖曳拉桿模擬水動力極端相變)</span>
@@ -190,12 +190,12 @@
                 </div>
             </section>
 
-            <!-- 官方公準時窗與常規/游擊雙動態調度分表 -->
+            <!-- 官方公準時窗與常規/游擊雙動態調度分表 (具備燈號即時連動機制) -->
             <details class="card border-[#38bdf8] bg-[#0c182b]" open id="detailsGuerrillaSchedule">
                 <summary class="card-header text-[#38bdf8] cursor-pointer list-none outline-none flex justify-between items-center">
                     <span class="font-extrabold text-[11.5px] flex items-center gap-1.5">
                         <span>🕒</span>
-                        <span class="tag-d0">D0 今日</span> 官方公準時窗與常規/游擊雙分表
+                        <span class="tag-d0">D0 今日</span> 官方公準時窗與常規/游擊雙分表 (即時動態連動)
                     </span>
                     <div class="flex items-center gap-2">
                         <span id="badgeGuerrillaMasterStatus" class="badge badge-pass text-[8.5px]">🟢 全日通航時窗</span>
@@ -203,10 +203,11 @@
                     </div>
                 </summary>
                 <div class="pt-1.5 border-t border-sky-500/30 mt-1 space-y-3">
-                    <!-- 分表 1: 常規核准航線班次分表 -->
+                    <!-- 分表 1: 常規核准航線班次分表 (動態同軸修正) -->
                     <div>
-                        <div class="text-[9.5px] font-bold text-emerald-300 mb-1 flex items-center gap-1">
+                        <div class="text-[9.5px] font-bold text-emerald-300 mb-1 flex items-center justify-between">
                             <span>📅 常規核准航線班次分表 (客輪定期航班)</span>
+                            <span class="text-[8px] text-slate-400">與物理解算燈號同軸連動</span>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="data-table">
@@ -215,38 +216,38 @@
                                         <th>航線班次</th>
                                         <th>預定時間</th>
                                         <th>執航船隻</th>
-                                        <th class="text-center">潮位 / 波高</th>
-                                        <th class="text-center">靠泊准駁狀態</th>
+                                        <th class="text-center">預測潮位/波高</th>
+                                        <th class="text-center">靠泊准駁燈號</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr class="hover:bg-slate-800/60">
-                                        <td class="font-bold text-sky-300">晨間常規 1 班</td>
+                                        <td class="font-bold text-sky-300">晨間常規 1 班 (上午)</td>
                                         <td class="font-mono">08:30</td>
                                         <td class="font-bold text-white">凱鯨號</td>
-                                        <td class="text-center font-mono">+1.50m | 0.82m</td>
-                                        <td class="text-center"><span class="badge badge-pass text-[8px]">🟢 准靠 (北岸)</span></td>
+                                        <td class="text-center font-mono" id="cellReg1TideHs">+1.50m | 0.82m</td>
+                                        <td class="text-center" id="cellReg1Badge"><span class="badge badge-pass text-[8px]">🟢 准靠 (北岸)</span></td>
                                     </tr>
                                     <tr class="hover:bg-slate-800/60">
-                                        <td class="font-bold text-sky-300">上午常規 2 班</td>
+                                        <td class="font-bold text-sky-300">上午常規 2 班 (上午)</td>
                                         <td class="font-mono">10:00</td>
                                         <td class="font-bold text-white">超級星號</td>
-                                        <td class="text-center font-mono">+1.20m | 0.95m</td>
-                                        <td class="text-center"><span class="badge badge-pass text-[8px]">🟢 准靠 (北岸)</span></td>
+                                        <td class="text-center font-mono" id="cellReg2TideHs">+1.20m | 0.95m</td>
+                                        <td class="text-center" id="cellReg2Badge"><span class="badge badge-pass text-[8px]">🟢 准靠 (北岸)</span></td>
                                     </tr>
                                     <tr class="hover:bg-slate-800/60">
-                                        <td class="font-bold text-amber-300">午間常規 3 班</td>
+                                        <td class="font-bold text-amber-300">午間常規 3 班 (中午)</td>
                                         <td class="font-mono">12:00</td>
                                         <td class="font-bold text-white">宏棋號</td>
-                                        <td class="text-center font-mono">+0.85m | 1.08m</td>
-                                        <td class="text-center"><span class="badge badge-yellow text-[8px]">🟡 移防 (南岸)</span></td>
+                                        <td class="text-center font-mono" id="cellReg3TideHs">+0.85m | 1.08m</td>
+                                        <td class="text-center" id="cellReg3Badge"><span class="badge badge-yellow text-[8px]">🟡 移防 (南岸)</span></td>
                                     </tr>
                                     <tr class="hover:bg-slate-800/60">
-                                        <td class="font-bold text-red-400">下午常規 4 班</td>
+                                        <td class="font-bold text-red-400">下午常規 4 班 (下午)</td>
                                         <td class="font-mono">14:30</td>
                                         <td class="font-bold text-white">新一號</td>
-                                        <td class="text-center font-mono">+1.15m | 1.30m</td>
-                                        <td class="text-center"><span class="badge badge-veto text-[8px]">🔴 預警停航</span></td>
+                                        <td class="text-center font-mono" id="cellReg4TideHs">+1.15m | 1.30m</td>
+                                        <td class="text-center" id="cellReg4Badge"><span class="badge badge-veto text-[8px]">🔴 預警停航</span></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -255,8 +256,9 @@
 
                     <!-- 分表 2: 游擊戰術動態調度分表 -->
                     <div>
-                        <div class="text-[9.5px] font-bold text-sky-300 mb-1 flex items-center gap-1">
+                        <div class="text-[9.5px] font-bold text-sky-300 mb-1 flex items-center justify-between">
                             <span>⚡ 游擊戰術動態調度分表 (物理視窗推演)</span>
+                            <span class="text-[8px] text-amber-300 font-mono">即時視窗控制</span>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="data-table" id="tableScheduleGuerrilla">
@@ -302,6 +304,55 @@
                             </table>
                         </div>
                     </div>
+                </div>
+            </details>
+
+            <!-- 未來三天開/封島戰術預測總覽 (含動態真實日期與時段) -->
+            <details class="card border-[#c084fc] bg-[#140b29]" open id="detailsWeeklyForecast">
+                <summary class="card-header text-purple-300 flex justify-between items-center cursor-pointer list-none outline-none">
+                    <span class="font-extrabold text-[11.5px] flex items-center gap-1"><span class="tag-d1">戰術預報</span> GEM 未來三天開/封島戰術預測總覽 (含日期與時段)</span>
+                    <div class="flex items-center gap-1.5"><span class="badge badge-pass text-[8px]">滾動推演</span><span class="badge badge-yellow text-[8px]">▼</span></div>
+                </summary>
+                <div class="overflow-x-auto pt-1 border-t border-purple-500/30 mt-1">
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>預測日期 (時段)</th><th class="text-center">外海波高</th><th class="text-center">有效風速</th><th class="text-center">潮位區間</th><th class="text-center">GEM 戰術裁定</th><th>建議調度方針</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr class="bg-emerald-950/20">
+                                <td class="font-bold text-emerald-300" id="forecastDateD0">D0 今日 (全日)</td>
+                                <td class="text-center font-mono">0.85 m</td>
+                                <td class="text-center font-mono">6.5 m/s</td>
+                                <td class="text-center font-mono">+0.8~+1.6m</td>
+                                <td class="text-center"><span class="badge badge-pass text-[7.5px]">🟢 全線開放</span></td>
+                                <td class="text-emerald-300 text-[8.5px] font-bold">🟢 常態通航靠泊北岸主泊位</td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold text-slate-300" id="forecastDateD1">D+1 明日 (上午)</td>
+                                <td class="text-center font-mono">1.10 m</td>
+                                <td class="text-center font-mono">8.2 m/s</td>
+                                <td class="text-center font-mono">+0.5~+1.8m</td>
+                                <td class="text-center"><span class="badge badge-yellow text-[7.5px]">🟡 游擊調撥</span></td>
+                                <td class="text-amber-300 text-[8.5px] font-bold">🟡 移防南岸權宜碼頭，限速3節</td>
+                            </tr>
+                            <tr>
+                                <td class="font-bold text-slate-300" id="forecastDateD2">D+2 後日 (下午)</td>
+                                <td class="text-center font-mono">1.35 m</td>
+                                <td class="text-center font-mono">9.8 m/s</td>
+                                <td class="text-center font-mono">+0.3~+1.9m</td>
+                                <td class="text-center"><span class="badge badge-orange text-[7.5px]">⏱️ 動態開窗</span></td>
+                                <td class="text-orange-300 text-[8.5px] font-bold">⏱️ 11:20 剛性止登 / 14:20 清島</td>
+                            </tr>
+                            <tr class="bg-red-950/20">
+                                <td class="font-bold text-red-300" id="forecastDateD3">D+3 大後日 (全日)</td>
+                                <td class="text-center font-mono text-red-400 font-bold">2.45 m</td>
+                                <td class="text-center font-mono text-red-400 font-bold">14.2 m/s</td>
+                                <td class="text-center font-mono">+0.2~+2.1m</td>
+                                <td class="text-center"><span class="badge badge-veto text-[7.5px]">🔴 物理熔斷</span></td>
+                                <td class="text-red-400 text-[8.5px] font-bold">🔴 低壓長浪穿透，全線封島避風</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </details>
         </div>
@@ -370,6 +421,44 @@
                 </div>
             </details>
 
+            <!-- 颱風專區與行政應變 (預設收合) -->
+            <details class="card border-[#c084fc] bg-[#140b29]" id="detailsTyphoonZone">
+                <summary class="card-header text-purple-300 font-bold flex justify-between items-center cursor-pointer list-none outline-none">
+                    <span class="flex items-center gap-1 text-[11.5px]"><span class="tag-d1">防救災連動</span> 行政應變中心三欄狀態與颱風監測</span>
+                    <div class="flex items-center gap-1.5"><span id="cwaIntensityTag"><span class="badge badge-pass text-[8.5px]">🟢 常態海象</span></span><span class="badge badge-yellow text-[8px]">▼ 展開查看</span></div>
+                </summary>
+                <div class="pt-2 border-t border-purple-500/30 mt-1 space-y-2 text-[9px]">
+                    <div class="bg-blue-950/60 p-2 rounded border border-blue-500/40 flex justify-between items-center text-[8.5px]">
+                        <span class="text-sky-300 font-bold">🚢 交通部 TDX 航務即時狀態：</span>
+                        <span class="text-amber-300 font-mono font-bold" id="tdxStatusText">🟢 TDX 航務: 烏石-龜山航線監控連線備援中</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-1 text-center font-mono text-[8.5px]">
+                        <div class="bg-slate-900/80 p-1.5 rounded border border-slate-700">
+                            <span class="text-slate-400 block text-[7.5px]">中央應變中心</span><b class="text-emerald-300">🟢 未開設</b>
+                        </div>
+                        <div class="bg-slate-900/80 p-1.5 rounded border border-slate-700">
+                            <span class="text-slate-400 block text-[7.5px]">宜蘭縣應變中心</span><b class="text-emerald-300">🟢 未開設</b>
+                        </div>
+                        <div class="bg-slate-900/80 p-1.5 rounded border border-slate-700">
+                            <span class="text-slate-400 block text-[7.5px]">新北市應變中心</span><b class="text-emerald-300">🟢 未開設</b>
+                        </div>
+                    </div>
+                    <div class="bg-black/60 p-2 rounded border border-purple-500/40">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5 font-mono text-[8.5px]">
+                            <div class="bg-slate-900/80 p-1.5 rounded border border-slate-700">
+                                <span class="text-slate-400 block text-[7.5px]">颱風名稱/編號</span><b class="text-white text-[9.5px]">無作用中颱風</b>
+                            </div>
+                            <div class="bg-slate-900/80 p-1.5 rounded border border-slate-700">
+                                <span class="text-slate-400 block text-[7.5px]">中心氣壓/風速</span><b class="text-amber-300 text-[9.5px]">1014 hPa | 4.8 m/s</b>
+                            </div>
+                            <div class="bg-slate-900/80 p-1.5 rounded border border-slate-700">
+                                <span class="text-slate-400 block text-[7.5px]">距龜山島距離</span><b class="text-red-400 text-[9.5px]">無侵襲威脅</b>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </details>
+
             <!-- 官方公告 vs GEM 模型 雙欄對比 -->
             <section class="card border-[#c084fc] bg-[#1a0f2e]">
                 <div class="card-header text-purple-300">
@@ -404,7 +493,7 @@
         </div>
     </div>
 
-    <!-- JS 核心控制器 -->
+    <!-- JS 核心控制器 (動態燈號連動與日期算子復原) -->
     <script>
     (function() {
         const getEl = id => document.getElementById(id);
@@ -504,7 +593,22 @@
                 const now = new Date();
                 setTxt('liveClock', `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')} CST`);
                 const days = ['日', '一', '二', '三', '四', '五', '六'];
-                setTxt('liveDate', `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} (${days[now.getDay()]})`);
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const date = String(now.getDate()).padStart(2, '0');
+                setTxt('liveDate', `${year}-${month}-${date} (${days[now.getDay()]})`);
+
+                // 算子動態填入未來三天具體日期
+                const d0 = new Date(now);
+                const d1 = new Date(now); d1.setDate(d1.getDate() + 1);
+                const d2 = new Date(now); d2.setDate(d2.getDate() + 2);
+                const d3 = new Date(now); d3.setDate(d3.getDate() + 3);
+
+                const fmtDate = (d, tag, slot) => `${d.getMonth()+1}/${d.getDate()} (${days[d.getDay()]}) ${tag} [${slot}]`;
+                setTxt('forecastDateD0', fmtDate(d0, 'D0 今日', '全日'));
+                setTxt('forecastDateD1', fmtDate(d1, 'D+1 明日', '上午'));
+                setTxt('forecastDateD2', fmtDate(d2, 'D+2 後日', '下午'));
+                setTxt('forecastDateD3', fmtDate(d3, 'D+3 大後日', '全日'));
             };
             update();
             setInterval(update, 1000);
@@ -590,6 +694,41 @@
             const cmpBN = getEl('cmpBadgeNorth');
             if (cmpBN) cmpBN.innerHTML = vetoNorth ? '<span class="badge badge-veto text-[7.5px]">🔴 VETO 熔斷</span>' : '<span class="badge badge-pass text-[7.5px]">🟢 准予靠泊</span>';
 
+            // =========================================================================
+            // 關鍵修正：連動常規客輪航班表格燈號，確保與物理推演與時俱進並保持一致
+            // =========================================================================
+            setTxt('cellReg1TideHs', `+${tide.toFixed(2)}m | ${hsNorth.toFixed(2)}m`);
+            const bReg1 = getEl('cellReg1Badge');
+            if (bReg1) {
+                bReg1.innerHTML = vetoNorth ? '<span class="badge badge-veto text-[8px]">🔴 預警停航</span>' : '<span class="badge badge-pass text-[8px]">🟢 准靠 (北岸)</span>';
+            }
+
+            setTxt('cellReg2TideHs', `+${(tide - 0.1).toFixed(2)}m | ${(hsNorth * 1.05).toFixed(2)}m`);
+            const bReg2 = getEl('cellReg2Badge');
+            if (bReg2) {
+                bReg2.innerHTML = vetoNorth ? '<span class="badge badge-veto text-[8px]">🔴 預警停航</span>' : '<span class="badge badge-pass text-[8px]">🟢 准靠 (北岸)</span>';
+            }
+
+            setTxt('cellReg3TideHs', `+${(tide - 0.25).toFixed(2)}m | ${hsSouth.toFixed(2)}m`);
+            const bReg3 = getEl('cellReg3Badge');
+            if (bReg3) {
+                if (vetoSouth && vetoNorth) {
+                    bReg3.innerHTML = '<span class="badge badge-veto text-[8px]">🔴 雙岸熔斷停航</span>';
+                } else if (vetoNorth) {
+                    bReg3.innerHTML = '<span class="badge badge-yellow text-[8px]">🟡 移防 (南岸)</span>';
+                } else {
+                    bReg3.innerHTML = '<span class="badge badge-pass text-[8px]">🟢 准靠 (北岸)</span>';
+                }
+            }
+
+            const eveHsVal = hs * (tp >= 12.0 ? 1.0 : 1.25);
+            setTxt('cellReg4TideHs', `+${(tide + 0.1).toFixed(2)}m | ${eveHsVal.toFixed(2)}m`);
+            const bReg4 = getEl('cellReg4Badge');
+            if (bReg4) {
+                bReg4.innerHTML = (eveHsVal > 1.13 || (vetoNorth && vetoSouth)) ? '<span class="badge badge-veto text-[8px]">🔴 預警停航</span>' : '<span class="badge badge-yellow text-[8px]">🟡 謹慎靠泊</span>';
+            }
+
+            // 更新頂部 Banner 警示
             const banner = getEl('vetoBanner');
             const headerMaster = getEl('headerMaster');
             const badgeDecision = getEl('badgeMobDecision');
@@ -597,21 +736,21 @@
             if (vetoNorth && vetoSouth) {
                 if (banner) {
                     banner.style.background = 'var(--status-danger)';
-                    banner.innerText = '🚨 [D0 今日] 警示：雙岸觸發 Hard VETO 剛性熔斷，全線封島禁止靠泊！';
+                    banner.innerText = '🚨 [D0 今日] 警示：雙岸觸發 Hard VETO 剛性熔斷，常規航班與游擊時窗全線封島停航！';
                 }
                 if (badgeDecision) { badgeDecision.innerText = '🔴 0.0% 物理熔斷'; badgeDecision.className = 'badge badge-veto text-[10px] px-2 py-1'; }
                 if (headerMaster) headerMaster.style.borderLeftColor = '#ef4444';
             } else if (vetoNorth || vetoSouth) {
                 if (banner) {
                     banner.style.background = 'var(--status-warn)';
-                    banner.innerText = '⚠️ [D0 今日] 戰術調度：啟動 Action 1 游擊調撥（單岸限制靠泊）！';
+                    banner.innerText = '⚠️ [D0 今日] 戰術調度：北岸受阻啟動 Action 1 游擊調撥（常規航班動態移防南岸）！';
                 }
                 if (badgeDecision) { badgeDecision.innerText = '🟡 Q2 游擊調撥'; badgeDecision.className = 'badge badge-yellow text-[10px] px-2 py-1'; }
                 if (headerMaster) headerMaster.style.borderLeftColor = '#f59e0b';
             } else {
                 if (banner) {
                     banner.style.background = 'var(--status-pass)';
-                    banner.innerText = '✅ [D0 今日] 系統檢測：四層物理防線全數通過，動態裕深安全，准予常規靠泊作業！';
+                    banner.innerText = '✅ [D0 今日] 系統檢測：四層物理防線全數通過，動態裕深安全，准予常規與游擊航班靠泊！';
                 }
                 if (badgeDecision) { badgeDecision.innerText = '🟢 100.0% Q1 全線開放'; badgeDecision.className = 'badge badge-pass text-[10px] px-2 py-1'; }
                 if (headerMaster) headerMaster.style.borderLeftColor = '#10b981';
