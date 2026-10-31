@@ -255,7 +255,7 @@
                 </div>
             </section>
 
-            <!-- 🚀 3. 【游擊時窗收合表及提醒燈號】(修改重點：改成可收合細節面板 + Header 即時提醒燈號徽章) -->
+            <!-- 3. 官方公準時窗與游擊動態調度表 -->
             <details class="card border-[#38bdf8] bg-[#0c182b]" open id="detailsGuerrillaSchedule">
                 <summary class="card-header text-[#38bdf8] cursor-pointer list-none outline-none flex justify-between items-center">
                     <span class="font-extrabold text-[11.5px] flex items-center gap-1.5">
@@ -263,7 +263,6 @@
                         <span class="tag-d0">D0 今日</span> 官方公準時窗與游擊動態調度表
                     </span>
                     <div class="flex items-center gap-2">
-                        <!-- 即時提醒燈號徽章 -->
                         <span id="badgeGuerrillaMasterStatus" class="badge badge-pass text-[8.5px]">🟢 全日通航時窗</span>
                         <span class="text-slate-400 text-[8px]">▼ 收合/展開</span>
                     </div>
@@ -441,7 +440,31 @@
                 </div>
             </section>
 
-            <!-- 3. 官方公告 vs GEM 模型 雙欄對比與再封島條件 (手機版亦完整保留) -->
+            <!-- 3. 🚀 Windy 即時氣象風場與海象動態遙測視窗 (已修復恢復) -->
+            <details class="card border-[#0ea5e9] bg-[#0c182b]" id="detailsWindy" open>
+                <summary class="card-header text-sky-400 font-bold flex justify-between items-center cursor-pointer list-none outline-none">
+                    <span class="flex items-center gap-1.5 text-[11.5px]">
+                        <span>🌀</span>
+                        <span class="tag-d0">D0 現場</span> Windy 即時風場與海象衛星遙測視窗
+                    </span>
+                    <div class="flex items-center gap-2">
+                        <span class="badge badge-pass text-[8.5px]">ECMWF 全球數值圖</span>
+                        <span class="text-slate-400 text-[8px]">▼ 收合/展開</span>
+                    </div>
+                </summary>
+                <div class="pt-1.5 border-t border-sky-500/30 mt-1">
+                    <div class="w-full h-[320px] rounded-lg overflow-hidden border border-slate-700/60 shadow-inner">
+                        <iframe 
+                            class="w-full h-full border-0" 
+                            src="https://embed.windy.com/embed2.html?lat=24.843&lon=121.952&detailLat=24.843&detailLon=121.952&width=650&height=450&zoom=10&level=surface&overlay=wind&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=m%2Fs&metricTemp=%C2%B0C&radarRange=-1" 
+                            loading="lazy" 
+                            title="Windy Live Map Guishan Island">
+                        </iframe>
+                    </div>
+                </div>
+            </details>
+
+            <!-- 4. 官方公告 vs GEM 模型 雙欄對比與再封島條件 (手機版亦完整保留) -->
             <section class="card border-[#c084fc] bg-[#1a0f2e]">
                 <div class="card-header text-purple-300">
                     <span class="flex items-center gap-1 font-bold text-[11.5px]"><span class="tag-d1">D0-D2 預報</span> 官方公告 vs GEM 模型雙欄對比</span>
@@ -483,7 +506,7 @@
                 </div>
             </section>
 
-            <!-- 4. 氣象署 CWA 颱風動態與行政應變三欄同步 (手機版保留核心狀態) -->
+            <!-- 5. 氣象署 CWA 颱風動態與行政應變三欄同步 -->
             <details class="card border-[#c084fc] bg-[#140b29]" id="detailsTyphoonZone" open>
                 <summary class="card-header text-purple-300 font-bold flex justify-between items-center cursor-pointer list-none outline-none">
                     <span class="flex items-center gap-1 text-[11.5px]"><span class="tag-d1">防救災連動</span> 行政應變中心三欄狀態與颱風監測</span>
@@ -494,7 +517,6 @@
                         <span class="text-sky-300 font-bold">🚢 交通部 TDX 航務即時狀態：</span>
                         <span class="text-amber-300 font-mono font-bold" id="tdxStatusText">🟢 TDX 航務: 烏石-龜山航線監控連線備援中</span>
                     </div>
-                    <!-- 行政應變三欄同步狀態 (中央、宜蘭、新北) -->
                     <div class="grid grid-cols-3 gap-1 text-center font-mono text-[8.5px]">
                         <div class="bg-slate-900/80 p-1.5 rounded border border-slate-700">
                             <span class="text-slate-400 block text-[7.5px]">中央應變中心</span><b class="text-emerald-300">🟢 未開設</b>
@@ -522,7 +544,7 @@
                 </div>
             </details>
 
-            <!-- 5. 自主強化學習與 Vision-PINN 反饋模組 (手機版隱藏，桌面版保留) -->
+            <!-- 6. 自主強化學習與 Vision-PINN 反饋模組 (手機版隱藏，桌面版保留) -->
             <details class="card border-[#c084fc] bg-[#140b29] hidden lg:block" id="detailsRLLoop" open>
                 <summary class="card-header text-purple-300 flex justify-between items-center cursor-pointer list-none outline-none">
                     <span class="font-extrabold text-[11.5px] flex items-center gap-1"><span class="tag-d1">AI 預報</span> 自主強化學習 (RL Loop) 與降噪迭代</span>
@@ -541,7 +563,7 @@
                 </div>
             </details>
 
-            <!-- 6. 72 小時及未來一周戰術預測總覽 (手機版隱藏，桌面版保留) -->
+            <!-- 7. 72 小時及未來一周戰術預測總覽 (手機版隱藏，桌面版保留) -->
             <details class="card border-[#c084fc] bg-[#140b29] hidden lg:block" id="detailsWeeklyForecast" open>
                 <summary class="card-header text-purple-300 flex justify-between items-center cursor-pointer list-none outline-none">
                     <span class="font-extrabold text-[11.5px] flex items-center gap-1"><span class="tag-d1">D+1~D+7 預報</span> GEM 未來一周戰術預報總覽</span>
@@ -722,11 +744,9 @@
             const sog = parseFloat(getEl('rngSog')?.value || 3.2);
             const deltaTheta = parseFloat(getEl('rngDeltaTheta')?.value || 50);
 
-            // 水動力學計算
             const fn_h = Math.min(0.95, (sog * 0.514444) / Math.sqrt(9.81 * (8.50 + tide)));
             const squat = Math.min(0.80, Math.max(0.02, (0.65 * (sog ** 2)) / (30.0 * ((8.50 + tide) / 2.02)) * (1.0 / Math.sqrt(Math.max(0.05, 1.0 - (fn_h ** 2)))) * 0.50));
 
-            // 長浪消能穿透判定 (Tp >= 12.0s 港池繞射消能瓦解 Kd=1.00)
             const kdNorth = tp >= 12.0 ? 1.00 : 1.06;
             const kdSouth = tp >= 12.0 ? 1.00 : 0.62;
 
@@ -756,7 +776,6 @@
             const fbNorth = cvNorth > 0.0 ? 0.15 : fbNorthRaw;
             const fbSouth = cvSouth > 0.0 ? 0.15 : fbSouthRaw;
 
-            // 剛性防線檢驗
             let vetoReasonsNorth = [];
             if (hsNorth > 1.13) vetoReasonsNorth.push("波高超標");
             if (weffNorth > 10.17) vetoReasonsNorth.push("強風過載");
@@ -774,7 +793,6 @@
             const vetoNorth = vetoReasonsNorth.length > 0;
             const vetoSouth = vetoReasonsSouth.length > 0;
 
-            // 更新側向比對數值
             setTxt('cmpHsSouth', `${hsSouth.toFixed(2)} m`);
             setTxt('cmpHsNorth', `${hsNorth.toFixed(2)} m`);
             setTxt('cmpWeffSouth', `${weffSouth.toFixed(2)} m/s`);
@@ -794,7 +812,6 @@
             setCvTxt('cmpCvSouth', cvSouth);
             setCvTxt('cmpCvNorth', cvNorth);
 
-            // 更新 HUD 能量條
             updateHUDBar('barHsSouth', 'hudHsSouth', hsSouth, 1.13, 3.0, false);
             updateHUDBar('barWeffSouth', 'hudWeffSouth', weffSouth, 10.17, 20.0, false);
             updateHUDBar('barTpSouth', 'hudTpSouth', tp, 12.0, 20.0, false);
@@ -807,7 +824,6 @@
             updateHUDBar('barUkcNorth', 'hudUkcNorth', ukcNorth, 1.50, 6.0, true);
             updateHUDBar('barFbNorth', 'hudFbNorth', fbNorth, 0.50, 3.0, true);
 
-            // 徽章標籤
             const bS = getEl('hudBadgeSouth');
             if (bS) { bS.innerHTML = vetoSouth ? '🔴 VETO' : '🟢 通過'; bS.className = vetoSouth ? 'badge badge-veto text-[8px]' : 'badge badge-pass text-[8px]'; }
             const bN = getEl('hudBadgeNorth');
@@ -818,7 +834,6 @@
             const cmpBN = getEl('cmpBadgeNorth');
             if (cmpBN) cmpBN.innerHTML = vetoNorth ? '<span class="badge badge-veto text-[7.5px]">🔴 VETO 熔斷</span>' : '<span class="badge badge-pass text-[7.5px]">🟢 准予靠泊</span>';
 
-            // 游擊時窗收合表 Header 即時提醒燈號與內部聯鎖
             const badgeGuerrillaMaster = getEl('badgeGuerrillaMasterStatus');
             if (vetoNorth && vetoSouth) {
                 if (badgeGuerrillaMaster) {
@@ -842,7 +857,6 @@
                 }
             }
 
-            // 太極勢能條
             const barYang = getEl('barBulletYang');
             const barYin = getEl('barBulletYin');
             const txtRatio = getEl('txtBulletRatio');
@@ -856,7 +870,6 @@
             if (txtYangP) txtYangP.textContent = yangPct > 0 ? `${yangPct}% 生門` : '';
             if (txtYinP) txtYinP.textContent = yinPct > 0 ? `${yinPct}% 杜死門` : '';
 
-            // 總體警報與決策坍縮
             const banner = getEl('vetoBanner');
             const headerMaster = getEl('headerMaster');
             const badgeDecision = getEl('badgeMobDecision');
