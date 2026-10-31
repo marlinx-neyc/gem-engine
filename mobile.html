@@ -190,7 +190,7 @@
                 </div>
             </section>
 
-            <!-- 官方公準時窗與常規/游擊雙動態調度分表 (具備燈號即時連動機制) -->
+            <!-- 官方公準時窗與常規/游擊雙動態調度分表 -->
             <details class="card border-[#38bdf8] bg-[#0c182b]" open id="detailsGuerrillaSchedule">
                 <summary class="card-header text-[#38bdf8] cursor-pointer list-none outline-none flex justify-between items-center">
                     <span class="font-extrabold text-[11.5px] flex items-center gap-1.5">
@@ -203,7 +203,7 @@
                     </div>
                 </summary>
                 <div class="pt-1.5 border-t border-sky-500/30 mt-1 space-y-3">
-                    <!-- 分表 1: 常規核准航線班次分表 (動態同軸修正) -->
+                    <!-- 分表 1: 常規核准航線班次分表 -->
                     <div>
                         <div class="text-[9.5px] font-bold text-emerald-300 mb-1 flex items-center justify-between">
                             <span>📅 常規核准航線班次分表 (客輪定期航班)</span>
@@ -397,7 +397,7 @@
                 </div>
             </section>
 
-            <!-- Windy 即時氣象風場視窗 -->
+            <!-- Windy 即時氣象風場視窗 (含上方圖層快速切換按鈕) -->
             <details class="card border-[#0ea5e9] bg-[#0c182b]" id="detailsWindy" open>
                 <summary class="card-header text-sky-400 font-bold flex justify-between items-center cursor-pointer list-none outline-none">
                     <span class="flex items-center gap-1.5 text-[11.5px]">
@@ -410,8 +410,19 @@
                     </div>
                 </summary>
                 <div class="pt-1.5 border-t border-sky-500/30 mt-1">
+                    <!-- Windy 圖層切換按鈕列 -->
+                    <div class="bg-[#0b172a] border border-sky-500/50 p-1 rounded-lg mb-1 flex items-center justify-between gap-1 overflow-x-auto font-mono text-[8.5px]">
+                        <span class="font-bold text-slate-300 pl-0.5 whitespace-nowrap">🌀 切換圖層:</span>
+                        <div class="grid grid-cols-4 gap-1 flex-1 min-w-[260px]">
+                            <button id="btnWindyWind" onclick="changeWindyOverlay('wind')" class="tab-btn py-0.5 px-1 rounded font-bold border border-sky-400 bg-sky-600 text-white text-center">💨 風速</button>
+                            <button id="btnWindyWaves" onclick="changeWindyOverlay('waves')" class="tab-btn py-0.5 px-1 rounded font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">🌊 浪高</button>
+                            <button id="btnWindySwell" onclick="changeWindyOverlay('swell')" class="tab-btn py-0.5 px-1 rounded font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">📏 湧浪</button>
+                            <button id="btnWindyRain" onclick="changeWindyOverlay('rain')" class="tab-btn py-0.5 px-1 rounded font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">🌧️ 降雨</button>
+                        </div>
+                    </div>
                     <div class="w-full h-[320px] rounded-lg overflow-hidden border border-slate-700/60 shadow-inner">
                         <iframe
+                            id="windyIframe"
                             class="w-full h-full border-0"
                             src="https://embed.windy.com/embed2.html?lat=24.843&lon=121.952&detailLat=24.843&detailLon=121.952&width=650&height=450&zoom=10&level=surface&overlay=wind&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=m%2Fs&metricTemp=%C2%B0C&radarRange=-1"
                             loading="lazy"
@@ -493,7 +504,7 @@
         </div>
     </div>
 
-    <!-- JS 核心控制器 (動態燈號連動與日期算子復原) -->
+    <!-- JS 核心控制器 (含 Windy 圖層動態切換) -->
     <script>
     (function() {
         const getEl = id => document.getElementById(id);
@@ -542,6 +553,29 @@
                     debouncedRender();
                 }, 350);
             }
+        };
+
+        window.changeWindyOverlay = function(overlay) {
+            const iframe = getEl('windyIframe');
+            if (iframe) {
+                iframe.src = `https://embed.windy.com/embed2.html?lat=24.843&lon=121.952&detailLat=24.843&detailLon=121.952&width=650&height=450&zoom=10&level=surface&overlay=${overlay}&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=m%2Fs&metricTemp=%C2%B0C&radarRange=-1`;
+            }
+            const btns = {
+                'wind': 'btnWindyWind',
+                'waves': 'btnWindyWaves',
+                'swell': 'btnWindySwell',
+                'rain': 'btnWindyRain'
+            };
+            Object.keys(btns).forEach(key => {
+                const btn = getEl(btns[key]);
+                if (btn) {
+                    if (key === overlay) {
+                        btn.className = 'tab-btn py-0.5 px-1 rounded font-bold border border-sky-400 bg-sky-600 text-white text-center';
+                    } else {
+                        btn.className = 'tab-btn py-0.5 px-1 rounded font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center';
+                    }
+                }
+            });
         };
 
         window.setProfileViewMode = function(modeName) {
@@ -598,7 +632,6 @@
                 const date = String(now.getDate()).padStart(2, '0');
                 setTxt('liveDate', `${year}-${month}-${date} (${days[now.getDay()]})`);
 
-                // 算子動態填入未來三天具體日期
                 const d0 = new Date(now);
                 const d1 = new Date(now); d1.setDate(d1.getDate() + 1);
                 const d2 = new Date(now); d2.setDate(d2.getDate() + 2);
@@ -694,9 +727,6 @@
             const cmpBN = getEl('cmpBadgeNorth');
             if (cmpBN) cmpBN.innerHTML = vetoNorth ? '<span class="badge badge-veto text-[7.5px]">🔴 VETO 熔斷</span>' : '<span class="badge badge-pass text-[7.5px]">🟢 准予靠泊</span>';
 
-            // =========================================================================
-            // 關鍵修正：連動常規客輪航班表格燈號，確保與物理推演與時俱進並保持一致
-            // =========================================================================
             setTxt('cellReg1TideHs', `+${tide.toFixed(2)}m | ${hsNorth.toFixed(2)}m`);
             const bReg1 = getEl('cellReg1Badge');
             if (bReg1) {
@@ -728,7 +758,6 @@
                 bReg4.innerHTML = (eveHsVal > 1.13 || (vetoNorth && vetoSouth)) ? '<span class="badge badge-veto text-[8px]">🔴 預警停航</span>' : '<span class="badge badge-yellow text-[8px]">🟡 謹慎靠泊</span>';
             }
 
-            // 更新頂部 Banner 警示
             const banner = getEl('vetoBanner');
             const headerMaster = getEl('headerMaster');
             const badgeDecision = getEl('badgeMobDecision');
