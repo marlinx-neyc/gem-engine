@@ -306,8 +306,84 @@
                     </div>
                 </div>
             </details>
+        </div>
 
-            <!-- 未來三天開/封島戰術預測總覽 (含動態真實日期與時段) -->
+        <!-- 右側動態圖形視覺化與預報專區欄 -->
+        <div class="lg:col-span-6 flex flex-col gap-2.5">
+            <!-- 碼頭動態剖面圖 Canvas -->
+            <section class="card border-[#38bdf8]">
+                <div class="card-header text-[#38bdf8]">
+                    <span id="lblProfileTitle">📐 <span class="tag-d0">D0 現場</span> 碼頭動態剖面與越浪分析</span>
+                    <span class="badge badge-yellow text-[8px]" id="lblProfileSlotTag">時段連動中</span>
+                </div>
+                <div class="bg-[#0b172a] border border-blue-500/50 p-1 rounded-lg mb-1 flex items-center justify-between gap-1">
+                    <span class="text-[9px] font-bold text-slate-300 pl-0.5 whitespace-nowrap">⚓ 剖面模式:</span>
+                    <div class="grid grid-cols-3 gap-1 flex-1">
+                        <button id="tabProfileSouth" onclick="setProfileViewMode('SOUTH')" class="tab-btn py-0.5 px-0.5 rounded text-[8.5px] font-bold border text-center tab-south-active">⚓ 南岸</button>
+                        <button id="tabProfileNorth" onclick="setProfileViewMode('NORTH')" class="tab-btn py-0.5 px-0.5 rounded text-[8.5px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚓ 北岸</button>
+                        <button id="tabProfileCompare" onclick="setProfileViewMode('COMPARE')" class="tab-btn py-0.5 px-0.5 rounded text-[8.5px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚖️ 對比</button>
+                    </div>
+                </div>
+                <div class="canvas-container h-[185px]" id="profileContainer">
+                    <canvas id="profileCanvas" class="w-full h-full block"></canvas>
+                </div>
+            </section>
+
+            <!-- 態勢雷達圖 Canvas -->
+            <section class="card border-[#38bdf8]">
+                <div class="card-header text-[#38bdf8] flex justify-between items-center">
+                    <span class="font-extrabold" id="lblRadarTitle">🎯 <span class="tag-d0">D0 現場</span> 態勢雷達圖與 5 大算子對比 (南岸)</span>
+                    <div class="flex items-center gap-1.5"><span id="radarNorthBadge" class="badge badge-pass text-[8px]">北岸 🟢 通過</span><span id="radarSouthBadge" class="badge badge-pass text-[8px]">南岸 🟢 通過</span></div>
+                </div>
+                <div class="bg-[#0b172a] border border-blue-500/50 p-1 rounded-lg mb-1 flex items-center justify-between gap-1">
+                    <span class="text-[9px] font-bold text-slate-300 pl-0.5 whitespace-nowrap">📡 雷達模式:</span>
+                    <div class="grid grid-cols-3 gap-1 flex-1">
+                        <button id="tabRadarSouth" onclick="setRadarViewMode('SOUTH')" class="tab-btn py-0.5 px-0.5 rounded text-[8.5px] font-bold border text-center tab-south-active">⚓ 南岸</button>
+                        <button id="tabRadarNorth" onclick="setRadarViewMode('NORTH')" class="tab-btn py-0.5 px-0.5 rounded text-[8.5px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚓ 北岸</button>
+                        <button id="tabRadarCompare" onclick="setRadarViewMode('COMPARE')" class="tab-btn py-0.5 px-0.5 rounded text-[8.5px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚖️ 雙岸</button>
+                    </div>
+                </div>
+                <div class="canvas-container h-[220px]" id="radarContainer">
+                    <canvas id="nativeRadarCanvas" class="w-full h-full block"></canvas>
+                </div>
+            </section>
+
+            <!-- Windy 即時氣象風場視窗 -->
+            <details class="card border-[#0ea5e9] bg-[#0c182b]" id="detailsWindy" open>
+                <summary class="card-header text-sky-400 font-bold flex justify-between items-center cursor-pointer list-none outline-none">
+                    <span class="flex items-center gap-1.5 text-[11.5px]">
+                        <span>🌀</span>
+                        <span class="tag-d0">D0 現場</span> Windy 即時風場與海象衛星遙測視窗
+                    </span>
+                    <div class="flex items-center gap-2">
+                        <span class="badge badge-pass text-[8.5px]">ECMWF 全球數值圖</span>
+                        <span class="text-slate-400 text-[8px]">▼ 收合/展開</span>
+                    </div>
+                </summary>
+                <div class="pt-1.5 border-t border-sky-500/30 mt-1">
+                    <!-- Windy 圖層切換按鈕列 -->
+                    <div class="bg-[#0b172a] border border-sky-500/50 p-1 rounded-lg mb-1 flex items-center justify-between gap-1 overflow-x-auto font-mono text-[8.5px]">
+                        <span class="font-bold text-slate-300 pl-0.5 whitespace-nowrap">🌀 切換圖層:</span>
+                        <div class="grid grid-cols-4 gap-1 flex-1 min-w-[260px]">
+                            <button id="btnWindyWind" onclick="changeWindyOverlay('wind')" class="tab-btn py-0.5 px-1 rounded font-bold border border-sky-400 bg-sky-600 text-white text-center">💨 風速</button>
+                            <button id="btnWindyWaves" onclick="changeWindyOverlay('waves')" class="tab-btn py-0.5 px-1 rounded font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">🌊 浪高</button>
+                            <button id="btnWindySwell" onclick="changeWindyOverlay('swell')" class="tab-btn py-0.5 px-1 rounded font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">📏 湧浪</button>
+                            <button id="btnWindyRain" onclick="changeWindyOverlay('rain')" class="tab-btn py-0.5 px-1 rounded font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">🌧️ 降雨</button>
+                        </div>
+                    </div>
+                    <div class="w-full h-[320px] rounded-lg overflow-hidden border border-slate-700/60 shadow-inner">
+                        <iframe
+                            id="windyIframe"
+                            class="w-full h-full border-0"
+                            src="https://embed.windy.com/embed2.html?lat=24.843&lon=121.952&detailLat=24.843&detailLon=121.952&width=650&height=450&zoom=10&level=surface&overlay=wind&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=m%2Fs&metricTemp=%C2%B0C&radarRange=-1"
+                            loading="lazy"
+                            title="Windy Live Map Guishan Island">
+                        </iframe>
+                    </div>
+                </div>
+            </details>
+
+            <!-- 未來三天開/封島戰術預測總覽 (已放置回 Windy 正下方) -->
             <details class="card border-[#c084fc] bg-[#140b29]" open id="detailsWeeklyForecast">
                 <summary class="card-header text-purple-300 flex justify-between items-center cursor-pointer list-none outline-none">
                     <span class="font-extrabold text-[11.5px] flex items-center gap-1"><span class="tag-d1">戰術預報</span> GEM 未來三天開/封島戰術預測總覽 (含日期與時段)</span>
@@ -355,82 +431,38 @@
                     </table>
                 </div>
             </details>
-        </div>
 
-        <!-- 右側動態圖形視覺化欄 -->
-        <div class="lg:col-span-6 flex flex-col gap-2.5">
-            <!-- 碼頭動態剖面圖 Canvas -->
-            <section class="card border-[#38bdf8]">
-                <div class="card-header text-[#38bdf8]">
-                    <span id="lblProfileTitle">📐 <span class="tag-d0">D0 現場</span> 碼頭動態剖面與越浪分析</span>
-                    <span class="badge badge-yellow text-[8px]" id="lblProfileSlotTag">時段連動中</span>
+            <!-- 官方公告 vs GEM 模型 雙欄對比 -->
+            <section class="card border-[#c084fc] bg-[#1a0f2e]">
+                <div class="card-header text-purple-300">
+                    <span class="flex items-center gap-1 font-bold text-[11.5px]"><span class="tag-d1">D0-D2 預報</span> 官方公告 vs GEM 模型雙欄對比</span>
+                    <span class="badge badge-pass !bg-purple-900/50 !text-purple-300 !border-purple-500/50 text-[8px]">🔄 雙生對算</span>
                 </div>
-                <div class="bg-[#0b172a] border border-blue-500/50 p-1 rounded-lg mb-1 flex items-center justify-between gap-1">
-                    <span class="text-[9px] font-bold text-slate-300 pl-0.5 whitespace-nowrap">⚓ 剖面模式:</span>
-                    <div class="grid grid-cols-3 gap-1 flex-1">
-                        <button id="tabProfileSouth" onclick="setProfileViewMode('SOUTH')" class="tab-btn py-0.5 px-0.5 rounded text-[8.5px] font-bold border text-center tab-south-active">⚓ 南岸</button>
-                        <button id="tabProfileNorth" onclick="setProfileViewMode('NORTH')" class="tab-btn py-0.5 px-0.5 rounded text-[8.5px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚓ 北岸</button>
-                        <button id="tabProfileCompare" onclick="setProfileViewMode('COMPARE')" class="tab-btn py-0.5 px-0.5 rounded text-[8.5px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚖️ 對比</button>
-                    </div>
-                </div>
-                <div class="canvas-container h-[185px]" id="profileContainer">
-                    <canvas id="profileCanvas" class="w-full h-full block"></canvas>
-                </div>
-            </section>
-
-            <!-- 態勢雷達圖 Canvas -->
-            <section class="card border-[#38bdf8]">
-                <div class="card-header text-[#38bdf8] flex justify-between items-center">
-                    <span class="font-extrabold" id="lblRadarTitle">🎯 <span class="tag-d0">D0 現場</span> 態勢雷達圖與 5 大算子對比 (南岸)</span>
-                    <div class="flex items-center gap-1.5"><span id="radarNorthBadge" class="badge badge-pass text-[8px]">北岸 🟢 通過</span><span id="radarSouthBadge" class="badge badge-pass text-[8px]">南岸 🟢 通過</span></div>
-                </div>
-                <div class="bg-[#0b172a] border border-blue-500/50 p-1 rounded-lg mb-1 flex items-center justify-between gap-1">
-                    <span class="text-[9px] font-bold text-slate-300 pl-0.5 whitespace-nowrap">📡 雷達模式:</span>
-                    <div class="grid grid-cols-3 gap-1 flex-1">
-                        <button id="tabRadarSouth" onclick="setRadarViewMode('SOUTH')" class="tab-btn py-0.5 px-0.5 rounded text-[8.5px] font-bold border text-center tab-south-active">⚓ 南岸</button>
-                        <button id="tabRadarNorth" onclick="setRadarViewMode('NORTH')" class="tab-btn py-0.5 px-0.5 rounded text-[8.5px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚓ 北岸</button>
-                        <button id="tabRadarCompare" onclick="setRadarViewMode('COMPARE')" class="tab-btn py-0.5 px-0.5 rounded text-[8.5px] font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">⚖️ 雙岸</button>
-                    </div>
-                </div>
-                <div class="canvas-container h-[220px]" id="radarContainer">
-                    <canvas id="nativeRadarCanvas" class="w-full h-full block"></canvas>
-                </div>
-            </section>
-
-            <!-- Windy 即時氣象風場視窗 (含上方圖層快速切換按鈕) -->
-            <details class="card border-[#0ea5e9] bg-[#0c182b]" id="detailsWindy" open>
-                <summary class="card-header text-sky-400 font-bold flex justify-between items-center cursor-pointer list-none outline-none">
-                    <span class="flex items-center gap-1.5 text-[11.5px]">
-                        <span>🌀</span>
-                        <span class="tag-d0">D0 現場</span> Windy 即時風場與海象衛星遙測視窗
-                    </span>
-                    <div class="flex items-center gap-2">
-                        <span class="badge badge-pass text-[8.5px]">ECMWF 全球數值圖</span>
-                        <span class="text-slate-400 text-[8px]">▼ 收合/展開</span>
-                    </div>
-                </summary>
-                <div class="pt-1.5 border-t border-sky-500/30 mt-1">
-                    <!-- Windy 圖層切換按鈕列 -->
-                    <div class="bg-[#0b172a] border border-sky-500/50 p-1 rounded-lg mb-1 flex items-center justify-between gap-1 overflow-x-auto font-mono text-[8.5px]">
-                        <span class="font-bold text-slate-300 pl-0.5 whitespace-nowrap">🌀 切換圖層:</span>
-                        <div class="grid grid-cols-4 gap-1 flex-1 min-w-[260px]">
-                            <button id="btnWindyWind" onclick="changeWindyOverlay('wind')" class="tab-btn py-0.5 px-1 rounded font-bold border border-sky-400 bg-sky-600 text-white text-center">💨 風速</button>
-                            <button id="btnWindyWaves" onclick="changeWindyOverlay('waves')" class="tab-btn py-0.5 px-1 rounded font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">🌊 浪高</button>
-                            <button id="btnWindySwell" onclick="changeWindyOverlay('swell')" class="tab-btn py-0.5 px-1 rounded font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">📏 湧浪</button>
-                            <button id="btnWindyRain" onclick="changeWindyOverlay('rain')" class="tab-btn py-0.5 px-1 rounded font-bold border border-slate-700 bg-slate-800 text-slate-300 text-center">🌧️ 降雨</button>
+                <div class="p-1 space-y-2 text-[10px]">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="bg-black/60 p-2 rounded border border-amber-500/40 flex flex-col justify-between">
+                            <div class="font-bold text-amber-300 border-b border-amber-500/30 pb-0.5 mb-1 flex justify-between items-center">
+                                <span>🏛️ 風管處官網公告</span>
+                                <span class="badge badge-pass text-[7.5px]">🟢 正常通航</span>
+                            </div>
+                            <div class="space-y-1 text-[8.5px]">
+                                <div class="flex justify-between"><span>預估封島：</span><b class="font-mono text-emerald-300">0 天 (常規開放)</b></div>
+                                <div class="flex justify-between"><span>官方預警：</span><b class="font-mono text-slate-300">無封島公告</b></div>
+                            </div>
+                        </div>
+                        <div class="bg-black/60 p-2 rounded border border-purple-500/40 flex flex-col justify-between">
+                            <div class="font-bold text-purple-300 border-b border-purple-500/30 pb-0.5 mb-1 flex justify-between items-center">
+                                <span>🤖 GEM-PINN 雙生模型</span>
+                                <span class="badge badge-pass text-[7.5px]">🟢 條件通航</span>
+                            </div>
+                            <div class="space-y-1 text-[8.5px]">
+                                <div class="flex justify-between"><span>模型裁定：</span><b class="font-mono text-emerald-300">Q1 全線開放</b></div>
+                                <div class="flex justify-between"><span>再封島觸發：</span><b class="font-mono text-sky-300">未破門檻 (PASS)</b></div>
+                            </div>
                         </div>
                     </div>
-                    <div class="w-full h-[320px] rounded-lg overflow-hidden border border-slate-700/60 shadow-inner">
-                        <iframe
-                            id="windyIframe"
-                            class="w-full h-full border-0"
-                            src="https://embed.windy.com/embed2.html?lat=24.843&lon=121.952&detailLat=24.843&detailLon=121.952&width=650&height=450&zoom=10&level=surface&overlay=wind&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=m%2Fs&metricTemp=%C2%B0C&radarRange=-1"
-                            loading="lazy"
-                            title="Windy Live Map Guishan Island">
-                        </iframe>
-                    </div>
                 </div>
-            </details>
+            </section>
 
             <!-- 颱風專區與行政應變 (預設收合) -->
             <details class="card border-[#c084fc] bg-[#140b29]" id="detailsTyphoonZone">
@@ -469,42 +501,10 @@
                     </div>
                 </div>
             </details>
-
-            <!-- 官方公告 vs GEM 模型 雙欄對比 -->
-            <section class="card border-[#c084fc] bg-[#1a0f2e]">
-                <div class="card-header text-purple-300">
-                    <span class="flex items-center gap-1 font-bold text-[11.5px]"><span class="tag-d1">D0-D2 預報</span> 官方公告 vs GEM 模型雙欄對比</span>
-                    <span class="badge badge-pass !bg-purple-900/50 !text-purple-300 !border-purple-500/50 text-[8px]">🔄 雙生對算</span>
-                </div>
-                <div class="p-1 space-y-2 text-[10px]">
-                    <div class="grid grid-cols-2 gap-2">
-                        <div class="bg-black/60 p-2 rounded border border-amber-500/40 flex flex-col justify-between">
-                            <div class="font-bold text-amber-300 border-b border-amber-500/30 pb-0.5 mb-1 flex justify-between items-center">
-                                <span>🏛️ 風管處官網公告</span>
-                                <span class="badge badge-pass text-[7.5px]">🟢 正常通航</span>
-                            </div>
-                            <div class="space-y-1 text-[8.5px]">
-                                <div class="flex justify-between"><span>預估封島：</span><b class="font-mono text-emerald-300">0 天 (常規開放)</b></div>
-                                <div class="flex justify-between"><span>官方預警：</span><b class="font-mono text-slate-300">無封島公告</b></div>
-                            </div>
-                        </div>
-                        <div class="bg-black/60 p-2 rounded border border-purple-500/40 flex flex-col justify-between">
-                            <div class="font-bold text-purple-300 border-b border-purple-500/30 pb-0.5 mb-1 flex justify-between items-center">
-                                <span>🤖 GEM-PINN 雙生模型</span>
-                                <span class="badge badge-pass text-[7.5px]">🟢 條件通航</span>
-                            </div>
-                            <div class="space-y-1 text-[8.5px]">
-                                <div class="flex justify-between"><span>模型裁定：</span><b class="font-mono text-emerald-300">Q1 全線開放</b></div>
-                                <div class="flex justify-between"><span>再封島觸發：</span><b class="font-mono text-sky-300">未破門檻 (PASS)</b></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
         </div>
     </div>
 
-    <!-- JS 核心控制器 (含 Windy 圖層動態切換) -->
+    <!-- JS 核心控制器 -->
     <script>
     (function() {
         const getEl = id => document.getElementById(id);
