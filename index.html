@@ -81,18 +81,18 @@
         </div>
     </header>
 
-    <!-- 1. 南北岸 CCTV IP 燈號連線監視列 -->
+    <!-- 1. 南北岸 CCTV 監視燈號連線監視列 (已刪除 IP 數值) -->
     <section class="bg-[#0b172a] border border-[#1e2d4a] rounded-xl p-2 mb-2.5 shadow-md w-full">
         <div class="flex flex-wrap justify-between items-center text-[10px] gap-2 font-mono">
             <div class="flex items-center gap-2.5">
-                <span class="font-bold text-sky-300 flex items-center gap-1">📹 CCTV IP 串流:</span>
+                <span class="font-bold text-sky-300 flex items-center gap-1">📹 CCTV 監視燈號:</span>
                 <span class="inline-flex items-center gap-1 bg-slate-900 px-2 py-0.5 rounded border border-slate-700">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    北岸 IP (192.168.1.101): <b class="text-emerald-400">ONLINE</b>
+                    北岸: <b class="text-emerald-400">ONLINE</b>
                 </span>
                 <span class="inline-flex items-center gap-1 bg-slate-900 px-2 py-0.5 rounded border border-slate-700">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    南岸 IP (192.168.1.102): <b class="text-emerald-400">ONLINE</b>
+                    南岸: <b class="text-emerald-400">ONLINE</b>
                 </span>
             </div>
             <span class="text-[8.5px] text-slate-400">Vision-PINN 雙視訊監控中</span>
@@ -404,7 +404,7 @@
         </div>
     </div>
 
-    <!-- JS 核心控制器 (繪圖與互動完全修復) -->
+    <!-- JS 核心控制器 -->
     <script>
     (function() {
         const getEl = id => document.getElementById(id);
@@ -648,15 +648,12 @@
             const crestY = cdToY(crestCD);
             const quayX = w * 0.50;
 
-            // 海床
             ctx.fillStyle = '#1e1b18'; ctx.fillRect(0, seabedY, w, Math.max(10, h - seabedY));
             ctx.strokeStyle = '#475569'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, seabedY); ctx.lineTo(w, seabedY); ctx.stroke();
 
-            // 碼頭牆體
             ctx.fillStyle = '#1e2d4a'; ctx.fillRect(quayX, deckY, w - quayX, seabedY - deckY);
             ctx.strokeStyle = accentColor; ctx.lineWidth = 1.2; ctx.strokeRect(quayX, deckY, w - quayX, seabedY - deckY);
 
-            // 海水與動態波浪
             const isOvertopping = fb < 0.50;
             ctx.beginPath(); ctx.moveTo(0, seabedY); ctx.lineTo(0, tideY);
             const waveAmp = Math.min(16, hsPier * 3.5);
@@ -669,24 +666,20 @@
             ctx.closePath();
             ctx.fillStyle = isOvertopping ? 'rgba(239, 68, 68, 0.4)' : 'rgba(56, 189, 248, 0.35)'; ctx.fill();
 
-            // 乾舷門檻虛線
             const limitCrestCD = deckCD - 0.50;
             const limitY = cdToY(limitCrestCD);
             ctx.beginPath(); ctx.setLineDash([4, 4]); ctx.moveTo(0, limitY); ctx.lineTo(w, limitY);
             ctx.strokeStyle = '#facc15'; ctx.lineWidth = 1.2; ctx.stroke();
 
-            // 波頂實測線
             ctx.beginPath(); ctx.setLineDash([3, 3]); ctx.moveTo(0, crestY); ctx.lineTo(w, crestY);
             ctx.strokeStyle = isOvertopping ? '#ef4444' : '#38bdf8'; ctx.lineWidth = 1.2; ctx.stroke();
             ctx.setLineDash([]);
 
-            // 標籤文字
             ctx.font = 'bold 8px sans-serif'; ctx.textAlign = 'left';
             ctx.fillStyle = '#facc15'; ctx.fillText(`── 乾舷門檻 (+${limitCrestCD.toFixed(2)}m CD)`, 6, limitY - 4);
             ctx.fillStyle = isOvertopping ? '#ef4444' : '#38bdf8';
             ctx.fillText(`── 波頂 (+${crestCD.toFixed(2)}m CD / FB: ${fb.toFixed(2)}m)`, 6, crestY + 11);
 
-            // 客輪輪廓
             const shipW = Math.min(50, quayX * 0.48);
             const shipX = quayX - shipW - 10;
             const shipDeckY = tideY - 9;
@@ -697,7 +690,6 @@
             ctx.closePath();
             ctx.fillStyle = '#1e293b'; ctx.fill(); ctx.strokeStyle = '#f8fafc'; ctx.lineWidth = 1; ctx.stroke();
 
-            // UKC 指示線
             const ukcX = shipX + shipW * 0.5;
             ctx.beginPath(); ctx.moveTo(ukcX, keelY); ctx.lineTo(ukcX, seabedY);
             ctx.strokeStyle = ukcPass ? '#10b981' : '#ef4444'; ctx.lineWidth = 1.8; ctx.stroke();
@@ -767,7 +759,6 @@
             const angles = [];
             for (let i = 0; i < count; i++) angles.push(-Math.PI / 2 + (i * 2 * Math.PI) / count);
 
-            // 繪製雷達網格圈
             [0.3, 0.6, 1.0, 1.25].forEach(lvl => {
                 ctx.beginPath();
                 for (let i = 0; i < count; i++) {
@@ -783,7 +774,6 @@
                 ctx.stroke();
             });
 
-            // 繪製雷達輻射軸線
             for (let i = 0; i < count; i++) {
                 ctx.beginPath(); ctx.moveTo(cx, cy);
                 ctx.lineTo(cx + R * 1.25 * Math.cos(angles[i]), cy + R * 1.25 * Math.sin(angles[i]));
