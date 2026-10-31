@@ -99,7 +99,7 @@
         </div>
     </section>
 
-    <!-- 戰術沙盤演練 (手機版精簡隱藏，桌面版保留) -->
+    <!-- 戰術沙盤演練 (隱藏式拉桿，用於即時模擬數據) -->
     <details class="card border-[#2563eb] bg-[#0c182b] mb-2.5 hidden lg:block" open id="detailsSandbox">
         <summary class="card-header text-[#60a5fa] list-none outline-none cursor-pointer flex justify-between items-center">
             <span class="font-extrabold text-[11.5px] flex items-center gap-1"><span class="tag-d0">D0 現場</span> 戰術沙盤物理調度演練 (拖曳拉桿模擬水動力極端相變)</span>
@@ -120,7 +120,7 @@
         <!-- 左側物理運算監控欄 -->
         <div class="lg:col-span-6 flex flex-col gap-2.5">
 
-            <!-- 2. 雙岸關鍵數值側向比對表 (含越浪率 CV 覆寫) -->
+            <!-- 雙岸關鍵數值側向比對表 -->
             <section class="card border-[#38bdf8] bg-[#091526]">
                 <div class="card-header text-sky-300 flex justify-between items-center">
                     <span class="font-extrabold text-[11.5px] flex items-center gap-1"><span class="tag-d0">D0 現場</span> 雙岸關鍵物理數值側向比對</span>
@@ -190,7 +190,7 @@
                 </div>
             </section>
 
-            <!-- 3. 官方公準時窗與常規/游擊雙動態調度分表 -->
+            <!-- 官方公準時窗與常規/游擊雙動態調度分表 -->
             <details class="card border-[#38bdf8] bg-[#0c182b]" open id="detailsGuerrillaSchedule">
                 <summary class="card-header text-[#38bdf8] cursor-pointer list-none outline-none flex justify-between items-center">
                     <span class="font-extrabold text-[11.5px] flex items-center gap-1.5">
@@ -306,7 +306,7 @@
             </details>
         </div>
 
-        <!-- 右側動態圖形視覺化與預警推演欄 -->
+        <!-- 右側動態圖形視覺化欄 -->
         <div class="lg:col-span-6 flex flex-col gap-2.5">
             <!-- 碼頭動態剖面圖 Canvas -->
             <section class="card border-[#38bdf8]">
@@ -404,7 +404,7 @@
         </div>
     </div>
 
-    <!-- JS 核心控制器 -->
+    <!-- JS 核心控制器 (繪圖與互動完全修復) -->
     <script>
     (function() {
         const getEl = id => document.getElementById(id);
@@ -413,7 +413,6 @@
         let currentProfileMode = 'SOUTH';
         let currentRadarMode = 'SOUTH';
         let animPhase = 0;
-        let resizeTimer = null;
         let autoPilotTimer = null;
         let stormPhase = 0;
         let isStorming = false;
@@ -511,6 +510,25 @@
             setInterval(update, 1000);
         }
 
+        function initUIControls() {
+            const bindInput = (id, labelId, suffix, isTide = false) => {
+                const el = getEl(id);
+                if (el) {
+                    el.addEventListener('input', e => {
+                        const val = parseFloat(e.target.value);
+                        setTxt(labelId, isTide ? `${val >= 0 ? '+' : ''}${val.toFixed(2)}${suffix}` : `${val}${suffix}`);
+                        debouncedRender();
+                    });
+                }
+            };
+            bindInput('rngHs', 'lblHs', 'm');
+            bindInput('rngW', 'lblW', 'm/s');
+            bindInput('rngTp', 'lblTp', 's');
+            bindInput('rngTide', 'lblTide', 'm', true);
+            bindInput('rngSog', 'lblSog', 'kts');
+            bindInput('rngDeltaTheta', 'lblDeltaTheta', '°');
+        }
+
         let renderTimeout = null;
         function debouncedRender() {
             if (renderTimeout) cancelAnimationFrame(renderTimeout);
@@ -599,6 +617,8 @@
                 if (headerMaster) headerMaster.style.borderLeftColor = '#10b981';
             }
 
+            window.lastDiagnostics = { vetoNorth, vetoSouth };
+
             if (!window.isDrawing) {
                 window.isDrawing = true;
                 drawProfileCanvas();
@@ -607,34 +627,251 @@
             }
         }
 
+        function drawSingleProfile(ctx, offsetX, offsetY, w, h, title, depthBase, deckCD, hsPier, weff, tp, tideCD, accentColor) {
+            ctx.save();
+            ctx.translate(offsetX, offsetY);
+            const cdToY = cd => ((5.0 - cd) / 17.0) * (h - 30) + 15;
+            const sog = parseFloat(getEl('rngSog')?.value || 3.2);
+            const fn_h = Math.min(0.95, (sog * 0.514444) / Math.sqrt(9.81 * (depthBase + tideCD)));
+            const squat = Math.min(0.80, Math.max(0.02, (0.65 * (sog ** 2)) / (30.0 * ((depthBase + tideCD) / 2.02)) * (1.0 / Math.sqrt(Math.max(0.05, 1.0 - (fn_h ** 2)))) * 0.50));
+            const draft = 2.02;
+            const keelCD = tideCD - draft - squat;
+            const ukc = depthBase + keelCD - hsPier * 0.5;
+            const crestCD = tideCD + hsPier * 0.68;
+            const fb = deckCD - crestCD;
+            const ukcPass = ukc >= 1.50;
+
+            const tideY = cdToY(tideCD);
+            const deckY = cdToY(deckCD);
+            const seabedY = cdToY(-depthBase);
+            const keelY = cdToY(keelCD);
+            const crestY = cdToY(crestCD);
+            const quayX = w * 0.50;
+
+            // 海床
+            ctx.fillStyle = '#1e1b18'; ctx.fillRect(0, seabedY, w, Math.max(10, h - seabedY));
+            ctx.strokeStyle = '#475569'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(0, seabedY); ctx.lineTo(w, seabedY); ctx.stroke();
+
+            // 碼頭牆體
+            ctx.fillStyle = '#1e2d4a'; ctx.fillRect(quayX, deckY, w - quayX, seabedY - deckY);
+            ctx.strokeStyle = accentColor; ctx.lineWidth = 1.2; ctx.strokeRect(quayX, deckY, w - quayX, seabedY - deckY);
+
+            // 海水與動態波浪
+            const isOvertopping = fb < 0.50;
+            ctx.beginPath(); ctx.moveTo(0, seabedY); ctx.lineTo(0, tideY);
+            const waveAmp = Math.min(16, hsPier * 3.5);
+            for (let x = 0; x <= quayX; x += 4) {
+                const wy = tideY + Math.sin(x * 0.05 + animPhase) * waveAmp;
+                ctx.lineTo(x, wy);
+            }
+            if (isOvertopping) { ctx.lineTo(quayX, crestY); ctx.lineTo(w, crestY + 1); ctx.lineTo(w, seabedY); }
+            else { ctx.lineTo(quayX, tideY); ctx.lineTo(quayX, seabedY); }
+            ctx.closePath();
+            ctx.fillStyle = isOvertopping ? 'rgba(239, 68, 68, 0.4)' : 'rgba(56, 189, 248, 0.35)'; ctx.fill();
+
+            // 乾舷門檻虛線
+            const limitCrestCD = deckCD - 0.50;
+            const limitY = cdToY(limitCrestCD);
+            ctx.beginPath(); ctx.setLineDash([4, 4]); ctx.moveTo(0, limitY); ctx.lineTo(w, limitY);
+            ctx.strokeStyle = '#facc15'; ctx.lineWidth = 1.2; ctx.stroke();
+
+            // 波頂實測線
+            ctx.beginPath(); ctx.setLineDash([3, 3]); ctx.moveTo(0, crestY); ctx.lineTo(w, crestY);
+            ctx.strokeStyle = isOvertopping ? '#ef4444' : '#38bdf8'; ctx.lineWidth = 1.2; ctx.stroke();
+            ctx.setLineDash([]);
+
+            // 標籤文字
+            ctx.font = 'bold 8px sans-serif'; ctx.textAlign = 'left';
+            ctx.fillStyle = '#facc15'; ctx.fillText(`── 乾舷門檻 (+${limitCrestCD.toFixed(2)}m CD)`, 6, limitY - 4);
+            ctx.fillStyle = isOvertopping ? '#ef4444' : '#38bdf8';
+            ctx.fillText(`── 波頂 (+${crestCD.toFixed(2)}m CD / FB: ${fb.toFixed(2)}m)`, 6, crestY + 11);
+
+            // 客輪輪廓
+            const shipW = Math.min(50, quayX * 0.48);
+            const shipX = quayX - shipW - 10;
+            const shipDeckY = tideY - 9;
+            ctx.beginPath();
+            ctx.moveTo(shipX, shipDeckY); ctx.lineTo(shipX + shipW, shipDeckY);
+            ctx.lineTo(shipX + shipW, keelY - 3); ctx.lineTo(shipX + shipW - 4, keelY);
+            ctx.lineTo(shipX + 4, keelY); ctx.lineTo(shipX, keelY - 5);
+            ctx.closePath();
+            ctx.fillStyle = '#1e293b'; ctx.fill(); ctx.strokeStyle = '#f8fafc'; ctx.lineWidth = 1; ctx.stroke();
+
+            // UKC 指示線
+            const ukcX = shipX + shipW * 0.5;
+            ctx.beginPath(); ctx.moveTo(ukcX, keelY); ctx.lineTo(ukcX, seabedY);
+            ctx.strokeStyle = ukcPass ? '#10b981' : '#ef4444'; ctx.lineWidth = 1.8; ctx.stroke();
+            ctx.font = 'bold 8.5px sans-serif'; ctx.textAlign = 'center';
+            ctx.fillStyle = ukcPass ? '#10b981' : '#ef4444';
+            ctx.fillText(`UKC: ${ukc.toFixed(2)}m (Squat: ${squat.toFixed(2)}m) ${ukcPass ? '🟢' : '🔴'}`, ukcX + 32, (keelY + seabedY) / 2 + 3);
+            ctx.restore();
+        }
+
         function drawProfileCanvas() {
             const canvas = getEl('profileCanvas');
             const container = getEl('profileContainer');
             if (!canvas || !container) return;
+            const hs = parseFloat(getEl('rngHs')?.value || 0.85);
+            const wVal = parseFloat(getEl('rngW')?.value || 6.50);
+            const tp = parseFloat(getEl('rngTp')?.value || 8.5);
+            const tide = parseFloat(getEl('rngTide')?.value || 1.10);
+
             const w = container.clientWidth || 320;
             const h = container.clientHeight || 185;
             const dpr = window.devicePixelRatio || 1;
             canvas.width = w * dpr; canvas.height = h * dpr;
             canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
             const ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr);
-            ctx.fillStyle = '#050a14'; ctx.fillRect(0, 0, w, h);
+            const isHigh = document.body.classList.contains('high-contrast');
+            ctx.fillStyle = isHigh ? '#f8fafc' : '#050a14'; ctx.fillRect(0, 0, w, h);
+
+            const kdNorth = tp >= 12.0 ? 1.00 : 1.06;
+            const kdSouth = tp >= 12.0 ? 1.00 : 0.62;
+
+            if (currentProfileMode === 'COMPARE') {
+                const subW = (w - 6) / 2;
+                setTxt('lblProfileTitle', '📐 [D0 現場] 碼頭動態剖面對比 (北岸 vs 南岸)');
+                drawSingleProfile(ctx, 0, 0, subW, h, '北岸 (主泊位 -8.5m)', 8.50, 3.20, hs * kdNorth, wVal, tp, tide, '#38bdf8');
+                drawSingleProfile(ctx, subW + 6, 0, subW, h, '南岸 (權宜泊位 -9.8m)', 9.80, 2.50, hs * kdSouth, wVal, tp, tide, '#34d399');
+            } else if (currentProfileMode === 'NORTH') {
+                setTxt('lblProfileTitle', '📐 [D0 現場] 碼頭動態剖面 (北岸碼頭主泊位 -8.50m CD)');
+                drawSingleProfile(ctx, 0, 0, w, h, '北岸碼頭 (-8.50m CD)', 8.50, 3.20, hs * kdNorth, wVal, tp, tide, '#38bdf8');
+            } else {
+                setTxt('lblProfileTitle', '📐 [D0 現場] 碼頭動態剖面 (南岸碼頭權宜泊位 -9.80m CD)');
+                drawSingleProfile(ctx, 0, 0, w, h, '南岸碼頭 (-9.80m CD)', 9.80, 2.50, hs * kdSouth, wVal, tp, tide, '#34d399');
+            }
         }
 
         function drawRadarCanvas() {
             const canvas = getEl('nativeRadarCanvas');
             const container = getEl('radarContainer');
             if (!canvas || !container) return;
+            const hs = parseFloat(getEl('rngHs')?.value || 0.85);
+            const wVal = parseFloat(getEl('rngW')?.value || 6.50);
+            const tpVal = parseFloat(getEl('rngTp')?.value || 8.5);
+            const tideVal = parseFloat(getEl('rngTide')?.value || 1.10);
+            const deltaTheta = parseFloat(getEl('rngDeltaTheta')?.value || 50);
+
             const w = container.clientWidth || 320;
             const h = container.clientHeight || 220;
             const dpr = window.devicePixelRatio || 1;
             canvas.width = w * dpr; canvas.height = h * dpr;
             canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
             const ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr);
-            ctx.fillStyle = '#050a14'; ctx.fillRect(0, 0, w, h);
+            const isHigh = document.body.classList.contains('high-contrast');
+            ctx.fillStyle = isHigh ? '#f8fafc' : '#050a14'; ctx.fillRect(0, 0, w, h);
+
+            const cx = w / 2; const cy = h * 0.44;
+            const R = Math.min(w * 0.22, h * 0.28, 75);
+            const count = 5;
+            const angles = [];
+            for (let i = 0; i < count; i++) angles.push(-Math.PI / 2 + (i * 2 * Math.PI) / count);
+
+            // 繪製雷達網格圈
+            [0.3, 0.6, 1.0, 1.25].forEach(lvl => {
+                ctx.beginPath();
+                for (let i = 0; i < count; i++) {
+                    const r = R * lvl;
+                    const x = cx + r * Math.cos(angles[i]);
+                    const y = cy + r * Math.sin(angles[i]);
+                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.strokeStyle = lvl === 1.0 ? '#facc15' : (isHigh ? '#94a3b8' : '#1e2d4a');
+                ctx.lineWidth = lvl === 1.0 ? 1.4 : 0.8;
+                if (lvl === 1.0) ctx.setLineDash([4, 4]); else ctx.setLineDash([]);
+                ctx.stroke();
+            });
+
+            // 繪製雷達輻射軸線
+            for (let i = 0; i < count; i++) {
+                ctx.beginPath(); ctx.moveTo(cx, cy);
+                ctx.lineTo(cx + R * 1.25 * Math.cos(angles[i]), cy + R * 1.25 * Math.sin(angles[i]));
+                ctx.strokeStyle = isHigh ? '#94a3b8' : '#1e2d4a'; ctx.lineWidth = 0.8; ctx.setLineDash([]); ctx.stroke();
+            }
+
+            const kdNorth = tpVal >= 12.0 ? 1.00 : 1.06;
+            const kdSouth = tpVal >= 12.0 ? 1.00 : 0.62;
+            const hsNorth = hs * kdNorth;
+            const hsSouth = hs * kdSouth;
+            const weffNorth = wVal * Math.abs(Math.cos(deltaTheta * Math.PI / 180.0));
+            const weffSouth = wVal * Math.abs(Math.cos((90.0 - deltaTheta) * Math.PI / 180.0));
+            const ukcNorth = 8.50 + tideVal - 2.02 - 0.15 - hsNorth * 0.5;
+            const ukcSouth = 9.80 + tideVal - 2.02 - 0.15 - hsSouth * 0.5;
+            const fbNorth = 3.20 - (tideVal + hsNorth * 0.68);
+            const fbSouth = 2.50 - (tideVal + hsSouth * 0.68);
+
+            const getRatios = (hsP, weffP, ukcP, fbP) => {
+                return [
+                    hsP / 1.13,
+                    weffP / 10.17,
+                    tpVal / 12.0,
+                    ukcP < 1.50 ? (1.0 + (1.50 - ukcP) / 1.50) : Math.max(0.2, 0.8 - (ukcP - 1.50) / 10.0),
+                    fbP < 0.50 ? (1.0 + (0.50 - fbP) / 0.50) : Math.max(0.2, 0.8 - (fbP - 0.50) / 3.0)
+                ];
+            };
+
+            const drawPoly = (ratios, fill, stroke) => {
+                ctx.beginPath();
+                for (let i = 0; i < count; i++) {
+                    const val = Math.max(0.2, Math.min(1.25, ratios[i]));
+                    const r = R * val;
+                    const x = cx + r * Math.cos(angles[i]);
+                    const y = cy + r * Math.sin(angles[i]);
+                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.fillStyle = fill; ctx.fill();
+                ctx.strokeStyle = stroke; ctx.lineWidth = 2; ctx.setLineDash([]); ctx.stroke();
+            };
+
+            if (currentRadarMode === 'COMPARE') {
+                drawPoly(getRatios(hsNorth, weffNorth, ukcNorth, fbNorth), 'rgba(56, 189, 248, 0.3)', '#38bdf8');
+                drawPoly(getRatios(hsSouth, weffSouth, ukcSouth, fbSouth), 'rgba(16, 185, 129, 0.3)', '#34d399');
+            } else if (currentRadarMode === 'NORTH') {
+                drawPoly(getRatios(hsNorth, weffNorth, ukcNorth, fbNorth), 'rgba(56, 189, 248, 0.35)', '#38bdf8');
+            } else {
+                drawPoly(getRatios(hsSouth, weffSouth, ukcSouth, fbSouth), 'rgba(16, 185, 129, 0.35)', '#34d399');
+            }
+
+            const activeHs = currentRadarMode === 'NORTH' ? hsNorth : hsSouth;
+            const activeWeff = currentRadarMode === 'NORTH' ? weffNorth : weffSouth;
+            const activeUkc = currentRadarMode === 'NORTH' ? ukcNorth : ukcSouth;
+            const activeFb = currentRadarMode === 'NORTH' ? fbNorth : fbSouth;
+
+            const labels = [
+                { t: "波高", v: `${activeHs.toFixed(2)}m`, l: "≤1.13m", f: activeHs > 1.13 },
+                { t: "風速", v: `${activeWeff.toFixed(1)}m/s`, l: "≤10.17m/s", f: activeWeff > 10.17 },
+                { t: "週期", v: `${tpVal.toFixed(1)}s`, l: "<12.0s", f: tpVal >= 12.0 },
+                { t: "裕深", v: `${activeUkc.toFixed(2)}m`, l: "≥1.50m", f: activeUkc < 1.50 },
+                { t: "乾舷", v: `${activeFb.toFixed(2)}m`, l: "≥0.50m", f: activeFb < 0.50 }
+            ];
+
+            ctx.font = 'bold 9px sans-serif';
+            for (let i = 0; i < count; i++) {
+                const r = R * 1.38;
+                let x = cx + r * Math.cos(angles[i]);
+                let y = cy + r * Math.sin(angles[i]);
+                const item = labels[i];
+                x = Math.max(12, Math.min(w - 12, x));
+                ctx.fillStyle = item.f ? '#ef4444' : '#10b981';
+                ctx.textAlign = x < cx - 12 ? 'right' : (x > cx + 12 ? 'left' : 'center');
+                ctx.fillText(`${item.t}: ${item.v} (${item.l}) ${item.f ? '🔴' : '🟢'}`, x, y);
+            }
+
+            const diag = window.lastDiagnostics || { vetoNorth: false, vetoSouth: false };
+            const isVeto = currentRadarMode === 'NORTH' ? diag.vetoNorth : (currentRadarMode === 'SOUTH' ? diag.vetoSouth : (diag.vetoNorth && diag.vetoSouth));
+            ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
+            if (isVeto) {
+                ctx.fillStyle = '#ef4444'; ctx.fillText('🔴 物理 VETO 熔斷 (禁止靠泊)', cx, cy + R + 36);
+            } else {
+                ctx.fillStyle = '#10b981'; ctx.fillText('🟢 物理防線全數通過 (准予靠泊)', cx, cy + R + 36);
+            }
         }
 
         function initDashboard() {
             startClock();
+            initUIControls();
             setTimeout(() => {
                 const preloader = getEl('app-preloader');
                 if (preloader) {
