@@ -3,6 +3,7 @@ import os
 import json
 from utils.encoder import NpEncoder
 from tools.gem_historical_miner import GemHistoricalDataMiner
+from core.gem_macro_rl import GemMacroRLOrchestrator
 from agents.gem_scout import GemScoutAgent
 from agents.gem_cctv import GemCCTVPatternAgent
 from agents.gem_vessel import GemVesselAgent
@@ -16,6 +17,7 @@ class GemConsensusOrchestrator:
         self.miner = GemHistoricalDataMiner(tdx_id, tdx_secret, cwa_key)
         self.miner.generate_calibrated_intel_db()
 
+        self.macro_rl = GemMacroRLOrchestrator()
         self.scout = GemScoutAgent(cwa_key)
         self.cctv = GemCCTVPatternAgent()
         self.vessel = GemVesselAgent()
@@ -28,11 +30,15 @@ class GemConsensusOrchestrator:
         telemetry = self.scout.harvest_telemetry(raw_telemetry)
         announcement = telemetry["official_announcement"]
 
+        qimen_res = self.macro_rl.parse_qimen_matrix()
+        macro_downscale = self.macro_rl.downscale_macro_api({"hs_deep": telemetry["hs"], "tp_deep": telemetry["tp"]}, qimen_res)
+
         cctv_res = self.cctv.process_cctv_frame_features({"cctv_cv_rate": telemetry["cctv_cv_rate"]})
         vessel_res = self.vessel.track_and_back_calculate(telemetry)
 
         intel_res = self.intel.match_historical_event(telemetry)
         physics_res = self.physics.evaluate_physics(telemetry, cctv_res)
+        macro_rl_res = self.macro_rl.evaluate_rl_match_with_hysteresis(telemetry)
 
         rl_feedback = self.calibration.process_double_q_per_feedback(
             actual_official_veto=announcement["official_veto"],
@@ -47,7 +53,7 @@ class GemConsensusOrchestrator:
             badge = "🟢 100.0% Q1 全線開放"
 
         live_payload = self.signal.package_live_status(
-            physics_res, intel_res, rl_feedback, final_action, announcement, vessel_res
+            physics_res, intel_res, rl_feedback, final_action, announcement, vessel_res, macro_rl_res
         )
 
         os.makedirs("data", exist_ok=True)
@@ -76,6 +82,7 @@ class GemConsensusOrchestrator:
             "vessel_res": vessel_res,
             "intel_res": intel_res,
             "physics_res": physics_res,
+            "macro_rl_res": macro_rl_res,
             "rl_feedback": rl_feedback
         }
 

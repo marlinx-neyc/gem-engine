@@ -23,8 +23,8 @@ class GemIntelligenceDB:
                 "match_score": 88.5 if is_high_wave else 39.8,
                 "is_alert": is_high_wave,
                 "est_closure_days": 1 if is_high_wave else 0,
-                "event_name": "2025 長湧衰退與大潮重疊" if is_high_wave else "常態海象",
-                "lesson": "長浪共振防波堤消能瓦解，引橋漫頂全線封閉" if is_high_wave else "常態物理評估"
+                "event_name": "2025 長湧衰退與大潮重疊",
+                "lesson": "長浪共振防波堤消能瓦解，引橋漫頂全線封閉"
             }
 
         current_vec = np.array([
@@ -45,12 +45,8 @@ class GemIntelligenceDB:
                 best_score = sim
                 best_case = case
 
-        is_alert = best_case["label"] in [1, 3]
         return {
             "match_score": round(best_score * 100, 1),
-            "is_alert": is_alert,
-            "est_closure_days": 1 if best_case["label"] == 1 else 0,
             "matched_time": best_case["time"],
-            "event_name": f"歷史案例對齊 ({best_case['time']})",
-            "lesson": f"對齊風管處與CWA歷史紀錄：波高 {best_case['hs']}m / 週期 {best_case['tp']}s (CCTV殘差校正)，該次實施：「{best_case['action']}」"
+            "lesson": f"對齊烏石港歷史避風紀錄 ({best_case['time']})：波高 {best_case['hs']}m，實施「{best_case['action']}」"
         }

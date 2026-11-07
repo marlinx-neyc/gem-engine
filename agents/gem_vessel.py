@@ -12,10 +12,6 @@ class GemVesselAgent:
             "lat": 24.84320,
             "lon": 121.94980
         }
-        self.whale_watching_fleet = [
-            "華棋168", "北極星1號", "龜山朝日2號", "超級星號",
-            "凱鯨號", "東洋銘珠", "新福豐36號", "蘭鯨號", "龜山朝日號"
-        ]
         self.pier_wushi = {"lat": 24.86872, "lon": 121.84154}
         self.pier_north = {"lat": 24.843727, "lon": 121.943732}
         self.pier_south = {"lat": 24.840441, "lon": 121.939794}

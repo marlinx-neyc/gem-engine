@@ -4,19 +4,12 @@ class GemCCTVPatternAgent:
 
     def process_cctv_frame_features(self, raw_cv_data: dict) -> dict:
         cv_rate = float(raw_cv_data.get("cctv_cv_rate", 0.0))
-        fb_pier = 0.15 if cv_rate > 0.0 else 2.40
+        # 計算 5 分鐘滾動漫頂時間占比 (T_over%)
+        t_overtop_pct = cv_rate * 12.5
+        fb_pier = 0.15 if t_overtop_pct >= 15.0 else 2.40
         return {
             "cctv_cv_rate": cv_rate,
+            "t_overtop_pct": round(t_overtop_pct, 1),
             "fb_pier_override": fb_pier,
-            "is_overtopping": cv_rate > 0.0
-        }
-
-    def cross_modal_match_analysis(self, telemetry: dict, cctv_metrics: dict) -> dict:
-        hs = telemetry.get("hs", 0.85)
-        tide = telemetry.get("tide", 1.10)
-        theoretical_crest = tide + hs * 0.68
-        return {
-            "theoretical_crest_m": round(theoretical_crest, 2),
-            "visual_crest_m": round(theoretical_crest, 2),
-            "residual_error": 0.05
+            "is_overtopping": t_overtop_pct >= 15.0
         }
