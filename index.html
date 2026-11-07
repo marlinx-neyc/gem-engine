@@ -59,7 +59,7 @@
         .marquee-txt:hover { animation-play-state: paused; }
     </style>
     <script>
-        window.INITIAL_LIVE_DATA = {"updated_at": "2026-11-07 11:31:29", "decision": "🔴 全線剛性熔斷（禁止靠泊）", "p_veto": 0.999, "official_veto": 1, "official_title": "【官方公告】受東北季風影響，長浪浪高2米以上浪潮蓋碼頭，本日封島1天", "official_body": "本(7)日受東北季風影響，臺灣東北部上午5～6陣風8級，下午轉6～7陣風9級，長浪浪高2米以上，經現場視訊觀察浪潮蓋碼頭，基於離島臨時碼頭靠泊及遊客上下等安全考量，本日封島1天，不便之處 敬請見諒。", "rl_match_rate": "96.81%", "official_wufu_position": "24.84320° N, 121.94980° E", "wushi_port_flux_ships_hr": 42.0, "est_closure_days": 1, "metrics": {"hs_pier": 2.4, "weff": 10.8, "ukc": 5.55, "ukc_south": 6.85, "fb": 0.15}, "marquee_msg": "🔴【風管處公告】【官方公告】受東北季風影響，長浪浪高2米以上浪潮蓋碼頭，本日封島1天 ｜ 🤖 GEM 雙生模型裁定：🔴 全線剛性熔斷（禁止靠泊） ｜ ⏱️ 官方對算視窗 (2026-11-07 11:31:29)"};
+        window.INITIAL_LIVE_DATA = {"updated_at": "2026-11-07 11:37:41", "decision": "🔴 全線剛性熔斷（禁止靠泊）", "p_veto": 0.999, "official_veto": 1, "official_title": "【官方公告】受東北季風影響，長浪浪高2米以上浪潮蓋碼頭，本日封島1天", "official_body": "本(7)日受東北季風影響，臺灣東北部上午5～6陣風8級，下午轉6～7陣風9級，長浪浪高2米以上，經現場視訊觀察浪潮蓋碼頭，基於離島臨時碼頭靠泊及遊客上下等安全考量，本日封島1天，不便之處 敬請見諒。", "rl_match_rate": "96.81%", "official_wufu_position": "24.84320° N, 121.94980° E", "wushi_port_flux_ships_hr": 42.0, "est_closure_days": 1, "metrics": {"hs_pier": 2.4, "weff": 10.8, "ukc": 5.55, "ukc_south": 6.85, "fb": 0.15}, "marquee_msg": "🔴【風管處公告】【官方公告】受東北季風影響，長浪浪高2米以上浪潮蓋碼頭，本日封島1天 ｜ 🤖 GEM 雙生模型裁定：🔴 全線剛性熔斷（禁止靠泊） ｜ ⏱️ 官方對算視窗 (2026-11-07 11:37:41)"};
     </script>
 </head>
 <body class="p-2 max-w-[1700px] mx-auto">
@@ -117,7 +117,7 @@
         </div>
     </section>
 
-    <!-- AIS 卡片：MarineTraffic 原生嵌入，500px 高度視窗，完全避免視訊卡遮擋右上角控制鈕 -->
+    <!-- AIS 卡片：MarineTraffic 原生 500px 高度視窗，完全避免視訊卡遮擋右上角控制鈕 -->
     <details class="card border-sky-500/60" open>
         <summary class="text-xs font-bold text-sky-300 flex justify-between items-center cursor-pointer outline-none">
             <span class="flex items-center gap-2">
@@ -143,7 +143,7 @@
                 </div>
             </div>
 
-            <!-- 地圖視窗：高度調至 500px，視角偏置 (centerv:24.8350, centerh:121.9400, zoom:13)，讓五福號卡片與右上角按鈕 (㗊) 完全分離 -->
+            <!-- 地圖視窗：高度調至 500px，視角偏置 (centerv:24.8350, centerh:121.9400, zoom:13) -->
             <div class="w-full h-[500px] rounded-lg border border-slate-700 overflow-hidden bg-black relative">
                 <iframe src="https://www.marinetraffic.com/en/ais/embed/zoom:13/centerv:24.83500/centerh:121.94000/mmsi:416017708" class="w-full h-full border-0"></iframe>
             </div>
