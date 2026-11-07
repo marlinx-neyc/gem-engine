@@ -50,7 +50,7 @@
         .marquee-txt:hover { animation-play-state: paused; }
     </style>
     <script>
-        window.INITIAL_LIVE_DATA = {"updated_at": "2026-11-07 13:16:09", "decision": "🔴 全線剛性熔斷（禁止靠泊）", "p_veto": 0.999, "official_veto": 1, "official_title": "【官方公告】受東北季風影響，長浪浪高2米以上浪潮蓋碼頭，本日封島1天", "official_body": "本(7)日受東北季風影響，臺灣東北部上午5～6陣風8級，下午轉6～7陣風9級，長浪浪高2米以上，經現場視訊觀察浪潮蓋碼頭，基於離島臨時碼頭靠泊及遊客上下等安全考量，本日封島1天，不便之處 敬請見諒。", "rl_match_rate": "96.81%", "official_wufu_position": "24.84320° N, 121.94980° E", "wushi_port_flux_ships_hr": 42.0, "est_closure_days": 1, "metrics": {"hs_pier": 2.4, "weff": 10.8, "ukc": 5.55, "ukc_south": 6.85, "fb": 0.15}, "marquee_msg": "🔴【風管處公告】【官方公告】受東北季風影響，長浪浪高2米以上浪潮蓋碼頭，本日封島1天 ｜ 🤖 GEM 裁定：🔴 全線剛性熔斷（禁止靠泊）  ｜ ⏱️ (2026-11-07 13:16:09)"};
+        window.INITIAL_LIVE_DATA = {"updated_at": "2026-11-07 13:19:24", "decision": "🔴 全線剛性熔斷（禁止靠泊）", "p_veto": 0.999, "official_veto": 1, "official_title": "【官方公告】受東北季風影響，長浪浪高2米以上浪潮蓋碼頭，本日封島1天", "official_body": "本(7)日受東北季風影響，臺灣東北部上午5～6陣風8級，下午轉6～7陣風9級，長浪浪高2米以上，經現場視訊觀察浪潮蓋碼頭，基於離島臨時碼頭靠泊及遊客上下等安全考量，本日封島1天，不便之處 敬請見諒。", "rl_match_rate": "96.81%", "official_wufu_position": "24.84320° N, 121.94980° E", "wushi_port_flux_ships_hr": 42.0, "est_closure_days": 1, "metrics": {"hs_pier": 2.4, "weff": 10.8, "ukc": 5.55, "ukc_south": 6.85, "fb": 0.15}, "marquee_msg": "🔴【風管處公告】【官方公告】受東北季風影響，長浪浪高2米以上浪潮蓋碼頭，本日封島1天 ｜ 🤖 GEM 裁定：🔴 全線剛性熔斷（禁止靠泊）  ｜ ⏱️ (2026-11-07 13:19:24)"};
     </script>
 </head>
 <body class="p-2 max-w-[1700px] mx-auto">
@@ -91,7 +91,7 @@
         </div>
     </header>
 
-    <!-- CCTV 卡片 -->
+    <!-- CCTV 卡片 (簡化樣式) -->
     <section class="card">
         <div class="text-xs font-bold text-sky-300 mb-2 flex items-center gap-1.5">
             📹 CCTV 實時傳輸狀態：
@@ -150,6 +150,156 @@
         </div>
     </details>
 
+    <!-- 7-Day 對比表 -->
+    <details class="card" open>
+        <summary class="text-xs font-bold text-sky-300 flex justify-between items-center cursor-pointer outline-none">
+            <span>🌅 官方公告 vs 各戰術方 7-Day 完整對比表 (即時自動同化更新)</span>
+            <span class="text-[10px] text-amber-300 border border-amber-500/50 px-1.5 py-0.5 rounded">▼ 點擊收合</span>
+        </summary>
+
+        <div class="flex gap-1.5 my-2 text-[10px] font-bold">
+            <button id="btnTabD0" onclick="switchDateTab('d0')" class="date-tab-btn bg-slate-800 text-slate-300 px-2.5 py-1 rounded border border-slate-700">🌅 今日 D0</button>
+            <button id="btnTab3Day" onclick="switchDateTab('3day')" class="date-tab-btn bg-slate-800 text-slate-300 px-2.5 py-1 rounded border border-slate-700">📅 3-Day</button>
+            <button id="btnTab7Day" onclick="switchDateTab('7day')" class="date-tab-btn bg-sky-500 text-white px-2.5 py-1 rounded">📈 7-Day</button>
+            <button id="btnTabAll" onclick="switchDateTab('all')" class="date-tab-btn bg-slate-800 text-slate-300 px-2.5 py-1 rounded border border-slate-700">全部</button>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-[11px] font-mono border-collapse whitespace-nowrap">
+                <thead>
+                    <tr class="bg-sky-950/60 text-sky-300 border-b border-slate-700">
+                        <th class="p-1.5">時段/日期</th>
+                        <th class="p-1.5">預估海象</th>
+                        <th class="p-1.5">🏛️ 官方公告</th>
+                        <th class="p-1.5">🚢 常規客輪</th>
+                        <th class="p-1.5">⚡ 游擊調撥</th>
+                        <th class="p-1.5">🤖 GEM 裁示</th>
+                    </tr>
+                </thead>
+                <tbody id="scheduleTableBody" class="divide-y divide-slate-800">
+                    <tr class="schedule-row row-d0 hover:bg-slate-800/50">
+                        <td class="p-1.5 font-bold text-teal-300">🌅 D0 07:30</td>
+                        <td class="p-1.5">🌊 2.40m 💨 16.8m/s</td>
+                        <td class="p-1.5 col-off"><span class="bg-red-950 border border-red-500 text-red-300 px-1.5 py-0.5 rounded font-bold">🔴 浪潮蓋碼頭</span></td>
+                        <td class="p-1.5 col-norm"><span class="bg-red-950 border border-red-500 text-red-300 px-1.5 py-0.5 rounded font-bold">🔴 停航</span></td>
+                        <td class="p-1.5 col-guer"><span class="bg-red-950 border border-red-500 text-red-300 px-1.5 py-0.5 rounded font-bold">🔴 禁靠</span></td>
+                        <td class="p-1.5 col-gem"><span class="bg-red-950 border border-red-500 text-red-300 px-1.5 py-0.5 rounded font-bold">🔴 VETO</span></td>
+                    </tr>
+                    <tr class="schedule-row row-d0 hover:bg-slate-800/50">
+                        <td class="p-1.5 font-bold text-amber-300">☀️ D0 11:30</td>
+                        <td class="p-1.5">🌊 2.10m 💨 14.5m/s</td>
+                        <td class="p-1.5 col-off"><span class="bg-red-950 border border-red-500 text-red-300 px-1.5 py-0.5 rounded font-bold">🔴 封閉清島</span></td>
+                        <td class="p-1.5 col-norm"><span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 賞鯨不登島</span></td>
+                        <td class="p-1.5 col-guer"><span class="bg-red-950 border border-red-500 text-red-300 px-1.5 py-0.5 rounded font-bold">🔴 港區淨空</span></td>
+                        <td class="p-1.5 col-gem"><span class="bg-red-950 border border-red-500 text-red-300 px-1.5 py-0.5 rounded font-bold">🔴 VETO</span></td>
+                    </tr>
+                    <tr class="schedule-row row-d0 hover:bg-slate-800/50">
+                        <td class="p-1.5 font-bold text-red-300">🌇 D0 16:30</td>
+                        <td class="p-1.5">🌊 1.85m 💨 12.0m/s</td>
+                        <td class="p-1.5 col-off"><span class="bg-red-950 border border-red-500 text-red-300 px-1.5 py-0.5 rounded font-bold">🔴 封閉休整</span></td>
+                        <td class="p-1.5 col-norm"><span class="bg-red-950 border border-red-500 text-red-300 px-1.5 py-0.5 rounded font-bold">🔴 停航</span></td>
+                        <td class="p-1.5 col-guer"><span class="bg-red-950 border border-red-500 text-red-300 px-1.5 py-0.5 rounded font-bold">🔴 次日評估</span></td>
+                        <td class="p-1.5 col-gem"><span class="bg-red-950 border border-red-500 text-red-300 px-1.5 py-0.5 rounded font-bold">🔴 VETO</span></td>
+                    </tr>
+                    <tr class="schedule-row row-d1 hover:bg-slate-800/50">
+                        <td class="p-1.5 font-bold text-sky-300">📅 D+1 (明日)</td>
+                        <td class="p-1.5">🌊 1.25m 💨 9.0m/s</td>
+                        <td class="p-1.5"><span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 條件評估</span></td>
+                        <td class="p-1.5"><span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 視海象</span></td>
+                        <td class="p-1.5"><span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 移防南岸</span></td>
+                        <td class="p-1.5"><span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 Q2 游擊</span></td>
+                    </tr>
+                    <tr class="schedule-row row-d2 hover:bg-slate-800/50">
+                        <td class="p-1.5 font-bold text-emerald-300">📅 D+2 (後日)</td>
+                        <td class="p-1.5">🌊 0.70m 💨 5.5m/s</td>
+                        <td class="p-1.5"><span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 正常開放</span></td>
+                        <td class="p-1.5"><span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 常規靠泊</span></td>
+                        <td class="p-1.5"><span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 全線開窗</span></td>
+                        <td class="p-1.5"><span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 Q1 開放</span></td>
+                    </tr>
+                    <tr class="schedule-row row-d3 hover:bg-slate-800/50">
+                        <td class="p-1.5 font-bold text-slate-300">📅 D+3</td>
+                        <td class="p-1.5">🌊 0.65m 💨 5.0m/s</td>
+                        <td class="p-1.5"><span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 正常開放</span></td>
+                        <td class="p-1.5"><span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 常規靠泊</span></td>
+                        <td class="p-1.5"><span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 機動靠泊</span></td>
+                        <td class="p-1.5"><span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 Q1 開放</span></td>
+                    </tr>
+                    <tr class="schedule-row row-d4 hover:bg-slate-800/50">
+                        <td class="p-1.5 font-bold text-slate-300">📅 D+4</td>
+                        <td class="p-1.5">🌊 0.80m 💨 6.2m/s</td>
+                        <td class="p-1.5"><span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 正常開放</span></td>
+                        <td class="p-1.5"><span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 常規靠泊</span></td>
+                        <td class="p-1.5"><span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 機動靠泊</span></td>
+                        <td class="p-1.5"><span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 Q1 開放</span></td>
+                    </tr>
+                    <tr class="schedule-row row-d5 hover:bg-slate-800/50">
+                        <td class="p-1.5 font-bold text-slate-300">📅 D+5</td>
+                        <td class="p-1.5">🌊 1.10m 💨 8.0m/s</td>
+                        <td class="p-1.5"><span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 注意長浪</span></td>
+                        <td class="p-1.5"><span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 謹慎靠泊</span></td>
+                        <td class="p-1.5"><span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 移防南岸</span></td>
+                        <td class="p-1.5"><span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 Q2 游擊</span></td>
+                    </tr>
+                    <tr class="schedule-row row-d6 hover:bg-slate-800/50">
+                        <td class="p-1.5 font-bold text-slate-300">📅 D+6</td>
+                        <td class="p-1.5">🌊 0.55m 💨 4.5m/s</td>
+                        <td class="p-1.5"><span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 正常開放</span></td>
+                        <td class="p-1.5"><span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 常規靠泊</span></td>
+                        <td class="p-1.5"><span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 常規靠泊</span></td>
+                        <td class="p-1.5"><span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 Q1 開放</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </details>
+
+    <!-- 雙岸關鍵物理數值側向比對 -->
+    <details class="card border-sky-500/60" open>
+        <summary class="text-xs font-bold text-sky-300 flex justify-between items-center cursor-pointer outline-none mb-2">
+            <span>🌅 D0 早盤 雙岸關鍵物理數值側向比對</span>
+            <span class="bg-emerald-950 text-emerald-300 border border-emerald-500 px-1.5 py-0.5 rounded text-[10px]">含 CCTV 驗證</span>
+        </summary>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs font-mono border-collapse whitespace-nowrap">
+                <thead>
+                    <tr class="bg-sky-950/60 text-sky-300 border-b border-slate-700">
+                        <th class="p-2">指標參數</th>
+                        <th class="p-2">南岸 (-9.8m)</th>
+                        <th class="p-2">北岸 (-8.5m)</th>
+                        <th class="p-2 text-amber-300">檢核門檻值 (南 / 北)</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800">
+                    <tr>
+                        <td class="p-2 font-bold">折算波高 (Hs,pier)</td>
+                        <td class="p-2 font-bold text-white">0.85 m</td>
+                        <td class="p-2 font-bold text-amber-300">1.15 m</td>
+                        <td class="p-2 text-amber-300 font-bold">≤ 1.13m / ≤ 0.95m</td>
+                    </tr>
+                    <tr>
+                        <td class="p-2 font-bold">折算有效風速 (Weff)</td>
+                        <td class="p-2 font-bold text-white">5.06 m/s</td>
+                        <td class="p-2 font-bold text-white">6.20 m/s</td>
+                        <td class="p-2 text-amber-300 font-bold">≤ 10.17m/s / ≤ 8.50m/s</td>
+                    </tr>
+                    <tr>
+                        <td class="p-2 font-bold">動態裕深 (UKC)</td>
+                        <td class="p-2 font-bold text-emerald-400">8.46 m</td>
+                        <td class="p-2 font-bold text-emerald-400">7.09 m</td>
+                        <td class="p-2 text-amber-300 font-bold">≥ 1.50m / ≥ 1.50m</td>
+                    </tr>
+                    <tr>
+                        <td class="p-2 font-bold">預留乾舷 (FB)</td>
+                        <td class="p-2 font-bold text-emerald-400">0.82 m</td>
+                        <td class="p-2 font-bold text-red-400">0.35 m (漫頂)</td>
+                        <td class="p-2 text-amber-300 font-bold">≥ 0.50m / ≥ 0.50m</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </details>
+
     <!-- 2D 風場向量羅盤 -->
     <section class="card">
         <div class="text-xs font-bold text-sky-300 mb-2 flex justify-between items-center border-b border-slate-700 pb-1">
@@ -162,6 +312,22 @@
             <span>折算有效風速 (Weff): <b class="text-emerald-400 font-extrabold">5.06 m/s</b></span>
         </div>
         <canvas id="compassCanvas" class="canvas-box"></canvas>
+    </section>
+
+    <!-- Windy 圖場 -->
+    <section class="card">
+        <div class="text-xs font-bold text-sky-300 mb-2 flex justify-between items-center border-b border-slate-700 pb-1">
+            <span>🌀 實時 Windy 動態圖場 (含逐時氣象預報詳細分析表)</span>
+            <div class="flex gap-1 text-[10px]">
+                <button onclick="changeWindyLayer('wind')" id="btnWindyWind" class="bg-sky-600 text-white px-2 py-0.5 rounded font-bold">⚡ 風速</button>
+                <button onclick="changeWindyLayer('waves')" id="btnWindyWaves" class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded">🌊 浪高</button>
+                <button onclick="changeWindyLayer('rain')" id="btnWindyRain" class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded">🌧️ 降雨</button>
+                <button onclick="changeWindyLayer('pressure')" id="btnWindyPressure" class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded">🌡️ 氣壓</button>
+            </div>
+        </div>
+        <div class="w-full h-[360px] rounded border border-slate-700 overflow-hidden">
+            <iframe id="windyIframe" src="https://embed.windy.com/embed2.html?lat=24.842&lon=121.951&detailLat=24.842&detailLon=121.951&width=100%25&height=360&zoom=11&level=surface&overlay=wind&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=true&metricWind=m%2Fs&metricTemp=%C2%B0C&radarRange=-1" class="w-full h-full border-0"></iframe>
+        </div>
     </section>
 
     <!-- 南北岸剖面圖與雷達圖 -->
@@ -196,6 +362,7 @@
         </div>
     </details>
 
+    <!-- 完整前端控制與 3 套 Canvas 繪圖腳本 -->
     <script>
         function toggleFullScreen() {
             if (!document.fullscreenElement) document.documentElement.requestFullscreen();
@@ -219,6 +386,44 @@
             var days = ['日', '一', '二', '三', '四', '五', '六'];
             var dateEl = document.getElementById('liveDate');
             if (dateEl) dateEl.textContent = y + '-' + mo + '-' + d + ' (' + days[now.getDay()] + ')';
+        }
+
+        function changeWindyLayer(layer) {
+            ['Wind', 'Waves', 'Rain', 'Pressure'].forEach(l => {
+                var btn = document.getElementById('btnWindy' + l);
+                if (btn) {
+                    btn.className = (l.toLowerCase() === layer) ?
+                        'bg-sky-600 text-white px-2 py-0.5 rounded font-bold' :
+                        'bg-slate-800 text-slate-300 px-2 py-0.5 rounded';
+                }
+            });
+            var iframe = document.getElementById('windyIframe');
+            if (iframe) {
+                iframe.src = 'https://embed.windy.com/embed2.html?lat=24.842&lon=121.951&detailLat=24.842&detailLon=121.951&width=100%25&height=360&zoom=11&level=surface&overlay=' + layer + '&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=true&metricWind=m%2Fs&metricTemp=%C2%B0C&radarRange=-1';
+            }
+        }
+
+        function switchDateTab(tab) {
+            document.querySelectorAll('.date-tab-btn').forEach(b => {
+                b.classList.remove('bg-sky-500', 'text-white');
+                b.classList.add('bg-slate-800', 'text-slate-300');
+            });
+            const activeBtn = document.getElementById('btnTab' + (tab==='d0'?'D0':tab==='3day'?'3Day':tab==='7day'?'7Day':'All'));
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-slate-800', 'text-slate-300');
+                activeBtn.classList.add('bg-sky-500', 'text-white');
+            }
+
+            const rows = document.querySelectorAll('.schedule-row');
+            rows.forEach(r => {
+                if (tab === 'all' || tab === '7day') {
+                    r.style.display = 'table-row';
+                } else if (tab === 'd0') {
+                    r.style.display = r.classList.contains('row-d0') ? 'table-row' : 'none';
+                } else if (tab === '3day') {
+                    r.style.display = (r.classList.contains('row-d0') || r.classList.contains('row-d1') || r.classList.contains('row-d2')) ? 'table-row' : 'none';
+                }
+            });
         }
 
         function drawCompass() {

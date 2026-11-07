@@ -8,8 +8,8 @@ class GemMacroRLOrchestrator:
     def __init__(self, intel_db_path="data/calibrated_intel_db.json", q_table_path="data/q_table.json"):
         self.intel_db_path = intel_db_path
         self.q_table_path = q_table_path
-        self.high_threshold = 0.80  # 80% 觸發門檻
-        self.low_threshold = 0.72   # 72% 釋放門檻
+        self.high_threshold = 0.80
+        self.low_threshold = 0.72
         self.last_state_active = False
         self.lr = 0.1
         self.gamma = 0.9
@@ -25,7 +25,6 @@ class GemMacroRLOrchestrator:
         return {}
 
     def parse_qimen_matrix(self, dt: datetime = None) -> dict:
-        """奇門戰術開窗權重 (W_qimen)"""
         dt = dt or datetime.now()
         hour = dt.hour
         is_optimal = 7 <= hour <= 11
@@ -35,7 +34,6 @@ class GemMacroRLOrchestrator:
         }
 
     def downscale_macro_api(self, macro_data: dict, qimen_res: dict) -> dict:
-        """PINN 水動力簡化降尺度推算碼頭波高與折算風速"""
         hs_deep = macro_data.get("hs_deep", 1.80)
         tp_deep = macro_data.get("tp_deep", 10.5)
         w_macro = macro_data.get("w_macro", 12.0)
@@ -53,7 +51,6 @@ class GemMacroRLOrchestrator:
         }
 
     def evaluate_rl_match_with_hysteresis(self, live_telemetry: dict) -> dict:
-        """80%/72% 雙向滯後 Safe RL 檢索與戰術建議」"""
         if not os.path.exists(self.intel_db_path):
             return {"match_score": 0.0, "has_suggestion": False, "suggestion": "智庫建置中"}
 
@@ -61,7 +58,6 @@ class GemMacroRLOrchestrator:
             db = json.load(f)
 
         cases = db.get("historical_cases", [])
-        
         hs = live_telemetry.get("hs", 1.0)
         tp = live_telemetry.get("tp", 8.0)
         e_flux = hs**2 * tp
@@ -69,7 +65,6 @@ class GemMacroRLOrchestrator:
         tide = live_telemetry.get("tide", 1.0)
 
         current_vec = np.array([hs, tp, e_flux, w, tide])
-
         best_sim = -1.0
         best_case = None
 
@@ -82,13 +77,7 @@ class GemMacroRLOrchestrator:
                 best_case = case
 
         match_score = round(best_sim * 100, 1)
-
-        # 雙向滯後機制 (Hysteresis)
-        if self.last_state_active:
-            active = (best_sim >= self.low_threshold)
-        else:
-            active = (best_sim >= self.high_threshold)
-
+        active = (best_sim >= self.low_threshold) if self.last_state_active else (best_sim >= self.high_threshold)
         self.last_state_active = active
 
         if active and best_case:
@@ -112,15 +101,12 @@ class GemMacroRLOrchestrator:
         }
 
     def train_online_step(self, state_key: str, action: int, reward: float, next_state_key: str):
-        """在線 Q-Learning 自主訓練更新」"""
         current_q = self.q_table.get(state_key, [0.0, 0.0, 0.0, 0.0])[action]
         max_next_q = max(self.q_table.get(next_state_key, [0.0, 0.0, 0.0, 0.0]))
         new_q = current_q + self.lr * (reward + self.gamma * max_next_q - current_q)
-        
         if state_key not in self.q_table:
             self.q_table[state_key] = [0.0, 0.0, 0.0, 0.0]
         self.q_table[state_key][action] = round(new_q, 4)
-
         os.makedirs("data", exist_ok=True)
         with open(self.q_table_path, "w", encoding="utf-8") as f:
             json.dump(self.q_table, f, ensure_ascii=False, indent=2)
