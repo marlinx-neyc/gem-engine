@@ -35,7 +35,6 @@ class GemHistoricalDataMiner:
         """執行 TDX x CWA 時空特徵對齊與決策邊界標定，生成智庫庫檔"""
         os.makedirs("data", exist_ok=True)
         
-        # 示範/對齊真實歷史案例集
         historical_cases = [
             {"time": "2026-11-05 07:30", "hs": 2.35, "tp": 12.1, "w": 16.2, "tide": 0.62, "label": 1, "action": "🔴 浪潮蓋頂剛性封島"},
             {"time": "2026-11-05 11:30", "hs": 2.10, "tp": 11.5, "w": 14.0, "tide": 0.95, "label": 1, "action": "🔴 長浪蓋碼頭封島清港"},

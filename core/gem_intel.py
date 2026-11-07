@@ -17,7 +17,6 @@ class GemIntelligenceDB:
         return None
 
     def match_historical_event(self, telemetry: dict) -> dict:
-        """利用即時遙測向量 [Hs, Tp, W, Tide] 於智庫數據集庫中進行歐氏距離特徵檢索"""
         if not self.db or "historical_cases" not in self.db:
             is_high_wave = telemetry.get("hs", 0) > 1.5
             return {
