@@ -1,14 +1,17 @@
 {
   "metadata": {
-    "trained_at": "2026-11-07 12:43:40",
+    "trained_at": "2026-11-07 12:51:06",
     "sample_count": 5,
     "data_sources": [
-      "TDX OAuth 2.0 (AIS Track)",
-      "CWA Buoy 46708A"
+      "Northeast Coast Official Announcements",
+      "CWA Buoy 46708A / Suao Buoy Time-Series",
+      "CCTV Visual Wave Crest & Overtopping Calibration"
     ]
   },
   "calibrated_thresholds": {
     "hard_veto_hs": 1.13,
+    "hard_veto_tp": 11.2,
+    "hard_veto_weff": 10.17,
     "divert_south_boundary": {
       "hs_max": 1.25,
       "tp_min": 8.0
@@ -21,8 +24,15 @@
       "tp": 12.1,
       "w": 16.2,
       "tide": 0.62,
+      "cctv_cv": 2.4,
       "label": 1,
-      "action": "🔴 浪潮蓋頂剛性封島"
+      "action": "🔴 浪潮蓋頂剛性封島",
+      "cctv_validation": {
+        "theoretical_crest_m": 2.22,
+        "visual_crest_m": 2.86,
+        "residual_error_m": 0.639,
+        "is_calibrated": false
+      }
     },
     {
       "time": "2026-11-05 11:30",
@@ -30,8 +40,15 @@
       "tp": 11.5,
       "w": 14.0,
       "tide": 0.95,
+      "cctv_cv": 1.8,
       "label": 1,
-      "action": "🔴 長浪蓋碼頭封島清港"
+      "action": "🔴 長浪蓋碼頭封島清港",
+      "cctv_validation": {
+        "theoretical_crest_m": 2.38,
+        "visual_crest_m": 2.89,
+        "residual_error_m": 0.514,
+        "is_calibrated": false
+      }
     },
     {
       "time": "2026-11-06 07:30",
@@ -39,8 +56,15 @@
       "tp": 8.0,
       "w": 8.5,
       "tide": 1.1,
+      "cctv_cv": 0.0,
       "label": 2,
-      "action": "🟡 啟動權宜調撥 (移防南岸靠泊)"
+      "action": "🟡 啟動權宜調撥 (移防南岸靠泊)",
+      "cctv_validation": {
+        "theoretical_crest_m": 1.92,
+        "visual_crest_m": 1.92,
+        "residual_error_m": 0.0,
+        "is_calibrated": true
+      }
     },
     {
       "time": "2026-11-06 14:00",
@@ -48,8 +72,15 @@
       "tp": 10.2,
       "w": 11.0,
       "tide": 0.45,
+      "cctv_cv": 0.8,
       "label": 3,
-      "action": "⚠️ 啟動防禦性早退撤離"
+      "action": "⚠️ 啟動防禦性早退撤離",
+      "cctv_validation": {
+        "theoretical_crest_m": 1.57,
+        "visual_crest_m": 1.72,
+        "residual_error_m": 0.151,
+        "is_calibrated": false
+      }
     },
     {
       "time": "2026-11-07 07:30",
@@ -57,8 +88,15 @@
       "tp": 7.2,
       "w": 5.8,
       "tide": 1.15,
+      "cctv_cv": 0.0,
       "label": 0,
-      "action": "🟢 常規開放北岸靠泊"
+      "action": "🟢 常規開放北岸靠泊",
+      "cctv_validation": {
+        "theoretical_crest_m": 1.66,
+        "visual_crest_m": 1.66,
+        "residual_error_m": 0.0,
+        "is_calibrated": true
+      }
     }
   ]
 }

@@ -52,5 +52,5 @@ class GemIntelligenceDB:
             "est_closure_days": 1 if best_case["label"] == 1 else 0,
             "matched_time": best_case["time"],
             "event_name": f"歷史案例對齊 ({best_case['time']})",
-            "lesson": f"對齊 TDX/CWA 歷史紀錄：波高 {best_case['hs']}m / 週期 {best_case['tp']}s，實施「{best_case['action']}」"
+            "lesson": f"對齊風管處與CWA歷史紀錄：波高 {best_case['hs']}m / 週期 {best_case['tp']}s (CCTV殘差校正)，該次實施：「{best_case['action']}」"
         }
