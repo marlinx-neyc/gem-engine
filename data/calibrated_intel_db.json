@@ -1,0 +1,64 @@
+{
+  "metadata": {
+    "trained_at": "2026-11-07 12:36:31",
+    "sample_count": 5,
+    "data_sources": [
+      "TDX OAuth 2.0 (AIS Track)",
+      "CWA Buoy 46708A"
+    ]
+  },
+  "calibrated_thresholds": {
+    "hard_veto_hs": 1.13,
+    "divert_south_boundary": {
+      "hs_max": 1.25,
+      "tp_min": 8.0
+    }
+  },
+  "historical_cases": [
+    {
+      "time": "2026-11-05 07:30",
+      "hs": 2.35,
+      "tp": 12.1,
+      "w": 16.2,
+      "tide": 0.62,
+      "label": 1,
+      "action": "🔴 浪潮蓋頂剛性封島"
+    },
+    {
+      "time": "2026-11-05 11:30",
+      "hs": 2.1,
+      "tp": 11.5,
+      "w": 14.0,
+      "tide": 0.95,
+      "label": 1,
+      "action": "🔴 長浪蓋碼頭封島清港"
+    },
+    {
+      "time": "2026-11-06 07:30",
+      "hs": 1.2,
+      "tp": 8.0,
+      "w": 8.5,
+      "tide": 1.1,
+      "label": 2,
+      "action": "🟡 啟動權宜調撥 (移防南岸靠泊)"
+    },
+    {
+      "time": "2026-11-06 14:00",
+      "hs": 1.65,
+      "tp": 10.2,
+      "w": 11.0,
+      "tide": 0.45,
+      "label": 3,
+      "action": "⚠️ 啟動防禦性早退撤離"
+    },
+    {
+      "time": "2026-11-07 07:30",
+      "hs": 0.75,
+      "tp": 7.2,
+      "w": 5.8,
+      "tide": 1.15,
+      "label": 0,
+      "action": "🟢 常規開放北岸靠泊"
+    }
+  ]
+}

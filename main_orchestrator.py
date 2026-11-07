@@ -2,6 +2,7 @@
 import os
 import json
 from utils.encoder import NpEncoder
+from tools.gem_historical_miner import GemHistoricalDataMiner
 from agents.gem_scout import GemScoutAgent
 from agents.gem_cctv import GemCCTVPatternAgent
 from agents.gem_vessel import GemVesselAgent
@@ -11,8 +12,11 @@ from core.gem_intel import GemIntelligenceDB
 from core.gem_calibration import GemCalibrationEngine
 
 class GemConsensusOrchestrator:
-    def __init__(self):
-        self.scout = GemScoutAgent()
+    def __init__(self, tdx_id: str = None, tdx_secret: str = None, cwa_key: str = None):
+        self.miner = GemHistoricalDataMiner(tdx_id, tdx_secret, cwa_key)
+        self.miner.generate_calibrated_intel_db()
+
+        self.scout = GemScoutAgent(cwa_key)
         self.cctv = GemCCTVPatternAgent()
         self.vessel = GemVesselAgent()
         self.physics = GemPhysicsEngine()
@@ -50,7 +54,6 @@ class GemConsensusOrchestrator:
         with open("data/live_status.json", "w", encoding="utf-8") as f:
             json.dump(live_payload, f, cls=NpEncoder, ensure_ascii=False, indent=2)
 
-        # 同時注入數據至根目錄 index.html 與 web/index.html 以確保 GitHub Pages 與 Colab 面板同步
         for target_path in ["index.html", "web/index.html"]:
             try:
                 if os.path.exists(target_path):
