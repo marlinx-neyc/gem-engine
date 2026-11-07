@@ -59,7 +59,7 @@
         .marquee-txt:hover { animation-play-state: paused; }
     </style>
     <script>
-        window.INITIAL_LIVE_DATA = {"updated_at": "2026-11-07 11:26:23", "decision": "🔴 全線剛性熔斷（禁止靠泊）", "p_veto": 0.999, "official_veto": 1, "official_title": "【官方公告】受東北季風影響，長浪浪高2米以上浪潮蓋碼頭，本日封島1天", "official_body": "本(7)日受東北季風影響，臺灣東北部上午5～6陣風8級，下午轉6～7陣風9級，長浪浪高2米以上，經現場視訊觀察浪潮蓋碼頭，基於離島臨時碼頭靠泊及遊客上下等安全考量，本日封島1天，不便之處 敬請見諒。", "rl_match_rate": "96.81%", "official_wufu_position": "24.84320° N, 121.94980° E", "wushi_port_flux_ships_hr": 42.0, "est_closure_days": 1, "metrics": {"hs_pier": 2.4, "weff": 10.8, "ukc": 5.55, "ukc_south": 6.85, "fb": 0.15}, "marquee_msg": "🔴【風管處公告】【官方公告】受東北季風影響，長浪浪高2米以上浪潮蓋碼頭，本日封島1天 ｜ 🤖 GEM 雙生模型裁定：🔴 全線剛性熔斷（禁止靠泊） ｜ ⏱️ 官方對算視窗 (2026-11-07 11:26:23)"};
+        window.INITIAL_LIVE_DATA = {"updated_at": "2026-11-07 11:31:29", "decision": "🔴 全線剛性熔斷（禁止靠泊）", "p_veto": 0.999, "official_veto": 1, "official_title": "【官方公告】受東北季風影響，長浪浪高2米以上浪潮蓋碼頭，本日封島1天", "official_body": "本(7)日受東北季風影響，臺灣東北部上午5～6陣風8級，下午轉6～7陣風9級，長浪浪高2米以上，經現場視訊觀察浪潮蓋碼頭，基於離島臨時碼頭靠泊及遊客上下等安全考量，本日封島1天，不便之處 敬請見諒。", "rl_match_rate": "96.81%", "official_wufu_position": "24.84320° N, 121.94980° E", "wushi_port_flux_ships_hr": 42.0, "est_closure_days": 1, "metrics": {"hs_pier": 2.4, "weff": 10.8, "ukc": 5.55, "ukc_south": 6.85, "fb": 0.15}, "marquee_msg": "🔴【風管處公告】【官方公告】受東北季風影響，長浪浪高2米以上浪潮蓋碼頭，本日封島1天 ｜ 🤖 GEM 雙生模型裁定：🔴 全線剛性熔斷（禁止靠泊） ｜ ⏱️ 官方對算視窗 (2026-11-07 11:31:29)"};
     </script>
 </head>
 <body class="p-2 max-w-[1700px] mx-auto">
@@ -117,7 +117,7 @@
         </div>
     </section>
 
-    <!-- AIS 卡片：復原五福號資訊卡，擺放於左下角，完全不遮擋右上角控制鈕 -->
+    <!-- AIS 卡片：MarineTraffic 原生嵌入，500px 高度視窗，完全避免視訊卡遮擋右上角控制鈕 -->
     <details class="card border-sky-500/60" open>
         <summary class="text-xs font-bold text-sky-300 flex justify-between items-center cursor-pointer outline-none">
             <span class="flex items-center gap-2">
@@ -143,31 +143,9 @@
                 </div>
             </div>
 
-            <!-- 地圖視窗：五福號座標中央對焦 + 左下角懸浮復原資訊卡 + 中央光暈標示 (右上角按鈕無遮擋) -->
-            <div class="w-full h-[360px] rounded-lg border border-slate-700 overflow-hidden bg-black relative">
-                <iframe src="https://www.marinetraffic.com/en/ais/embed/zoom:14/centerv:24.84320/centerh:121.94980" class="w-full h-full border-0"></iframe>
-                
-                <!-- 🎯 中央五福號波紋藍光光暈 -->
-                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none flex flex-col items-center justify-center z-10">
-                    <span class="flash-indicator-blue !w-5 !h-5 border-2 border-white shadow-[0_0_25px_#38bdf8]"></span>
-                </div>
-
-                <!-- 📜 復原的「五福號實時資訊卡」（固定於左下角，避開右上圖層按鈕） -->
-                <div class="absolute bottom-3 left-3 bg-[#0d1b2a]/90 border border-sky-500/80 rounded-lg p-2.5 shadow-2xl backdrop-blur-md max-w-[240px] z-20 pointer-events-auto">
-                    <div class="flex items-center gap-1.5 border-b border-sky-500/40 pb-1 mb-1.5">
-                        <span class="text-sm">🇹🇼</span>
-                        <div>
-                            <div class="text-[11px] font-bold text-white leading-tight">DUNG BEI JIAU WU FU</div>
-                            <div class="text-[9px] text-sky-400 font-mono">東北角五福號 (公務小船)</div>
-                        </div>
-                    </div>
-                    <div class="text-[10px] font-mono space-y-1 text-slate-300">
-                        <div class="flex justify-between"><span>航速/航向:</span><b class="text-white">0 kn / 0°</b></div>
-                        <div class="flex justify-between"><span>動態狀態:</span><b class="text-emerald-400">Stopped</b></div>
-                        <div class="flex justify-between"><span>吃水深度:</span><b class="text-sky-300">1.20 m</b></div>
-                        <div class="flex justify-between"><span>定位座標:</span><b class="text-amber-300">24.8432°N, 121.9498°E</b></div>
-                    </div>
-                </div>
+            <!-- 地圖視窗：高度調至 500px，視角偏置 (centerv:24.8350, centerh:121.9400, zoom:13)，讓五福號卡片與右上角按鈕 (㗊) 完全分離 -->
+            <div class="w-full h-[500px] rounded-lg border border-slate-700 overflow-hidden bg-black relative">
+                <iframe src="https://www.marinetraffic.com/en/ais/embed/zoom:13/centerv:24.83500/centerh:121.94000/mmsi:416017708" class="w-full h-full border-0"></iframe>
             </div>
 
             <div class="text-[11px] font-mono bg-slate-900 p-2 rounded border border-slate-700 space-y-1">
