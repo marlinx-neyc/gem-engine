@@ -40,7 +40,6 @@ class GemConsensusOrchestrator:
         physics_res = self.physics.evaluate_physics(telemetry, cctv_res)
         macro_rl_res = self.macro_rl.evaluate_rl_match_with_hysteresis(telemetry)
 
-        # 執行在線 Q-Learning 增量訓練
         self.macro_rl.train_online_step(
             state_key=f"state_{int(telemetry['hs']*10)}",
             action=0 if physics_res["hard_veto"] else 1,
