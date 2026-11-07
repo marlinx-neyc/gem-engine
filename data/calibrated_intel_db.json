@@ -1,79 +1,103 @@
 {
   "metadata": {
-    "trained_at": "2026-11-07 13:05:33",
+    "trained_at": "2026-11-07 13:16:05",
     "sample_count": 5,
-    "data_sources": [
-      "Macro Ocean APIs (CMEMS / ECMWF ERA5 Wave Spectra)",
-      "CWA Buoy 46708A / Suao Station Time-Series",
-      "CCTV 5-Min Rolling Overtopping Rate (T_over%)",
-      "Wushi Port Fleet Shelter Timestamps (T_start, T_end)"
+    "features": [
+      "hs",
+      "tp",
+      "energy_flux",
+      "steepness",
+      "w",
+      "tide",
+      "t_overtop_pct",
+      "captain_consensus"
     ]
   },
   "calibrated_thresholds": {
     "hard_veto_hs": 1.13,
-    "hard_veto_tp": 11.2,
-    "wushi_mass_shelter_threshold_pct": 70.0
+    "hard_veto_energy_flux": 15.0,
+    "t_overtop_veto_pct": 15.0
   },
   "historical_cases": [
     {
       "time": "2026-11-05 07:30",
-      "hs_deep": 3.1,
       "hs": 2.35,
       "tp": 12.1,
       "w": 16.2,
       "tide": 0.62,
-      "cctv_overtop_pct": 28.5,
-      "wushi_shelter_rate": 100.0,
+      "cv": 2.4,
+      "turn": 1.0,
+      "shelter": 100.0,
       "label": 1,
-      "action": "🔴 浪潮蓋頂剛性封島 (烏石港全數避風靠泊)"
+      "action": "🔴 浪潮蓋頂剛性封島",
+      "energy_flux": 66.822,
+      "steepness": 0.0103,
+      "t_overtop_pct": 30.0,
+      "captain_consensus": 1.0
     },
     {
       "time": "2026-11-05 11:30",
-      "hs_deep": 2.8,
       "hs": 2.1,
       "tp": 11.5,
       "w": 14.0,
       "tide": 0.95,
-      "cctv_overtop_pct": 18.0,
-      "wushi_shelter_rate": 100.0,
+      "cv": 1.8,
+      "turn": 1.0,
+      "shelter": 100.0,
       "label": 1,
-      "action": "🔴 長浪蓋碼頭封島清港 (烏石港港區淨空)"
+      "action": "🔴 長浪蓋碼頭封島清港",
+      "energy_flux": 50.715,
+      "steepness": 0.0102,
+      "t_overtop_pct": 22.5,
+      "captain_consensus": 1.0
     },
     {
       "time": "2026-11-06 07:30",
-      "hs_deep": 1.6,
-      "hs": 1.2,
-      "tp": 8.0,
+      "hs": 1.1,
+      "tp": 11.8,
       "w": 8.5,
       "tide": 1.1,
-      "cctv_overtop_pct": 0.0,
-      "wushi_shelter_rate": 35.0,
+      "cv": 0.4,
+      "turn": 0.85,
+      "shelter": 45.0,
       "label": 2,
-      "action": "🟡 啟動權宜調撥 (移防南岸靠泊 / 烏石港部份發航)"
+      "action": "🟡 啟動權宜調撥 (移防南岸靠泊)",
+      "energy_flux": 14.278,
+      "steepness": 0.0051,
+      "t_overtop_pct": 5.0,
+      "captain_consensus": 0.85
     },
     {
       "time": "2026-11-06 14:00",
-      "hs_deep": 2.1,
-      "hs": 1.65,
+      "hs": 1.25,
       "tp": 10.2,
       "w": 11.0,
       "tide": 0.45,
-      "cctv_overtop_pct": 8.5,
-      "wushi_shelter_rate": 70.0,
+      "cv": 0.8,
+      "turn": 0.7,
+      "shelter": 70.0,
       "label": 3,
-      "action": "⚠️ 啟動防禦性早退撤離 (船隊返航烏石港)"
+      "action": "⚠️ 啟動防禦性早退撤離",
+      "energy_flux": 15.937,
+      "steepness": 0.0077,
+      "t_overtop_pct": 10.0,
+      "captain_consensus": 0.7
     },
     {
       "time": "2026-11-07 07:30",
-      "hs_deep": 0.95,
       "hs": 0.75,
       "tp": 7.2,
       "w": 5.8,
       "tide": 1.15,
-      "cctv_overtop_pct": 0.0,
-      "wushi_shelter_rate": 0.0,
+      "cv": 0.0,
+      "turn": 0.0,
+      "shelter": 0.0,
       "label": 0,
-      "action": "🟢 常規開放北岸靠泊 (烏石港船隊正常營運)"
+      "action": "🟢 常規開放北岸靠泊",
+      "energy_flux": 4.05,
+      "steepness": 0.0093,
+      "t_overtop_pct": 0.0,
+      "captain_consensus": 0.0
     }
   ]
 }

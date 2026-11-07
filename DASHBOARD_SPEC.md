@@ -1,12 +1,12 @@
 # 🌊 GEM Engine UI/UX 儀表板架構與數據同化規範指南 (Dashboard Governance Standard)
 
-> **版本**：v88.0 Flagship Standard
+> **版本**：v89.0 Autonomous Standard
 > **核心原則**：`Layout Frozen, Data Fluid`（UI/UX 版面結構剛性凍結，僅允許後端數據層動態注入更新）
 
 ---
 
 ## 📌 1. 規範宗旨 (Purpose)
-本規範結合「宏觀外海預報降尺度」、「CWA測站/CCTV時域殘差」與「烏石港母港動態」，確立龜山島全域海事指揮中樞前端視覺面板的唯一標準結構。
+本規範結合「PINN 近岸水動力降尺度」、「MARL 船長共識賽局」與「80%/72% Hysteresis Safe RL」，確立龜山島全域海事指揮中樞前端視覺面板的唯一標準結構。
 
 ---
 
