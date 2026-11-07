@@ -1,11 +1,12 @@
 {
   "metadata": {
-    "trained_at": "2026-11-07 13:01:41",
+    "trained_at": "2026-11-07 13:05:33",
     "sample_count": 5,
     "data_sources": [
-      "Wushi Port Fleet Typhoon Shelter Timestamps",
-      "CWA Buoy Time-Series",
-      "CCTV Temporal Overtopping Rate"
+      "Macro Ocean APIs (CMEMS / ECMWF ERA5 Wave Spectra)",
+      "CWA Buoy 46708A / Suao Station Time-Series",
+      "CCTV 5-Min Rolling Overtopping Rate (T_over%)",
+      "Wushi Port Fleet Shelter Timestamps (T_start, T_end)"
     ]
   },
   "calibrated_thresholds": {
@@ -16,6 +17,7 @@
   "historical_cases": [
     {
       "time": "2026-11-05 07:30",
+      "hs_deep": 3.1,
       "hs": 2.35,
       "tp": 12.1,
       "w": 16.2,
@@ -27,6 +29,7 @@
     },
     {
       "time": "2026-11-05 11:30",
+      "hs_deep": 2.8,
       "hs": 2.1,
       "tp": 11.5,
       "w": 14.0,
@@ -38,6 +41,7 @@
     },
     {
       "time": "2026-11-06 07:30",
+      "hs_deep": 1.6,
       "hs": 1.2,
       "tp": 8.0,
       "w": 8.5,
@@ -49,6 +53,7 @@
     },
     {
       "time": "2026-11-06 14:00",
+      "hs_deep": 2.1,
       "hs": 1.65,
       "tp": 10.2,
       "w": 11.0,
@@ -60,6 +65,7 @@
     },
     {
       "time": "2026-11-07 07:30",
+      "hs_deep": 0.95,
       "hs": 0.75,
       "tp": 7.2,
       "w": 5.8,
