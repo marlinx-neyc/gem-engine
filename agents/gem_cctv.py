@@ -4,7 +4,6 @@ class GemCCTVPatternAgent:
 
     def process_cctv_frame_features(self, raw_cv_data: dict) -> dict:
         cv_rate = float(raw_cv_data.get("cctv_cv_rate", 0.0))
-        # 計算 5 分鐘滾動漫頂時間占比 (T_over%)
         t_overtop_pct = cv_rate * 12.5
         fb_pier = 0.15 if t_overtop_pct >= 15.0 else 2.40
         return {

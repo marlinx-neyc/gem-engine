@@ -30,7 +30,6 @@ class GemMacroRLOrchestrator:
         w_macro = macro_data.get("w_macro", 12.0)
         monsoon_angle = macro_data.get("monsoon_angle", 50.0)
 
-        # 碼頭地形與繞射折減
         kd_north = 1.00 if monsoon_angle < 60 else 0.75
         kd_south = 0.55
 
@@ -71,7 +70,6 @@ class GemMacroRLOrchestrator:
 
         match_score = round(best_sim * 100, 1)
 
-        # 雙向滯後鎖定邏輯
         if self.last_state_active:
             active = (best_sim >= self.low_threshold)
         else:

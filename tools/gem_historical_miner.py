@@ -15,7 +15,6 @@ class GemHistoricalDataMiner:
         """採礦同化：包含烏石港船隊避風時序 (T_start/T_end) 與歷史海象標定"""
         os.makedirs("data", exist_ok=True)
         
-        # 示範/對齊真實烏石港颱風期與長浪避風歷史案例庫
         historical_cases = [
             {
                 "time": "2026-11-05 07:30", "hs": 2.35, "tp": 12.1, "w": 16.2, "tide": 0.62, "cctv_overtop_pct": 28.5,
