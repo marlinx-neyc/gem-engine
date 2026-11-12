@@ -1,0 +1,101 @@
+{
+  "updated_at": "2026-11-12 11:29:42 CST",
+  "decision": "🟡 戰術機動調撥 (移防南岸靠泊 Q2)",
+  "consensus_status": "🟡【多源動態校核】時段: 午間巡查防禦窗 (11:30) ｜ 實時浪高 Hs=1.44m / 週期 Tp=6.7s ｜ GEM 物理計算裁定",
+  "trust_score": "92.5% (實時海氣象融合)",
+  "p_veto": 0.05,
+  "official_veto": 1,
+  "official_title": "【風管處公告】受氣象/海浪影響，(31)日龜山島實施封島",
+  "official_body": "東北角暨宜蘭海岸國家風景區管理處：龜山島今日海象受控，常態營運開放登島作業。",
+  "official_wufu_position": "24.84320° N, 121.94980° E",
+  "official_wufu_status": "⚠️ 五福號島周巡弋未靠泊 [AIS基準點]",
+  "official_wufu_dist_wushi": "11.3 km",
+  "official_wufu_dist_piers": "615.1m / 1055.2m",
+  "current_window_name": "午間巡查防禦窗 (11:30)",
+  "wushi_port_flux_ships_hr": 7.7,
+  "cctv_status": {
+    "cctv_cv_rate": 0.48,
+    "t_overtop_pct": 6.0,
+    "fb_north_override": 2.4,
+    "fb_south_override": 2.8,
+    "is_overtopping": false,
+    "north_cam_status": "🟢 LIVE 25FPS (漫頂率 6.0%)",
+    "south_cam_status": "🟢 LIVE 25FPS (FB 2.8m)",
+    "visual_eye_status": "🟢 CCTV 畫面顯示碼頭水深乾舷合規"
+  },
+  "typhoon_info": {
+    "warning": "🟡 低壓擾動注意",
+    "name": "熱帶/鋒面低壓系統",
+    "distance": "< 450 km",
+    "eta": "約 12.0 小時"
+  },
+  "daily_forecast": [
+    {
+      "date": "11-12",
+      "hs_max": 1.68,
+      "tp_max": 7.9,
+      "w_max": 3.5
+    },
+    {
+      "date": "11-13",
+      "hs_max": 1.24,
+      "tp_max": 7.4,
+      "w_max": 4.6
+    },
+    {
+      "date": "11-14",
+      "hs_max": 0.96,
+      "tp_max": 7.2,
+      "w_max": 2.8
+    },
+    {
+      "date": "11-15",
+      "hs_max": 1.18,
+      "tp_max": 6.8,
+      "w_max": 4.4
+    },
+    {
+      "date": "11-16",
+      "hs_max": 0.9,
+      "tp_max": 6.5,
+      "w_max": 3.6
+    },
+    {
+      "date": "11-17",
+      "hs_max": 0.88,
+      "tp_max": 6.6,
+      "w_max": 2.6
+    },
+    {
+      "date": "11-18",
+      "hs_max": 1.66,
+      "tp_max": 7.2,
+      "w_max": 5.1
+    }
+  ],
+  "swell_forecast": {
+    "is_swell_alert": false,
+    "status_tag": "🟢 海象平穩受控",
+    "impact_window_str": "無明顯長浪湧浪漫頂威脅",
+    "advice": "目前波高 Hs=1.44m、週期 Tp=6.7s，風浪受控，可維持常規航務作業。",
+    "cg_speed_ms": 5.23,
+    "cg_knots": 10.2,
+    "energy_flux": 13.89
+  },
+  "metrics": {
+    "hs": 1.44,
+    "tp": 6.7,
+    "pressure": 993.2,
+    "pressure_3h": -0.1,
+    "hs_pier_north": 1.44,
+    "hs_pier_south": 0.79,
+    "w": 3.5,
+    "weff": 0.06,
+    "delta_theta": 91.0,
+    "ukc_north": 6.5,
+    "ukc_south": 8.45,
+    "fb_north": 2.4,
+    "fb_south": 2.8
+  },
+  "marquee_msg": "📢 雙軌情報：【風管處公告】受氣象/海浪影響，(31)日龜山島實施封島 ｜ 🚢 公務船 (11:30)：⚠️ 五福號島周巡弋未靠泊 [AIS基準點] ｜ 🤖 GEM 仲裁：🟡 戰術機動調撥 (移防南岸靠泊 Q2) (實時Hs:1.44m, Tp:6.7s, 風速:3.5m/s) ｜ ⏱️ 校核：2026-11-12 11:29:42 CST"
+}
