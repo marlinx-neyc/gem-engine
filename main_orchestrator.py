@@ -83,6 +83,7 @@ class GemConsensusOrchestrator:
             "badge": consensus_res["trust_score"],
             "final_action": final_action,
             "vessel_status": consensus_res["dock_desc"],
+            "effective_official": consensus_res["effective_official_label"],
             "consensus_status": consensus_res["consensus_status"],
             "physics_res": physics_res,
             "data_source": telemetry.get("data_source", "live")

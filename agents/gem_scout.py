@@ -19,26 +19,49 @@ class GemScoutAgent:
             "https://www.necoast-nsa.gov.tw/News.aspx?n=88"
         ]
 
+    def _check_date_relevance(self, text: str, now_cst: datetime) -> dict:
+        '''檢核封島公告是否明確屬於今日 (D0) 或明日 (D+1)，過濾過期歷史舊聞'''
+        today_m, today_d = now_cst.month, now_cst.day
+        tmr = now_cst + timedelta(days=1)
+        tmr_m, tmr_d = tmr.month, tmr.day
+
+        is_today = bool(re.search(rf"(本日封島|今日封島|今天封島|今\({today_d}\)日|{today_m}月{today_d}日|{today_m}/{today_d})", text))
+        is_tmr = bool(re.search(rf"(明日封島|明天封島|續封島|明\({tmr_d}\)日|{tmr_m}月{tmr_d}日|{tmr_m}/{tmr_d})", text))
+
+        # 若有明確日期標記（如 X月Y日）但既非今日也非明日，視為過期歷史公告
+        has_explicit_date = bool(re.search(r"\d{1,2}月\d{1,2}日", text))
+        if has_explicit_date and not is_today and not is_tmr:
+            return {"valid": False, "is_today": False, "is_tmr": False}
+
+        # 若無明確日期，僅在出現「本日/今日/明日/明天/續封島」時才視為有效
+        if not has_explicit_date and not is_today and not is_tmr:
+            return {"valid": False, "is_today": False, "is_tmr": False}
+
+        return {"valid": True, "is_today": is_today, "is_tmr": is_tmr}
+
     def fetch_facebook_announcement(self) -> dict:
         if not self.fb_page_token or not self.fb_page_id:
             return None
         url = f"https://graph.facebook.com/v18.0/{self.fb_page_id}/published_posts"
-        params = {"access_token": self.fb_page_token, "limit": 1, "fields": "message,created_time"}
+        params = {"access_token": self.fb_page_token, "limit": 2, "fields": "message,created_time"}
+        now_cst = datetime.now(CST)
         try:
             resp = requests.get(url, params=params, timeout=4)
             if resp.status_code == 200:
-                data = resp.json().get("data", [])
-                if data:
-                    msg = data[0].get("message", "")
-                    is_closed = bool(re.search(r"(本日封島|續封島|明日封島|明天封島|暫停開放|不開放登島)", msg))
-                    return {
-                        "official_veto": 1 if is_closed else 0,
-                        "wave_warning": True,
-                        "title": f"【FB 社群公告】{msg[:35]}...",
-                        "body": msg,
-                        "source": "facebook_api",
-                        "published_at": data[0].get("created_time", "")
-                    }
+                for post in resp.json().get("data", []):
+                    msg = post.get("message", "")
+                    if "龜山島" in msg and re.search(r"(封島|暫停開放|不開放登島)", msg):
+                        rel = self._check_date_relevance(msg, now_cst)
+                        if rel["valid"]:
+                            return {
+                                "official_veto": 1 if rel["is_today"] else 0,
+                                "tomorrow_veto": 1 if rel["is_tmr"] else 0,
+                                "wave_warning": True,
+                                "title": f"【FB 社群公告】{msg[:36]}...",
+                                "body": msg,
+                                "source": "facebook_api",
+                                "published_at": post.get("created_time", "")
+                            }
         except Exception:
             pass
         return None
@@ -48,7 +71,7 @@ class GemScoutAgent:
             return override_announcement
 
         fb_res = self.fetch_facebook_announcement()
-        if fb_res and fb_res["official_veto"] == 1:
+        if fb_res and (fb_res.get("official_veto") == 1 or fb_res.get("tomorrow_veto") == 1):
             return fb_res
 
         now = datetime.now(CST)
@@ -57,9 +80,10 @@ class GemScoutAgent:
 
         default_payload = {
             "official_veto": 0,
+            "tomorrow_veto": 0,
             "wave_warning": False,
             "title": "【風管處通告】全島常規開放營運中",
-            "body": "東北角暨宜蘭海岸國家風景區管理處：龜山島今日海象受控，常態營運開放登島作業。",
+            "body": "東北角暨宜蘭海岸國家風景區管理處：龜山島今日無當日封島通告，依實船靠泊與海象動態開放登島。",
             "published_at": now.strftime("%Y-%m-%d %H:%M CST"),
             "extracted_day": current_day,
             "source": "official_web"
@@ -71,20 +95,24 @@ class GemScoutAgent:
                 resp = requests.get(url, headers=headers, timeout=5)
                 if resp.status_code == 200:
                     soup = BeautifulSoup(resp.text, 'html.parser')
-                    full_text = soup.get_text()
-
-                    is_closed = bool(re.search(r"(本日封島|續封島|明日封島|明天封島|明\(\d+\)日|\d+月\d+日封島|115年\d+月\d+日|禁止靠泊|浪潮蓋碼頭|暫停開放|不開放登島)", full_text))
-                    has_waves = bool(re.search(r"(長浪|浪高|浪潮漫頂|湧浪|大潮|風力超過|平均風力)", full_text))
-
-                    day_match = re.search(r"(?:明|今|本)\((\d+)\)日|(\d+)月(\d+)日封島|\d+年\d+月(\d+)日", full_text)
-                    extracted_day = int(day_match.group(1) or day_match.group(3) or day_match.group(4) or tomorrow_day) if day_match else current_day
-
-                    default_payload.update({
-                        "official_veto": 1 if is_closed else 0,
-                        "wave_warning": has_waves,
-                        "title": f"【風管處公告】受氣象/海浪影響，({extracted_day})日龜山島實施封島" if is_closed else "【風管處通告】全島常規開放營運中",
-                        "extracted_day": extracted_day
-                    })
+                    # 逐條檢查連結與標題，避免整頁雜訊與過期舊聞互相干擾
+                    candidates = [el.get_text(" ", strip=True) for el in soup.find_all(["a", "li", "h2", "h3", "div"]) if "龜山島" in el.get_text()]
+                    for snippet in candidates:
+                        if len(snippet) > 160:
+                            continue
+                        if re.search(r"(封島|禁止靠泊|浪潮蓋碼頭|暫停開放|不開放登島)", snippet):
+                            rel = self._check_date_relevance(snippet, now)
+                            if rel["valid"]:
+                                target_d = current_day if rel["is_today"] else tomorrow_day
+                                default_payload.update({
+                                    "official_veto": 1 if rel["is_today"] else 0,
+                                    "tomorrow_veto": 1 if rel["is_tmr"] else 0,
+                                    "wave_warning": True,
+                                    "title": f"【風管處公告】受海浪影響，({target_d})日龜山島實施封島",
+                                    "body": snippet,
+                                    "extracted_day": target_d
+                                })
+                                return default_payload
                     break
             except Exception:
                 continue
@@ -107,7 +135,7 @@ class GemScoutAgent:
             f"&wind_speed_unit=ms&timezone=Asia%2FTaipei"
         )
         res = {
-            "hs": 1.15, "tp": 8.5, "w": 7.5, "wind_dir": 45.0,
+            "hs": 1.15, "tp": 8.5, "w": 5.5, "wind_dir": 45.0,
             "monsoon_angle": 35.0, "pressure": 1014.0, "pressure_3h": -0.5,
             "tide": 0.95, "daily_forecast": [], "data_source": "fallback_baseline"
         }
@@ -123,7 +151,7 @@ class GemScoutAgent:
 
                 hs = float(m_cur.get("wave_height") or 1.15)
                 tp = float(m_cur.get("swell_wave_period") or m_cur.get("wave_period") or 8.5)
-                w_spd = float(w_cur.get("wind_speed_10m") or 7.5)
+                w_spd = float(w_cur.get("wind_speed_10m") or 5.5)
                 w_dir = float(w_cur.get("wind_direction_10m") or 45.0)
                 pressure = float(w_cur.get("surface_pressure") or 1014.0)
 
@@ -211,18 +239,18 @@ class GemScoutAgent:
         energy_flux = hs**2 * tp
 
         now = datetime.now(CST)
-        is_swell_alert = (tp >= 10.5 and hs >= 1.2)
+        is_swell_alert = (tp >= 11.0 and hs >= 1.35)
 
         if is_swell_alert:
             start_impact = now + timedelta(hours=1.0)
             end_impact = start_impact + timedelta(hours=3.5)
             status_tag = "🔴 高度漫頂風險期" if hs >= 1.8 else "🟡 湧浪越浪警戒期"
             timeline_str = f"{start_impact.strftime('%H:%M')} - {end_impact.strftime('%H:%M')} CST (長浪湧浪峰值)"
-            advice = f"長浪週期 Tp={tp}s (群速 {cg_knots:.1f}節, 能量流 {energy_flux:.1f}) 易引發碼頭消能瓦解，建議維持剛性封閉或機動移防南岸。"
+            advice = f"長浪週期 Tp={tp}s (群速 {cg_knots:.1f}節, 能量流 {energy_flux:.1f})，北岸消能壓力大，建議優先採用南岸靠泊並關注五福號駐島動向。"
         else:
             status_tag = "🟢 海象平穩受控"
             timeline_str = "無明顯長浪湧浪漫頂威脅"
-            advice = f"目前波高 Hs={hs}m、週期 Tp={tp}s，風浪受控，可維持常規航務作業。"
+            advice = f"目前外海波高 Hs={hs}m、週期 Tp={tp}s，經地形折算後符合靠泊安全線，可維持常規登島作業。"
 
         return {
             "is_swell_alert": is_swell_alert,
@@ -247,7 +275,7 @@ class GemScoutAgent:
         pressure = float(raw_input.get("pressure", live_wx["pressure"]))
         pressure_3h = float(raw_input.get("pressure_3h", live_wx["pressure_3h"]))
 
-        auto_cv = round(max(0.0, (hs - 1.15) * 1.65 + (0.35 if tp >= 12.0 and hs >= 1.3 else 0.0)), 2)
+        auto_cv = round(max(0.0, (hs - 1.25) * 1.55 + (0.30 if tp >= 12.0 and hs >= 1.4 else 0.0)), 2)
         cctv_cv_rate = float(raw_input.get("cctv_cv_rate", auto_cv))
 
         return {

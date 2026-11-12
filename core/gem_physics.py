@@ -24,7 +24,11 @@ class GemPhysicsEngine:
         fb_north = cctv_res.get("fb_north_override", 2.40)
         fb_south = cctv_res.get("fb_south_override", 2.80)
 
-        hard_veto = bool(hs_pier_north > 1.80 or weff > 10.17 or ukc_north < 1.00 or fb_north < 0.20)
+        hard_veto = bool(
+            (hs_pier_north > 1.80 and hs_pier_south > 1.35)
+            or weff > 10.17
+            or (ukc_north < 1.00 and ukc_south < 1.20)
+        )
 
         action_mode = "🔴 全線剛性熔斷（禁止靠泊）"
         badge = "🔴 0.0% 物理 VETO 熔斷"
@@ -33,9 +37,9 @@ class GemPhysicsEngine:
             if fb_north >= 0.50 and ukc_north >= 1.50 and hs_pier_north <= 0.95:
                 action_mode = "🟢 常態開放靠泊 (北岸 Q1)"
                 badge = "🟢 100.0% 常規開放"
-            elif fb_south >= 0.50 and ukc_south >= 1.50:
+            elif fb_south >= 0.50 and ukc_south >= 1.50 and hs_pier_south <= 1.13:
                 action_mode = "🟡 戰術機動調撥 (移防南岸靠泊 Q2)"
-                badge = "🟡 80.0% 移防南岸"
+                badge = "🟡 85.0% 移防南岸"
             elif 0.30 <= fb_north < 0.50:
                 action_mode = "🟡 晨間延滯觀望 (建議延後至 08:30 評估)"
                 badge = "🟡 50.0% 延滯開窗"

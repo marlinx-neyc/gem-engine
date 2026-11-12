@@ -1,16 +1,15 @@
 # 🌊 GEM Engine UI/UX 儀表板與系統架構規範指南 (Dashboard Governance Standard)
-> **版本**：v103.3 Real-Time Telemetry & Multi-Source Consensus Architecture
-> **原則**：Spec-Driven, Code-Diff Minimal Push, Unified Mobile-First Design, CST-Locked, Live-API Direct
+> **版本**：v103.4 Vessel-Ground-Truth & Dynamic Official Override Architecture
+> **原則**：Spec-Driven, Vessel-First Ground Truth, Date-Filtered NLP, CST-Locked, Live-API Direct
 
-## 🏛️ 1. 官方三時段與多重驗證規範 (CST UTC+8)
-- 🌅 **晨間首航巡查窗 (07:30)**：06:30 - 09:30 CST，比對五福號靠泊狀態與即時海氣象，決定早盤放行。
-- ☀️ **午間巡查防禦窗 (11:30)**：10:30 - 13:30 CST，比對午後潮位加成與湧浪群速，決定是否防禦性早退。
-- 🌇 **傍晚閉島休整窗 (16:30)**：15:30 - 18:30 CST，清島休整驗證與未來 7 日營運預報對齊。
-- 🚢 **靠泊判定準則**：與碼頭距離 $\le 180\text{m}$ 且船速 $SOG \le 1.5\text{ knots}$ 為確認靠泊。
-- 🌐 **雙軌即時數據流**：後端 Cron 定時寫入官方公告與 AIS 狀態；前端開啟或點擊「實時同步」時直連 Open-Meteo Marine & Weather API 動態更新所有物理指標與 7-Day 預報。
-
-## 🏛️ 2. 面板 12 大戰術卡片全動態綁定規範
-1. 雙軌多重驗證跑馬燈 (`#marqueeContainer`) 2. 戰術 Header (`#badgeHeartbeatContainer` 真實同步時戳)
-3. CCTV 雙岸眼睛 (`#cctvCard`) 4. 🌀 颱風即時動態 (`#typhoonCard`) 5. 🌊 浪湧與氣壓監測視窗 (`#swellForecastCard`)
-6. 🌐 MarineTraffic AIS 與五福號 HUD 7. 🌅 7-Day 完整動態預報對比表 8. 雙岸關鍵物理數值側向比對
-9. 🧭 2D 風場向量羅盤 Canvas 10. 🌀 Windy 動態圖場 11. 📐 碼頭剖面越浪 Canvas 12. 🎯 5 軸態勢雷達 Canvas
+## 🏛️ 1. 開島本質規律與實船優先仲裁規範 (CST UTC+8)
+1. **公務船行為鐵證（最高權重）**：
+   - 「東北角五福號」(MMSI: 416017708) 在船班營運時段 (`07:00 - 16:30 CST`) 靠泊於龜山島北岸或南岸碼頭（距離 $\le 180\text{m}$ 且航速 $SOG \le 1.5\text{ knots}$），即代表風管處已完成實船試靠並駐島戒護，**官方實質判定「開島營運中」**。
+   - 若網站靜態公告仍顯示封島（前日預報未更新），系統自動執行**「官方公告與時俱進動態修正」**，將官方實質狀態切換為 `🟢 實質開島 (五福號駐島戒護中)`。
+   - 若船班時段內五福號滯留烏石港母港未出港，或盤中提早離岸返航（防禦性早退），則動態修正為 `🔴 實質封島`。
+2. **官網爬蟲日期時效過濾**：
+   - 解析官網標題與公告時，必須嚴格檢核日期是否符合**今日 (D0)** 或**明日 (D+1)**，過濾新聞列表中的過期歷史封島公告。
+3. **三層開島物理判準**：
+   - **水動力靠泊線**：碼頭折算波高 $H_{s,\text{pier}}$（北岸 $\le 0.95\text{m}$、南岸 $\le 1.13\text{m}$）、法向有效風速 $W_{\text{eff}}$（北岸 $\le 8.50\text{m/s}$、南岸 $\le 10.17\text{m/s}$）、預留乾舷 $FB \ge 0.50\text{m}$。
+   - **南北岸雙碼頭切換**：東北季風期北岸超標時，若南岸受島體遮蔽達標則移防南岸開島。
+   - **晨間試靠終審**：07:30 五福號實船靠泊穩定後正式放行賞鯨船隊。
