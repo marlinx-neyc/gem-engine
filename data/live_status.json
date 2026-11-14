@@ -1,20 +1,20 @@
 {
-  "updated_at": "2026-11-14 11:25:37 CST",
+  "updated_at": "2026-11-14 18:45:43 CST",
   "decision": "🟢 常態開放靠泊 (北岸 Q1)",
-  "consensus_status": "🟢【多重驗證一致·開島】官方開放 ｜ 五福號船班時段靠泊龜山島戒護 ｜ 水動力合規 (Hs=0.84m)",
-  "trust_score": "100.0% (三重吻合)",
+  "consensus_status": "🟡【非船班時段校核】時段: 夜間休整離峰期 ｜ 船況: 🌙 五福號非營運時段停泊烏石港母港 (水文行為反演·母港待命) ｜ 實時浪高 Hs=0.86m",
+  "trust_score": "91.0% (水動力+公告融合)",
   "p_veto": 0.05,
   "official_veto": 0,
   "tomorrow_veto": 0,
-  "effective_official_label": "🟢 實質開島 (五福號駐島戒護)",
+  "effective_official_label": "🟢 常態營運",
   "official_title": "【風管處通告】全島常規開放營運中",
   "official_body": "東北角暨宜蘭海岸國家風景區管理處：龜山島今日無當日封島通告，依實船靠泊與海象動態開放登島。",
-  "official_wufu_position": "24.84375° N, 121.94378° E",
-  "official_wufu_status": "🟢 五福號靠泊北岸戒護中 (水文行為反演·北岸駐守)",
-  "official_wufu_dist_wushi": "10.7 km",
-  "official_wufu_dist_piers": "5.5m / 545.1m",
-  "current_window_name": "午間巡查防禦窗 (11:30)",
-  "wushi_port_flux_ships_hr": 42.0,
+  "official_wufu_position": "24.86872° N, 121.84154° E",
+  "official_wufu_status": "🌙 五福號非營運時段停泊烏石港母港 (水文行為反演·母港待命)",
+  "official_wufu_dist_wushi": "0.0 km",
+  "official_wufu_dist_piers": "10678.6m / 10400.2m",
+  "current_window_name": "夜間休整離峰期",
+  "wushi_port_flux_ships_hr": 0.0,
   "cctv_status": {
     "cctv_cv_rate": 0.0,
     "t_overtop_pct": 0.0,
@@ -36,68 +36,68 @@
       "date": "11-14",
       "hs_max": 0.98,
       "tp_max": 7.2,
-      "w_max": 2.2
+      "w_max": 2.1
     },
     {
       "date": "11-15",
       "hs_max": 1.3,
       "tp_max": 6.8,
-      "w_max": 4.7
+      "w_max": 4.3
     },
     {
       "date": "11-16",
       "hs_max": 1.26,
       "tp_max": 6.2,
-      "w_max": 4.2
+      "w_max": 3.5
     },
     {
       "date": "11-17",
       "hs_max": 1.04,
       "tp_max": 6.5,
-      "w_max": 2.8
+      "w_max": 2.7
     },
     {
       "date": "11-18",
       "hs_max": 1.44,
       "tp_max": 6.8,
-      "w_max": 4.4
+      "w_max": 4.2
     },
     {
       "date": "11-19",
       "hs_max": 1.8,
       "tp_max": 7.1,
-      "w_max": 4.6
+      "w_max": 4.4
     },
     {
       "date": "11-20",
       "hs_max": 1.08,
       "tp_max": 6.8,
-      "w_max": 2.9
+      "w_max": 3.6
     }
   ],
   "swell_forecast": {
     "is_swell_alert": false,
     "status_tag": "🟢 海象平穩受控",
     "impact_window_str": "無明顯長浪湧浪漫頂威脅",
-    "advice": "目前外海波高 Hs=0.84m、週期 Tp=8.1s，經地形折算後符合靠泊安全線，可維持常規登島作業。",
-    "cg_speed_ms": 6.32,
-    "cg_knots": 12.3,
-    "energy_flux": 5.72
+    "advice": "目前外海波高 Hs=0.86m、週期 Tp=7.3s，經地形折算後符合靠泊安全線，可維持常規登島作業。",
+    "cg_speed_ms": 5.7,
+    "cg_knots": 11.1,
+    "energy_flux": 5.4
   },
   "metrics": {
-    "hs": 0.84,
-    "tp": 8.1,
-    "pressure": 986.7,
-    "pressure_3h": -1.1,
-    "hs_pier_north": 0.84,
-    "hs_pier_south": 0.46,
-    "w": 1.5,
-    "weff": 0.21,
-    "delta_theta": 98.0,
-    "ukc_north": 7.09,
-    "ukc_south": 8.77,
+    "hs": 0.86,
+    "tp": 7.3,
+    "pressure": 984.5,
+    "pressure_3h": -0.7,
+    "hs_pier_north": 0.86,
+    "hs_pier_south": 0.47,
+    "w": 1.6,
+    "weff": 1.58,
+    "delta_theta": 170.0,
+    "ukc_north": 7.26,
+    "ukc_south": 8.95,
     "fb_north": 2.4,
     "fb_south": 2.8
   },
-  "marquee_msg": "📢 官方實質判定：【風管處通告】全島常規開放營運中 ｜ 🚢 公務船 (11:30)：🟢 五福號靠泊北岸戒護中 (水文行為反演·北岸駐守) ｜ 🤖 GEM 仲裁：🟢 常態開放靠泊 (北岸 Q1) (Hs:0.84m, 南/北折算:0.46/0.84m, 風速:1.5m/s) ｜ ⏱️ 校核：2026-11-14 11:25:37 CST"
+  "marquee_msg": "📢 官方實質判定：【風管處通告】全島常規開放營運中 ｜ 🚢 公務船 (休整期)：🌙 五福號非營運時段停泊烏石港母港 (水文行為反演·母港待命) ｜ 🤖 GEM 仲裁：🟢 常態開放靠泊 (北岸 Q1) (Hs:0.86m, 南/北折算:0.47/0.86m, 風速:1.6m/s) ｜ ⏱️ 校核：2026-11-14 18:45:43 CST"
 }
