@@ -1,14 +1,16 @@
 import os
 import json
 import math
+import requests
 from datetime import datetime, timedelta, timezone
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 CST = timezone(timedelta(hours=8))
 
 class GemVesselAgent:
-    def __init__(self, track_db_path: str = "data/wufu_track.json"):
+    def __init__(self, track_db_path: str = "data/wufu_track.json", ais_api_url: str = None):
         self.track_db_path = track_db_path
+        self.ais_api_url = ais_api_url or os.environ.get("AIS_API_URL")
         self.official_vessel = {
             "name": "東北角五福號", "mmsi": "416017708", "call_sign": "BR5216",
             "kind": "公務小船", "draft_m": 1.20
@@ -19,7 +21,6 @@ class GemVesselAgent:
 
     @staticmethod
     def is_operational_boat_hours(dt: datetime = None) -> bool:
-        '''判斷是否處於龜山島日間船班營運時段 (07:00 - 16:30 CST)'''
         dt = dt or datetime.now(CST)
         cur_min = dt.hour * 60 + dt.minute
         return (7 * 60 <= cur_min <= 16 * 60 + 30)
@@ -38,7 +39,28 @@ class GemVesselAgent:
              math.sin(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.cos(math.radians(lon2 - lon1)))
         return round((math.degrees(math.atan2(y, x)) + 360.0) % 360.0, 1)
 
-    def _update_and_load_track(self, lat: float, lon: float, sog: float, tag: str, dt: datetime) -> List[dict]:
+    def fetch_realtime_ais_api(self) -> Optional[dict]:
+        '''嘗試從外部真實 AIS API 端點取得 MMSI 416017708 經緯度與航速'''
+        if not self.ais_api_url:
+            return None
+        try:
+            resp = requests.get(self.ais_api_url, timeout=4)
+            if resp.status_code == 200:
+                payload = resp.json()
+                records = payload if isinstance(payload, list) else payload.get("data", [payload])
+                for item in records:
+                    if str(item.get("mmsi", "")) == "416017708" or ("lat" in item and "lon" in item):
+                        return {
+                            "lat": float(item["lat"]),
+                            "lon": float(item["lon"]),
+                            "sog": float(item.get("sog", item.get("speed", 0.0))),
+                            "source_tag": "AIS即時API"
+                        }
+        except Exception:
+            pass
+        return None
+
+    def _update_and_load_track(self, lat: float, lon: float, sog: float, tag: str, is_real_ais: bool, dt: datetime) -> List[dict]:
         os.makedirs(os.path.dirname(self.track_db_path) or ".", exist_ok=True)
         history = []
         if os.path.exists(self.track_db_path):
@@ -48,26 +70,41 @@ class GemVesselAgent:
             except Exception:
                 history = []
 
-        history.append({
-            "ts": dt.isoformat(),
-            "lat": round(lat, 6),
-            "lon": round(lon, 6),
-            "sog": round(sog, 2),
-            "tag": tag
-        })
-        history = history[-15:]
+        # 僅在真實 AIS 變動或為首筆初始化時追加軌跡，避免相同靜態點重複洗版
+        should_append = True
+        if history:
+            last = history[-1]
+            if abs(last.get("lat", 0) - round(lat, 6)) < 1e-5 and abs(last.get("lon", 0) - round(lon, 6)) < 1e-5 and last.get("tag") == tag:
+                should_append = False
 
-        tmp_path = f"{self.track_db_path}.tmp_{os.getpid()}"
-        with open(tmp_path, "w", encoding="utf-8") as f:
-            json.dump(history, f, ensure_ascii=False, indent=2)
-        os.replace(tmp_path, self.track_db_path)
+        if should_append:
+            history.append({
+                "ts": dt.isoformat(),
+                "lat": round(lat, 6),
+                "lon": round(lon, 6),
+                "sog": round(sog, 2),
+                "tag": tag,
+                "is_real_ais": is_real_ais
+            })
+            history = history[-15:]
+            tmp_path = f"{self.track_db_path}.tmp_{os.getpid()}"
+            with open(tmp_path, "w", encoding="utf-8") as f:
+                json.dump(history, f, ensure_ascii=False, indent=2)
+            os.replace(tmp_path, self.track_db_path)
         return history
 
-    def analyze_trajectory_vector(self, track_history: List[dict]) -> Dict[str, Any]:
+    def analyze_trajectory_vector(self, track_history: List[dict], is_real_ais: bool) -> Dict[str, Any]:
+        if not is_real_ais:
+            return {
+                "vector_state": "HYDRO_FALLBACK",
+                "vector_desc": "🛰️ 待接通真實AIS (目前為水文推演備援)",
+                "delta_dist_m": 0.0,
+                "cog_deg": None
+            }
         if len(track_history) < 2:
             return {
                 "vector_state": "INITIAL_POINT",
-                "vector_desc": "📡 單點定位建立中 (待累積軌跡)",
+                "vector_desc": "📡 AIS首筆定位建立中 (待累積軌跡)",
                 "delta_dist_m": 0.0,
                 "cog_deg": None
             }
@@ -124,12 +161,12 @@ class GemVesselAgent:
         in_hours = self.is_operational_boat_hours(dt)
         if in_hours:
             if hs_n <= 0.95 and weff <= 8.50:
-                return {"lat": 24.84375, "lon": 121.94378, "sog": 0.1, "source_tag": "水文反演·北岸駐守"}
+                return {"lat": 24.84375, "lon": 121.94378, "sog": 0.1, "source_tag": "水文推演備援·北岸"}
             elif hs_s <= 1.13 and weff <= 10.17:
-                return {"lat": 24.84048, "lon": 121.93985, "sog": 0.1, "source_tag": "水文反演·南岸駐守"}
-        return {"lat": 24.86872, "lon": 121.84154, "sog": 0.0, "source_tag": "水文反演·母港待命"}
+                return {"lat": 24.84048, "lon": 121.93985, "sog": 0.1, "source_tag": "水文推演備援·南岸"}
+        return {"lat": 24.86872, "lon": 121.84154, "sog": 0.0, "source_tag": "水文推演備援·母港"}
 
-    def evaluate_docking_status(self, off_lat: float, off_lon: float, sog: float, source_tag: str = "AIS即時", dt: datetime = None) -> Dict[str, Any]:
+    def evaluate_docking_status(self, off_lat: float, off_lon: float, sog: float, source_tag: str, is_real_ais: bool, dt: datetime = None) -> Dict[str, Any]:
         dt = dt or datetime.now(CST)
         in_boat_hours = self.is_operational_boat_hours(dt)
 
@@ -170,6 +207,7 @@ class GemVesselAgent:
             "dist_wushi_m": round(dist_wushi, 1),
             "dist_north_m": round(dist_north, 1),
             "dist_south_m": round(dist_south, 1),
+            "is_real_ais": is_real_ais,
             "is_docked_island": is_docked_island,
             "in_boat_hours": in_boat_hours,
             "implied_official_open": implied_open,
@@ -184,14 +222,21 @@ class GemVesselAgent:
             lat = float(telemetry["wufu_lat"])
             lon = float(telemetry["wufu_lon"])
             sog = float(telemetry.get("wufu_sog", 0.2))
-            tag = "AIS即時"
+            tag = "AIS即時傳入"
+            is_real_ais = True
         else:
-            inferred = self._infer_vessel_position_from_hydrodynamics(telemetry, dt)
-            lat, lon, sog, tag = inferred["lat"], inferred["lon"], inferred["sog"], inferred["source_tag"]
+            live_ais = self.fetch_realtime_ais_api()
+            if live_ais:
+                lat, lon, sog, tag = live_ais["lat"], live_ais["lon"], live_ais["sog"], live_ais["source_tag"]
+                is_real_ais = True
+            else:
+                inferred = self._infer_vessel_position_from_hydrodynamics(telemetry, dt)
+                lat, lon, sog, tag = inferred["lat"], inferred["lon"], inferred["sog"], inferred["source_tag"]
+                is_real_ais = False
 
-        track_history = self._update_and_load_track(lat, lon, sog, tag, dt)
-        traj_eval = self.analyze_trajectory_vector(track_history)
-        dock_eval = self.evaluate_docking_status(lat, lon, sog, tag, dt)
+        track_history = self._update_and_load_track(lat, lon, sog, tag, is_real_ais, dt)
+        traj_eval = self.analyze_trajectory_vector(track_history, is_real_ais)
+        dock_eval = self.evaluate_docking_status(lat, lon, sog, tag, is_real_ais, dt)
 
         return {
             "official_wufu": {

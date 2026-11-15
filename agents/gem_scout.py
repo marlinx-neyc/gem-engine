@@ -21,7 +21,6 @@ class GemScoutAgent:
         ]
 
     def _check_date_relevance(self, text: str, now_cst: datetime) -> dict:
-        '''檢核封島公告是否明確屬於今日 (D0) 或明日 (D+1)，過濾過期歷史舊聞並辨識半日/全日'''
         today_m, today_d = now_cst.month, now_cst.day
         tmr = now_cst + timedelta(days=1)
         tmr_m, tmr_d = tmr.month, tmr.day
@@ -130,24 +129,27 @@ class GemScoutAgent:
         return default_payload
 
     def fetch_live_marine_and_weather(self) -> dict:
-        '''即時抓取龜山島海域海浪與氣象觀測預報 (Open-Meteo Marine & Weather API)'''
+        '''即時抓取龜山島海域海浪、氣象與逐時午後湧浪斜率預報 (Open-Meteo Marine & Weather API)'''
         marine_url = (
             f"https://marine-api.open-meteo.com/v1/marine?"
             f"latitude={self.lat}&longitude={self.lon}"
             f"&current=wave_height,wave_period,swell_wave_height,swell_wave_period"
-            f"&daily=wave_height_max,wave_period_max&timezone=Asia%2FTaipei"
+            f"&hourly=wave_height,wave_period,swell_wave_period"
+            f"&daily=wave_height_max,wave_period_max&forecast_days=7&timezone=Asia%2FTaipei"
         )
         weather_url = (
             f"https://api.open-meteo.com/v1/forecast?"
             f"latitude={self.lat}&longitude={self.lon}"
             f"&current=wind_speed_10m,wind_direction_10m,surface_pressure"
-            f"&hourly=surface_pressure&daily=wind_speed_10m_max"
-            f"&wind_speed_unit=ms&timezone=Asia%2FTaipei"
+            f"&hourly=surface_pressure,wind_speed_10m&daily=wind_speed_10m_max"
+            f"&wind_speed_unit=ms&forecast_days=7&timezone=Asia%2FTaipei"
         )
         res = {
             "hs": 1.15, "tp": 8.5, "w": 5.5, "wind_dir": 45.0,
             "monsoon_angle": 35.0, "pressure": 1014.0, "pressure_3h": -0.5,
-            "tide": 0.95, "daily_forecast": [], "data_source": "fallback_baseline"
+            "tide": 0.95, "daily_forecast": [],
+            "pm_forecast": {"pm_hs_max": 1.15, "pm_tp_max": 8.5, "hs_slope_3h": 0.0, "afternoon_risk": False, "risk_label": "🟢 午後海象平穩"},
+            "data_source": "fallback_baseline"
         }
         try:
             m_resp = requests.get(marine_url, timeout=5)
@@ -167,13 +169,39 @@ class GemScoutAgent:
 
                 delta_theta = min(180.0, abs(((w_dir - 45.0 + 180.0) % 360.0) - 180.0))
 
+                now_cst = datetime.now(CST)
+                now_hr = now_cst.hour
+
                 p_3h = 0.0
                 hourly_p = w_data.get("hourly", {}).get("surface_pressure", [])
-                now_hr = datetime.now(CST).hour
                 if len(hourly_p) > now_hr and now_hr >= 3:
                     p_3h = round(float(hourly_p[now_hr]) - float(hourly_p[now_hr - 3]), 1)
 
-                now_cst = datetime.now(CST)
+                # 計算未來 3h 浪高上升斜率與午後 (12:00-17:00 CST) 峰值
+                h_hs = m_data.get("hourly", {}).get("wave_height", [])
+                h_tp = m_data.get("hourly", {}).get("swell_wave_period") or m_data.get("hourly", {}).get("wave_period") or []
+                hs_slope_3h = 0.0
+                if len(h_hs) > now_hr + 3 and h_hs[now_hr] is not None and h_hs[now_hr + 3] is not None:
+                    hs_slope_3h = round(float(h_hs[now_hr + 3]) - float(h_hs[now_hr]), 2)
+
+                pm_hs_vals = [float(h_hs[i]) for i in range(12, min(18, len(h_hs))) if h_hs[i] is not None]
+                pm_tp_vals = [float(h_tp[i]) for i in range(12, min(18, len(h_tp))) if h_tp[i] is not None]
+                pm_hs_max = round(max(pm_hs_vals) if pm_hs_vals else hs, 2)
+                pm_tp_max = round(max(pm_tp_vals) if pm_tp_vals else tp, 1)
+
+                kd_s_pm = 0.75 if pm_tp_max >= 12.0 else 0.55
+                pm_hs_south = pm_hs_max * kd_s_pm
+                afternoon_risk = bool(
+                    (pm_tp_max >= 12.0 and pm_hs_south > 1.13)
+                    or (pm_hs_south > 1.13)
+                    or (hs_slope_3h >= 0.30 and pm_hs_max >= 1.45)
+                )
+                risk_label = (
+                    f"🟡 午後封島高風險預警 (PM Hs={pm_hs_max}m, Tp={pm_tp_max}s, 斜率{hs_slope_3h:+.2f}m/3h)"
+                    if afternoon_risk else
+                    f"🟢 午後海象受控 (PM Hs={pm_hs_max}m, Tp={pm_tp_max}s)"
+                )
+
                 tide_est = round(0.85 + 0.45 * math.sin(2 * math.pi * (now_cst.hour + now_cst.minute / 60.0) / 12.42), 2)
 
                 m_daily = m_data.get("daily", {})
@@ -202,6 +230,13 @@ class GemScoutAgent:
                     "pressure_3h": p_3h,
                     "tide": tide_est,
                     "daily_forecast": daily_list,
+                    "pm_forecast": {
+                        "pm_hs_max": pm_hs_max,
+                        "pm_tp_max": pm_tp_max,
+                        "hs_slope_3h": hs_slope_3h,
+                        "afternoon_risk": afternoon_risk,
+                        "risk_label": risk_label
+                    },
                     "data_source": "open_meteo_live"
                 })
         except Exception:
@@ -241,21 +276,26 @@ class GemScoutAgent:
             "eta": "無暴風圈威脅"
         }
 
-    def estimate_swell_macro_dynamics(self, hs: float, tp: float, tide: float) -> dict:
+    def estimate_swell_macro_dynamics(self, hs: float, tp: float, tide: float, pm_forecast: dict = None) -> dict:
         g = 9.81
         cg_speed = (g * tp) / (4 * np.pi)
         cg_knots = cg_speed * 1.94384
         energy_flux = hs**2 * tp
+        pm_forecast = pm_forecast or {}
 
         now = datetime.now(CST)
-        is_swell_alert = (tp >= 11.5 and hs >= 1.35)
+        is_swell_alert = (tp >= 11.5 and hs >= 1.35) or bool(pm_forecast.get("afternoon_risk", False))
 
-        if is_swell_alert:
+        if tp >= 11.5 and hs >= 1.35:
             start_impact = now + timedelta(hours=1.0)
             end_impact = start_impact + timedelta(hours=3.5)
             status_tag = "🔴 高度漫頂風險期" if (hs >= 1.60 and tp >= 12.0) else "🟡 湧浪越浪警戒期"
             timeline_str = f"{start_impact.strftime('%H:%M')} - {end_impact.strftime('%H:%M')} CST (長浪湧浪峰值)"
             advice = f"長浪週期 Tp={tp}s (群速 {cg_knots:.1f}節, 能量流 {energy_flux:.1f}) 產生繞射穿透，嚴防引橋越浪與港池共振。"
+        elif pm_forecast.get("afternoon_risk"):
+            status_tag = "🟡 午後長浪湧升預警"
+            timeline_str = "12:00 - 17:00 CST (逐時波譜顯示午後轉惡)"
+            advice = f"目前波高 Hs={hs}m 尚可，但未來 3h 斜率 {pm_forecast.get('hs_slope_3h', 0):+.2f}m，午後預估達 Hs={pm_forecast.get('pm_hs_max')}m / Tp={pm_forecast.get('pm_tp_max')}s，嚴防下午臨時封島。"
         else:
             status_tag = "🟢 海象平穩受控"
             timeline_str = "無明顯長浪湧浪漫頂威脅"
@@ -283,6 +323,7 @@ class GemScoutAgent:
         monsoon_angle = float(raw_input.get("monsoon_angle", live_wx["monsoon_angle"]))
         pressure = float(raw_input.get("pressure", live_wx["pressure"]))
         pressure_3h = float(raw_input.get("pressure_3h", live_wx["pressure_3h"]))
+        pm_forecast = live_wx.get("pm_forecast", {})
 
         auto_cv = round(max(0.0, (hs - 1.25) * 1.55 + (0.60 if tp >= 12.0 and hs >= 1.5 else 0.0)), 2)
         cctv_cv_rate = float(raw_input.get("cctv_cv_rate", auto_cv))
@@ -298,10 +339,11 @@ class GemScoutAgent:
             "pressure_3h": pressure_3h,
             "cctv_cv_rate": cctv_cv_rate,
             "daily_forecast": live_wx.get("daily_forecast", []),
+            "pm_forecast": pm_forecast,
             "data_source": live_wx.get("data_source", "live"),
             "typhoon_info": self.fetch_typhoon_status(pressure),
             "official_announcement": announcement,
-            "swell_forecast": self.estimate_swell_macro_dynamics(hs, tp, tide)
+            "swell_forecast": self.estimate_swell_macro_dynamics(hs, tp, tide, pm_forecast)
         }
         for k in ["wufu_lat", "wufu_lon", "wufu_sog"]:
             if k in raw_input:

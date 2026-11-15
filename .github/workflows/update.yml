@@ -1,9 +1,9 @@
-name: GEM Engine High-Freq Operational Sync (CST 06:30-17:30)
+name: GEM Engine Tiered Anti-Bloat Sync (CST)
 
 on:
   schedule:
-    - cron: '*/10 22-23,0-8 * * *'
-    - cron: '30 9 * * *'
+    - cron: '*/15 23,0,3,4,8,9 * * *'
+    - cron: '0 1,2,5,6,7 * * *'
   workflow_dispatch:
 
 jobs:
@@ -26,12 +26,13 @@ jobs:
           CWA_API_KEY: ${{ secrets.CWA_API_KEY }}
           FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          AIS_API_URL: ${{ secrets.AIS_API_URL }}
         run: python main_orchestrator.py
 
-      - name: Auto Push updates to GitHub
+      - name: Auto Push updates to GitHub (Only on State Hash Change)
         run: |
           git config --global user.name "GEM Engine Bot"
           git config --global user.email "bot@gem-engine.local"
           git add data/live_status.json latest_decision.json data/wufu_track.json index.html web/index.html mobile.html desktop.html DASHBOARD_SPEC.md
-          git diff-index --quiet HEAD || git commit -m "🤖 [Auto Cron] 官方公告、四維路徑與即時海氣象同步"
+          git diff-index --quiet HEAD || git commit -m "🤖 [Auto Cron] 狀態相變與即時海氣象同步"
           git push

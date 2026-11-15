@@ -1,11 +1,11 @@
 # 🌊 GEM Engine UI/UX 儀表板與系統架構規範指南 (Dashboard Governance Standard)
-> **版本**：v103.7 Official Date-Sync, 4-Way Consensus & Smart LINE Override Architecture
-> **原則**：Spec-Driven, Code-Diff Minimal Push, Unified Mobile-First Design, 4-Way Arbitration, CST-Locked
+> **版本**：v103.8 State-Hash Anti-Bloat, Real-AIS Isolation & Hourly PM-Closure Forecast
+> **原則**：Spec-Driven, Semantic-Hash Push, Real-AIS Ground Truth, Hourly Predictive Risk, CST-Locked
 
-## 🏛️ 1. 官方公告與日期對比表同步規範 (CST UTC+8)
-1. **狀態隔離與同步 (`web_official_veto` vs `official_veto`)**：
-   - 後端爬蟲偵測到官網或粉專發布今日封島時，寫入 `web_official_veto = 1` 與 `announcement_scope`（`FULL_DAY` 或 `AFTERNOON`）。
-   - 前端定時更新海氣象 API 時，必須完整繼承 `web_official_veto`，嚴禁以數值預報覆寫清除官方封島公告。
-2. **日期對比表 (`D0` / `D+1`) 雙向連動**：
-   - 當 `web_official_veto == 1` 或人工覆寫鎖生效時，今日 `D0`（`07:30` / `11:30` / `16:30`）之「🏛️ 官方實質判定」同步切換為 `🔴 公告封島`（若為 `AFTERNOON` 下午封島半天，則 `07:30` 保留開島、`11:30` 與 `16:30` 同步轉為 `🔴 公告封島`）。
-   - 當 `tomorrow_veto == 1` 時，今日 `D0` 維持實際營運狀態，僅同步將 `D+1 (明日)` 官方欄位切為 `🔴 官方公告封島`。
+## 🏛️ 1. 防爆量差異寫入與即時性分流規範
+1. **語意狀態雜湊 (`state_hash`)**：
+   - 僅當裁決狀態、官方公告、人工覆寫鎖、AIS 狀態、午後預警改變，或浪高變動 $\Delta H_s \ge 0.05\text{m}$、週期變動 $\Delta T_p \ge 0.5\text{s}$ 時才執行原子寫入與 Git Push，避免無效 Commit 觸發 GitHub 次級限流。
+2. **真實 AIS 權重隔離 (`is_real_ais`)**：
+   - 僅當接通真實 AIS 座標 (`is_real_ais == True`) 且五福號靠泊碼頭時，才賦予「實船駐島鐵證」覆寫官網滯後公告之權限；水文推演船位僅供輔助參考，杜絕循環論證。
+3. **逐時午後封島預判 (`pm_forecast`)**：
+   - 透過 Open-Meteo `hourly` 序列計算未來 3 小時浪高上升斜率與 `12:00 - 17:00 CST` 峰值，提前於早盤標示午後半日封島高風險預警。
