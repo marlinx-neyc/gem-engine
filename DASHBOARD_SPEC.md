@@ -1,11 +1,10 @@
 # 🌊 GEM Engine UI/UX 儀表板與系統架構規範指南 (Dashboard Governance Standard)
-> **版本**：v103.12 Multi-Layer Sea Chart, Unobstructed MarineTraffic & CWA Buoy Fusion
-> **原則**：Spec-Driven, Multi-Layer-Keyless-Map, Pinpoint-Wufu-Beacon, Semantic-Hash Push, CWA-Buoy-First
+> **版本**：v103.13 Native MarineTraffic MMSI Lock, CWA Buoy Fusion & Cloud Hydration
+> **原則**：Spec-Driven, Native-MarineTraffic-MMSI-Lock, Unobstructed-Close-Button, Semantic-Hash Push, CWA-Buoy-First
 
-## 🏛️ 1. 多圖層海圖與單一公務船標示規範
-1. **四圖層自由切換 (`#wufuMapWrapper`)**：
-   - 支援「🌑 暗色海圖 (Esri Dark + OpenSeaMap 航標)」、「🛰️ 衛星海圖」、「🗺️ 航海圖」與「🌐 原版AIS底圖 (MarineTraffic 無白卡遮擋模式)」。
-   - 座標中心精準對齊光點核心 (`iconAnchor: [10, 10]`)，僅顯示「東北角五福號（名稱 + 雙層脈衝閃燈）」，且不遮擋任何操作按鈕。
+## 🏛️ 1. 原生 MarineTraffic AIS 鎖定與多源觀測融合規範
+1. **原生 MarineTraffic MMSI 416017708 鎖定 (`#marineTrafficIframe`)**：
+   - 採用原生 MarineTraffic 嵌入視圖 (`/mmsi:416017708`) 明確標示公務船「東北角五福號 (`DUNG BEI JIAU WU FU`)」目標圓圈與即時狀態，行動端透過寬視口縮放 (`scale(0.649)`) 確保右上角 `×` 關閉鈕完全露出不重疊。
 2. **CWA 浮標實測優先 (`O-B0075-001`)**：
    - 優先讀取龜山島浮標 (`46708A`) 與龍洞浮標 (`46694A`) 實測波高 $H_s$ 與湧浪週期 $T_p$，與 Open-Meteo 預報取保守最大值融合。
 3. **語意狀態雜湊 (`state_hash`) 與雲端狀態回填**：
