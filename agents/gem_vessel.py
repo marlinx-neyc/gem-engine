@@ -202,6 +202,8 @@ class GemVesselAgent:
             implied_open = False
 
         return {
+            "lat": round(off_lat, 6),
+            "lon": round(off_lon, 6),
             "dist_wushi_m": round(dist_wushi, 1),
             "dist_north_m": round(dist_north, 1),
             "dist_south_m": round(dist_south, 1),

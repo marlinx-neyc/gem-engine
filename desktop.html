@@ -6,8 +6,10 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>🌊 GEM Engine v103.10 龜山島全域戰術指揮中樞</title>
+    <title>🌊 GEM Engine v103.11 龜山島全域戰術指揮中樞</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <style>
         :root {
             --bg-dark: #080e1a; --card-bg: #111c2e; --card-border: #1e2d4a;
@@ -56,9 +58,9 @@
         }
 
         @keyframes halo-pulse-blue {
-            0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.9), 0 0 12px #38bdf8; transform: scale(1); }
-            70% { box-shadow: 0 0 0 10px rgba(56, 189, 248, 0), 0 0 20px #60a5fa; transform: scale(1.15); }
-            100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0), 0 0 8px #38bdf8; transform: scale(1); }
+            0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.95), 0 0 14px #38bdf8; transform: scale(1); }
+            70% { box-shadow: 0 0 0 14px rgba(56, 189, 248, 0), 0 0 24px #60a5fa; transform: scale(1.18); }
+            100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0), 0 0 10px #38bdf8; transform: scale(1); }
         }
         .flash-indicator-blue {
             display: inline-block; width: 12px; height: 12px; border-radius: 50%;
@@ -66,25 +68,39 @@
             animation: halo-pulse-blue 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
 
-        @keyframes windy-white-pulse {
-            0% { transform: scale(0.8); opacity: 1; box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.9); }
-            70% { transform: scale(1.3); opacity: 0.25; box-shadow: 0 0 0 12px rgba(255, 255, 255, 0); }
-            100% { transform: scale(0.8); opacity: 0; box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+        /* 海圖上專屬「東北角五福號」閃燈標示 */
+        @keyframes wufu-beacon-ring {
+            0% { transform: scale(0.7); opacity: 1; }
+            80% { transform: scale(2.6); opacity: 0; }
+            100% { transform: scale(2.6); opacity: 0; }
         }
-        .turtle-white-beacon {
-            display: inline-block; width: 10px; height: 10px; border-radius: 50%;
-            background-color: #ffffff; animation: windy-white-pulse 1.5s infinite;
+        .wufu-map-marker {
+            display: flex; align-items: center; gap: 6px; white-space: nowrap;
+            pointer-events: auto;
         }
-
-        /* 行動端 AIS 虛擬寬視口縮放，防止地圖圖層鈕與船訊卡 × 關閉鈕重疊 */
-        @media (max-width: 639px) {
-            .mt-iframe-unblocked {
-                width: 154% !important;
-                height: 154% !important;
-                transform: scale(0.649);
-                transform-origin: top left;
-            }
+        .wufu-beacon-wrap {
+            position: relative; width: 20px; height: 20px;
+            display: flex; align-items: center; justify-content: center;
         }
+        .wufu-beacon-ring {
+            position: absolute; width: 20px; height: 20px; border-radius: 50%;
+            border: 2.5px solid #38bdf8; background: rgba(56, 189, 248, 0.25);
+            animation: wufu-beacon-ring 1.3s ease-out infinite;
+        }
+        .wufu-beacon-core {
+            position: relative; width: 12px; height: 12px; border-radius: 50%;
+            background: #38bdf8; border: 2px solid #ffffff;
+            box-shadow: 0 0 12px #38bdf8, 0 0 20px #0ea5e9;
+        }
+        .wufu-name-pill {
+            background: rgba(8, 14, 26, 0.92); color: #f8fafc;
+            border: 1.5px solid #38bdf8; border-radius: 6px;
+            padding: 2px 7px; font-size: 12px; font-weight: 800;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.85), 0 0 8px rgba(56, 189, 248, 0.45);
+        }
+        .leaflet-container { background: #050a14 !important; }
+        .leaflet-control-attribution { display: none !important; }
 
         .card {
             background: var(--card-bg); border: 1px solid var(--card-border);
@@ -95,7 +111,7 @@
         .marquee-txt { display: inline-block; white-space: nowrap; animation: marquee-anim 24s linear infinite; }
         .marquee-txt:hover { animation-play-state: paused; }
     </style>
-    <script id="initial-live-data" type="application/json">{"updated_at": "2026-11-15 21:22:04 CST", "decision": "🌙 夜間休整期（預估開窗：🟢 常態開放靠泊 (北岸 Q1)）", "consensus_status": "🌙【夜間休整離峰期】非船班時段 ｜ 實時浪高 Hs=1.22m、週期 Tp=5.7s 符合安全基準", "trust_score": "94.5% (夜間水動力持續監測)", "p_veto": 0.05, "web_official_veto": 0, "announcement_scope": "FULL_DAY", "official_veto": 0, "tomorrow_veto": 0, "manual_override": {"active": false}, "four_way_summary": {"pos": "🌙 五福號非營運時段停泊烏石港母港 (水文推演備援·母港)", "traj": "🛰️ 待接通真實AIS (目前為水文推演備援)", "phys": "🟢 100.0% 常規開放", "off": "🌙 夜間休整 (海象合規)"}, "effective_official_label": "🌙 夜間休整 (海象合規)", "official_title": "【風管處通告】全島常規開放營運中", "official_body": "東北角暨宜蘭海岸國家風景區管理處：龜山島今日無當日封島通告，依實船軌跡與海象動態開放登島。", "official_wufu_position": "24.86872° N, 121.84154° E", "official_wufu_status": "🌙 五福號非營運時段停泊烏石港母港 (水文推演備援·母港)", "official_wufu_vector": "🛰️ 待接通真實AIS (目前為水文推演備援)", "official_wufu_is_real_ais": false, "official_wufu_dist_wushi": "0.0 km", "official_wufu_dist_piers": "10678.6m / 10400.2m", "current_window_name": "夜間休整離峰期", "wushi_port_flux_ships_hr": 0.0, "cctv_status": {"cctv_cv_rate": 0.0, "t_overtop_pct": 0.0, "fb_north_override": 2.4, "fb_south_override": 2.8, "is_overtopping": false, "north_cam_status": "🟢 LIVE 25FPS (漫頂率 0.0%)", "south_cam_status": "🟢 LIVE 25FPS (FB 2.8m)", "visual_eye_status": "🟢 CCTV 畫面顯示碼頭水深乾舷合規"}, "typhoon_info": {"warning": "🟡 低壓擾動注意", "name": "熱帶/鋒面低壓系統", "distance": "< 450 km", "eta": "約 12.0 小時"}, "daily_forecast": [{"date": "11-15", "hs_max": 1.24, "tp_max": 7.7, "w_max": 4.9}, {"date": "11-16", "hs_max": 1.22, "tp_max": 6.3, "w_max": 4.2}, {"date": "11-17", "hs_max": 0.98, "tp_max": 6.8, "w_max": 2.6}, {"date": "11-18", "hs_max": 1.58, "tp_max": 6.9, "w_max": 4.5}, {"date": "11-19", "hs_max": 1.76, "tp_max": 7.0, "w_max": 4.8}, {"date": "11-20", "hs_max": 1.54, "tp_max": 7.0, "w_max": 4.7}, {"date": "11-21", "hs_max": 1.1, "tp_max": 6.5, "w_max": 3.5}], "pm_forecast": {"pm_hs_max": 1.22, "pm_tp_max": 6.4, "hs_slope_3h": 0.0, "afternoon_risk": false, "risk_label": "🟢 午後海象受控 (PM Hs=1.22m, Tp=6.4s)"}, "swell_forecast": {"is_swell_alert": false, "status_tag": "🟢 海象平穩受控", "impact_window_str": "無明顯長浪湧浪漫頂威脅", "advice": "目前外海波高 Hs=1.22m、週期 Tp=5.7s，經地形折算後符合靠泊安全線，可維持常規登島作業。", "cg_speed_ms": 4.45, "cg_knots": 8.6, "energy_flux": 8.48}, "metrics": {"hs": 1.22, "tp": 5.7, "pressure": 987.6, "pressure_3h": 1.0, "hs_pier_north": 0.92, "hs_pier_south": 0.67, "w": 2.9, "weff": 2.25, "delta_theta": 5.0, "ukc_north": 6.79, "ukc_south": 8.34, "fb_north": 2.4, "fb_south": 2.8}, "marquee_msg": "📢 官方實質判定：【風管處通告】全島常規開放營運中 ｜ 🚢 位置與路徑：🌙 五福號非營運時段停泊烏石港母港 (水文推演備援·母港) / 🛰️ 待接通真實AIS (目前為水文推演備援) ｜ 🤖 GEM 四維仲裁：🌙 夜間休整期（預估開窗：🟢 常態開放靠泊 (北岸 Q1)） (Hs:1.22m, Tp:5.7s, 南/北折算:0.67/0.92m) ｜ ⏱️ 校核：2026-11-15 21:22:04 CST", "state_hash": "b99da23cde9c714942717e5aa8bd09cd9444c67a9ed68d83bd456363a8b88bd5"}</script>
+    <script id="initial-live-data" type="application/json">{"updated_at": "2026-11-15 21:28:45 CST", "decision": "🌙 夜間休整期（預估開窗：🟢 常態開放靠泊 (北岸 Q1)）", "consensus_status": "🌙【夜間休整離峰期】非船班時段 ｜ 實時浪高 Hs=1.22m、週期 Tp=5.7s 符合安全基準", "trust_score": "94.5% (夜間水動力持續監測)", "p_veto": 0.05, "web_official_veto": 0, "announcement_scope": "FULL_DAY", "official_veto": 0, "tomorrow_veto": 0, "manual_override": {"active": false}, "four_way_summary": {"pos": "🌙 五福號非營運時段停泊烏石港母港 (水文推演備援·母港)", "traj": "🛰️ 待接通真實AIS (目前為水文推演備援)", "phys": "🟢 100.0% 常規開放", "off": "🌙 夜間休整 (海象合規)"}, "effective_official_label": "🌙 夜間休整 (海象合規)", "official_title": "【風管處通告】全島常規開放營運中", "official_body": "東北角暨宜蘭海岸國家風景區管理處：龜山島今日無當日封島通告，依實船軌跡與海象動態開放登島。", "official_wufu_lat": 24.86872, "official_wufu_lon": 121.84154, "official_wufu_position": "24.86872° N, 121.84154° E", "official_wufu_status": "🌙 五福號非營運時段停泊烏石港母港 (水文推演備援·母港)", "official_wufu_vector": "🛰️ 待接通真實AIS (目前為水文推演備援)", "official_wufu_is_real_ais": false, "official_wufu_dist_wushi": "0.0 km", "official_wufu_dist_piers": "10678.6m / 10400.2m", "current_window_name": "夜間休整離峰期", "wushi_port_flux_ships_hr": 0.0, "cctv_status": {"cctv_cv_rate": 0.0, "t_overtop_pct": 0.0, "fb_north_override": 2.4, "fb_south_override": 2.8, "is_overtopping": false, "north_cam_status": "🟢 LIVE 25FPS (漫頂率 0.0%)", "south_cam_status": "🟢 LIVE 25FPS (FB 2.8m)", "visual_eye_status": "🟢 CCTV 畫面顯示碼頭水深乾舷合規"}, "typhoon_info": {"warning": "🟡 低壓擾動注意", "name": "熱帶/鋒面低壓系統", "distance": "< 450 km", "eta": "約 12.0 小時"}, "daily_forecast": [{"date": "11-15", "hs_max": 1.24, "tp_max": 7.7, "w_max": 4.9}, {"date": "11-16", "hs_max": 1.22, "tp_max": 6.3, "w_max": 4.2}, {"date": "11-17", "hs_max": 0.98, "tp_max": 6.8, "w_max": 2.6}, {"date": "11-18", "hs_max": 1.58, "tp_max": 6.9, "w_max": 4.5}, {"date": "11-19", "hs_max": 1.76, "tp_max": 7.0, "w_max": 4.8}, {"date": "11-20", "hs_max": 1.54, "tp_max": 7.0, "w_max": 4.7}, {"date": "11-21", "hs_max": 1.1, "tp_max": 6.5, "w_max": 3.5}], "pm_forecast": {"pm_hs_max": 1.22, "pm_tp_max": 6.4, "hs_slope_3h": 0.0, "afternoon_risk": false, "risk_label": "🟢 午後海象受控 (PM Hs=1.22m, Tp=6.4s)"}, "swell_forecast": {"is_swell_alert": false, "status_tag": "🟢 海象平穩受控", "impact_window_str": "無明顯長浪湧浪漫頂威脅", "advice": "目前外海波高 Hs=1.22m、週期 Tp=5.7s，經地形折算後符合靠泊安全線，可維持常規登島作業。", "cg_speed_ms": 4.45, "cg_knots": 8.6, "energy_flux": 8.48}, "metrics": {"hs": 1.22, "tp": 5.7, "pressure": 987.6, "pressure_3h": 1.0, "hs_pier_north": 0.92, "hs_pier_south": 0.67, "w": 2.9, "weff": 2.25, "delta_theta": 5.0, "ukc_north": 6.79, "ukc_south": 8.33, "fb_north": 2.4, "fb_south": 2.8}, "marquee_msg": "📢 官方實質判定：【風管處通告】全島常規開放營運中 ｜ 🚢 位置與路徑：🌙 五福號非營運時段停泊烏石港母港 (水文推演備援·母港) / 🛰️ 待接通真實AIS (目前為水文推演備援) ｜ 🤖 GEM 四維仲裁：🌙 夜間休整期（預估開窗：🟢 常態開放靠泊 (北岸 Q1)） (Hs:1.22m, Tp:5.7s, 南/北折算:0.67/0.92m) ｜ ⏱️ 校核：2026-11-15 21:28:45 CST", "state_hash": "b99da23cde9c714942717e5aa8bd09cd9444c67a9ed68d83bd456363a8b88bd5"}</script>
 </head>
 <body class="p-2 max-w-[1200px] mx-auto">
 
@@ -116,7 +132,7 @@
                 <span class="text-2xl">🌊</span>
                 <div>
                     <h1 class="text-base font-extrabold text-white flex items-center gap-2">
-                        龜山島戰術指揮中樞 <span class="text-[10px] text-[#38bdf8] font-mono">(📱 v103.10 無遮擋AIS海圖與CWA浮標融合版)</span>
+                        龜山島戰術指揮中樞 <span class="text-[10px] text-[#38bdf8] font-mono">(📱 v103.11 五福號專屬閃燈定位版)</span>
                     </h1>
                     <div class="text-[11px] text-[#cbd5e1] mt-1 flex flex-wrap gap-2 items-center font-mono">
                         <span id="badgeHeartbeatContainer" class="inline-flex items-center gap-1.5 bg-emerald-950 border border-emerald-500/60 px-2 py-0.5 rounded text-emerald-300 font-bold transition-colors">
@@ -262,12 +278,12 @@
         </div>
     </details>
 
-    <!-- 6. MarineTraffic AIS 地圖與 HUD (已修正白卡遮擋 × 按鈕與無遮擋切換) -->
+    <!-- 6. 公務船「東北角五福號」專屬閃燈定位海圖與 HUD (僅顯示五福號名稱+閃燈，無其他雜訊) -->
     <details class="card border-sky-500/60" open>
         <summary class="text-xs font-bold text-sky-300 flex justify-between items-center cursor-pointer outline-none">
             <span class="flex items-center gap-2">
-                <span class="px-1.5 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-500/60 text-[10px] font-mono">🌐 MarineTraffic AIS</span>
-                公務船「東北角五福號」進退停軌跡與開島鐵證 HUD (點擊收合/展開)
+                <span class="px-1.5 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-500/60 text-[10px] font-mono">🚢 五福號 AIS 定位</span>
+                公務船「東北角五福號」專屬閃燈定位圖與動態 HUD (點擊收合/展開)
             </span>
             <span class="text-[10px] text-emerald-400 border border-emerald-500/50 px-1.5 py-0.5 rounded">▼ 點擊收合/展開</span>
         </summary>
@@ -278,29 +294,20 @@
                         <span class="flash-indicator-blue"></span>公務船「東北角五福號」態勢：
                         <b class="text-emerald-300 ml-1" id="txtWufuDockDesc">[五福號狀態對齊中]</b>
                     </span>
-                    <div class="flex flex-wrap items-center gap-1">
-                        <button onclick="setMarineMapMode('clean')" id="btnMapClean" class="font-mono text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded font-bold shadow">🗺️ 海圖全景 (無遮擋)</button>
-                        <button onclick="setMarineMapMode('card')" id="btnMapCard" class="font-mono text-[10px] bg-slate-800 text-slate-300 border border-slate-600 px-2 py-0.5 rounded">🚢 鎖定五福號卡片</button>
-                        <a href="https://www.marinetraffic.com/en/ais/home/shipid:3718684/zoom:13" target="_blank" rel="noopener" class="font-mono text-[10px] bg-sky-700 hover:bg-sky-600 text-white px-1.5 py-0.5 rounded">🔗 全螢幕</a>
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="centerOnWufu()" class="font-mono text-[10px] bg-sky-600 hover:bg-sky-500 text-white px-2 py-0.5 rounded font-bold shadow">🎯 置中五福號</button>
+                        <a href="https://www.marinetraffic.com/en/ais/home/shipid:6181762/zoom:13" target="_blank" rel="noopener" class="font-mono text-[10px] bg-slate-800 hover:bg-slate-700 text-sky-300 border border-sky-500/40 px-1.5 py-0.5 rounded">🔗 外部AIS</a>
                     </div>
                 </div>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-mono bg-slate-900 p-2 rounded border border-slate-700">
-                    <div><span class="text-slate-400 text-[10px]">📍 五福號座標:</span><br/><b class="text-sky-300 text-xs font-bold" id="txtCoordWufu">24.84375° N, 121.94378° E</b></div>
+                    <div><span class="text-slate-400 text-[10px]">📍 五福號座標:</span><br/><b class="text-sky-300 text-xs font-bold" id="txtCoordWufu">24.86872° N, 121.84154° E</b></div>
                     <div><span class="text-slate-400 text-[10px]">距烏石港母港:</span><br/><b class="text-sky-300" id="txtDistWushi">-- km</b></div>
                     <div><span class="text-slate-400 text-[10px]">距北岸 / 南岸反算:</span><br/><b class="text-amber-300" id="txtDistPiers">-- m / -- m</b></div>
                     <div><span class="text-slate-400 text-[10px]">路徑向量狀態:</span><br/><b class="text-emerald-400" id="txtWufuVector">--</b></div>
                 </div>
             </div>
-            <!-- 預設載入無白卡遮擋之航道全景圖；點擊「鎖定五福號卡片」時自動啟用縮放視口避免圖層鈕擋住 × 關閉鈕 -->
-            <div class="w-full h-[360px] sm:h-[460px] rounded-lg border border-slate-700 overflow-hidden bg-slate-950 relative">
-                <iframe id="marineTrafficIframe" src="https://www.marinetraffic.com/en/ais/embed/zoom:12/centerv:24.85500/centerh:121.89500/shownames:true" class="w-full h-full border-0 mt-iframe-unblocked" loading="lazy"></iframe>
-            </div>
-            <div class="text-[11px] font-mono bg-slate-900 p-2 rounded border border-slate-700 space-y-1">
-                <div class="flex items-center gap-1.5 text-slate-200">
-                    <span class="turtle-white-beacon w-2.5 h-2.5"></span>🐢 龜山島頂峰標示: <b class="text-white font-bold">24.8425° N, 121.9510° E (Windy 白色脈衝閃光)</b>
-                </div>
-                <div class="text-slate-300">🚢 烏石港賞鯨船隊: <b class="text-emerald-300">華棋168/北極星1號/龜山朝日2號/超級星號/凱鯨號/東洋銘珠/新福豐36號/蘭鯨號/龜山朝日號</b></div>
-            </div>
+            <!-- 純淨戰術海圖：僅標示「東北角五福號（名稱 + 閃燈）」，移除其他船隻與彈窗 -->
+            <div id="wufuLeafletMap" class="w-full h-[360px] sm:h-[440px] rounded-lg border border-slate-700 overflow-hidden bg-[#050a14] relative z-10"></div>
         </div>
     </details>
 
@@ -432,6 +439,9 @@
         var currentRadarMode = 'south';
         var cachedMetrics = null;
         var cachedLivePayload = null;
+        var wufuMap = null;
+        var wufuMarker = null;
+        var currentWufuCoords = [24.86872, 121.84154];
         const GITHUB_REPO_SLUG = 'marlinx-neyc/gem-engine';
 
         function toggleFullScreen() {
@@ -442,22 +452,50 @@
             document.body.classList.toggle('high-contrast');
         }
 
-        // 切換 MarineTraffic 海圖全景 (無白卡遮擋) vs 鎖定五福號卡片 (縮放視口露出 × 按鈕)
-        function setMarineMapMode(mode) {
-            const iframe = document.getElementById('marineTrafficIframe');
-            const btnClean = document.getElementById('btnMapClean');
-            const btnCard = document.getElementById('btnMapCard');
-            if (!iframe) return;
+        // 初始化純淨戰術海圖：僅渲染「東北角五福號（名稱 + 閃燈）」
+        function initWufuBeaconMap(lat, lon) {
+            currentWufuCoords = [lat, lon];
+            if (typeof L === 'undefined') return;
 
-            if (mode === 'clean') {
-                iframe.src = 'https://www.marinetraffic.com/en/ais/embed/zoom:12/centerv:24.85500/centerh:121.89500/shownames:true';
-                if (btnClean) btnClean.className = 'font-mono text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded font-bold shadow';
-                if (btnCard) btnCard.className = 'font-mono text-[10px] bg-slate-800 text-slate-300 border border-slate-600 px-2 py-0.5 rounded';
+            if (!wufuMap) {
+                wufuMap = L.map('wufuLeafletMap', {
+                    center: [lat, lon],
+                    zoom: 12,
+                    zoomControl: true,
+                    attributionControl: false
+                });
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    subdomains: 'abcd',
+                    maxZoom: 18
+                }).addTo(wufuMap);
+
+                const wufuIcon = L.divIcon({
+                    className: 'wufu-custom-div-icon',
+                    html: '<div class="wufu-map-marker"><div class="wufu-beacon-wrap"><span class="wufu-beacon-ring"></span><span class="wufu-beacon-core"></span></div><span class="wufu-name-pill">東北角五福號</span></div>',
+                    iconSize: [140, 28],
+                    iconAnchor: [10, 14]
+                });
+                wufuMarker = L.marker([lat, lon], { icon: wufuIcon }).addTo(wufuMap);
             } else {
-                iframe.src = 'https://www.marinetraffic.com/en/ais/embed/zoom:12/centerv:24.85500/centerh:121.89500/mmsi:416017708';
-                if (btnCard) btnCard.className = 'font-mono text-[10px] bg-sky-600 text-white px-2 py-0.5 rounded font-bold shadow';
-                if (btnClean) btnClean.className = 'font-mono text-[10px] bg-slate-800 text-slate-300 border border-slate-600 px-2 py-0.5 rounded';
+                if (wufuMarker) wufuMarker.setLatLng([lat, lon]);
+                wufuMap.panTo([lat, lon]);
             }
+        }
+
+        function centerOnWufu() {
+            if (wufuMap && currentWufuCoords) {
+                wufuMap.setView(currentWufuCoords, 13, { animate: true });
+            }
+        }
+
+        function parseCoordsFromPayload(data) {
+            if (typeof data.official_wufu_lat === 'number' && typeof data.official_wufu_lon === 'number') {
+                return [data.official_wufu_lat, data.official_wufu_lon];
+            }
+            const posStr = data.official_wufu_position || '';
+            const m = posStr.match(/([\d.]+)°\s*N,\s*([\d.]+)°\s*E/);
+            if (m) return [parseFloat(m[1]), parseFloat(m[2])];
+            return [24.86872, 121.84154];
         }
 
         function configureGithubToken() {
@@ -778,6 +816,10 @@
         function applyLiveData(data) {
             if (!data) return;
             cachedLivePayload = data;
+
+            // 更新海圖上唯一的「東北角五福號（名稱 + 閃燈）」位置
+            const [wLat, wLon] = parseCoordsFromPayload(data);
+            initWufuBeaconMap(wLat, wLon);
 
             const marqueeEl = document.getElementById('marqueeText');
             const marqueeBox = document.getElementById('marqueeContainer');
@@ -1336,6 +1378,7 @@
         window.addEventListener('DOMContentLoaded', function() {
             updateLiveClock();
             setInterval(updateLiveClock, 1000);
+            initWufuBeaconMap(24.86872, 121.84154);
 
             const initTag = document.getElementById('initial-live-data');
             if (initTag && initTag.textContent.trim() !== 'null') {
