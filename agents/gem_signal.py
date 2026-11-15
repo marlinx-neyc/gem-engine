@@ -35,7 +35,7 @@ class GemSignalAgent:
         marquee_str = (
             f"📢 官方實質判定：{official_title} ｜ "
             f"🚢 位置與路徑：{vessel_msg} / {vector_msg} ｜ "
-            f"🤖 GEM 四維仲裁：{final_action} (Hs:{m.get('hs')}m, 南/北折算:{m.get('hs_pier_south')}/{m.get('hs_pier_north')}m, 風速:{m.get('w')}m/s) ｜ "
+            f"🤖 GEM 四維仲裁：{final_action} (Hs:{m.get('hs')}m, Tp:{m.get('tp')}s, 南/北折算:{m.get('hs_pier_south')}/{m.get('hs_pier_north')}m) ｜ "
             f"⏱️ 校核：{now_str}"
         )
 

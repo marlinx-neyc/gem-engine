@@ -90,7 +90,7 @@ class GemVesselAgent:
         if d_curr <= 180.0 and sog <= 1.5:
             state = "STATIONARY_AT_PIER"
             desc = "🟢 軌跡穩定駐泊碼頭戒護 (Δd≈0m)"
-        elif delta_d > 300.0 and sog >= 3.0 and (cog is not None and 250.0 <= cog <= 320.0):
+        elif delta_d > 300.0 and sog >= 3.0 and (cog is not None and 235.0 <= cog <= 320.0):
             state = "RETREATING_TO_WUSHI"
             desc = f"🔴 軌跡返航烏石港 (COG {cog}°, Δd=+{delta_d}m) [早退/封島鐵證]"
         elif delta_d < -300.0 and sog >= 3.0 and (cog is not None and 80.0 <= cog <= 140.0):
@@ -117,8 +117,9 @@ class GemVesselAgent:
         theta = float(telemetry.get("monsoon_angle", 35.0))
 
         kd_n = 1.00 if tp >= 12.0 else (0.75 if theta < 45.0 else 1.00)
+        kd_s = 0.75 if tp >= 12.0 else 0.55
         hs_n = hs * kd_n
-        hs_s = hs * 0.55
+        hs_s = hs * kd_s
         weff = w * abs(math.cos(math.radians(theta)))
 
         in_hours = self.is_operational_boat_hours(dt)

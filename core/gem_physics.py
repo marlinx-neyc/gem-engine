@@ -10,8 +10,9 @@ class GemPhysicsEngine:
         hs, tp, w = telemetry["hs"], telemetry["tp"], telemetry["w"]
         delta_theta, tide = telemetry["monsoon_angle"], telemetry["tide"]
 
+        # 長週期湧浪 (Tp >= 12.0s) 具備高繞射穿透能力，南岸遮蔽衰減減弱
         kd_north = 1.00 if tp >= 12.0 else (0.75 if delta_theta < 45.0 else 1.00)
-        kd_south = 0.55
+        kd_south = 0.75 if tp >= 12.0 else 0.55
         hs_pier_north = float(hs * kd_north)
         hs_pier_south = float(hs * kd_south)
 
@@ -25,19 +26,20 @@ class GemPhysicsEngine:
         fb_south = cctv_res.get("fb_south_override", 2.80)
 
         hard_veto = bool(
-            (hs_pier_north > 1.80 and hs_pier_south > 1.35)
+            (hs_pier_north > 0.95 and hs_pier_south > 1.13)
             or weff > 10.17
-            or (ukc_north < 1.00 and ukc_south < 1.20)
+            or (ukc_north < 1.50 and ukc_south < 1.50)
+            or (fb_north < 0.50 and fb_south < 0.50)
         )
 
         action_mode = "🔴 全線剛性熔斷（禁止靠泊）"
         badge = "🔴 0.0% 物理 VETO 熔斷"
 
         if not hard_veto:
-            if fb_north >= 0.50 and ukc_north >= 1.50 and hs_pier_north <= 0.95:
+            if fb_north >= 0.50 and ukc_north >= 1.50 and hs_pier_north <= 0.95 and weff <= 8.50:
                 action_mode = "🟢 常態開放靠泊 (北岸 Q1)"
                 badge = "🟢 100.0% 常規開放"
-            elif fb_south >= 0.50 and ukc_south >= 1.50 and hs_pier_south <= 1.13:
+            elif fb_south >= 0.50 and ukc_south >= 1.50 and hs_pier_south <= 1.13 and weff <= 10.17:
                 action_mode = "🟡 戰術機動調撥 (移防南岸靠泊 Q2)"
                 badge = "🟡 85.0% 移防南岸"
             elif 0.30 <= fb_north < 0.50:

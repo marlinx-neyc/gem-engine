@@ -10,7 +10,7 @@ class GemHistoricalDataMiner:
         raw_cases = [
             {"time": "2026-11-05 07:30", "hs": 2.35, "tp": 12.1, "w": 16.2, "tide": 0.62, "cv": 2.40, "action": "🔴 浪潮蓋頂剛性封島"},
             {"time": "2026-11-06 07:30", "hs": 1.44, "tp": 9.2,  "w": 3.5,  "tide": 1.05, "cv": 0.15, "action": "🟡 啟動權宜調撥 (移防南岸靠泊 / 五福號駐島)"},
-            {"time": "2026-11-15 11:17", "hs": 1.65, "tp": 12.8, "w": 11.2, "tide": 0.85, "cv": 1.20, "action": "🔴 盤中長湧浪湧升，五福號返航執行午後封島"}
+            {"time": "2026-11-15 11:17", "hs": 1.65, "tp": 12.8, "w": 11.2, "tide": 0.85, "cv": 1.20, "action": "🔴 盤中長湧浪湧升 (Tp=12.8s)，五福號返航執行午後封島"}
         ]
         intel_db = {
             "metadata": {"trained_at": datetime.now(CST).strftime("%Y-%m-%d %H:%M:%S CST")},

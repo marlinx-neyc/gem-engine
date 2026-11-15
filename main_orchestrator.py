@@ -36,12 +36,13 @@ class GemConsensusOrchestrator:
         self.signal = GemSignalAgent()
 
     def _load_existing_live_status(self) -> dict:
-        if os.path.exists("data/live_status.json"):
-            try:
-                with open("data/live_status.json", "r", encoding="utf-8") as f:
-                    return json.load(f)
-            except Exception:
-                pass
+        for candidate in ["data/live_status.json", "latest_decision.json"]:
+            if os.path.exists(candidate):
+                try:
+                    with open(candidate, "r", encoding="utf-8") as f:
+                        return json.load(f)
+                except Exception:
+                    pass
         return {}
 
     def execute_pipeline(self, raw_telemetry: dict = None):
@@ -72,7 +73,9 @@ class GemConsensusOrchestrator:
             telemetry=telemetry
         )
 
+        # 雙端 JSON 端點同步寫入
         purge_and_atomic_write("data/live_status.json", live_payload)
+        purge_and_atomic_write("latest_decision.json", live_payload)
 
         json_str = json.dumps(live_payload, cls=NpEncoder, ensure_ascii=False).replace("</script>", "<\\/script>")
         pattern = r'<script id="initial-live-data" type="application/json">[\s\S]*?</script>'
@@ -84,7 +87,7 @@ class GemConsensusOrchestrator:
                     with open(target_path, "r", encoding="utf-8") as f:
                         html_content = f.read()
                     if re.search(pattern, html_content):
-                        injected_html = re.sub(pattern, replacement, html_content, count=1)
+                        injected_html = re.sub(pattern, lambda _: replacement, html_content, count=1)
                         with open(target_path, "w", encoding="utf-8") as f:
                             f.write(injected_html)
             except Exception:

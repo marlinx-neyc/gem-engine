@@ -243,14 +243,14 @@ class GemScoutAgent:
         energy_flux = hs**2 * tp
 
         now = datetime.now(CST)
-        is_swell_alert = (tp >= 11.0 and hs >= 1.35)
+        is_swell_alert = (tp >= 11.5 and hs >= 1.35)
 
         if is_swell_alert:
             start_impact = now + timedelta(hours=1.0)
             end_impact = start_impact + timedelta(hours=3.5)
-            status_tag = "🔴 高度漫頂風險期" if hs >= 1.8 else "🟡 湧浪越浪警戒期"
+            status_tag = "🔴 高度漫頂風險期" if (hs >= 1.60 and tp >= 12.0) else "🟡 湧浪越浪警戒期"
             timeline_str = f"{start_impact.strftime('%H:%M')} - {end_impact.strftime('%H:%M')} CST (長浪湧浪峰值)"
-            advice = f"長浪週期 Tp={tp}s (群速 {cg_knots:.1f}節, 能量流 {energy_flux:.1f})，北岸消能壓力大，建議優先採用南岸靠泊並監控五福號軌跡。"
+            advice = f"長浪週期 Tp={tp}s (群速 {cg_knots:.1f}節, 能量流 {energy_flux:.1f}) 產生繞射穿透，嚴防引橋越浪與港池共振。"
         else:
             status_tag = "🟢 海象平穩受控"
             timeline_str = "無明顯長浪湧浪漫頂威脅"
@@ -279,7 +279,7 @@ class GemScoutAgent:
         pressure = float(raw_input.get("pressure", live_wx["pressure"]))
         pressure_3h = float(raw_input.get("pressure_3h", live_wx["pressure_3h"]))
 
-        auto_cv = round(max(0.0, (hs - 1.25) * 1.55 + (0.30 if tp >= 12.0 and hs >= 1.4 else 0.0)), 2)
+        auto_cv = round(max(0.0, (hs - 1.25) * 1.55 + (0.60 if tp >= 12.0 and hs >= 1.5 else 0.0)), 2)
         cctv_cv_rate = float(raw_input.get("cctv_cv_rate", auto_cv))
 
         res = {

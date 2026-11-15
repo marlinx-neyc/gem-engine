@@ -65,17 +65,19 @@ class GemMultiSourceConsensus:
         active_ov = self._check_active_manual_override(existing_state, dt)
         if active_ov.get("active"):
             ov_reason = active_ov.get("reason", "值班指揮官啟動人工緊急覆寫鎖")
+            ov_scope = active_ov.get("scope", "FULL_DAY")
             ov_action = int(active_ov.get("action", 0))
             is_ov_veto = (ov_action == 0)
+            scope_tag = "下午封島半天 (12:00-17:30)" if ov_scope == "AFTERNOON" else "全日封島管制"
             return {
                 "current_window": win,
                 "manual_override": active_ov,
                 "effective_official_veto": 1 if is_ov_veto else 0,
-                "effective_official_label": "🔴 現場緊急覆寫封島" if is_ov_veto else "🟢 現場覆寫開島",
+                "effective_official_label": f"🔴 現場覆寫·{scope_tag}" if is_ov_veto else "🟢 現場覆寫開島",
                 "effective_official_title": f"【現場群組緊急通告】{ov_reason}",
                 "consensus_status": f"🔒【人工覆寫鎖生效中】{ov_reason} (鎖定至 {active_ov.get('expires_at', '17:30 CST')})",
                 "trust_score": "100.0% (指揮官人工覆寫鎖)",
-                "final_action": "🔴 全線剛性熔斷（現場緊急封島）" if is_ov_veto else "🟢 現場放行（覆寫解鎖）",
+                "final_action": f"🔴 全線剛性熔斷（{scope_tag}）" if is_ov_veto else "🟢 現場放行（覆寫解鎖）",
                 "vessel_docked": vessel_docked,
                 "dock_desc": dock_desc,
                 "vector_desc": vector_desc,
@@ -83,7 +85,7 @@ class GemMultiSourceConsensus:
                     "pos": dock_desc,
                     "traj": vector_desc,
                     "phys": physics_res["badge"],
-                    "off": "🔒 現場群組緊急覆寫"
+                    "off": f"🔒 {scope_tag}"
                 }
             }
 
@@ -125,8 +127,8 @@ class GemMultiSourceConsensus:
             effective_official_veto = 1
             effective_official_label = "🔴 物理預警熔斷 (待船隻確認)"
             effective_official_title = f"【物理模型預警】港池折算波高超標 (Hs={m.get('hs')}m, Tp={m.get('tp')}s)，預警封島"
-            consensus_status = f"🔴【物理領先預警·熔斷】官網尚未發布封島，但水動力越浪超標 (Hs={m.get('hs')}m)，GEM 提前啟動熔斷！"
-            trust_score = "96.5% (水動力領先預警)"
+            consensus_status = f"🔴【物理領先預警·熔斷】官網尚未發布封島，但水動力越浪超標 (Hs={m.get('hs')}m, Tp={m.get('tp')}s)，GEM 提前啟動熔斷！"
+            trust_score = "97.2% (水動力領先預警)"
             final_action = "🔴 物理預警熔斷（禁止靠泊）"
 
         # 🎯 Priority 5: 非船班時段或跨日預報
