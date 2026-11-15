@@ -129,7 +129,6 @@ class GemScoutAgent:
         return default_payload
 
     def fetch_cwa_buoy_realtime(self) -> dict:
-        '''讀取 CWA 氣象署浮標即時海象觀測 (O-B0075-001: 龜山島浮標 46708A / 龍洞浮標 46694A)'''
         if not self.cwa_api_key:
             return None
         url = f"https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-B0075-001?Authorization={self.cwa_api_key}&StationID=46708A,46694A,C6U01"
@@ -155,7 +154,6 @@ class GemScoutAgent:
         return None
 
     def fetch_live_marine_and_weather(self) -> dict:
-        '''融合 CWA 浮標實測與 Open-Meteo 逐時海氣象預報'''
         marine_url = (
             f"https://marine-api.open-meteo.com/v1/marine?"
             f"latitude={self.lat}&longitude={self.lon}"
@@ -191,7 +189,6 @@ class GemScoutAgent:
                 tp = float(m_cur.get("swell_wave_period") or m_cur.get("wave_period") or 8.5)
                 src_tag = "open_meteo_live"
 
-                # 融合 CWA 實測浮標數據（取保守最大值防長湧浪突變）
                 cwa_buoy = self.fetch_cwa_buoy_realtime()
                 if cwa_buoy:
                     hs = max(hs, cwa_buoy["hs"])

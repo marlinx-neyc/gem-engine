@@ -66,7 +66,6 @@ class GemMultiSourceConsensus:
         vector_desc = wufu.get("vector_desc", "軌跡校核中")
         m = physics_res.get("metrics", {})
 
-        # 🛡️ Priority 0: 人工緊急覆寫鎖
         active_ov = self._check_active_manual_override(existing_state, dt)
         if active_ov.get("active"):
             ov_reason = active_ov.get("reason", "值班指揮官啟動人工緊急覆寫鎖")
@@ -96,7 +95,6 @@ class GemMultiSourceConsensus:
                 }
             }
 
-        # 🎯 Priority 1: 真實 AIS 路徑顯示盤中返航烏石港或試靠失敗 -> 最高優先級判定臨時封島
         if is_real_ais and in_boat_hours and vector_state in ["RETREATING_TO_WUSHI", "LOITERING_FAILED_DOCK"]:
             effective_official_veto = 1
             effective_official_label = "🔴 實質封島 (AIS路徑確認撤離)"
@@ -105,7 +103,6 @@ class GemMultiSourceConsensus:
             trust_score = "99.5% (真實AIS路徑實證)"
             final_action = "🔴 全線剛性熔斷（路徑確認撤離）"
 
-        # 🎯 Priority 2: 真實 AIS 確認船班時段五福號穩定靠泊碼頭 -> 修正官網滯後公告，判定實質開島
         elif is_real_ais and in_boat_hours and vessel_docked:
             effective_official_veto = 0
             if web_veto:
@@ -120,7 +117,6 @@ class GemMultiSourceConsensus:
                 trust_score = "100.0% (四維吻合)"
             final_action = physics_res["action_mode"] if not phys_veto else "🟡 實船駐島開窗 (留意南岸調撥)"
 
-        # 🎯 Priority 3: 真實 AIS 確認船班時段滯留烏石港未出港 -> 實質封島
         elif is_real_ais and in_boat_hours and dock_code == "BERTHED_WUSHI_CLOSED":
             effective_official_veto = 1
             effective_official_label = "🔴 實質封島 (AIS確認未出港)"
@@ -129,7 +125,6 @@ class GemMultiSourceConsensus:
             trust_score = "98.5% (真實AIS未出港)"
             final_action = "🔴 全線剛性熔斷（禁止靠泊）"
 
-        # 🎯 Priority 4: 官網已明確發布今日封島公告
         elif web_veto:
             effective_official_veto = 1
             scope_txt = "下午封島半天" if ann_scope == "AFTERNOON" else "官方公告封島"
@@ -139,7 +134,6 @@ class GemMultiSourceConsensus:
             trust_score = "100.0% (官方正式公告)"
             final_action = f"🔴 全線剛性熔斷（{scope_txt}）"
 
-        # 🎯 Priority 5: 物理模型領先預警熔斷
         elif phys_veto:
             effective_official_veto = 1
             effective_official_label = "🔴 物理預警熔斷 (待船隻確認)"
@@ -148,7 +142,6 @@ class GemMultiSourceConsensus:
             trust_score = "97.2% (水動力領先預警)"
             final_action = "🔴 物理預警熔斷（禁止靠泊）" if in_boat_hours else "🌙 夜間休整期（預警：🔴 物理 VETO 熔斷）"
 
-        # 🎯 Priority 6: 常態營運 / 夜間休整期
         else:
             effective_official_veto = 0
             effective_official_label = "🟢 常態營運" if in_boat_hours else "🌙 夜間休整 (海象合規)"

@@ -47,7 +47,6 @@ class GemConsensusOrchestrator:
 
     @staticmethod
     def _compute_semantic_state_hash(payload: dict) -> str:
-        '''計算語意狀態雜湊：僅當裁決、公告、覆寫鎖、AIS、午後預警改變或 ΔHs>=0.05m / ΔTp>=0.5s 時才變更'''
         m = payload.get("metrics", {})
         pm = payload.get("pm_forecast", {})
         sig_obj = {
