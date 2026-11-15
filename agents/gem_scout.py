@@ -128,8 +128,34 @@ class GemScoutAgent:
 
         return default_payload
 
+    def fetch_cwa_buoy_realtime(self) -> dict:
+        '''讀取 CWA 氣象署浮標即時海象觀測 (O-B0075-001: 龜山島浮標 46708A / 龍洞浮標 46694A)'''
+        if not self.cwa_api_key:
+            return None
+        url = f"https://opendata.cwa.gov.tw/api/v1/rest/datastore/O-B0075-001?Authorization={self.cwa_api_key}&StationID=46708A,46694A,C6U01"
+        try:
+            resp = requests.get(url, timeout=4)
+            if resp.status_code == 200:
+                locs = resp.json().get("Records", {}).get("SeaSurfaceObs", {}).get("Location", [])
+                for loc in locs:
+                    obs_list = loc.get("StationObsTimes", {}).get("StationObsTime", [])
+                    if not obs_list:
+                        continue
+                    latest = obs_list[-1].get("WeatherElements", {})
+                    wh = latest.get("WaveHeight")
+                    wp = latest.get("WavePeriod")
+                    if wh not in [None, "None", "-", "-99"] and wp not in [None, "None", "-", "-99"]:
+                        return {
+                            "hs": float(wh),
+                            "tp": float(wp),
+                            "station": loc.get("Station", {}).get("StationName", "CWA浮標")
+                        }
+        except Exception:
+            pass
+        return None
+
     def fetch_live_marine_and_weather(self) -> dict:
-        '''即時抓取龜山島海域海浪、氣象與逐時午後湧浪斜率預報 (Open-Meteo Marine & Weather API)'''
+        '''融合 CWA 浮標實測與 Open-Meteo 逐時海氣象預報'''
         marine_url = (
             f"https://marine-api.open-meteo.com/v1/marine?"
             f"latitude={self.lat}&longitude={self.lon}"
@@ -163,6 +189,15 @@ class GemScoutAgent:
 
                 hs = float(m_cur.get("wave_height") or 1.15)
                 tp = float(m_cur.get("swell_wave_period") or m_cur.get("wave_period") or 8.5)
+                src_tag = "open_meteo_live"
+
+                # 融合 CWA 實測浮標數據（取保守最大值防長湧浪突變）
+                cwa_buoy = self.fetch_cwa_buoy_realtime()
+                if cwa_buoy:
+                    hs = max(hs, cwa_buoy["hs"])
+                    tp = max(tp, cwa_buoy["tp"])
+                    src_tag = f"cwa_buoy({cwa_buoy['station']})+open_meteo"
+
                 w_spd = float(w_cur.get("wind_speed_10m") or 5.5)
                 w_dir = float(w_cur.get("wind_direction_10m") or 45.0)
                 pressure = float(w_cur.get("surface_pressure") or 1014.0)
@@ -177,7 +212,6 @@ class GemScoutAgent:
                 if len(hourly_p) > now_hr and now_hr >= 3:
                     p_3h = round(float(hourly_p[now_hr]) - float(hourly_p[now_hr - 3]), 1)
 
-                # 計算未來 3h 浪高上升斜率與午後 (12:00-17:00 CST) 峰值
                 h_hs = m_data.get("hourly", {}).get("wave_height", [])
                 h_tp = m_data.get("hourly", {}).get("swell_wave_period") or m_data.get("hourly", {}).get("wave_period") or []
                 hs_slope_3h = 0.0
@@ -186,8 +220,8 @@ class GemScoutAgent:
 
                 pm_hs_vals = [float(h_hs[i]) for i in range(12, min(18, len(h_hs))) if h_hs[i] is not None]
                 pm_tp_vals = [float(h_tp[i]) for i in range(12, min(18, len(h_tp))) if h_tp[i] is not None]
-                pm_hs_max = round(max(pm_hs_vals) if pm_hs_vals else hs, 2)
-                pm_tp_max = round(max(pm_tp_vals) if pm_tp_vals else tp, 1)
+                pm_hs_max = round(max([hs] + pm_hs_vals) if pm_hs_vals else hs, 2)
+                pm_tp_max = round(max([tp] + pm_tp_vals) if pm_tp_vals else tp, 1)
 
                 kd_s_pm = 0.75 if pm_tp_max >= 12.0 else 0.55
                 pm_hs_south = pm_hs_max * kd_s_pm
@@ -237,7 +271,7 @@ class GemScoutAgent:
                         "afternoon_risk": afternoon_risk,
                         "risk_label": risk_label
                     },
-                    "data_source": "open_meteo_live"
+                    "data_source": src_tag
                 })
         except Exception:
             pass

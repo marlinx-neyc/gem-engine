@@ -40,7 +40,6 @@ class GemVesselAgent:
         return round((math.degrees(math.atan2(y, x)) + 360.0) % 360.0, 1)
 
     def fetch_realtime_ais_api(self) -> Optional[dict]:
-        '''嘗試從外部真實 AIS API 端點取得 MMSI 416017708 經緯度與航速'''
         if not self.ais_api_url:
             return None
         try:
@@ -70,7 +69,6 @@ class GemVesselAgent:
             except Exception:
                 history = []
 
-        # 僅在真實 AIS 變動或為首筆初始化時追加軌跡，避免相同靜態點重複洗版
         should_append = True
         if history:
             last = history[-1]

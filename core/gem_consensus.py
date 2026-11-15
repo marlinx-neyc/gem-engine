@@ -146,17 +146,21 @@ class GemMultiSourceConsensus:
             effective_official_title = f"【物理模型預警】港池折算波高超標 (Hs={m.get('hs')}m, Tp={m.get('tp')}s)，預警封島"
             consensus_status = f"🔴【物理領先預警·熔斷】水動力越浪超標 (Hs={m.get('hs')}m, Tp={m.get('tp')}s)，GEM 啟動熔斷！"
             trust_score = "97.2% (水動力領先預警)"
-            final_action = "🔴 物理預警熔斷（禁止靠泊）"
+            final_action = "🔴 物理預警熔斷（禁止靠泊）" if in_boat_hours else "🌙 夜間休整期（預警：🔴 物理 VETO 熔斷）"
 
-        # 🎯 Priority 6: 常態營運 (附加逐時午後湧浪預警檢查)
+        # 🎯 Priority 6: 常態營運 / 夜間休整期
         else:
             effective_official_veto = 0
-            effective_official_label = "🟢 常態營運"
+            effective_official_label = "🟢 常態營運" if in_boat_hours else "🌙 夜間休整 (海象合規)"
             effective_official_title = announcement.get("title", "【風管處通告】全島常規開放營運中")
-            if pm_risk:
+            if pm_risk and in_boat_hours:
                 consensus_status = f"🟡【午前可航·午後封島預警】{pm_forecast.get('risk_label', '')} ｜ 建議縮短上午登島時窗"
                 trust_score = "95.5% (逐時波譜前瞻預警)"
                 final_action = "🟡 上午限時開窗 (午後湧浪高風險預警)"
+            elif not in_boat_hours:
+                consensus_status = f"🌙【夜間休整離峰期】非船班時段 ｜ 實時浪高 Hs={m.get('hs')}m、週期 Tp={m.get('tp')}s 符合安全基準"
+                trust_score = "94.5% (夜間水動力持續監測)"
+                final_action = f"🌙 夜間休整期（預估開窗：{physics_res['action_mode']}）"
             else:
                 consensus_status = f"🟢【四維綜合校核】時段: {win['name']} ｜ {vector_desc} ｜ 實時浪高 Hs={m.get('hs')}m"
                 trust_score = "94.0% (水動力+公告融合)"

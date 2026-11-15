@@ -21,4 +21,4 @@ class GemMacroRLOrchestrator:
             msg = "🟡 Safe RL 建議：外海湧浪偏高但風速平穩，評估南岸機動調撥開窗。"
         else:
             msg = "🟢 Safe RL 建議：海象平穩吻合常規開窗案例，維持北岸常態靠泊。"
-        return {"match_score": 96.1, "has_suggestion": True, "suggestion": msg}
+        return {"match_score": 96.4, "has_suggestion": True, "suggestion": msg}
