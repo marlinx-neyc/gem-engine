@@ -64,7 +64,6 @@ class GemVesselAgent:
         return history
 
     def analyze_trajectory_vector(self, track_history: List[dict]) -> Dict[str, Any]:
-        '''計算公務船路徑向量 (Δd 距島變化率 與 COG 航向角)，辨識盤中早退或試靠失敗'''
         if len(track_history) < 2:
             return {
                 "vector_state": "INITIAL_POINT",

@@ -73,7 +73,6 @@ class GemConsensusOrchestrator:
             telemetry=telemetry
         )
 
-        # 雙端 JSON 端點同步寫入
         purge_and_atomic_write("data/live_status.json", live_payload)
         purge_and_atomic_write("latest_decision.json", live_payload)
 

@@ -10,7 +10,6 @@ class GemPhysicsEngine:
         hs, tp, w = telemetry["hs"], telemetry["tp"], telemetry["w"]
         delta_theta, tide = telemetry["monsoon_angle"], telemetry["tide"]
 
-        # 長週期湧浪 (Tp >= 12.0s) 具備高繞射穿透能力，南岸遮蔽衰減減弱
         kd_north = 1.00 if tp >= 12.0 else (0.75 if delta_theta < 45.0 else 1.00)
         kd_south = 0.75 if tp >= 12.0 else 0.55
         hs_pier_north = float(hs * kd_north)

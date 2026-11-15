@@ -21,22 +21,23 @@ class GemScoutAgent:
         ]
 
     def _check_date_relevance(self, text: str, now_cst: datetime) -> dict:
-        '''檢核封島公告是否明確屬於今日 (D0) 或明日 (D+1)，過濾過期歷史舊聞'''
+        '''檢核封島公告是否明確屬於今日 (D0) 或明日 (D+1)，過濾過期歷史舊聞並辨識半日/全日'''
         today_m, today_d = now_cst.month, now_cst.day
         tmr = now_cst + timedelta(days=1)
         tmr_m, tmr_d = tmr.month, tmr.day
 
-        is_today = bool(re.search(rf"(本日封島|今日封島|今天封島|下午封島|今\({today_d}\)日|{today_m}月{today_d}日|{today_m}/{today_d})", text))
+        is_today = bool(re.search(rf"(本日封島|今日封島|今天封島|下午封島|封島半天|今\({today_d}\)日|{today_m}月{today_d}日|{today_m}/{today_d})", text))
         is_tmr = bool(re.search(rf"(明日封島|明天封島|續封島|明\({tmr_d}\)日|{tmr_m}月{tmr_d}日|{tmr_m}/{tmr_d})", text))
+        scope = "AFTERNOON" if re.search(r"(下午封島|封島半天|午後封島|12:00)", text) else "FULL_DAY"
 
         has_explicit_date = bool(re.search(r"\d{1,2}月\d{1,2}日", text))
         if has_explicit_date and not is_today and not is_tmr:
-            return {"valid": False, "is_today": False, "is_tmr": False}
+            return {"valid": False, "is_today": False, "is_tmr": False, "scope": scope}
 
         if not has_explicit_date and not is_today and not is_tmr:
-            return {"valid": False, "is_today": False, "is_tmr": False}
+            return {"valid": False, "is_today": False, "is_tmr": False, "scope": scope}
 
-        return {"valid": True, "is_today": is_today, "is_tmr": is_tmr}
+        return {"valid": True, "is_today": is_today, "is_tmr": is_tmr, "scope": scope}
 
     def fetch_facebook_announcement(self) -> dict:
         if not self.fb_page_token or not self.fb_page_id:
@@ -55,6 +56,7 @@ class GemScoutAgent:
                             return {
                                 "official_veto": 1 if rel["is_today"] else 0,
                                 "tomorrow_veto": 1 if rel["is_tmr"] else 0,
+                                "scope": rel["scope"],
                                 "wave_warning": True,
                                 "title": f"【FB 社群公告】{msg[:36]}...",
                                 "body": msg,
@@ -80,6 +82,7 @@ class GemScoutAgent:
         default_payload = {
             "official_veto": 0,
             "tomorrow_veto": 0,
+            "scope": "FULL_DAY",
             "wave_warning": False,
             "title": "【風管處通告】全島常規開放營運中",
             "body": "東北角暨宜蘭海岸國家風景區管理處：龜山島今日無當日封島通告，依實船軌跡與海象動態開放登島。",
@@ -109,11 +112,13 @@ class GemScoutAgent:
                             rel = self._check_date_relevance(snippet, now)
                             if rel["valid"]:
                                 target_d = current_day if rel["is_today"] else tomorrow_day
+                                scope_txt = "下午封島半天" if rel["scope"] == "AFTERNOON" else "實施封島"
                                 default_payload.update({
                                     "official_veto": 1 if rel["is_today"] else 0,
                                     "tomorrow_veto": 1 if rel["is_tmr"] else 0,
+                                    "scope": rel["scope"],
                                     "wave_warning": True,
-                                    "title": f"【風管處公告】受海浪影響，({target_d})日龜山島實施封島",
+                                    "title": f"【風管處公告】受海浪影響，({target_d})日龜山島{scope_txt}",
                                     "body": snippet,
                                     "extracted_day": target_d
                                 })

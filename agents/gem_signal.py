@@ -47,6 +47,8 @@ class GemSignalAgent:
             "consensus_status": consensus_res["consensus_status"],
             "trust_score": consensus_res["trust_score"],
             "p_veto": physics_res["p_veto"],
+            "web_official_veto": consensus_res.get("web_official_veto", 0),
+            "announcement_scope": consensus_res.get("announcement_scope", "FULL_DAY"),
             "official_veto": consensus_res.get("effective_official_veto", 0),
             "tomorrow_veto": announcement.get("tomorrow_veto", 0),
             "manual_override": consensus_res.get("manual_override", {"active": False}),

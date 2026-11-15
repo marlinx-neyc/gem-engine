@@ -33,5 +33,5 @@ jobs:
           git config --global user.name "GEM Engine Bot"
           git config --global user.email "bot@gem-engine.local"
           git add data/live_status.json latest_decision.json data/wufu_track.json index.html web/index.html mobile.html desktop.html DASHBOARD_SPEC.md
-          git diff-index --quiet HEAD || git commit -m "🤖 [Auto Cron] 四維路徑向量與即時海氣象動態同步"
+          git diff-index --quiet HEAD || git commit -m "🤖 [Auto Cron] 官方公告、四維路徑與即時海氣象同步"
           git push

@@ -52,6 +52,7 @@ class GemMultiSourceConsensus:
         wufu = vessel_res.get("official_wufu", {})
 
         web_veto = (announcement.get("official_veto", 0) == 1)
+        ann_scope = announcement.get("scope", "FULL_DAY")
         vessel_docked = bool(wufu.get("is_docked_island", False))
         in_boat_hours = bool(wufu.get("in_boat_hours", False))
         dock_code = wufu.get("dock_code", "")
@@ -72,6 +73,8 @@ class GemMultiSourceConsensus:
             return {
                 "current_window": win,
                 "manual_override": active_ov,
+                "web_official_veto": 1 if is_ov_veto else 0,
+                "announcement_scope": ov_scope,
                 "effective_official_veto": 1 if is_ov_veto else 0,
                 "effective_official_label": f"🔴 現場覆寫·{scope_tag}" if is_ov_veto else "🟢 現場覆寫開島",
                 "effective_official_title": f"【現場群組緊急通告】{ov_reason}",
@@ -122,8 +125,18 @@ class GemMultiSourceConsensus:
             trust_score = "98.0% (實船未出港優先)"
             final_action = "🔴 全線剛性熔斷（禁止靠泊）"
 
-        # 🎯 Priority 4: 物理模型領先預警熔斷 (長浪湧升但官網未發)
-        elif phys_veto and not web_veto:
+        # 🎯 Priority 4: 官網已明確發布今日封島公告 (含非船班時段結算/預警)
+        elif web_veto:
+            effective_official_veto = 1
+            scope_txt = "下午封島半天" if ann_scope == "AFTERNOON" else "官方公告封島"
+            effective_official_label = f"🔴 {scope_txt}"
+            effective_official_title = announcement.get("title", "【風管處公告】今日龜山島實施封島")
+            consensus_status = f"🔴【官方公告封島】{effective_official_title} ｜ 日期面板 D0 已同步修正為封島！"
+            trust_score = "100.0% (官方正式公告)"
+            final_action = f"🔴 全線剛性熔斷（{scope_txt}）"
+
+        # 🎯 Priority 5: 物理模型領先預警熔斷 (長浪湧升但官網未發)
+        elif phys_veto:
             effective_official_veto = 1
             effective_official_label = "🔴 物理預警熔斷 (待船隻確認)"
             effective_official_title = f"【物理模型預警】港池折算波高超標 (Hs={m.get('hs')}m, Tp={m.get('tp')}s)，預警封島"
@@ -131,18 +144,20 @@ class GemMultiSourceConsensus:
             trust_score = "97.2% (水動力領先預警)"
             final_action = "🔴 物理預警熔斷（禁止靠泊）"
 
-        # 🎯 Priority 5: 非船班時段或跨日預報
+        # 🎯 Priority 6: 常態營運
         else:
-            effective_official_veto = 1 if (web_veto or phys_veto) else 0
-            effective_official_label = "🔴 預警封島" if effective_official_veto == 1 else "🟢 常態營運"
+            effective_official_veto = 0
+            effective_official_label = "🟢 常態營運"
             effective_official_title = announcement.get("title", "【風管處通告】全島常規開放營運中")
-            consensus_status = f"🟡【四維綜合校核】時段: {win['name']} ｜ {vector_desc} ｜ 實時浪高 Hs={m.get('hs')}m"
-            trust_score = "92.0% (水動力+公告融合)"
+            consensus_status = f"🟢【四維綜合校核】時段: {win['name']} ｜ {vector_desc} ｜ 實時浪高 Hs={m.get('hs')}m"
+            trust_score = "94.0% (水動力+公告融合)"
             final_action = physics_res["action_mode"]
 
         return {
             "current_window": win,
             "manual_override": {"active": False},
+            "web_official_veto": 1 if web_veto else 0,
+            "announcement_scope": ann_scope,
             "effective_official_veto": effective_official_veto,
             "effective_official_label": effective_official_label,
             "effective_official_title": effective_official_title,

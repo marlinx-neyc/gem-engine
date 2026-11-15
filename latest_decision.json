@@ -1,9 +1,11 @@
 {
-  "updated_at": "2026-11-15 20:06:54 CST",
+  "updated_at": "2026-11-15 20:19:50 CST",
   "decision": "🟢 常態開放靠泊 (北岸 Q1)",
-  "consensus_status": "🟡【四維綜合校核】時段: 夜間休整離峰期 ｜ ⚓ 靜止待命 (距島 10400m, Δd=0.0m) ｜ 實時浪高 Hs=1.2m",
-  "trust_score": "92.0% (水動力+公告融合)",
+  "consensus_status": "🟢【四維綜合校核】時段: 夜間休整離峰期 ｜ ⚓ 靜止待命 (距島 10400m, Δd=0.0m) ｜ 實時浪高 Hs=1.2m",
+  "trust_score": "94.0% (水動力+公告融合)",
   "p_veto": 0.05,
+  "web_official_veto": 0,
+  "announcement_scope": "FULL_DAY",
   "official_veto": 0,
   "tomorrow_veto": 0,
   "manual_override": {
@@ -97,17 +99,17 @@
   "metrics": {
     "hs": 1.2,
     "tp": 4.6,
-    "pressure": 987.5,
+    "pressure": 987.6,
     "pressure_3h": 1.1,
     "hs_pier_north": 0.9,
     "hs_pier_south": 0.66,
-    "w": 2.3,
-    "weff": 1.76,
-    "delta_theta": 11.0,
-    "ukc_north": 6.95,
-    "ukc_south": 8.49,
+    "w": 2.4,
+    "weff": 1.85,
+    "delta_theta": 9.0,
+    "ukc_north": 6.91,
+    "ukc_south": 8.45,
     "fb_north": 2.4,
     "fb_south": 2.8
   },
-  "marquee_msg": "📢 官方實質判定：【風管處通告】全島常規開放營運中 ｜ 🚢 位置與路徑：🌙 五福號非營運時段停泊烏石港母港 (水文反演·母港待命) / ⚓ 靜止待命 (距島 10400m, Δd=0.0m) ｜ 🤖 GEM 四維仲裁：🟢 常態開放靠泊 (北岸 Q1) (Hs:1.2m, Tp:4.6s, 南/北折算:0.66/0.9m) ｜ ⏱️ 校核：2026-11-15 20:06:54 CST"
+  "marquee_msg": "📢 官方實質判定：【風管處通告】全島常規開放營運中 ｜ 🚢 位置與路徑：🌙 五福號非營運時段停泊烏石港母港 (水文反演·母港待命) / ⚓ 靜止待命 (距島 10400m, Δd=0.0m) ｜ 🤖 GEM 四維仲裁：🟢 常態開放靠泊 (北岸 Q1) (Hs:1.2m, Tp:4.6s, 南/北折算:0.66/0.9m) ｜ ⏱️ 校核：2026-11-15 20:19:50 CST"
 }
