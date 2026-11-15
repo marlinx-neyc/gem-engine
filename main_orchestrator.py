@@ -76,23 +76,14 @@ class GemConsensusOrchestrator:
         physics_res = self.physics.evaluate_physics(telemetry, cctv_res)
 
         consensus_res = self.consensus.arbitrate_consensus(
-            announcement=announcement,
-            vessel_res=vessel_res,
-            physics_res=physics_res,
-            cctv_res=cctv_res,
-            pm_forecast=pm_fc,
-            existing_state=existing_state
+            announcement=announcement, vessel_res=vessel_res, physics_res=physics_res,
+            cctv_res=cctv_res, pm_forecast=pm_fc, existing_state=existing_state
         )
 
         final_action = consensus_res["final_action"]
         live_payload = self.signal.package_live_status(
-            physics_res=physics_res,
-            consensus_res=consensus_res,
-            announcement=announcement,
-            vessel_res=vessel_res,
-            swell_res=swell_res,
-            cctv_res=cctv_res,
-            telemetry=telemetry
+            physics_res=physics_res, consensus_res=consensus_res, announcement=announcement,
+            vessel_res=vessel_res, swell_res=swell_res, cctv_res=cctv_res, telemetry=telemetry
         )
 
         new_hash = self._compute_semantic_state_hash(live_payload)
@@ -124,17 +115,11 @@ class GemConsensusOrchestrator:
                     pass
 
         return {
-            "badge": consensus_res["trust_score"],
-            "final_action": final_action,
-            "vessel_status": consensus_res["dock_desc"],
-            "vector_status": consensus_res["vector_desc"],
-            "pm_risk_label": pm_fc.get("risk_label", ""),
-            "effective_official": consensus_res["effective_official_label"],
-            "consensus_status": consensus_res["consensus_status"],
-            "physics_res": physics_res,
-            "data_source": telemetry.get("data_source", "live"),
-            "state_hash": new_hash[:12],
-            "skipped_write": skipped_write
+            "badge": consensus_res["trust_score"], "final_action": final_action,
+            "vessel_status": consensus_res["dock_desc"], "vector_status": consensus_res["vector_desc"],
+            "pm_risk_label": pm_fc.get("risk_label", ""), "effective_official": consensus_res["effective_official_label"],
+            "consensus_status": consensus_res["consensus_status"], "physics_res": physics_res,
+            "data_source": telemetry.get("data_source", "live"), "state_hash": new_hash[:12], "skipped_write": skipped_write
         }
 
 if __name__ == "__main__":

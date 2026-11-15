@@ -93,19 +93,9 @@ class GemVesselAgent:
 
     def analyze_trajectory_vector(self, track_history: List[dict], is_real_ais: bool) -> Dict[str, Any]:
         if not is_real_ais:
-            return {
-                "vector_state": "HYDRO_FALLBACK",
-                "vector_desc": "🛰️ 待接通真實AIS (目前為水文推演備援)",
-                "delta_dist_m": 0.0,
-                "cog_deg": None
-            }
+            return {"vector_state": "HYDRO_FALLBACK", "vector_desc": "🛰️ 待接通真實AIS (目前為水文推演備援)", "delta_dist_m": 0.0, "cog_deg": None}
         if len(track_history) < 2:
-            return {
-                "vector_state": "INITIAL_POINT",
-                "vector_desc": "📡 AIS首筆定位建立中 (待累積軌跡)",
-                "delta_dist_m": 0.0,
-                "cog_deg": None
-            }
+            return {"vector_state": "INITIAL_POINT", "vector_desc": "📡 AIS首筆定位建立中 (待累積軌跡)", "delta_dist_m": 0.0, "cog_deg": None}
 
         p_prev, p_curr = track_history[-2], track_history[-1]
         d_prev = min(
@@ -122,27 +112,17 @@ class GemVesselAgent:
         sog = float(p_curr.get("sog", 0.0))
 
         if d_curr <= 180.0 and sog <= 1.5:
-            state = "STATIONARY_AT_PIER"
-            desc = "🟢 軌跡穩定駐泊碼頭戒護 (Δd≈0m)"
+            state, desc = "STATIONARY_AT_PIER", "🟢 軌跡穩定駐泊碼頭戒護 (Δd≈0m)"
         elif delta_d > 300.0 and sog >= 3.0 and (cog is not None and 235.0 <= cog <= 320.0):
-            state = "RETREATING_TO_WUSHI"
-            desc = f"🔴 軌跡返航烏石港 (COG {cog}°, Δd=+{delta_d}m) [早退/封島鐵證]"
+            state, desc = "RETREATING_TO_WUSHI", f"🔴 軌跡返航烏石港 (COG {cog}°, Δd=+{delta_d}m) [早退/封島鐵證]"
         elif delta_d < -300.0 and sog >= 3.0 and (cog is not None and 80.0 <= cog <= 140.0):
-            state = "APPROACHING_ISLAND"
-            desc = f"🚢 軌跡駛向龜山島 (COG {cog}°, Δd={delta_d}m) [準備開島]"
+            state, desc = "APPROACHING_ISLAND", f"🚢 軌跡駛向龜山島 (COG {cog}°, Δd={delta_d}m) [準備開島]"
         elif 200.0 < d_curr <= 1000.0 and sog > 2.0 and abs(delta_d) < 150.0:
-            state = "LOITERING_FAILED_DOCK"
-            desc = f"⚠️ 島周繞行無法靠泊 (距岸 {round(d_curr)}m, SOG {sog}kt)"
+            state, desc = "LOITERING_FAILED_DOCK", f"⚠️ 島周繞行無法靠泊 (距岸 {round(d_curr)}m, SOG {sog}kt)"
         else:
-            state = "BERTHED_OR_IDLE"
-            desc = f"⚓ 靜止待命 (距島 {round(d_curr)}m, Δd={delta_d}m)"
+            state, desc = "BERTHED_OR_IDLE", f"⚓ 靜止待命 (距島 {round(d_curr)}m, Δd={delta_d}m)"
 
-        return {
-            "vector_state": state,
-            "vector_desc": desc,
-            "delta_dist_m": delta_d,
-            "cog_deg": cog
-        }
+        return {"vector_state": state, "vector_desc": desc, "delta_dist_m": delta_d, "cog_deg": cog}
 
     def _infer_vessel_position_from_hydrodynamics(self, telemetry: dict, dt: datetime) -> dict:
         hs = float(telemetry.get("hs", 1.15))
@@ -152,12 +132,10 @@ class GemVesselAgent:
 
         kd_n = 1.00 if tp >= 12.0 else (0.75 if theta < 45.0 else 1.00)
         kd_s = 0.75 if tp >= 12.0 else 0.55
-        hs_n = hs * kd_n
-        hs_s = hs * kd_s
+        hs_n, hs_s = hs * kd_n, hs * kd_s
         weff = w * abs(math.cos(math.radians(theta)))
 
-        in_hours = self.is_operational_boat_hours(dt)
-        if in_hours:
+        if self.is_operational_boat_hours(dt):
             if hs_n <= 0.95 and weff <= 8.50:
                 return {"lat": 24.84375, "lon": 121.94378, "sog": 0.1, "source_tag": "水文推演備援·北岸"}
             elif hs_s <= 1.13 and weff <= 10.17:
@@ -177,62 +155,39 @@ class GemVesselAgent:
         is_docked_island = is_docked_north or is_docked_south
 
         if is_docked_north:
-            state_desc = f"🟢 五福號靠泊北岸戒護中 ({source_tag})"
-            dock_code = "DOCKED_NORTH"
-            implied_open = True
+            state_desc, dock_code, implied_open = f"🟢 五福號靠泊北岸戒護中 ({source_tag})", "DOCKED_NORTH", True
         elif is_docked_south:
-            state_desc = f"🟡 五福號靠泊南岸戒護中 ({source_tag})"
-            dock_code = "DOCKED_SOUTH"
-            implied_open = True
+            state_desc, dock_code, implied_open = f"🟡 五福號靠泊南岸戒護中 ({source_tag})", "DOCKED_SOUTH", True
         elif dist_wushi <= 1200.0 and sog <= 0.8:
             if in_boat_hours:
-                state_desc = f"🔴 五福號船班時段停泊烏石港未出港 ({source_tag})"
-                dock_code = "BERTHED_WUSHI_CLOSED"
+                state_desc, dock_code = f"🔴 五福號船班時段停泊烏石港未出港 ({source_tag})", "BERTHED_WUSHI_CLOSED"
             else:
-                state_desc = f"🌙 五福號非營運時段停泊烏石港母港 ({source_tag})"
-                dock_code = "BERTHED_WUSHI_OFFHOURS"
+                state_desc, dock_code = f"🌙 五福號非營運時段停泊烏石港母港 ({source_tag})", "BERTHED_WUSHI_OFFHOURS"
             implied_open = False
         elif dist_north <= 900.0 or dist_south <= 900.0:
-            state_desc = f"⚠️ 五福號島周繞行無法靠泊 ({source_tag})"
-            dock_code = "PATROLLING_FAILED"
-            implied_open = False
+            state_desc, dock_code, implied_open = f"⚠️ 五福號島周繞行無法靠泊 ({source_tag})", "PATROLLING_FAILED", False
         else:
-            state_desc = f"🚢 五福號航道往返航行中 ({source_tag})"
-            dock_code = "EN_ROUTE"
-            implied_open = False
+            state_desc, dock_code, implied_open = f"🚢 五福號航道往返航行中 ({source_tag})", "EN_ROUTE", False
 
         return {
-            "lat": round(off_lat, 6),
-            "lon": round(off_lon, 6),
-            "dist_wushi_m": round(dist_wushi, 1),
-            "dist_north_m": round(dist_north, 1),
-            "dist_south_m": round(dist_south, 1),
-            "is_real_ais": is_real_ais,
-            "is_docked_island": is_docked_island,
-            "in_boat_hours": in_boat_hours,
-            "implied_official_open": implied_open,
-            "dock_code": dock_code,
-            "dock_desc": state_desc
+            "lat": round(off_lat, 6), "lon": round(off_lon, 6),
+            "dist_wushi_m": round(dist_wushi, 1), "dist_north_m": round(dist_north, 1), "dist_south_m": round(dist_south, 1),
+            "is_real_ais": is_real_ais, "is_docked_island": is_docked_island, "in_boat_hours": in_boat_hours,
+            "implied_official_open": implied_open, "dock_code": dock_code, "dock_desc": state_desc
         }
 
     def track_and_back_calculate(self, telemetry: dict, dt: datetime = None) -> dict:
         dt = dt or datetime.now(CST)
         off = self.official_vessel
         if "wufu_lat" in telemetry and "wufu_lon" in telemetry:
-            lat = float(telemetry["wufu_lat"])
-            lon = float(telemetry["wufu_lon"])
-            sog = float(telemetry.get("wufu_sog", 0.2))
-            tag = "AIS即時傳入"
-            is_real_ais = True
+            lat, lon, sog, tag, is_real_ais = float(telemetry["wufu_lat"]), float(telemetry["wufu_lon"]), float(telemetry.get("wufu_sog", 0.2)), "AIS即時傳入", True
         else:
             live_ais = self.fetch_realtime_ais_api()
             if live_ais:
-                lat, lon, sog, tag = live_ais["lat"], live_ais["lon"], live_ais["sog"], live_ais["source_tag"]
-                is_real_ais = True
+                lat, lon, sog, tag, is_real_ais = live_ais["lat"], live_ais["lon"], live_ais["sog"], live_ais["source_tag"], True
             else:
                 inferred = self._infer_vessel_position_from_hydrodynamics(telemetry, dt)
-                lat, lon, sog, tag = inferred["lat"], inferred["lon"], inferred["sog"], inferred["source_tag"]
-                is_real_ais = False
+                lat, lon, sog, tag, is_real_ais = inferred["lat"], inferred["lon"], inferred["sog"], inferred["source_tag"], False
 
         track_history = self._update_and_load_track(lat, lon, sog, tag, is_real_ais, dt)
         traj_eval = self.analyze_trajectory_vector(track_history, is_real_ais)
@@ -241,10 +196,8 @@ class GemVesselAgent:
         return {
             "official_wufu": {
                 "name": off["name"], "mmsi": off["mmsi"],
-                "coord_str": f"{lat:.5f}° N, {lon:.5f}° E",
-                "sog_knots": sog,
-                **dock_eval,
-                **traj_eval
+                "coord_str": f"{lat:.5f}° N, {lon:.5f}° E", "sog_knots": sog,
+                **dock_eval, **traj_eval
             },
             "wushi_port_fleet_flux": {"v_flux_ships_per_hour": 42.0 if dock_eval["implied_official_open"] else 0.0}
         }

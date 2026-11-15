@@ -36,17 +36,13 @@ class GemPhysicsEngine:
 
         if not hard_veto:
             if fb_north >= 0.50 and ukc_north >= 1.50 and hs_pier_north <= 0.95 and weff <= 8.50:
-                action_mode = "🟢 常態開放靠泊 (北岸 Q1)"
-                badge = "🟢 100.0% 常規開放"
+                action_mode, badge = "🟢 常態開放靠泊 (北岸 Q1)", "🟢 100.0% 常規開放"
             elif fb_south >= 0.50 and ukc_south >= 1.50 and hs_pier_south <= 1.13 and weff <= 10.17:
-                action_mode = "🟡 戰術機動調撥 (移防南岸靠泊 Q2)"
-                badge = "🟡 85.0% 移防南岸"
+                action_mode, badge = "🟡 戰術機動調撥 (移防南岸靠泊 Q2)", "🟡 85.0% 移防南岸"
             elif 0.30 <= fb_north < 0.50:
-                action_mode = "🟡 晨間延滯觀望 (建議延後至 08:30 評估)"
-                badge = "🟡 50.0% 延滯開窗"
+                action_mode, badge = "🟡 晨間延滯觀望 (建議延後至 08:30 評估)", "🟡 50.0% 延滯開窗"
             else:
-                action_mode = "⚠️ 防禦性早退撤離 (午後潮位加成警報)"
-                badge = "⚠️ 防禦性早退"
+                action_mode, badge = "⚠️ 防禦性早退撤離 (午後潮位加成警報)", "⚠️ 防禦性早退"
 
         return {
             "hard_veto": hard_veto,
@@ -54,18 +50,12 @@ class GemPhysicsEngine:
             "action_mode": action_mode,
             "badge": badge,
             "metrics": {
-                "hs": round(hs, 2),
-                "tp": round(tp, 1),
+                "hs": round(hs, 2), "tp": round(tp, 1),
                 "pressure": round(telemetry.get("pressure", 1013.0), 1),
                 "pressure_3h": round(telemetry.get("pressure_3h", 0.0), 1),
-                "hs_pier_north": round(hs_pier_north, 2),
-                "hs_pier_south": round(hs_pier_south, 2),
-                "w": round(w, 2),
-                "weff": round(weff, 2),
-                "delta_theta": round(delta_theta, 1),
-                "ukc_north": round(ukc_north, 2),
-                "ukc_south": round(ukc_south, 2),
-                "fb_north": round(fb_north, 2),
-                "fb_south": round(fb_south, 2)
+                "hs_pier_north": round(hs_pier_north, 2), "hs_pier_south": round(hs_pier_south, 2),
+                "w": round(w, 2), "weff": round(weff, 2), "delta_theta": round(delta_theta, 1),
+                "ukc_north": round(ukc_north, 2), "ukc_south": round(ukc_south, 2),
+                "fb_north": round(fb_north, 2), "fb_south": round(fb_south, 2)
             }
         }

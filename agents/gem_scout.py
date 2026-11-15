@@ -32,10 +32,8 @@ class GemScoutAgent:
         has_explicit_date = bool(re.search(r"\d{1,2}月\d{1,2}日", text))
         if has_explicit_date and not is_today and not is_tmr:
             return {"valid": False, "is_today": False, "is_tmr": False, "scope": scope}
-
         if not has_explicit_date and not is_today and not is_tmr:
             return {"valid": False, "is_today": False, "is_tmr": False, "scope": scope}
-
         return {"valid": True, "is_today": is_today, "is_tmr": is_tmr, "scope": scope}
 
     def fetch_facebook_announcement(self) -> dict:
@@ -69,7 +67,6 @@ class GemScoutAgent:
     def fetch_official_announcement(self, override_announcement: dict = None) -> dict:
         if override_announcement:
             return override_announcement
-
         fb_res = self.fetch_facebook_announcement()
         if fb_res and (fb_res.get("official_veto") == 1 or fb_res.get("tomorrow_veto") == 1):
             return fb_res
@@ -125,7 +122,6 @@ class GemScoutAgent:
                     break
             except Exception:
                 continue
-
         return default_payload
 
     def fetch_cwa_buoy_realtime(self) -> dict:
@@ -181,7 +177,6 @@ class GemScoutAgent:
             if m_resp.status_code == 200 and w_resp.status_code == 200:
                 m_data = m_resp.json()
                 w_data = w_resp.json()
-
                 m_cur = m_data.get("current", {})
                 w_cur = w_data.get("current", {})
 
@@ -198,7 +193,6 @@ class GemScoutAgent:
                 w_spd = float(w_cur.get("wind_speed_10m") or 5.5)
                 w_dir = float(w_cur.get("wind_direction_10m") or 45.0)
                 pressure = float(w_cur.get("surface_pressure") or 1014.0)
-
                 delta_theta = min(180.0, abs(((w_dir - 45.0 + 180.0) % 360.0) - 180.0))
 
                 now_cst = datetime.now(CST)
@@ -234,7 +228,6 @@ class GemScoutAgent:
                 )
 
                 tide_est = round(0.85 + 0.45 * math.sin(2 * math.pi * (now_cst.hour + now_cst.minute / 60.0) / 12.42), 2)
-
                 m_daily = m_data.get("daily", {})
                 w_daily = w_data.get("daily", {})
                 dates = m_daily.get("time", [])
@@ -252,20 +245,13 @@ class GemScoutAgent:
                     })
 
                 res.update({
-                    "hs": round(hs, 2),
-                    "tp": round(tp, 1),
-                    "w": round(w_spd, 1),
-                    "wind_dir": round(w_dir, 0),
-                    "monsoon_angle": round(delta_theta, 1),
-                    "pressure": round(pressure, 1),
-                    "pressure_3h": p_3h,
-                    "tide": tide_est,
+                    "hs": round(hs, 2), "tp": round(tp, 1), "w": round(w_spd, 1),
+                    "wind_dir": round(w_dir, 0), "monsoon_angle": round(delta_theta, 1),
+                    "pressure": round(pressure, 1), "pressure_3h": p_3h, "tide": tide_est,
                     "daily_forecast": daily_list,
                     "pm_forecast": {
-                        "pm_hs_max": pm_hs_max,
-                        "pm_tp_max": pm_tp_max,
-                        "hs_slope_3h": hs_slope_3h,
-                        "afternoon_risk": afternoon_risk,
+                        "pm_hs_max": pm_hs_max, "pm_tp_max": pm_tp_max,
+                        "hs_slope_3h": hs_slope_3h, "afternoon_risk": afternoon_risk,
                         "risk_label": risk_label
                     },
                     "data_source": src_tag
@@ -284,28 +270,12 @@ class GemScoutAgent:
                     if records:
                         tc = records[0]
                         name = tc.get("cwaTyphoonName") or tc.get("typhoonName") or "熱帶氣旋"
-                        return {
-                            "warning": "🔴 颱風警報發布中",
-                            "name": name,
-                            "distance": "監測警戒區內",
-                            "eta": "請依海陸警通報"
-                        }
+                        return {"warning": "🔴 颱風警報發布中", "name": name, "distance": "監測警戒區內", "eta": "請依海陸警通報"}
             except Exception:
                 pass
-
         if pressure < 1002.0:
-            return {
-                "warning": "🟡 低壓擾動注意",
-                "name": "熱帶/鋒面低壓系統",
-                "distance": "< 450 km",
-                "eta": "約 12.0 小時"
-            }
-        return {
-            "warning": "🟢 無警報 (未發布)",
-            "name": "無近臺熱帶氣旋",
-            "distance": "> 1,200 km",
-            "eta": "無暴風圈威脅"
-        }
+            return {"warning": "🟡 低壓擾動注意", "name": "熱帶/鋒面低壓系統", "distance": "< 450 km", "eta": "約 12.0 小時"}
+        return {"warning": "🟢 無警報 (未發布)", "name": "無近臺熱帶氣旋", "distance": "> 1,200 km", "eta": "無暴風圈威脅"}
 
     def estimate_swell_macro_dynamics(self, hs: float, tp: float, tide: float, pm_forecast: dict = None) -> dict:
         g = 9.81
@@ -333,12 +303,9 @@ class GemScoutAgent:
             advice = f"目前外海波高 Hs={hs}m、週期 Tp={tp}s，經地形折算後符合靠泊安全線，可維持常規登島作業。"
 
         return {
-            "is_swell_alert": is_swell_alert,
-            "status_tag": status_tag,
-            "impact_window_str": timeline_str,
-            "advice": advice,
-            "cg_speed_ms": round(cg_speed, 2),
-            "cg_knots": round(cg_knots, 1),
+            "is_swell_alert": is_swell_alert, "status_tag": status_tag,
+            "impact_window_str": timeline_str, "advice": advice,
+            "cg_speed_ms": round(cg_speed, 2), "cg_knots": round(cg_knots, 1),
             "energy_flux": round(energy_flux, 2)
         }
 
@@ -360,15 +327,9 @@ class GemScoutAgent:
         cctv_cv_rate = float(raw_input.get("cctv_cv_rate", auto_cv))
 
         res = {
-            "hs": hs,
-            "tp": tp,
-            "w": w,
-            "wind_dir": live_wx.get("wind_dir", 45.0),
-            "tide": tide,
-            "monsoon_angle": monsoon_angle,
-            "pressure": pressure,
-            "pressure_3h": pressure_3h,
-            "cctv_cv_rate": cctv_cv_rate,
+            "hs": hs, "tp": tp, "w": w, "wind_dir": live_wx.get("wind_dir", 45.0),
+            "tide": tide, "monsoon_angle": monsoon_angle, "pressure": pressure,
+            "pressure_3h": pressure_3h, "cctv_cv_rate": cctv_cv_rate,
             "daily_forecast": live_wx.get("daily_forecast", []),
             "pm_forecast": pm_forecast,
             "data_source": live_wx.get("data_source", "live"),

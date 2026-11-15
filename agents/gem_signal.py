@@ -10,14 +10,8 @@ class GemSignalAgent:
         self._last_marquee_cache = None
 
     def package_live_status(
-        self,
-        physics_res: dict,
-        consensus_res: dict,
-        announcement: dict,
-        vessel_res: dict,
-        swell_res: dict = None,
-        cctv_res: dict = None,
-        telemetry: dict = None
+        self, physics_res: dict, consensus_res: dict, announcement: dict,
+        vessel_res: dict, swell_res: dict = None, cctv_res: dict = None, telemetry: dict = None
     ) -> dict:
         self.purge_internal_cache()
         telemetry = telemetry or {}
@@ -40,39 +34,30 @@ class GemSignalAgent:
             f"🤖 GEM 四維仲裁：{final_action} (Hs:{m.get('hs')}m, Tp:{m.get('tp')}s, 南/北折算:{m.get('hs_pier_south')}/{m.get('hs_pier_north')}m){pm_tag} ｜ "
             f"⏱️ 校核：{now_str}"
         )
-
         self._last_marquee_cache = marquee_str
 
         return {
-            "updated_at": now_str,
-            "decision": final_action,
+            "updated_at": now_str, "decision": final_action,
             "consensus_status": consensus_res["consensus_status"],
-            "trust_score": consensus_res["trust_score"],
-            "p_veto": physics_res["p_veto"],
+            "trust_score": consensus_res["trust_score"], "p_veto": physics_res["p_veto"],
             "web_official_veto": consensus_res.get("web_official_veto", 0),
             "announcement_scope": consensus_res.get("announcement_scope", "FULL_DAY"),
             "official_veto": consensus_res.get("effective_official_veto", 0),
             "tomorrow_veto": announcement.get("tomorrow_veto", 0),
             "manual_override": consensus_res.get("manual_override", {"active": False}),
             "four_way_summary": consensus_res.get("four_way_summary", {}),
-            "effective_official_label": official_label,
-            "official_title": official_title,
+            "effective_official_label": official_label, "official_title": official_title,
             "official_body": announcement.get("body", ""),
             "official_wufu_lat": off_v.get("lat", 24.86872),
             "official_wufu_lon": off_v.get("lon", 121.84154),
             "official_wufu_position": off_v.get("coord_str", "24.86872° N, 121.84154° E"),
-            "official_wufu_status": vessel_msg,
-            "official_wufu_vector": vector_msg,
+            "official_wufu_status": vessel_msg, "official_wufu_vector": vector_msg,
             "official_wufu_is_real_ais": off_v.get("is_real_ais", False),
             "official_wufu_dist_wushi": f"{off_v.get('dist_wushi_m', 0.0) / 1000.0:.1f} km",
             "official_wufu_dist_piers": f"{off_v.get('dist_north_m', 10678.6)}m / {off_v.get('dist_south_m', 10400.2)}m",
             "current_window_name": win["name"],
             "wushi_port_flux_ships_hr": vessel_res.get("wushi_port_fleet_flux", {}).get("v_flux_ships_per_hour", 0.0),
-            "cctv_status": cctv_res or {},
-            "typhoon_info": telemetry.get("typhoon_info", {}),
-            "daily_forecast": telemetry.get("daily_forecast", []),
-            "pm_forecast": pm_fc,
-            "swell_forecast": swell_res or {},
-            "metrics": m,
-            "marquee_msg": marquee_str
+            "cctv_status": cctv_res or {}, "typhoon_info": telemetry.get("typhoon_info", {}),
+            "daily_forecast": telemetry.get("daily_forecast", []), "pm_forecast": pm_fc,
+            "swell_forecast": swell_res or {}, "metrics": m, "marquee_msg": marquee_str
         }

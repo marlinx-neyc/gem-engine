@@ -12,15 +12,12 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-
       - name: Install dependencies
         run: pip install requests beautifulsoup4 numpy
-
       - name: Run main orchestrator
         env:
           CWA_API_KEY: ${{ secrets.CWA_API_KEY }}
@@ -28,7 +25,6 @@ jobs:
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
           AIS_API_URL: ${{ secrets.AIS_API_URL }}
         run: python main_orchestrator.py
-
       - name: Auto Push updates to GitHub (Only on State Hash Change)
         run: |
           git config --global user.name "GEM Engine Bot"

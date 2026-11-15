@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>🌊 GEM Engine v103.11 龜山島全域戰術指揮中樞</title>
+    <title>🌊 GEM Engine v103.12 龜山島全域戰術指揮中樞</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
@@ -16,102 +16,73 @@
             --accent-blue: #38bdf8; --text-main: #f8fafc; --status-pass: #10b981;
             --status-danger: #ef4444; --status-yellow: #facc15;
         }
-        body.high-contrast {
-            --bg-dark: #000000; --card-bg: #0f172a; --card-border: #38bdf8;
-            --text-main: #ffffff;
-        }
+        body.high-contrast { --bg-dark: #000000; --card-bg: #0f172a; --card-border: #38bdf8; --text-main: #ffffff; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             background-color: var(--bg-dark); color: var(--text-main);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             font-variant-numeric: tabular-nums;
         }
-
         @keyframes heartbeat-pulse-green {
             0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.8); }
             70% { transform: scale(1.2); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
             100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
-        .heartbeat-dot-green {
-            display: inline-block; width: 9px; height: 9px; border-radius: 50%;
-            background-color: #34d399; animation: heartbeat-pulse-green 1.2s infinite;
-        }
-
+        .heartbeat-dot-green { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background-color: #34d399; animation: heartbeat-pulse-green 1.2s infinite; }
         @keyframes heartbeat-pulse-yellow {
             0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.8); }
             70% { transform: scale(1.25); box-shadow: 0 0 0 8px rgba(250, 204, 21, 0); }
             100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(250, 204, 21, 0); }
         }
-        .heartbeat-dot-yellow {
-            display: inline-block; width: 9px; height: 9px; border-radius: 50%;
-            background-color: #facc15; animation: heartbeat-pulse-yellow 0.8s infinite;
-        }
-
+        .heartbeat-dot-yellow { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background-color: #facc15; animation: heartbeat-pulse-yellow 0.8s infinite; }
         @keyframes heartbeat-pulse-red {
             0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.9); }
             70% { transform: scale(1.3); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
-        .heartbeat-dot-red {
-            display: inline-block; width: 9px; height: 9px; border-radius: 50%;
-            background-color: #ef4444; animation: heartbeat-pulse-red 0.6s infinite;
-        }
-
+        .heartbeat-dot-red { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background-color: #ef4444; animation: heartbeat-pulse-red 0.6s infinite; }
         @keyframes halo-pulse-blue {
             0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.95), 0 0 14px #38bdf8; transform: scale(1); }
             70% { box-shadow: 0 0 0 14px rgba(56, 189, 248, 0), 0 0 24px #60a5fa; transform: scale(1.18); }
             100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0), 0 0 10px #38bdf8; transform: scale(1); }
         }
-        .flash-indicator-blue {
-            display: inline-block; width: 12px; height: 12px; border-radius: 50%;
-            background-color: #38bdf8; border: 2px solid #ffffff;
-            animation: halo-pulse-blue 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
+        .flash-indicator-blue { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background-color: #38bdf8; border: 2px solid #ffffff; animation: halo-pulse-blue 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
 
-        /* 海圖上專屬「東北角五福號」閃燈標示 */
+        /* 海圖上專屬「東北角五福號」閃燈標示（精準鎖定光點中心 [10, 10]） */
         @keyframes wufu-beacon-ring {
             0% { transform: scale(0.7); opacity: 1; }
-            80% { transform: scale(2.6); opacity: 0; }
-            100% { transform: scale(2.6); opacity: 0; }
+            80% { transform: scale(2.8); opacity: 0; }
+            100% { transform: scale(2.8); opacity: 0; }
         }
-        .wufu-map-marker {
-            display: flex; align-items: center; gap: 6px; white-space: nowrap;
-            pointer-events: auto;
-        }
-        .wufu-beacon-wrap {
-            position: relative; width: 20px; height: 20px;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .wufu-beacon-ring {
-            position: absolute; width: 20px; height: 20px; border-radius: 50%;
-            border: 2.5px solid #38bdf8; background: rgba(56, 189, 248, 0.25);
-            animation: wufu-beacon-ring 1.3s ease-out infinite;
-        }
-        .wufu-beacon-core {
-            position: relative; width: 12px; height: 12px; border-radius: 50%;
-            background: #38bdf8; border: 2px solid #ffffff;
-            box-shadow: 0 0 12px #38bdf8, 0 0 20px #0ea5e9;
-        }
+        .wufu-map-marker { display: flex; align-items: center; gap: 6px; white-space: nowrap; pointer-events: auto; }
+        .wufu-beacon-wrap { position: relative; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .wufu-beacon-ring { position: absolute; width: 20px; height: 20px; border-radius: 50%; border: 2.5px solid #38bdf8; background: rgba(56, 189, 248, 0.3); animation: wufu-beacon-ring 1.3s ease-out infinite; }
+        .wufu-beacon-core { position: relative; width: 12px; height: 12px; border-radius: 50%; background: #38bdf8; border: 2px solid #ffffff; box-shadow: 0 0 12px #38bdf8, 0 0 20px #0ea5e9; }
         .wufu-name-pill {
             background: rgba(8, 14, 26, 0.92); color: #f8fafc;
             border: 1.5px solid #38bdf8; border-radius: 6px;
             padding: 2px 7px; font-size: 12px; font-weight: 800;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.85), 0 0 8px rgba(56, 189, 248, 0.45);
         }
-        .leaflet-container { background: #050a14 !important; }
+        .leaflet-container { background: #071324 !important; }
         .leaflet-control-attribution { display: none !important; }
 
-        .card {
-            background: var(--card-bg); border: 1px solid var(--card-border);
-            border-radius: 10px; padding: 10px; margin-bottom: 8px; width: 100%;
+        /* 行動端原版 MarineTraffic 寬視口縮放，確保點選任何船隻時 × 關閉鈕都不會被圖層按鈕擋住 */
+        @media (max-width: 639px) {
+            .mt-iframe-unblocked {
+                width: 154% !important;
+                height: 154% !important;
+                transform: scale(0.649);
+                transform-origin: top left;
+            }
         }
+        .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 10px; margin-bottom: 8px; width: 100%; }
         .canvas-box { width: 100%; height: 230px; background: #050a14; border-radius: 6px; border: 1px solid #1e2d4a; }
         @keyframes marquee-anim { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
         .marquee-txt { display: inline-block; white-space: nowrap; animation: marquee-anim 24s linear infinite; }
         .marquee-txt:hover { animation-play-state: paused; }
     </style>
-    <script id="initial-live-data" type="application/json">{"updated_at": "2026-11-15 21:28:45 CST", "decision": "🌙 夜間休整期（預估開窗：🟢 常態開放靠泊 (北岸 Q1)）", "consensus_status": "🌙【夜間休整離峰期】非船班時段 ｜ 實時浪高 Hs=1.22m、週期 Tp=5.7s 符合安全基準", "trust_score": "94.5% (夜間水動力持續監測)", "p_veto": 0.05, "web_official_veto": 0, "announcement_scope": "FULL_DAY", "official_veto": 0, "tomorrow_veto": 0, "manual_override": {"active": false}, "four_way_summary": {"pos": "🌙 五福號非營運時段停泊烏石港母港 (水文推演備援·母港)", "traj": "🛰️ 待接通真實AIS (目前為水文推演備援)", "phys": "🟢 100.0% 常規開放", "off": "🌙 夜間休整 (海象合規)"}, "effective_official_label": "🌙 夜間休整 (海象合規)", "official_title": "【風管處通告】全島常規開放營運中", "official_body": "東北角暨宜蘭海岸國家風景區管理處：龜山島今日無當日封島通告，依實船軌跡與海象動態開放登島。", "official_wufu_lat": 24.86872, "official_wufu_lon": 121.84154, "official_wufu_position": "24.86872° N, 121.84154° E", "official_wufu_status": "🌙 五福號非營運時段停泊烏石港母港 (水文推演備援·母港)", "official_wufu_vector": "🛰️ 待接通真實AIS (目前為水文推演備援)", "official_wufu_is_real_ais": false, "official_wufu_dist_wushi": "0.0 km", "official_wufu_dist_piers": "10678.6m / 10400.2m", "current_window_name": "夜間休整離峰期", "wushi_port_flux_ships_hr": 0.0, "cctv_status": {"cctv_cv_rate": 0.0, "t_overtop_pct": 0.0, "fb_north_override": 2.4, "fb_south_override": 2.8, "is_overtopping": false, "north_cam_status": "🟢 LIVE 25FPS (漫頂率 0.0%)", "south_cam_status": "🟢 LIVE 25FPS (FB 2.8m)", "visual_eye_status": "🟢 CCTV 畫面顯示碼頭水深乾舷合規"}, "typhoon_info": {"warning": "🟡 低壓擾動注意", "name": "熱帶/鋒面低壓系統", "distance": "< 450 km", "eta": "約 12.0 小時"}, "daily_forecast": [{"date": "11-15", "hs_max": 1.24, "tp_max": 7.7, "w_max": 4.9}, {"date": "11-16", "hs_max": 1.22, "tp_max": 6.3, "w_max": 4.2}, {"date": "11-17", "hs_max": 0.98, "tp_max": 6.8, "w_max": 2.6}, {"date": "11-18", "hs_max": 1.58, "tp_max": 6.9, "w_max": 4.5}, {"date": "11-19", "hs_max": 1.76, "tp_max": 7.0, "w_max": 4.8}, {"date": "11-20", "hs_max": 1.54, "tp_max": 7.0, "w_max": 4.7}, {"date": "11-21", "hs_max": 1.1, "tp_max": 6.5, "w_max": 3.5}], "pm_forecast": {"pm_hs_max": 1.22, "pm_tp_max": 6.4, "hs_slope_3h": 0.0, "afternoon_risk": false, "risk_label": "🟢 午後海象受控 (PM Hs=1.22m, Tp=6.4s)"}, "swell_forecast": {"is_swell_alert": false, "status_tag": "🟢 海象平穩受控", "impact_window_str": "無明顯長浪湧浪漫頂威脅", "advice": "目前外海波高 Hs=1.22m、週期 Tp=5.7s，經地形折算後符合靠泊安全線，可維持常規登島作業。", "cg_speed_ms": 4.45, "cg_knots": 8.6, "energy_flux": 8.48}, "metrics": {"hs": 1.22, "tp": 5.7, "pressure": 987.6, "pressure_3h": 1.0, "hs_pier_north": 0.92, "hs_pier_south": 0.67, "w": 2.9, "weff": 2.25, "delta_theta": 5.0, "ukc_north": 6.79, "ukc_south": 8.33, "fb_north": 2.4, "fb_south": 2.8}, "marquee_msg": "📢 官方實質判定：【風管處通告】全島常規開放營運中 ｜ 🚢 位置與路徑：🌙 五福號非營運時段停泊烏石港母港 (水文推演備援·母港) / 🛰️ 待接通真實AIS (目前為水文推演備援) ｜ 🤖 GEM 四維仲裁：🌙 夜間休整期（預估開窗：🟢 常態開放靠泊 (北岸 Q1)） (Hs:1.22m, Tp:5.7s, 南/北折算:0.67/0.92m) ｜ ⏱️ 校核：2026-11-15 21:28:45 CST", "state_hash": "b99da23cde9c714942717e5aa8bd09cd9444c67a9ed68d83bd456363a8b88bd5"}</script>
+    <script id="initial-live-data" type="application/json">{"updated_at": "2026-11-15 21:38:25 CST", "decision": "🌙 夜間休整期（預估開窗：🟢 常態開放靠泊 (北岸 Q1)）", "consensus_status": "🌙【夜間休整離峰期】非船班時段 ｜ 實時浪高 Hs=1.22m、週期 Tp=5.7s 符合安全基準", "trust_score": "94.5% (夜間水動力持續監測)", "p_veto": 0.05, "web_official_veto": 0, "announcement_scope": "FULL_DAY", "official_veto": 0, "tomorrow_veto": 0, "manual_override": {"active": false}, "four_way_summary": {"pos": "🌙 五福號非營運時段停泊烏石港母港 (水文推演備援·母港)", "traj": "🛰️ 待接通真實AIS (目前為水文推演備援)", "phys": "🟢 100.0% 常規開放", "off": "🌙 夜間休整 (海象合規)"}, "effective_official_label": "🌙 夜間休整 (海象合規)", "official_title": "【風管處通告】全島常規開放營運中", "official_body": "東北角暨宜蘭海岸國家風景區管理處：龜山島今日無當日封島通告，依實船軌跡與海象動態開放登島。", "official_wufu_lat": 24.86872, "official_wufu_lon": 121.84154, "official_wufu_position": "24.86872° N, 121.84154° E", "official_wufu_status": "🌙 五福號非營運時段停泊烏石港母港 (水文推演備援·母港)", "official_wufu_vector": "🛰️ 待接通真實AIS (目前為水文推演備援)", "official_wufu_is_real_ais": false, "official_wufu_dist_wushi": "0.0 km", "official_wufu_dist_piers": "10678.6m / 10400.2m", "current_window_name": "夜間休整離峰期", "wushi_port_flux_ships_hr": 0.0, "cctv_status": {"cctv_cv_rate": 0.0, "t_overtop_pct": 0.0, "fb_north_override": 2.4, "fb_south_override": 2.8, "is_overtopping": false, "north_cam_status": "🟢 LIVE 25FPS (漫頂率 0.0%)", "south_cam_status": "🟢 LIVE 25FPS (FB 2.8m)", "visual_eye_status": "🟢 CCTV 畫面顯示碼頭水深乾舷合規"}, "typhoon_info": {"warning": "🟡 低壓擾動注意", "name": "熱帶/鋒面低壓系統", "distance": "< 450 km", "eta": "約 12.0 小時"}, "daily_forecast": [{"date": "11-15", "hs_max": 1.24, "tp_max": 7.7, "w_max": 4.9}, {"date": "11-16", "hs_max": 1.22, "tp_max": 6.3, "w_max": 4.2}, {"date": "11-17", "hs_max": 0.98, "tp_max": 6.8, "w_max": 2.6}, {"date": "11-18", "hs_max": 1.58, "tp_max": 6.9, "w_max": 4.5}, {"date": "11-19", "hs_max": 1.76, "tp_max": 7.0, "w_max": 4.8}, {"date": "11-20", "hs_max": 1.54, "tp_max": 7.0, "w_max": 4.7}, {"date": "11-21", "hs_max": 1.1, "tp_max": 6.5, "w_max": 3.5}], "pm_forecast": {"pm_hs_max": 1.22, "pm_tp_max": 6.4, "hs_slope_3h": 0.0, "afternoon_risk": false, "risk_label": "🟢 午後海象受控 (PM Hs=1.22m, Tp=6.4s)"}, "swell_forecast": {"is_swell_alert": false, "status_tag": "🟢 海象平穩受控", "impact_window_str": "無明顯長浪湧浪漫頂威脅", "advice": "目前外海波高 Hs=1.22m、週期 Tp=5.7s，經地形折算後符合靠泊安全線，可維持常規登島作業。", "cg_speed_ms": 4.45, "cg_knots": 8.6, "energy_flux": 8.48}, "metrics": {"hs": 1.22, "tp": 5.7, "pressure": 987.6, "pressure_3h": 1.0, "hs_pier_north": 0.92, "hs_pier_south": 0.67, "w": 2.7, "weff": 2.1, "delta_theta": 4.0, "ukc_north": 6.79, "ukc_south": 8.33, "fb_north": 2.4, "fb_south": 2.8}, "marquee_msg": "📢 官方實質判定：【風管處通告】全島常規開放營運中 ｜ 🚢 位置與路徑：🌙 五福號非營運時段停泊烏石港母港 (水文推演備援·母港) / 🛰️ 待接通真實AIS (目前為水文推演備援) ｜ 🤖 GEM 四維仲裁：🌙 夜間休整期（預估開窗：🟢 常態開放靠泊 (北岸 Q1)） (Hs:1.22m, Tp:5.7s, 南/北折算:0.67/0.92m) ｜ ⏱️ 校核：2026-11-15 21:38:25 CST", "state_hash": "b99da23cde9c714942717e5aa8bd09cd9444c67a9ed68d83bd456363a8b88bd5"}</script>
 </head>
 <body class="p-2 max-w-[1200px] mx-auto">
 
@@ -119,9 +90,7 @@
     <div id="marqueeContainer" class="bg-emerald-900/90 border border-emerald-500 text-white rounded-lg p-2 mb-2 shadow-lg flex items-center overflow-hidden transition-colors">
         <span class="mr-2 text-base shrink-0 font-bold">📢 即時動態：</span>
         <div class="overflow-hidden w-full relative">
-            <span class="marquee-txt text-xs font-mono font-bold" id="marqueeText">
-                📢 雙軌情報：正在載入快照與即時海氣象數據...
-            </span>
+            <span class="marquee-txt text-xs font-mono font-bold" id="marqueeText">📢 雙軌情報：正在載入快照與即時海氣象數據...</span>
         </div>
     </div>
 
@@ -132,7 +101,7 @@
                 <span class="text-2xl">🌊</span>
                 <div>
                     <h1 class="text-base font-extrabold text-white flex items-center gap-2">
-                        龜山島戰術指揮中樞 <span class="text-[10px] text-[#38bdf8] font-mono">(📱 v103.11 五福號專屬閃燈定位版)</span>
+                        龜山島戰術指揮中樞 <span class="text-[10px] text-[#38bdf8] font-mono">(📱 v103.12 多圖層海圖與五福號精準定位版)</span>
                     </h1>
                     <div class="text-[11px] text-[#cbd5e1] mt-1 flex flex-wrap gap-2 items-center font-mono">
                         <span id="badgeHeartbeatContainer" class="inline-flex items-center gap-1.5 bg-emerald-950 border border-emerald-500/60 px-2 py-0.5 rounded text-emerald-300 font-bold transition-colors">
@@ -155,20 +124,11 @@
             </div>
         </div>
 
-        <!-- 四維綜合比對即時矩陣摘要列 -->
         <div class="mt-2 pt-2 border-t border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-[11px] font-mono">
-            <div class="bg-slate-900/90 p-1.5 rounded border border-slate-700">
-                <span class="text-slate-400 text-[10px]">① 公務船位置:</span><br/><b class="text-sky-300" id="txt4WayPos">--</b>
-            </div>
-            <div class="bg-slate-900/90 p-1.5 rounded border border-slate-700">
-                <span class="text-slate-400 text-[10px]">② 路徑向量 / 午後預警:</span><br/><b class="text-amber-300" id="txt4WayTraj">--</b>
-            </div>
-            <div class="bg-slate-900/90 p-1.5 rounded border border-slate-700">
-                <span class="text-slate-400 text-[10px]">③ 水動力物理模型:</span><br/><b class="text-emerald-300" id="txt4WayPhys">--</b>
-            </div>
-            <div class="bg-slate-900/90 p-1.5 rounded border border-slate-700">
-                <span class="text-slate-400 text-[10px]">④ 官方/覆寫裁定:</span><br/><b class="text-fuchsia-300" id="txt4WayOff">--</b>
-            </div>
+            <div class="bg-slate-900/90 p-1.5 rounded border border-slate-700"><span class="text-slate-400 text-[10px]">① 公務船位置:</span><br/><b class="text-sky-300" id="txt4WayPos">--</b></div>
+            <div class="bg-slate-900/90 p-1.5 rounded border border-slate-700"><span class="text-slate-400 text-[10px]">② 路徑向量 / 午後預警:</span><br/><b class="text-amber-300" id="txt4WayTraj">--</b></div>
+            <div class="bg-slate-900/90 p-1.5 rounded border border-slate-700"><span class="text-slate-400 text-[10px]">③ 水動力物理模型:</span><br/><b class="text-emerald-300" id="txt4WayPhys">--</b></div>
+            <div class="bg-slate-900/90 p-1.5 rounded border border-slate-700"><span class="text-slate-400 text-[10px]">④ 官方/覆寫裁定:</span><br/><b class="text-fuchsia-300" id="txt4WayOff">--</b></div>
         </div>
     </header>
 
@@ -182,9 +142,7 @@
             <span class="text-[10px] text-amber-300 border border-amber-500/50 px-1.5 py-0.5 rounded" id="lblOverrideBadge">未啟用覆寫</span>
         </summary>
         <div class="pt-2 mt-2 border-t border-slate-800 space-y-2 text-xs font-mono">
-            <p class="text-[11px] text-slate-300">
-                💡 直接貼上現場 LINE 群組公告原文，系統將自動辨識「下午封島/半天」或「全日封島」，同步修正下方對比表今日官方欄並寫入 GitHub API。
-            </p>
+            <p class="text-[11px] text-slate-300">💡 直接貼上現場 LINE 群組公告原文，系統將自動辨識「下午封島/半天」或「全日封島」，同步修正下方對比表今日官方欄並寫入 GitHub API。</p>
             <textarea id="txtLineNoticeInput" rows="2" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white focus:border-sky-400 outline-none" placeholder="貼上群組公告，例如：受鋒面通過及東北風增強影響，龜山島周邊海域有長湧浪，故宣布今(15)日下午封島半天..."></textarea>
             <div class="flex flex-wrap gap-2 items-center justify-between">
                 <div class="flex gap-2">
@@ -224,18 +182,10 @@
             <span class="text-[10px] text-amber-400 border border-amber-500/50 px-1.5 py-0.5 rounded">▼ 點擊收合</span>
         </summary>
         <div class="pt-2 mt-2 border-t border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">
-            <div class="bg-slate-900 p-2 rounded border border-slate-800">
-                <span class="text-slate-400 text-[10px]">颱風警報狀態:</span><br/><b class="text-emerald-400" id="txtTyphoonWarning">🟢 無警報 (未發布)</b>
-            </div>
-            <div class="bg-slate-900 p-2 rounded border border-slate-800">
-                <span class="text-slate-400 text-[10px]">近臺颱風名稱:</span><br/><b class="text-sky-300" id="txtTyphoonName">無近臺熱帶氣旋</b>
-            </div>
-            <div class="bg-slate-900 p-2 rounded border border-slate-800">
-                <span class="text-slate-400 text-[10px]">中心距龜山島:</span><br/><b class="text-amber-300" id="txtTyphoonDist">&gt; 1,200 km</b>
-            </div>
-            <div class="bg-slate-900 p-2 rounded border border-slate-800">
-                <span class="text-slate-400 text-[10px]">暴風圈邊緣接觸倒數:</span><br/><b class="text-fuchsia-300" id="txtTyphoonEta">無暴風圈威脅</b>
-            </div>
+            <div class="bg-slate-900 p-2 rounded border border-slate-800"><span class="text-slate-400 text-[10px]">颱風警報狀態:</span><br/><b class="text-emerald-400" id="txtTyphoonWarning">🟢 無警報 (未發布)</b></div>
+            <div class="bg-slate-900 p-2 rounded border border-slate-800"><span class="text-slate-400 text-[10px]">近臺颱風名稱:</span><br/><b class="text-sky-300" id="txtTyphoonName">無近臺熱帶氣旋</b></div>
+            <div class="bg-slate-900 p-2 rounded border border-slate-800"><span class="text-slate-400 text-[10px]">中心距龜山島:</span><br/><b class="text-amber-300" id="txtTyphoonDist">&gt; 1,200 km</b></div>
+            <div class="bg-slate-900 p-2 rounded border border-slate-800"><span class="text-slate-400 text-[10px]">暴風圈邊緣接觸倒數:</span><br/><b class="text-fuchsia-300" id="txtTyphoonEta">無暴風圈威脅</b></div>
         </div>
     </details>
 
@@ -250,53 +200,44 @@
         </summary>
         <div class="pt-2 mt-2 border-t border-slate-800 space-y-2 text-xs font-mono">
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                <div class="bg-slate-900 p-2 rounded border border-slate-700">
-                    <span class="text-slate-400 text-[10px]">海平面氣壓 / 3h變化:</span><br/><b class="text-sky-300" id="txtPressureVal">-- hPa</b> (<b class="text-amber-400" id="txtPressureTrend">-- hPa/3h</b>)
-                </div>
-                <div class="bg-slate-900 p-2 rounded border border-slate-700">
-                    <span class="text-slate-400 text-[10px]">東北季風攻角 / 有效風:</span><br/><b class="text-amber-300" id="txtMonsoonAngle">Δθ=--°</b> (<b class="text-emerald-400" id="txtWeffVal">Weff: -- m/s</b>)
-                </div>
-                <div class="bg-slate-900 p-2 rounded border border-slate-700">
-                    <span class="text-slate-400 text-[10px]">湧浪週期 (Tp) / 波高:</span><br/><b class="text-sky-300" id="txtTpVal">Tp: -- s</b> / <b class="text-amber-300" id="txtHsVal">Hs: --m</b>
-                </div>
-                <div class="bg-slate-900 p-2 rounded border border-slate-700">
-                    <span class="text-slate-400 text-[10px]">湧浪傳播速 / 午後預估:</span><br/><b class="text-teal-300" id="txtCgSpeed">-- m/s (-- 節)</b>
-                </div>
+                <div class="bg-slate-900 p-2 rounded border border-slate-700"><span class="text-slate-400 text-[10px]">海平面氣壓 / 3h變化:</span><br/><b class="text-sky-300" id="txtPressureVal">-- hPa</b> (<b class="text-amber-400" id="txtPressureTrend">-- hPa/3h</b>)</div>
+                <div class="bg-slate-900 p-2 rounded border border-slate-700"><span class="text-slate-400 text-[10px]">東北季風攻角 / 有效風:</span><br/><b class="text-amber-300" id="txtMonsoonAngle">Δθ=--°</b> (<b class="text-emerald-400" id="txtWeffVal">Weff: -- m/s</b>)</div>
+                <div class="bg-slate-900 p-2 rounded border border-slate-700"><span class="text-slate-400 text-[10px]">湧浪週期 (Tp) / 波高:</span><br/><b class="text-sky-300" id="txtTpVal">Tp: -- s</b> / <b class="text-amber-300" id="txtHsVal">Hs: --m</b></div>
+                <div class="bg-slate-900 p-2 rounded border border-slate-700"><span class="text-slate-400 text-[10px]">湧浪傳播速 / 午後預估:</span><br/><b class="text-teal-300" id="txtCgSpeed">-- m/s (-- 節)</b></div>
             </div>
             <div id="swellAlertBox" class="bg-slate-900/90 border border-sky-500/60 p-2.5 rounded-lg space-y-1 transition-colors">
                 <div class="flex justify-between items-center text-sky-200 font-bold border-b border-slate-700 pb-1">
                     <span>⏱️ 長浪湧浪衝擊與午後封島風險推估 (Hourly Slope Forecast):</span>
                     <span class="bg-slate-800 text-sky-200 border border-sky-400 px-1.5 py-0.5 rounded text-[10px]" id="lblSwellTag">校核中</span>
                 </div>
-                <div class="text-white font-bold">
-                    預估浪潮高峰 / 午後趨勢：<span class="text-amber-300 font-mono text-sm" id="txtImpactWindow">--</span>
-                </div>
-                <p class="text-slate-300 text-[11px]" id="txtSwellAdvice">
-                    💡 預警說明：正在同步即時波浪週期與逐時斜率推估...
-                </p>
+                <div class="text-white font-bold">預估浪潮高峰 / 午後趨勢：<span class="text-amber-300 font-mono text-sm" id="txtImpactWindow">--</span></div>
+                <p class="text-slate-300 text-[11px]" id="txtSwellAdvice">💡 預警說明：正在同步即時波浪週期與逐時斜率推估...</p>
             </div>
         </div>
     </details>
 
-    <!-- 6. 公務船「東北角五福號」專屬閃燈定位海圖與 HUD (僅顯示五福號名稱+閃燈，無其他雜訊) -->
+    <!-- 6. 公務船「東北角五福號」多圖層定位海圖與 HUD -->
     <details class="card border-sky-500/60" open>
         <summary class="text-xs font-bold text-sky-300 flex justify-between items-center cursor-pointer outline-none">
             <span class="flex items-center gap-2">
                 <span class="px-1.5 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-500/60 text-[10px] font-mono">🚢 五福號 AIS 定位</span>
-                公務船「東北角五福號」專屬閃燈定位圖與動態 HUD (點擊收合/展開)
+                公務船「東北角五福號」多圖層精準閃燈定位與動態 HUD (點擊收合/展開)
             </span>
             <span class="text-[10px] text-emerald-400 border border-emerald-500/50 px-1.5 py-0.5 rounded">▼ 點擊收合/展開</span>
         </summary>
         <div class="pt-2 mt-2 border-t border-slate-800 space-y-2">
             <div class="bg-[#0d1b2a] border border-sky-500/60 rounded-lg p-2 shadow-[0_0_15px_rgba(56,189,248,0.25)]">
-                <div class="flex flex-wrap justify-between items-center mb-1 text-xs font-bold text-sky-300 border-b border-sky-500/30 pb-1 gap-1">
+                <div class="flex flex-wrap justify-between items-center mb-1.5 text-xs font-bold text-sky-300 border-b border-sky-500/30 pb-1.5 gap-1.5">
                     <span class="flex items-center gap-2">
                         <span class="flash-indicator-blue"></span>公務船「東北角五福號」態勢：
                         <b class="text-emerald-300 ml-1" id="txtWufuDockDesc">[五福號狀態對齊中]</b>
                     </span>
-                    <div class="flex items-center gap-1.5">
-                        <button onclick="centerOnWufu()" class="font-mono text-[10px] bg-sky-600 hover:bg-sky-500 text-white px-2 py-0.5 rounded font-bold shadow">🎯 置中五福號</button>
-                        <a href="https://www.marinetraffic.com/en/ais/home/shipid:6181762/zoom:13" target="_blank" rel="noopener" class="font-mono text-[10px] bg-slate-800 hover:bg-slate-700 text-sky-300 border border-sky-500/40 px-1.5 py-0.5 rounded">🔗 外部AIS</a>
+                    <div class="flex flex-wrap items-center gap-1 text-[10px] font-mono">
+                        <button onclick="switchSeaChartLayer('dark')" id="btnLayer_dark" class="bg-sky-600 text-white px-2 py-0.5 rounded font-bold shadow">🌑 暗色海圖</button>
+                        <button onclick="switchSeaChartLayer('satellite')" id="btnLayer_satellite" class="bg-slate-800 text-slate-300 border border-slate-600 px-2 py-0.5 rounded">🛰️ 衛星海圖</button>
+                        <button onclick="switchSeaChartLayer('nautical')" id="btnLayer_nautical" class="bg-slate-800 text-slate-300 border border-slate-600 px-2 py-0.5 rounded">🗺️ 航海圖</button>
+                        <button onclick="switchSeaChartLayer('mt')" id="btnLayer_mt" class="bg-slate-800 text-slate-300 border border-slate-600 px-2 py-0.5 rounded">🌐 原版AIS底圖</button>
+                        <button onclick="centerOnWufu()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-0.5 rounded font-bold">🎯 置中五福號</button>
                     </div>
                 </div>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-mono bg-slate-900 p-2 rounded border border-slate-700">
@@ -306,8 +247,12 @@
                     <div><span class="text-slate-400 text-[10px]">路徑向量狀態:</span><br/><b class="text-emerald-400" id="txtWufuVector">--</b></div>
                 </div>
             </div>
-            <!-- 純淨戰術海圖：僅標示「東北角五福號（名稱 + 閃燈）」，移除其他船隻與彈窗 -->
-            <div id="wufuLeafletMap" class="w-full h-[360px] sm:h-[440px] rounded-lg border border-slate-700 overflow-hidden bg-[#050a14] relative z-10"></div>
+            <!-- 多圖層精準座標海圖容器（僅標示東北角五福號名稱+閃燈，免金鑰無浮水印） -->
+            <div id="wufuLeafletMap" class="w-full h-[360px] sm:h-[440px] rounded-lg border border-slate-700 overflow-hidden bg-[#071324] relative z-10"></div>
+            <!-- 經典 MarineTraffic 底圖容器（切換「🌐 原版AIS底圖」時顯示，無自動白卡遮擋且具寬視口縮放） -->
+            <div id="wufuMtContainer" class="hidden w-full h-[360px] sm:h-[440px] rounded-lg border border-slate-700 overflow-hidden bg-slate-950 relative">
+                <iframe id="marineTrafficIframe" src="https://www.marinetraffic.com/en/ais/embed/zoom:12/centerv:24.85600/centerh:121.89600/shownames:false" class="w-full h-full border-0 mt-iframe-unblocked" loading="lazy"></iframe>
+            </div>
         </div>
     </details>
 
@@ -441,6 +386,9 @@
         var cachedLivePayload = null;
         var wufuMap = null;
         var wufuMarker = null;
+        var baseTileLayers = {};
+        var seamarkLayer = null;
+        var activeChartMode = 'dark';
         var currentWufuCoords = [24.86872, 121.84154];
         const GITHUB_REPO_SLUG = 'marlinx-neyc/gem-engine';
 
@@ -452,7 +400,7 @@
             document.body.classList.toggle('high-contrast');
         }
 
-        // 初始化純淨戰術海圖：僅渲染「東北角五福號（名稱 + 閃燈）」
+        // 初始化免金鑰多圖層海圖 + 精準座標鎖定「東北角五福號（名稱 + 閃燈）」
         function initWufuBeaconMap(lat, lon) {
             currentWufuCoords = [lat, lon];
             if (typeof L === 'undefined') return;
@@ -464,16 +412,23 @@
                     zoomControl: true,
                     attributionControl: false
                 });
-                L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                    subdomains: 'abcd',
-                    maxZoom: 18
-                }).addTo(wufuMap);
 
+                baseTileLayers = {
+                    dark: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', { maxZoom: 16 }),
+                    satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18 }),
+                    nautical: L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 })
+                };
+                seamarkLayer = L.tileLayer('https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png', { maxZoom: 18, opacity: 0.9 });
+
+                baseTileLayers.dark.addTo(wufuMap);
+                seamarkLayer.addTo(wufuMap);
+
+                // iconAnchor: [10, 10] 精準鎖定 20x20 藍光閃燈圓心於 WGS84 座標點上
                 const wufuIcon = L.divIcon({
                     className: 'wufu-custom-div-icon',
                     html: '<div class="wufu-map-marker"><div class="wufu-beacon-wrap"><span class="wufu-beacon-ring"></span><span class="wufu-beacon-core"></span></div><span class="wufu-name-pill">東北角五福號</span></div>',
-                    iconSize: [140, 28],
-                    iconAnchor: [10, 14]
+                    iconSize: [145, 20],
+                    iconAnchor: [10, 10]
                 });
                 wufuMarker = L.marker([lat, lon], { icon: wufuIcon }).addTo(wufuMap);
             } else {
@@ -482,8 +437,53 @@
             }
         }
 
+        // 多圖層切換（含原版 MarineTraffic 經典暗色底圖無遮擋模式）
+        function switchSeaChartLayer(mode) {
+            activeChartMode = mode;
+            ['dark', 'satellite', 'nautical', 'mt'].forEach(function(m) {
+                const btn = document.getElementById('btnLayer_' + m);
+                if (btn) {
+                    btn.className = (m === mode)
+                        ? 'bg-sky-600 text-white px-2 py-0.5 rounded font-bold shadow'
+                        : 'bg-slate-800 text-slate-300 border border-slate-600 px-2 py-0.5 rounded';
+                }
+            });
+
+            const leafletBox = document.getElementById('wufuLeafletMap');
+            const mtBox = document.getElementById('wufuMtContainer');
+            if (!leafletBox || !mtBox) return;
+
+            if (mode === 'mt') {
+                leafletBox.classList.add('hidden');
+                mtBox.classList.remove('hidden');
+                const mtIframe = document.getElementById('marineTrafficIframe');
+                if (mtIframe) {
+                    const [lat, lon] = currentWufuCoords;
+                    mtIframe.src = `https://www.marinetraffic.com/en/ais/embed/zoom:12/centerv:${lat.toFixed(5)}/centerh:${lon.toFixed(5)}/shownames:false`;
+                }
+            } else {
+                mtBox.classList.add('hidden');
+                leafletBox.classList.remove('hidden');
+                if (wufuMap) {
+                    Object.values(baseTileLayers).forEach(function(layer) {
+                        if (wufuMap.hasLayer(layer)) wufuMap.removeLayer(layer);
+                    });
+                    if (baseTileLayers[mode]) baseTileLayers[mode].addTo(wufuMap);
+                    if (seamarkLayer && !wufuMap.hasLayer(seamarkLayer)) seamarkLayer.addTo(wufuMap);
+                    wufuMap.invalidateSize();
+                    wufuMap.setView(currentWufuCoords, wufuMap.getZoom());
+                }
+            }
+        }
+
         function centerOnWufu() {
-            if (wufuMap && currentWufuCoords) {
+            const [lat, lon] = currentWufuCoords;
+            if (activeChartMode === 'mt') {
+                const mtIframe = document.getElementById('marineTrafficIframe');
+                if (mtIframe) {
+                    mtIframe.src = `https://www.marinetraffic.com/en/ais/embed/zoom:13/centerv:${lat.toFixed(5)}/centerh:${lon.toFixed(5)}/shownames:false`;
+                }
+            } else if (wufuMap) {
                 wufuMap.setView(currentWufuCoords, 13, { animate: true });
             }
         }
@@ -554,12 +554,8 @@
             const expiresAt = `${yyyy}-${mm}-${dd}T17:30:00+08:00`;
 
             const overrideObj = isClose ? {
-                active: true,
-                action: 0,
-                scope: parsedScope.scope,
-                reason: reason,
-                operator: 'Duty_Officer',
-                expires_at: expiresAt
+                active: true, action: 0, scope: parsedScope.scope,
+                reason: reason, operator: 'Duty_Officer', expires_at: expiresAt
             } : { active: false };
 
             let updatedPayload = cachedLivePayload ? JSON.parse(JSON.stringify(cachedLivePayload)) : {};
@@ -575,10 +571,7 @@
                 updatedPayload.effective_official_label = `🔴 現場覆寫·${parsedScope.label}`;
                 updatedPayload.official_title = `【現場群組緊急通告】${reason}`;
                 updatedPayload.trust_score = '100.0% (指揮官人工覆寫鎖)';
-                updatedPayload.four_way_summary = {
-                    ...(updatedPayload.four_way_summary || {}),
-                    off: `🔒 ${parsedScope.label}`
-                };
+                updatedPayload.four_way_summary = { ...(updatedPayload.four_way_summary || {}), off: `🔒 ${parsedScope.label}` };
                 updatedPayload.marquee_msg = `🔒 人工覆寫鎖生效 (${parsedScope.label})：${reason} ｜ 🤖 GEM 仲裁：🔴 全線剛性熔斷 ｜ ⏱️ 鎖定至 17:30 CST`;
             } else {
                 updatedPayload.web_official_veto = 0;
@@ -610,7 +603,6 @@
                     putGithubJsonFile(pat, 'data/live_status.json', updatedPayload, commitMsg),
                     putGithubJsonFile(pat, 'latest_decision.json', updatedPayload, commitMsg)
                 ]);
-
                 if (ok1 || ok2) {
                     setHeartbeatStatus('active', '雙端 API 覆寫成功');
                     alert(isClose ? `✅ 已將「${parsedScope.label}」寫入雲端 API 並同步更新 D0 官方欄位！` : '✅ 已解除雲端覆寫鎖！');
@@ -666,9 +658,7 @@
         function isOverrideActive(data) {
             const ov = data?.manual_override;
             if (!ov || !ov.active) return false;
-            if (ov.expires_at) {
-                return new Date() < new Date(ov.expires_at);
-            }
+            if (ov.expires_at) return new Date() < new Date(ov.expires_at);
             return true;
         }
 
@@ -678,9 +668,7 @@
             const webOfficialClosed = (data.web_official_veto === 1);
             const isOfficialClosed = (data.official_veto === 1 || webOfficialClosed);
             const isTmrClosed = (data.tomorrow_veto === 1);
-            const scope = data?.manual_override?.active
-                ? (data.manual_override.scope || 'FULL_DAY')
-                : (data.announcement_scope || 'FULL_DAY');
+            const scope = data?.manual_override?.active ? (data.manual_override.scope || 'FULL_DAY') : (data.announcement_scope || 'FULL_DAY');
             const pmFc = data.pm_forecast || {};
             const isPmRisk = Boolean(pmFc.afternoon_risk);
             const isRealAis = Boolean(data.official_wufu_is_real_ais);
@@ -731,28 +719,18 @@
 
                 const gCell = row.querySelector('.col-guer');
                 if (gCell) {
-                    if (slotClosed || Number(rowHs) > 1.85) {
-                        gCell.innerHTML = '<span class="bg-red-950 border border-red-500 text-red-300 px-1.5 py-0.5 rounded font-bold">🔴 停航避浪</span>';
-                    } else if (slotPmWarn) {
-                        gCell.innerHTML = '<span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 準備早退</span>';
-                    } else if (Number(rowHs) > 0.95) {
-                        gCell.innerHTML = '<span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 移防南岸</span>';
-                    } else {
-                        gCell.innerHTML = '<span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 北岸靠泊</span>';
-                    }
+                    if (slotClosed || Number(rowHs) > 1.85) gCell.innerHTML = '<span class="bg-red-950 border border-red-500 text-red-300 px-1.5 py-0.5 rounded font-bold">🔴 停航避浪</span>';
+                    else if (slotPmWarn) gCell.innerHTML = '<span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 準備早退</span>';
+                    else if (Number(rowHs) > 0.95) gCell.innerHTML = '<span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 移防南岸</span>';
+                    else gCell.innerHTML = '<span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 北岸靠泊</span>';
                 }
 
                 const gemCell = row.querySelector('.col-gem');
                 if (gemCell) {
-                    if (slotClosed || dec.includes("剛性熔斷")) {
-                        gemCell.innerHTML = '<span class="bg-red-950 border border-red-500 text-red-300 px-1.5 py-0.5 rounded font-bold">🔴 VETO</span>';
-                    } else if (slotPmWarn) {
-                        gemCell.innerHTML = '<span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 午後封島預警</span>';
-                    } else if (dec.includes("南岸") || Number(rowHs) > 0.95) {
-                        gemCell.innerHTML = '<span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 Q2 開島</span>';
-                    } else {
-                        gemCell.innerHTML = '<span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 Q1 開島</span>';
-                    }
+                    if (slotClosed || dec.includes("剛性熔斷")) gemCell.innerHTML = '<span class="bg-red-950 border border-red-500 text-red-300 px-1.5 py-0.5 rounded font-bold">🔴 VETO</span>';
+                    else if (slotPmWarn) gemCell.innerHTML = '<span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 午後封島預警</span>';
+                    else if (dec.includes("南岸") || Number(rowHs) > 0.95) gemCell.innerHTML = '<span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 Q2 開島</span>';
+                    else gemCell.innerHTML = '<span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 Q1 開島</span>';
                 }
             });
 
@@ -767,7 +745,6 @@
 
                 const dateCell = row.querySelector('.col-date');
                 if (dateCell) dateCell.textContent = dDate;
-
                 const wxCell = row.querySelector('.col-wx');
                 if (wxCell) wxCell.textContent = `🌊 ${Number(fHs).toFixed(2)}m 💨 ${Number(fW).toFixed(1)}m/s`;
 
@@ -776,40 +753,17 @@
 
                 const offCell = row.querySelector('.col-off');
                 if (offCell) {
-                    if (d === 1 && isTmrClosed) {
-                        offCell.innerHTML = '<span class="bg-red-950 border border-red-500 text-red-300 px-1.5 py-0.5 rounded font-bold">🔴 官方公告封島</span>';
-                    } else if (isHigh) {
-                        offCell.innerHTML = '<span class="bg-red-950 border border-red-500 text-red-300 px-1.5 py-0.5 rounded font-bold">🔴 預警封島</span>';
-                    } else if (isMed) {
-                        offCell.innerHTML = '<span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 條件評估</span>';
-                    } else {
-                        offCell.innerHTML = '<span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 正常開放</span>';
-                    }
+                    if (d === 1 && isTmrClosed) offCell.innerHTML = '<span class="bg-red-950 border border-red-500 text-red-300 px-1.5 py-0.5 rounded font-bold">🔴 官方公告封島</span>';
+                    else if (isHigh) offCell.innerHTML = '<span class="bg-red-950 border border-red-500 text-red-300 px-1.5 py-0.5 rounded font-bold">🔴 預警封島</span>';
+                    else if (isMed) offCell.innerHTML = '<span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 條件評估</span>';
+                    else offCell.innerHTML = '<span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 正常開放</span>';
                 }
-
                 const vCell = row.querySelector('.col-vessel');
-                if (vCell) {
-                    vCell.innerHTML = isHigh
-                        ? '<span class="bg-red-950 border border-red-500 text-red-300 px-1.5 py-0.5 rounded font-bold">🔴 難靠泊</span>'
-                        : (isMed ? '<span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 南岸試靠</span>'
-                                 : '<span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 北岸靠泊</span>');
-                }
-
+                if (vCell) vCell.innerHTML = isHigh ? '<span class="bg-red-950 border border-red-500 text-red-300 px-1.5 py-0.5 rounded font-bold">🔴 難靠泊</span>' : (isMed ? '<span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 南岸試靠</span>' : '<span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 北岸靠泊</span>');
                 const gCell = row.querySelector('.col-guer');
-                if (gCell) {
-                    gCell.innerHTML = isHigh
-                        ? '<span class="bg-red-950 border border-red-500 text-red-300 px-1.5 py-0.5 rounded font-bold">🔴 全線避浪</span>'
-                        : (isMed ? '<span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 移防南岸</span>'
-                                 : '<span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 全線開窗</span>');
-                }
-
+                if (gCell) gCell.innerHTML = isHigh ? '<span class="bg-red-950 border border-red-500 text-red-300 px-1.5 py-0.5 rounded font-bold">🔴 全線避浪</span>' : (isMed ? '<span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 移防南岸</span>' : '<span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 全線開窗</span>');
                 const gemCell = row.querySelector('.col-gem');
-                if (gemCell) {
-                    gemCell.innerHTML = isHigh
-                        ? '<span class="bg-red-950 border border-red-500 text-red-300 px-1.5 py-0.5 rounded font-bold">🔴 VETO</span>'
-                        : (isMed ? '<span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 Q2 開島</span>'
-                                 : '<span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 Q1 開島</span>');
-                }
+                if (gemCell) gemCell.innerHTML = isHigh ? '<span class="bg-red-950 border border-red-500 text-red-300 px-1.5 py-0.5 rounded font-bold">🔴 VETO</span>' : (isMed ? '<span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 Q2 開島</span>' : '<span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 Q1 開島</span>');
             }
         }
 
@@ -817,7 +771,6 @@
             if (!data) return;
             cachedLivePayload = data;
 
-            // 更新海圖上唯一的「東北角五福號（名稱 + 閃燈）」位置
             const [wLat, wLon] = parseCoordsFromPayload(data);
             initWufuBeaconMap(wLat, wLon);
 
@@ -858,9 +811,7 @@
             const fw = data.four_way_summary || {};
             const pmFc = data.pm_forecast || {};
             if (document.getElementById('txt4WayPos')) document.getElementById('txt4WayPos').textContent = fw.pos || data.official_wufu_status || '--';
-            if (document.getElementById('txt4WayTraj')) {
-                document.getElementById('txt4WayTraj').textContent = pmFc.afternoon_risk ? pmFc.risk_label : (fw.traj || data.official_wufu_vector || '--');
-            }
+            if (document.getElementById('txt4WayTraj')) document.getElementById('txt4WayTraj').textContent = pmFc.afternoon_risk ? pmFc.risk_label : (fw.traj || data.official_wufu_vector || '--');
             if (document.getElementById('txt4WayPhys')) document.getElementById('txt4WayPhys').textContent = fw.phys || '--';
             if (document.getElementById('txt4WayOff')) document.getElementById('txt4WayOff').textContent = fw.off || data.effective_official_label || '--';
 
@@ -963,11 +914,7 @@
             const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=wind_speed_10m,wind_direction_10m,surface_pressure&hourly=surface_pressure,wind_speed_10m&daily=wind_speed_10m_max&wind_speed_unit=ms&forecast_days=7&timezone=Asia%2FTaipei`;
 
             try {
-                const [marineRes, weatherRes] = await Promise.all([
-                    fetch(marineUrl),
-                    fetch(weatherUrl)
-                ]);
-
+                const [marineRes, weatherRes] = await Promise.all([fetch(marineUrl), fetch(weatherUrl)]);
                 if (marineRes.ok && weatherRes.ok) {
                     const marine = await marineRes.json();
                     const weather = await weatherRes.json();
@@ -1046,8 +993,7 @@
                         status_tag: (tp >= 11.5 && hs >= 1.35) ? ((hs >= 1.60 && tp >= 12.0) ? '🔴 高度漫頂風險期' : '🟡 湧浪越浪警戒期') : (afternoonRisk ? '🟡 午後長浪湧升預警' : '🟢 海象平穩受控'),
                         impact_window_str: (tp >= 11.5 && hs >= 1.35) ? '未來 1~4 小時 (湧浪能量集中)' : (afternoonRisk ? '12:00 - 17:00 CST (逐時波譜顯示午後轉惡)' : '無明顯長浪湧浪漫頂威脅'),
                         advice: afternoonRisk ? `目前波高 Hs=${hs}m 尚可，但未來 3h 斜率 ${hsSlope3h >= 0 ? '+' : ''}${hsSlope3h}m，午後預估達 Hs=${pmHsMax}m / Tp=${pmTpMax}s，嚴防下午臨時封島。` : `目前外海波高 Hs=${hs}m、週期 Tp=${tp}s，符合靠泊安全線。`,
-                        cg_speed_ms: cgSpeed,
-                        cg_knots: cgKnots
+                        cg_speed_ms: cgSpeed, cg_knots: cgKnots
                     };
                     baseData.cctv_status = {
                         north_cam_status: overtopPct >= 15.0 ? `🔴 越浪警戒 (${overtopPct}%)` : `🟢 LIVE 25FPS (漫頂率 ${overtopPct}%)`,
@@ -1081,10 +1027,7 @@
                         baseData.effective_official_label = (isRealAis && inHours && isDocked)
                             ? '🟢 實質開島 (五福號駐島戒護)'
                             : (webOfficialVeto ? '🔴 官方公告封島' : (effVeto === 1 ? '🔴 物理預警封島' : (inHours ? '🟢 常態營運' : '🌙 夜間休整 (海象合規)')));
-                        baseData.four_way_summary = {
-                            ...(baseData.four_way_summary || {}),
-                            off: baseData.effective_official_label
-                        };
+                        baseData.four_way_summary = { ...(baseData.four_way_summary || {}), off: baseData.effective_official_label };
                         const cstTimeStr = new Date().toLocaleTimeString('zh-TW', { hour12: false, timeZone: 'Asia/Taipei' });
                         const titleShown = baseData.official_title || baseData.effective_official_label;
                         const pmTag = afternoonRisk ? ` ｜ ${riskLabel}` : '';
@@ -1121,9 +1064,7 @@
             ['Wind', 'Gust', 'Waves', 'Rain', 'Pressure'].forEach(function(l) {
                 var btn = document.getElementById('btnWindy' + l);
                 if (btn) {
-                    btn.className = (l.toLowerCase() === layer) ?
-                        'bg-sky-600 text-white px-2 py-0.5 rounded font-bold' :
-                        'bg-slate-800 text-slate-300 px-2 py-0.5 rounded';
+                    btn.className = (l.toLowerCase() === layer) ? 'bg-sky-600 text-white px-2 py-0.5 rounded font-bold' : 'bg-slate-800 text-slate-300 px-2 py-0.5 rounded';
                 }
             });
             var iframe = document.getElementById('windyIframe');
@@ -1207,9 +1148,7 @@
             ['south', 'north', 'compare'].forEach(function(m) {
                 var btn = document.getElementById('btnProf_' + m);
                 if (btn) {
-                    btn.className = (m === mode) ?
-                        'px-2 py-0.5 rounded font-bold ' + (m==='south'?'bg-emerald-600 text-white':m==='north'?'bg-blue-600 text-white':'bg-purple-600 text-white') :
-                        'bg-slate-800 text-slate-300 px-2 py-0.5 rounded';
+                    btn.className = (m === mode) ? 'px-2 py-0.5 rounded font-bold ' + (m==='south'?'bg-emerald-600 text-white':m==='north'?'bg-blue-600 text-white':'bg-purple-600 text-white') : 'bg-slate-800 text-slate-300 px-2 py-0.5 rounded';
                 }
             });
             drawPierProfile(mode, cachedMetrics);
@@ -1283,9 +1222,7 @@
             ['south', 'north', 'compare'].forEach(function(m) {
                 var btn = document.getElementById('btnRadar_' + m);
                 if (btn) {
-                    btn.className = (m === mode) ?
-                        'px-2 py-0.5 rounded font-bold ' + (m==='south'?'bg-emerald-600 text-white':m==='north'?'bg-blue-600 text-white':'bg-purple-600 text-white') :
-                        'bg-slate-800 text-slate-300 px-2 py-0.5 rounded';
+                    btn.className = (m === mode) ? 'px-2 py-0.5 rounded font-bold ' + (m==='south'?'bg-emerald-600 text-white':m==='north'?'bg-blue-600 text-white':'bg-purple-600 text-white') : 'bg-slate-800 text-slate-300 px-2 py-0.5 rounded';
                 }
             });
             drawRadarChart(mode, cachedMetrics);
