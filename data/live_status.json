@@ -1,7 +1,7 @@
 {
-  "updated_at": "2026-11-16 10:39:32 CST",
+  "updated_at": "2026-11-16 15:33:59 CST",
   "decision": "🟢 常態開放靠泊 (北岸 Q1)",
-  "consensus_status": "🟢【四維綜合校核】時段: 午間巡查防禦窗 (11:30) ｜ 🛰️ 待接通真實AIS (目前為水文推演備援) ｜ 實時浪高 Hs=1.04m",
+  "consensus_status": "🟢【四維綜合校核】時段: 傍晚閉島休整窗 (16:30) ｜ 🛰️ 待接通真實AIS (目前為水文推演備援) ｜ 實時浪高 Hs=1.04m",
   "trust_score": "94.0% (水動力+公告融合)",
   "p_veto": 0.05,
   "web_official_veto": 0,
@@ -28,7 +28,7 @@
   "official_wufu_is_real_ais": false,
   "official_wufu_dist_wushi": "10.7 km",
   "official_wufu_dist_piers": "5.5m / 545.1m",
-  "current_window_name": "午間巡查防禦窗 (11:30)",
+  "current_window_name": "傍晚閉島休整窗 (16:30)",
   "wushi_port_flux_ships_hr": 42.0,
   "cctv_status": {
     "cctv_cv_rate": 0.0,
@@ -93,7 +93,7 @@
   "pm_forecast": {
     "pm_hs_max": 1.04,
     "pm_tp_max": 4.8,
-    "hs_slope_3h": -0.02,
+    "hs_slope_3h": -0.04,
     "afternoon_risk": false,
     "risk_label": "🟢 午後海象受控 (PM Hs=1.04m, Tp=4.8s)"
   },
@@ -101,26 +101,26 @@
     "is_swell_alert": false,
     "status_tag": "🟢 海象平穩受控",
     "impact_window_str": "無明顯長浪湧浪漫頂威脅",
-    "advice": "目前外海波高 Hs=1.04m、週期 Tp=4.8s，經地形折算後符合靠泊安全線，可維持常規登島作業。",
-    "cg_speed_ms": 3.75,
-    "cg_knots": 7.3,
-    "energy_flux": 5.19
+    "advice": "目前外海波高 Hs=1.04m、週期 Tp=4.7s，經地形折算後符合靠泊安全線，可維持常規登島作業。",
+    "cg_speed_ms": 3.67,
+    "cg_knots": 7.1,
+    "energy_flux": 5.08
   },
   "metrics": {
     "hs": 1.04,
-    "tp": 4.8,
-    "pressure": 988.3,
-    "pressure_3h": 0.5,
+    "tp": 4.7,
+    "pressure": 986.4,
+    "pressure_3h": -1.0,
     "hs_pier_north": 0.78,
     "hs_pier_south": 0.57,
-    "w": 3.3,
-    "weff": 2.43,
-    "delta_theta": 19.0,
-    "ukc_north": 7.02,
-    "ukc_south": 8.53,
+    "w": 3.8,
+    "weff": 2.95,
+    "delta_theta": 5.0,
+    "ukc_north": 7.82,
+    "ukc_south": 9.33,
     "fb_north": 2.4,
     "fb_south": 2.8
   },
-  "marquee_msg": "📢 官方實質判定：【風管處通告】全島常規開放營運中 ｜ 🚢 位置與路徑：🟢 五福號靠泊北岸戒護中 (水文推演備援·北岸) / 🛰️ 待接通真實AIS (目前為水文推演備援) ｜ 🤖 GEM 四維仲裁：🟢 常態開放靠泊 (北岸 Q1) (Hs:1.04m, Tp:4.8s, 南/北折算:0.57/0.78m) ｜ ⏱️ 校核：2026-11-16 10:39:32 CST",
-  "state_hash": "2f6578b13f11eeebd42e6f3fc475d4baa69b5f72a986c7c1eaa46236a2950118"
+  "marquee_msg": "📢 官方實質判定：【風管處通告】全島常規開放營運中 ｜ 🚢 位置與路徑：🟢 五福號靠泊北岸戒護中 (水文推演備援·北岸) / 🛰️ 待接通真實AIS (目前為水文推演備援) ｜ 🤖 GEM 四維仲裁：🟢 常態開放靠泊 (北岸 Q1) (Hs:1.04m, Tp:4.7s, 南/北折算:0.57/0.78m) ｜ ⏱️ 校核：2026-11-16 15:33:59 CST",
+  "state_hash": "7953882f5e29b62ea3987a72af1493d18ac31351f00b7ff57cf44f835945419a"
 }
