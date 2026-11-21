@@ -163,23 +163,21 @@ class GemVesselAgent:
         return None
 
     def fetch_tdx_ais_realtime(self, diag_logs: list) -> Optional[dict]:
-        """通道 1：TDX OAuth2 REST API (/Ship/AIS/RealTime v3 & v2 雙版本端點查詢)"""
         token = self._get_tdx_access_token(diag_logs)
         if not token:
             return None
 
         headers = {"Authorization": f"Bearer {token}", "Accept": "application/json"}
-        spatial_filter = "Lat ge 24.78 and Lat le 24.92 and Lon ge 121.80 and Lon le 122.00"
         tdx_endpoints = [
+            "https://tdx.transportdata.tw/api/basic/v3/Shipping/AIS/RealTime?$filter=MMSI eq '416017708'&$format=JSON",
+            "https://tdx.transportdata.tw/api/basic/v2/Shipping/AIS/RealTime?$filter=MMSI eq '416017708'&$format=JSON",
             "https://tdx.transportdata.tw/api/basic/v3/Ship/AIS/RealTime?$filter=MMSI eq '416017708'&$format=JSON",
             "https://tdx.transportdata.tw/api/basic/v2/Ship/AIS/RealTime?$filter=MMSI eq '416017708'&$format=JSON",
-            f"https://tdx.transportdata.tw/api/basic/v3/Ship/AIS/RealTime?$filter={spatial_filter}&$format=JSON",
-            f"https://tdx.transportdata.tw/api/basic/v2/Ship/AIS/RealTime?$filter={spatial_filter}&$format=JSON",
-            "https://tdx.transportdata.tw/api/basic/v3/Ship/AIS/RealTime?$top=300&$format=JSON"
+            "https://tdx.transportdata.tw/api/basic/v3/Shipping/AIS/RealTime?$top=200&$format=JSON"
         ]
         for idx, ep in enumerate(tdx_endpoints):
             try:
-                resp = requests.get(ep, headers=headers, timeout=6)
+                resp = requests.get(ep, headers=headers, timeout=5)
                 diag_logs.append(f"tdx_ais_{idx+1}:{resp.status_code}")
                 if resp.status_code == 200:
                     data = resp.json()
@@ -192,7 +190,6 @@ class GemVesselAgent:
         return None
 
     def fetch_tdx_mqtt_ais_burst(self, diag_logs: list, listen_sec: float = 3.5) -> Optional[dict]:
-        """通道 2：TDX MQTT Broker (mqtt.transportdata.tw:8883 TLS) 雙命名空間短時視窗訂閱"""
         if not (self.tdx_mm_id and self.tdx_mm_username and self.tdx_mm_pw):
             diag_logs.append("tdx_mqtt:NO_CREDENTIALS")
             return None
@@ -207,11 +204,11 @@ class GemVesselAgent:
             conn_state["rc"] = str(reason_code)
             if str(reason_code) in ["0", "Success"]:
                 for topic in [
-                    "TDX/Ship/AIS/RealTime/#",
-                    "v2/Ship/AIS/RealTime/#",
-                    "v3/Ship/AIS/RealTime/#",
-                    "TDX/Maritime/AIS/RealTime/#",
-                    "v2/Maritime/AIS/RealTime/#"
+                    "TDX/Shipping/#",
+                    "TDX/Ship/#",
+                    "TDX/Maritime/#",
+                    "v2/Shipping/#",
+                    "v3/Shipping/#"
                 ]:
                     client.subscribe(topic, qos=0)
 

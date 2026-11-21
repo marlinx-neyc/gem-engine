@@ -60,7 +60,6 @@ class GemConsensusOrchestrator:
     def _compute_semantic_state_hash(payload: dict) -> str:
         m = payload.get("metrics", {})
         pm = payload.get("pm_forecast", {})
-        rl = payload.get("rl_intel_match", {})
         sig_obj = {
             "decision": payload.get("decision"),
             "official_veto": payload.get("official_veto"),
@@ -71,8 +70,6 @@ class GemConsensusOrchestrator:
             "wufu_status": payload.get("official_wufu_status"),
             "wufu_vector": payload.get("official_wufu_vector"),
             "afternoon_risk": pm.get("afternoon_risk", False),
-            "rl_veto": rl.get("rl_veto_triggered", False),
-            "rl_cat": rl.get("matched_category", ""),
             "hs_bucket": round(float(m.get("hs", 0.0)) / 0.05),
             "tp_bucket": round(float(m.get("tp", 0.0)) / 0.5)
         }
@@ -85,10 +82,10 @@ class GemConsensusOrchestrator:
         announcement = telemetry["official_announcement"]
         swell_res = telemetry.get("swell_forecast", {})
         pm_fc = telemetry.get("pm_forecast", {})
+        bh_info = telemetry.get("blue_highway", {})
         cctv_res = self.cctv.process_cctv_frame_features({
             "cctv_cv_rate": telemetry["cctv_cv_rate"],
-            "tide": telemetry["tide"],
-            "hs": telemetry.get("hs", 0.8)
+            "tide": telemetry["tide"]
         })
         vessel_res = self.vessel.track_and_back_calculate(telemetry)
         physics_res = self.physics.evaluate_physics(telemetry, cctv_res)
@@ -100,7 +97,8 @@ class GemConsensusOrchestrator:
 
         consensus_res = self.consensus.arbitrate_consensus(
             announcement=announcement, vessel_res=vessel_res, physics_res=physics_res,
-            cctv_res=cctv_res, pm_forecast=pm_fc, existing_state=existing_state, rl_res=rl_res
+            cctv_res=cctv_res, pm_forecast=pm_fc, existing_state=existing_state,
+            rl_res=rl_res, blue_highway=bh_info
         )
 
         is_confirmed_signal = bool(
@@ -126,11 +124,11 @@ class GemConsensusOrchestrator:
 
         m_v665 = physics_res.get("metrics", {})
         ty_info = telemetry.get("typhoon_info", {})
-        live_payload["spec_version"] = "GEM-ENG-SPEC-2026-V66.5-QIMEN-RL-V108.3"
+        live_payload["spec_version"] = "GEM-ENG-SPEC-2026-V66.5-QIMEN-RL-V110"
         live_payload["rl_intel_match"] = rl_res
         live_payload["qimen_matrix"] = rl_res.get("qimen_matrix", {})
         live_payload["action_id"] = physics_res.get("action_id", 0)
-        live_payload["decision_code"] = f"Q{physics_res.get('action_id', 0)}" if physics_res.get('action_id') in [1,2,3] else "Q4"
+        live_payload["decision_code"] = f"Q{physics_res.get('action_id', 0)}" if physics_res.get("action_id") in [1,2,3] else "Q4"
         live_payload["emergency_centers"] = ty_info.get("emergency_centers", {"central": "未開設", "yilan": "未開設", "new_taipei": "未開設"})
         live_payload["physics_metrics"] = {
             "hs_pier_m": m_v665.get("hs_pier_south", 0.0),
@@ -183,9 +181,10 @@ class GemConsensusOrchestrator:
             "badge": consensus_res["trust_score"], "final_action": final_action,
             "vessel_status": consensus_res["dock_desc"], "vector_status": consensus_res["vector_desc"],
             "ais_diagnostics": vessel_res.get("official_wufu", {}).get("ais_diagnostics", []),
+            "rl_intel_match": rl_res, "qimen_matrix": rl_res.get("qimen_matrix", {}),
             "pm_risk_label": pm_fc.get("risk_label", ""), "effective_official": consensus_res["effective_official_label"],
             "consensus_status": consensus_res["consensus_status"], "physics_res": physics_res,
-            "rl_res": rl_res, "scraper_diagnostics": announcement.get("scraper_diagnostics", {}),
+            "scraper_diagnostics": announcement.get("scraper_diagnostics", {}),
             "data_source": telemetry.get("data_source", "live"), "state_hash": new_hash[:12], "skipped_write": skipped_write
         }
 
