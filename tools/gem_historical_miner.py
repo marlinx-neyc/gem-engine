@@ -81,7 +81,7 @@ class GemHistoricalDataMiner:
         intel_db = {
             "metadata": {
                 "updated_at": datetime.now(CST).strftime("%Y-%m-%d %H:%M:%S CST"),
-                "spec": "GEM-ENG-SPEC-2026-V66.5-QIMEN-RL-V108",
+                "spec": "GEM-ENG-SPEC-2026-V66.5-QIMEN-RL-V108.3",
                 "total_cases": len(by_id)
             },
             "historical_cases": list(by_id.values())

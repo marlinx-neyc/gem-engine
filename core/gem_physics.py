@@ -33,7 +33,10 @@ class GemPhysicsEngine:
         delta_theta = float(telemetry["monsoon_angle"])
         tide = float(telemetry["tide"])
         v_speed_kts = float(telemetry.get("v_speed_kts", 12.5))
-        cv_rate = float(cctv_res.get("cctv_cv_rate", telemetry.get("cctv_cv_rate", 0.0)))
+        cv_rate = max(
+            float(cctv_res.get("cctv_cv_rate", 0.0)),
+            float(telemetry.get("cctv_cv_rate", 0.0))
+        )
         passenger_count = int(telemetry.get("passenger_count", 150))
         high_tide_hour = float(telemetry.get("high_tide_hour", 10.0))
         alpha_tune = float(telemetry.get("alpha_tune", 0.85))
@@ -52,12 +55,13 @@ class GemPhysicsEngine:
         ukc_north = round((self.d_chart_north + tide) - (self.d_draft + squat_north) - hs_pier_north, 2)
         ukc_south = round((self.d_chart_south + tide) - (self.d_draft + squat_south_3kt) - hs_pier_south, 2)
 
-        fb_north = float(cctv_res.get("fb_north_override", 0.15 if cv_rate > 0.0 else round(3.20 - tide, 2)))
-        fb_south = float(cctv_res.get("fb_south_override", 0.15 if cv_rate > 0.0 else round(3.20 - tide, 2)))
+        fb_north = 0.15 if cv_rate > 0.0 else float(cctv_res.get("fb_north_override", round(3.20 - tide, 2)))
+        fb_south = 0.15 if cv_rate > 0.0 else float(cctv_res.get("fb_south_override", round(3.20 - tide, 2)))
 
         # 雙岸各自獨立可用性檢核（南岸若災損封閉則直接視為不可用）
         north_usable = (hs_pier_north <= 0.95) and (weff <= 8.50) and (ukc_north >= 1.50) and (fb_north >= 0.50)
         south_usable = (not south_closed) and (hs_pier_south <= 1.13) and (weff <= 10.17) and (ukc_south >= 1.50) and (fb_south >= 0.50)
+        south_hydro_ok = (not south_closed) and (hs_pier_south <= 1.13) and (weff <= 10.17) and (ukc_south >= 1.50)
 
         hard_veto = bool((not north_usable) and (not south_usable))
 
@@ -71,8 +75,9 @@ class GemPhysicsEngine:
         e_net = round(k_flux / v_impedance, 4)
         p_veto = round(1.0 / (1.0 + math.exp(-(e_net - 1.00) / (0.25 * alpha_tune))), 4)
 
-        if hard_veto or p_veto > 0.80:
-            if cv_rate > 1.0 and south_usable:
+        # 決策坍縮樹（優先判定 Q3 滿潮越浪動態開窗）
+        if hard_veto:
+            if cv_rate > 1.0 and south_hydro_ok:
                 action_id = 3
                 action_mode = "⏱️ Q3 動態開窗 (11:20 剛性止登 / 14:20 強制清島)"
                 badge = "⏱️ Q3 動態開窗"
@@ -81,6 +86,14 @@ class GemPhysicsEngine:
                 reason_tag = "南岸災損封閉且北岸浪/風超標" if south_closed and not north_usable else "禁止靠泊"
                 action_mode = f"🔴 0.0% 物理 VETO 熔斷（{reason_tag}）"
                 badge = "🔴 0.0% 物理 VETO 熔斷"
+        elif cv_rate > 1.0 and (south_usable or north_usable):
+            action_id = 3
+            action_mode = "⏱️ Q3 動態開窗 (11:20 剛性止登 / 14:20 強制清島)"
+            badge = "⏱️ Q3 動態開窗"
+        elif p_veto > 0.80:
+            action_id = 0
+            action_mode = "🔴 0.0% 物理 VETO 熔斷（能量張量相變超限）"
+            badge = "🔴 0.0% 物理 VETO 熔斷"
         elif (not north_usable and south_usable) or (0.20 <= p_veto <= 0.80) or (tide < 0.40) or (35.0 <= delta_theta < 45.0):
             if south_usable:
                 action_id = 1

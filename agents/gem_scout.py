@@ -1,4 +1,5 @@
 import re
+import json
 import time
 import math
 import urllib3
@@ -20,9 +21,9 @@ CST = timezone(timedelta(hours=8))
 
 class GemScoutAgent:
     def __init__(self, cwa_api_key: str = None, fb_page_token: str = None, fb_page_id: str = None):
-        self.cwa_api_key = cwa_api_key or ""
-        self.fb_page_token = fb_page_token or ""
-        self.fb_page_id = fb_page_id or "necoast.nsa"
+        self.cwa_api_key = (cwa_api_key or "").strip()
+        self.fb_page_token = (fb_page_token or "").strip()
+        self.fb_page_id = (fb_page_id or "necoast.nsa").strip()
         self.lat = 24.8425
         self.lon = 121.9510
         self.official_urls = [
@@ -49,7 +50,6 @@ class GemScoutAgent:
 
     @staticmethod
     def _extract_closure_windows(raw_text: str) -> list:
-        # 從長段落或導覽列混合文字中精準切割出包含「龜山島」與封島關鍵字的前後視窗
         normalized = re.sub(r"\s+", " ", raw_text).strip()
         windows = []
         for m in re.finditer(r"龜山島", normalized):
@@ -83,7 +83,6 @@ class GemScoutAgent:
             rf"{roc_y}[./-]0?{tmr_m}[./-]0?{tmr_d})"
         )
 
-        # 排除僅針對「南岸碼頭/401步道局部設施災損」而非全島封島之歷史公告
         if re.search(r"(401登山步道及南岸碼頭.*暫停開放|南岸碼頭.*暫停開放)", text) and not re.search(r"(封島|不開放登島|暫停登島)", text):
             return {"valid": False, "is_today": False, "is_tmr": False, "scope": "SOUTH_PIER_ONLY", "stale_filtered": False, "reason": "partial_facility_notice"}
 
@@ -113,7 +112,6 @@ class GemScoutAgent:
         return {"valid": True, "is_today": is_today, "is_tmr": is_tmr, "scope": scope, "stale_filtered": False, "reason": "matched_date"}
 
     def fetch_facebook_announcement(self, diag_logs: list = None) -> dict:
-        # 雙軌 FB 查詢：1) Meta Graph API (若有 Token) -> 2) mbasic.facebook.com/necoast.nsa 公開頁免 Token 穿透
         diag_logs = diag_logs if diag_logs is not None else []
         now_cst = datetime.now(CST)
 
@@ -181,7 +179,6 @@ class GemScoutAgent:
         return None
 
     def _fetch_google_news_rss_fallback(self, now_cst: datetime, diag_logs: list) -> dict:
-        # 穿透海外機房 IP 限制：透過 Google News 台灣新聞與 FB 索引 RSS 捕捉風管處最新封島快訊
         for idx, rss_url in enumerate(self.news_rss_urls):
             try:
                 resp = requests.get(rss_url, headers={"User-Agent": "Mozilla/5.0"}, timeout=6)
@@ -258,11 +255,8 @@ class GemScoutAgent:
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.8",
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            "Pragma": "no-cache"
+            "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.8"
         }
-        buster = int(time.time())
         tmr_candidate = None
         urls_to_scan = list(self.official_urls)
         visited = set()
@@ -272,64 +266,77 @@ class GemScoutAgent:
             if base_url in visited:
                 continue
             visited.add(base_url)
-            sep = "&" if "?" in base_url else "?"
-            url = f"{base_url}{sep}_t={buster}"
+
+            candidate_urls = [base_url, f"https://r.jina.ai/{base_url}"]
+            resp = None
+            matched_target = base_url
+            for url in candidate_urls:
+                try:
+                    r = requests.get(url, headers=headers, timeout=6, verify=False)
+                    short_name = url.split("//")[1][:30]
+                    diag_logs.append(f"{short_name}:{r.status_code}")
+                    if r.status_code == 200 and len(r.text) > 200:
+                        resp = r
+                        matched_target = url
+                        break
+                except Exception as e:
+                    diag_logs.append(f"{url.split('//')[1][:24]}:ERR({type(e).__name__})")
+
+            if resp is None:
+                continue
+
             try:
-                resp = requests.get(url, headers=headers, timeout=6, verify=False)
-                short_name = base_url.split("//")[1][:28]
-                diag_logs.append(f"{short_name}:{resp.status_code}")
-                if resp.status_code == 200:
-                    resp.encoding = resp.apparent_encoding or "utf-8"
-                    raw_blocks = []
-                    if HAS_BS4:
-                        soup = BeautifulSoup(resp.text, 'html.parser')
-                        for a_tag in soup.find_all("a", href=True):
-                            a_txt = a_tag.get_text(" ", strip=True)
-                            if "龜山島" in a_txt:
-                                raw_blocks.append(a_txt)
-                                href = a_tag["href"]
-                                if "News-Content.aspx" in href or "Articles.aspx" in href:
-                                    full_link = urljoin(base_url, href)
-                                    if full_link not in visited and len(urls_to_scan) < 10:
-                                        urls_to_scan.append(full_link)
-                        for el in soup.find_all(["li", "h1", "h2", "h3", "p", "marquee", "span", "div"]):
-                            txt = el.get_text(" ", strip=True)
-                            if "龜山島" in txt:
-                                raw_blocks.append(txt)
-                    else:
-                        clean_txt = re.sub(r"<[^>]+>", "\n", resp.text)
-                        raw_blocks = [ln.strip() for ln in clean_txt.splitlines() if "龜山島" in ln]
+                resp.encoding = resp.apparent_encoding or "utf-8"
+                raw_blocks = []
+                if HAS_BS4 and "<html" in resp.text.lower():
+                    soup = BeautifulSoup(resp.text, 'html.parser')
+                    for a_tag in soup.find_all("a", href=True):
+                        a_txt = a_tag.get_text(" ", strip=True)
+                        if "龜山島" in a_txt:
+                            raw_blocks.append(a_txt)
+                            href = a_tag["href"]
+                            if "News-Content.aspx" in href or "Articles.aspx" in href:
+                                full_link = urljoin(base_url, href)
+                                if full_link not in visited and len(urls_to_scan) < 10:
+                                    urls_to_scan.append(full_link)
+                    for el in soup.find_all(["li", "h1", "h2", "h3", "p", "marquee", "span", "div"]):
+                        txt = el.get_text(" ", strip=True)
+                        if "龜山島" in txt:
+                            raw_blocks.append(txt)
+                else:
+                    clean_txt = re.sub(r"<[^>]+>", "\n", resp.text)
+                    raw_blocks = [ln.strip() for ln in clean_txt.splitlines() if "龜山島" in ln]
 
-                    windows = []
-                    for blk in raw_blocks:
-                        windows.extend(self._extract_closure_windows(blk))
+                windows = []
+                for blk in raw_blocks:
+                    windows.extend(self._extract_closure_windows(blk))
 
-                    for snippet in windows:
-                        rel = self._check_date_relevance(snippet, now)
-                        if rel["valid"] and rel["is_today"]:
-                            scope_txt = "下午封島半天" if rel["scope"] == "AFTERNOON" else "實施封島"
-                            default_payload.update({
-                                "official_veto": 1,
-                                "tomorrow_veto": 1 if rel["is_tmr"] else 0,
-                                "scope": rel["scope"],
-                                "wave_warning": True,
-                                "title": f"【風管處公告】受海象影響，({current_day})日龜山島{scope_txt}",
-                                "body": snippet,
-                                "extracted_day": current_day,
-                                "source": "official_web_live",
-                                "scraper_diagnostics": {
-                                    "checked_at": now.strftime("%Y-%m-%d %H:%M:%S CST"),
-                                    "matched_url": base_url,
-                                    "http_statuses": diag_logs,
-                                    "raw_snippet": snippet[:140],
-                                    "filter_reason": rel["reason"]
-                                }
-                            })
-                            return default_payload
-                        elif rel["valid"] and rel["is_tmr"] and tmr_candidate is None:
-                            tmr_candidate = (base_url, snippet, rel)
+                for snippet in windows:
+                    rel = self._check_date_relevance(snippet, now)
+                    if rel["valid"] and rel["is_today"]:
+                        scope_txt = "下午封島半天" if rel["scope"] == "AFTERNOON" else "實施封島"
+                        default_payload.update({
+                            "official_veto": 1,
+                            "tomorrow_veto": 1 if rel["is_tmr"] else 0,
+                            "scope": rel["scope"],
+                            "wave_warning": True,
+                            "title": f"【風管處公告】受海象影響，({current_day})日龜山島{scope_txt}",
+                            "body": snippet,
+                            "extracted_day": current_day,
+                            "source": "official_web_live",
+                            "scraper_diagnostics": {
+                                "checked_at": now.strftime("%Y-%m-%d %H:%M:%S CST"),
+                                "matched_url": matched_target,
+                                "http_statuses": diag_logs,
+                                "raw_snippet": snippet[:140],
+                                "filter_reason": rel["reason"]
+                            }
+                        })
+                        return default_payload
+                    elif rel["valid"] and rel["is_tmr"] and tmr_candidate is None:
+                        tmr_candidate = (matched_target, snippet, rel)
             except Exception as e:
-                diag_logs.append(f"{base_url.split('//')[1][:22]}:ERR({type(e).__name__})")
+                diag_logs.append(f"{base_url.split('//')[1][:22]}:PARSE_ERR({type(e).__name__})")
                 continue
 
         rss_hit = self._fetch_google_news_rss_fallback(now, diag_logs)
@@ -370,6 +377,24 @@ class GemScoutAgent:
                 }
             })
         return default_payload
+
+    def fetch_cwa_blue_highway(self) -> dict:
+        if not self.cwa_api_key:
+            return {"status": "NO_KEY", "is_rough_sea": False}
+        url = f"https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-A0021-001?Authorization={self.cwa_api_key}"
+        try:
+            r = requests.get(url, timeout=4)
+            if r.status_code == 200:
+                locs = r.json().get("records", {}).get("location", [])
+                for loc in locs:
+                    loc_name = str(loc.get("locationName", ""))
+                    if "龜山島" in loc_name or "烏石" in loc_name:
+                        raw_str = json.dumps(loc, ensure_ascii=False)
+                        is_rough = any(k in raw_str for k in ["大浪", "巨浪", "猛浪", "狂濤"])
+                        return {"status": "OK", "route": loc_name, "is_rough_sea": is_rough, "raw_snippet": raw_str[:120]}
+        except Exception:
+            pass
+        return {"status": "UNAVAILABLE", "is_rough_sea": False}
 
     def fetch_cwa_buoy_realtime(self) -> dict:
         if not self.cwa_api_key:
@@ -606,6 +631,7 @@ class GemScoutAgent:
             "pm_forecast": pm_forecast,
             "data_source": live_wx.get("data_source", "live"),
             "typhoon_info": self.fetch_typhoon_status(pressure),
+            "blue_highway": self.fetch_cwa_blue_highway(),
             "official_announcement": announcement,
             "swell_forecast": self.estimate_swell_macro_dynamics(hs, tp, tide, pm_forecast)
         }

@@ -163,7 +163,7 @@ class GemVesselAgent:
         return None
 
     def fetch_tdx_ais_realtime(self, diag_logs: list) -> Optional[dict]:
-        """通道 1：TDX OAuth2 REST API (v3 / v2 雙版本端點查詢)"""
+        """通道 1：TDX OAuth2 REST API (/Ship/AIS/RealTime v3 & v2 雙版本端點查詢)"""
         token = self._get_tdx_access_token(diag_logs)
         if not token:
             return None
@@ -192,7 +192,7 @@ class GemVesselAgent:
         return None
 
     def fetch_tdx_mqtt_ais_burst(self, diag_logs: list, listen_sec: float = 3.5) -> Optional[dict]:
-        """通道 2：TDX MQTT Broker (mqtt.transportdata.tw:8883 TLS) 短時視窗訂閱備援"""
+        """通道 2：TDX MQTT Broker (mqtt.transportdata.tw:8883 TLS) 雙命名空間短時視窗訂閱"""
         if not (self.tdx_mm_id and self.tdx_mm_username and self.tdx_mm_pw):
             diag_logs.append("tdx_mqtt:NO_CREDENTIALS")
             return None
@@ -209,7 +209,9 @@ class GemVesselAgent:
                 for topic in [
                     "TDX/Ship/AIS/RealTime/#",
                     "v2/Ship/AIS/RealTime/#",
-                    "v3/Ship/AIS/RealTime/#"
+                    "v3/Ship/AIS/RealTime/#",
+                    "TDX/Maritime/AIS/RealTime/#",
+                    "v2/Maritime/AIS/RealTime/#"
                 ]:
                     client.subscribe(topic, qos=0)
 

@@ -60,6 +60,7 @@ class GemConsensusOrchestrator:
     def _compute_semantic_state_hash(payload: dict) -> str:
         m = payload.get("metrics", {})
         pm = payload.get("pm_forecast", {})
+        rl = payload.get("rl_intel_match", {})
         sig_obj = {
             "decision": payload.get("decision"),
             "official_veto": payload.get("official_veto"),
@@ -70,6 +71,8 @@ class GemConsensusOrchestrator:
             "wufu_status": payload.get("official_wufu_status"),
             "wufu_vector": payload.get("official_wufu_vector"),
             "afternoon_risk": pm.get("afternoon_risk", False),
+            "rl_veto": rl.get("rl_veto_triggered", False),
+            "rl_cat": rl.get("matched_category", ""),
             "hs_bucket": round(float(m.get("hs", 0.0)) / 0.05),
             "tp_bucket": round(float(m.get("tp", 0.0)) / 0.5)
         }
@@ -84,7 +87,8 @@ class GemConsensusOrchestrator:
         pm_fc = telemetry.get("pm_forecast", {})
         cctv_res = self.cctv.process_cctv_frame_features({
             "cctv_cv_rate": telemetry["cctv_cv_rate"],
-            "tide": telemetry["tide"]
+            "tide": telemetry["tide"],
+            "hs": telemetry.get("hs", 0.8)
         })
         vessel_res = self.vessel.track_and_back_calculate(telemetry)
         physics_res = self.physics.evaluate_physics(telemetry, cctv_res)
@@ -122,7 +126,7 @@ class GemConsensusOrchestrator:
 
         m_v665 = physics_res.get("metrics", {})
         ty_info = telemetry.get("typhoon_info", {})
-        live_payload["spec_version"] = "GEM-ENG-SPEC-2026-V66.5-QIMEN-RL-V108"
+        live_payload["spec_version"] = "GEM-ENG-SPEC-2026-V66.5-QIMEN-RL-V108.3"
         live_payload["rl_intel_match"] = rl_res
         live_payload["qimen_matrix"] = rl_res.get("qimen_matrix", {})
         live_payload["action_id"] = physics_res.get("action_id", 0)
@@ -181,10 +185,10 @@ class GemConsensusOrchestrator:
             "ais_diagnostics": vessel_res.get("official_wufu", {}).get("ais_diagnostics", []),
             "pm_risk_label": pm_fc.get("risk_label", ""), "effective_official": consensus_res["effective_official_label"],
             "consensus_status": consensus_res["consensus_status"], "physics_res": physics_res,
-            "scraper_diagnostics": announcement.get("scraper_diagnostics", {}),
+            "rl_res": rl_res, "scraper_diagnostics": announcement.get("scraper_diagnostics", {}),
             "data_source": telemetry.get("data_source", "live"), "state_hash": new_hash[:12], "skipped_write": skipped_write
         }
 
 if __name__ == "__main__":
     res = GemConsensusOrchestrator().execute_pipeline()
-    print(f"🎯 最終四維多重驗證裁示: {res['final_action']} (HASH={res['state_hash']})")
+    print(f"🎯 最終四維多重驗證裁示: {res['final_action']} (HASH={res['state_hash']}, AIS={res['ais_diagnostics']})")

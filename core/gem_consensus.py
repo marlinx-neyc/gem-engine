@@ -38,7 +38,8 @@ class GemMultiSourceConsensus:
 
     def arbitrate_consensus(
         self, announcement: dict, vessel_res: dict, physics_res: dict,
-        cctv_res: dict, pm_forecast: dict = None, existing_state: dict = None, dt: datetime = None, rl_res: dict = None
+        cctv_res: dict, pm_forecast: dict = None, existing_state: dict = None,
+        dt: datetime = None, rl_res: dict = None
     ) -> Dict[str, Any]:
         dt = dt or datetime.now(CST)
         pm_forecast = pm_forecast or {}
@@ -60,11 +61,9 @@ class GemMultiSourceConsensus:
         vector_desc = wufu.get("vector_desc", "軌跡校核中")
         m = physics_res.get("metrics", {})
 
-        # 官網是否因海外 WAF 404/錯誤而無法真正驗證
         http_logs = " ".join(announcement.get("scraper_diagnostics", {}).get("http_statuses", []))
         gov_unreachable = ("necoast-nsa.gov.tw" in http_logs and ":200" not in http_logs)
 
-        # TDX 雙通道已連線，但營運時段龜山島海域完全沒有五福號訊號（代表滯留烏石港關機未出港）
         ais_logs = " ".join(wufu.get("ais_diagnostics", []))
         tdx_connected = any(tag in ais_logs for tag in ["tdx_auth:200", "tdx_mqtt:rc=Success", "tdx_mqtt:rc=0"])
         ais_absent_in_hours = in_boat_hours and (not vessel_docked) and (is_real_ais or tdx_connected or dock_code == "BERTHED_WUSHI_CLOSED")
@@ -89,15 +88,12 @@ class GemMultiSourceConsensus:
                 "four_way_summary": {"pos": dock_desc, "traj": vector_desc, "phys": physics_res["badge"], "off": f"🔒 {scope_tag}"}
             }
 
-        # 1. 真實 AIS 顯示五福號撤離返航
         if is_real_ais and in_boat_hours and vector_state in ["RETREATING_TO_WUSHI", "LOITERING_FAILED_DOCK"]:
             effective_official_veto = 1
             effective_official_label = "🔴 實質封島 (AIS路徑確認撤離)"
             effective_official_title = "【四維仲裁·臨時封島】五福號實船軌跡顯示返航烏石港/試靠失敗，現場執行封島疏散"
             consensus_status = f"🔴【四維路徑鐵證·封島】{vector_desc} ｜ 官網文字未更新前提前觸發熔斷！"
             trust_score, final_action = "99.5% (真實AIS路徑實證)", "🔴 0.0% 物理 VETO 熔斷（路徑確認撤離）"
-
-        # 2. 真實 AIS 顯示五福號正靠泊龜山島戒護
         elif is_real_ais and in_boat_hours and vessel_docked:
             effective_official_veto = 0
             effective_official_label = "🟢 實質開島 (五福號駐島戒護)"
@@ -105,8 +101,6 @@ class GemMultiSourceConsensus:
             consensus_status = f"🟢【四維驗證一致·開島】五福號駐泊戒護 ({dock_code}) ｜ 物理合規 (Hs={m.get('hs')}m)"
             trust_score = "100.0% (四維吻合)"
             final_action = physics_res["action_mode"] if not phys_veto else "🟡 實船駐島開窗"
-
-        # 3. 官網明確公告封島
         elif web_veto:
             effective_official_veto = 1
             scope_txt = "下午封島半天" if ann_scope == "AFTERNOON" else "官方公告封島"
@@ -114,21 +108,15 @@ class GemMultiSourceConsensus:
             effective_official_title = announcement.get("title", "【風管處公告】今日龜山島實施封島")
             consensus_status = f"🔴【官方公告封島】{effective_official_title} ｜ 日期面板 D0 已同步修正為封島！"
             trust_score, final_action = "100.0% (官方正式公告)", f"🔴 0.0% 物理 VETO 熔斷（{scope_txt}）"
-
-        # 3.5 Safe RL 智庫 >= 80% 高置信度灰色地帶坍縮（例行性封島 / 例外封島精準判別）
         elif rl_res.get("rl_veto_triggered"):
             effective_official_veto = 1
             rl_score = rl_res.get("match_score", 80.0)
             rl_label = rl_res.get("matched_label", "例外封島原型")
-            effective_official_label = f"🔴 實質封島 (RL智庫 {rl_score}% 精準收斂)"
-            effective_official_title = f"【Safe RL 智庫判別·封島】匹配度 {rl_score}% 吻合「{rl_label}」"
-            consensus_status = f"🧠【Safe RL 智庫精準收斂 {rl_score}% ≥ 80%】匹配「{rl_label}」，將灰色地帶坍縮為剛性封島！"
-            trust_score = f"{rl_score}% (Safe RL 智庫>=80%精準判別)"
-            final_action = "🔴 0.0% 物理 VETO 熔斷（RL智庫例外封島收斂）" if in_boat_hours else "🌙 夜間休整期（預警：🔴 RL智庫封島）"
-
-        # 4. 矛盾辯證熔斷（關鍵修復！）：
-        #    (A) 全島無可用泊位（南岸封閉＋北岸波/風超標）
-        #    或 (B) 船班時段五福號未現蹤龜山島（滯留烏石港關機）＋ 官網 404 不可達/波浪偏高
+            effective_official_label = f"🔴 實質封島 (11D RL智庫 {rl_score}% 精準收斂)"
+            effective_official_title = f"【11D Safe RL 智庫判別·封島】匹配度 {rl_score}% 吻合「{rl_label}」"
+            consensus_status = f"🧠【11D Safe RL 智庫精準收斂 {rl_score}% ≥ 80%】匹配「{rl_label}」，將灰色地帶坍縮為剛性封島！"
+            trust_score = f"{rl_score}% (11D Safe RL 智庫>=80%精準判別)"
+            final_action = "🔴 0.0% 物理 VETO 熔斷（11D RL智庫例外封島收斂）" if in_boat_hours else "🌙 夜間休整期（預警：🔴 RL智庫封島）"
         elif phys_veto or (ais_absent_in_hours and (gov_unreachable or float(m.get("hs_pier_north", 0)) > 0.90)):
             effective_official_veto = 1
             dialectic_reasons = []
@@ -145,8 +133,6 @@ class GemMultiSourceConsensus:
             consensus_status = f"🔴【四維矛盾辯證·封島】{reason_join}（修正單點盲區）！"
             trust_score = "98.2% (水動力+泊位+船位交叉辯證)"
             final_action = "🔴 0.0% 物理 VETO 熔斷（禁止靠泊）" if in_boat_hours else "🌙 夜間休整期（預警：🔴 物理 VETO 熔斷）"
-
-        # 5. 正常開放與其他時段
         else:
             effective_official_veto = 0
             effective_official_label = "🟢 常態營運" if in_boat_hours else "🌙 夜間休整 (海象合規)"
