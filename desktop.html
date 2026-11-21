@@ -770,6 +770,18 @@
                 document.getElementById('txtScraperCheckedAt').textContent = diag.checked_at || data.updated_at || '--';
             }
 
+            const qm = data.qimen_matrix || (data.rl_intel_match && data.rl_intel_match.qimen_matrix) || {};
+            const rl = data.rl_intel_match || {};
+            if (document.getElementById('txtQimenHeaven')) document.getElementById('txtQimenHeaven').textContent = qm.qimen_heaven || '--';
+            if (document.getElementById('txtQimenEarth')) document.getElementById('txtQimenEarth').textContent = qm.qimen_earth || '--';
+            if (document.getElementById('txtQimenGate')) document.getElementById('txtQimenGate').textContent = qm.qimen_gate || '--';
+            if (document.getElementById('txtQimenDeity')) document.getElementById('txtQimenDeity').textContent = qm.qimen_deity || '--';
+            if (document.getElementById('txtRlMatchBadge') && rl.match_score !== undefined) {
+                document.getElementById('txtRlMatchBadge').textContent = `11D匹配度: ${rl.match_score}% ${rl.is_decisive_80 ? '(≥80%收斂)' : '(<80%觀望)'}`;
+            }
+            if (document.getElementById('txtRlSuggestion') && rl.suggestion) {
+                document.getElementById('txtRlSuggestion').textContent = rl.suggestion;
+            }
             const fw = data.four_way_summary || {};
             const pmFc = data.pm_forecast || {};
             const m = data.metrics || {};
