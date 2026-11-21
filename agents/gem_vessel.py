@@ -11,6 +11,8 @@ class GemVesselAgent:
     def __init__(self, track_db_path: str = "data/wufu_track.json", ais_api_url: str = None):
         self.track_db_path = track_db_path
         self.ais_api_url = ais_api_url or os.environ.get("AIS_API_URL")
+        self.tdx_client_id = os.environ.get("TDX_CLIENT_ID")
+        self.tdx_client_secret = os.environ.get("TDX_CLIENT_SECRET")
         self.official_vessel = {
             "name": "東北角五福號", "mmsi": "416017708", "call_sign": "BR5216",
             "kind": "公務小船", "draft_m": 1.20
@@ -40,6 +42,7 @@ class GemVesselAgent:
         return round((math.degrees(math.atan2(y, x)) + 360.0) % 360.0, 1)
 
     def fetch_realtime_ais_api(self) -> Optional[dict]:
+        '''優先讀取即時 AIS API (五福號 416017708 為主，並統計島周賞鯨船隊群集數量)'''
         if not self.ais_api_url:
             return None
         try:
@@ -47,14 +50,37 @@ class GemVesselAgent:
             if resp.status_code == 200:
                 payload = resp.json()
                 records = payload if isinstance(payload, list) else payload.get("data", [payload])
+                wufu_rec = None
+                island_fleet_count = 0
                 for item in records:
-                    if str(item.get("mmsi", "")) == "416017708" or ("lat" in item and "lon" in item):
-                        return {
-                            "lat": float(item["lat"]),
-                            "lon": float(item["lon"]),
+                    if "lat" not in item or "lon" not in item:
+                        continue
+                    lat_v, lon_v = float(item["lat"]), float(item["lon"])
+                    d_island = min(
+                        self._haversine_distance(lat_v, lon_v, self.pier_north["lat"], self.pier_north["lon"]),
+                        self._haversine_distance(lat_v, lon_v, self.pier_south["lat"], self.pier_south["lon"])
+                    )
+                    if d_island <= 600.0:
+                        island_fleet_count += 1
+                    if str(item.get("mmsi", "")) == "416017708":
+                        wufu_rec = {
+                            "lat": lat_v,
+                            "lon": lon_v,
                             "sog": float(item.get("sog", item.get("speed", 0.0))),
-                            "source_tag": "AIS即時API"
+                            "source_tag": "AIS即時API",
+                            "island_fleet_count": island_fleet_count
                         }
+                if wufu_rec:
+                    wufu_rec["island_fleet_count"] = island_fleet_count
+                    return wufu_rec
+                if records and "lat" in records[0] and "lon" in records[0]:
+                    return {
+                        "lat": float(records[0]["lat"]),
+                        "lon": float(records[0]["lon"]),
+                        "sog": float(records[0].get("sog", records[0].get("speed", 0.0))),
+                        "source_tag": "AIS即時API",
+                        "island_fleet_count": island_fleet_count
+                    }
         except Exception:
             pass
         return None
@@ -130,10 +156,11 @@ class GemVesselAgent:
         w = float(telemetry.get("w", 5.5))
         theta = float(telemetry.get("monsoon_angle", 35.0))
 
-        kd_n = 1.00 if tp >= 12.0 else (0.75 if theta < 45.0 else 1.00)
-        kd_s = 0.75 if tp >= 12.0 else 0.55
+        kd_n = 1.00 if tp >= 12.0 else 0.883
+        kd_s = 1.00 if tp >= 12.0 else 0.72
         hs_n, hs_s = hs * kd_n, hs * kd_s
-        weff = w * abs(math.cos(math.radians(theta)))
+        kw = 0.78 if theta < 35.0 else (0.88 if theta < 45.0 else 1.00)
+        weff = w * abs(math.cos(math.radians(theta))) * kw
 
         if self.is_operational_boat_hours(dt):
             if hs_n <= 0.95 and weff <= 8.50:
@@ -179,12 +206,14 @@ class GemVesselAgent:
     def track_and_back_calculate(self, telemetry: dict, dt: datetime = None) -> dict:
         dt = dt or datetime.now(CST)
         off = self.official_vessel
+        fleet_cnt = 0
         if "wufu_lat" in telemetry and "wufu_lon" in telemetry:
             lat, lon, sog, tag, is_real_ais = float(telemetry["wufu_lat"]), float(telemetry["wufu_lon"]), float(telemetry.get("wufu_sog", 0.2)), "AIS即時傳入", True
         else:
             live_ais = self.fetch_realtime_ais_api()
             if live_ais:
                 lat, lon, sog, tag, is_real_ais = live_ais["lat"], live_ais["lon"], live_ais["sog"], live_ais["source_tag"], True
+                fleet_cnt = live_ais.get("island_fleet_count", 0)
             else:
                 inferred = self._infer_vessel_position_from_hydrodynamics(telemetry, dt)
                 lat, lon, sog, tag, is_real_ais = inferred["lat"], inferred["lon"], inferred["sog"], inferred["source_tag"], False
@@ -197,6 +226,7 @@ class GemVesselAgent:
             "official_wufu": {
                 "name": off["name"], "mmsi": off["mmsi"],
                 "coord_str": f"{lat:.5f}° N, {lon:.5f}° E", "sog_knots": sog,
+                "island_fleet_count": fleet_cnt,
                 **dock_eval, **traj_eval
             },
             "wushi_port_fleet_flux": {"v_flux_ships_per_hour": 42.0 if dock_eval["implied_official_open"] else 0.0}

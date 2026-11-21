@@ -3,7 +3,11 @@ import time
 import math
 import requests
 import numpy as np
-from bs4 import BeautifulSoup
+try:
+    from bs4 import BeautifulSoup
+    HAS_BS4 = True
+except ImportError:
+    HAS_BS4 = False
 from datetime import datetime, timedelta, timezone
 
 CST = timezone(timedelta(hours=8))
@@ -20,10 +24,25 @@ class GemScoutAgent:
             "https://www.necoast-nsa.gov.tw/News.aspx?n=88"
         ]
 
-    def _check_date_relevance(self, text: str, now_cst: datetime) -> dict:
+    @staticmethod
+    def _haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+        R = 6371.0
+        p1, p2 = math.radians(lat1), math.radians(lat2)
+        dp = math.radians(lat2 - lat1)
+        dl = math.radians(lon2 - lon1)
+        a = math.sin(dp / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
+        return round(R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a)), 1)
+
+    def _check_date_relevance(self, text: str, now_cst: datetime, pub_dt: datetime = None) -> dict:
         today_m, today_d = now_cst.month, now_cst.day
         tmr = now_cst + timedelta(days=1)
         tmr_m, tmr_d = tmr.month, tmr.day
+
+        # 若貼文/公告帶有發布時間且已超過 18 小時，除非明確寫出今日日期或「續封」，否則視為歷史過期公告
+        if pub_dt is not None:
+            age_hours = (now_cst - pub_dt).total_seconds() / 3600.0
+            if age_hours > 18.0 and not re.search(rf"({today_m}月{today_d}日|{today_m}/{today_d}|續封)", text):
+                return {"valid": False, "is_today": False, "is_tmr": False, "scope": "FULL_DAY", "stale_filtered": True}
 
         is_today = bool(re.search(rf"(本日封島|今日封島|今天封島|下午封島|封島半天|今\({today_d}\)日|{today_m}月{today_d}日|{today_m}/{today_d})", text))
         is_tmr = bool(re.search(rf"(明日封島|明天封島|續封島|明\({tmr_d}\)日|{tmr_m}月{tmr_d}日|{tmr_m}/{tmr_d})", text))
@@ -31,24 +50,31 @@ class GemScoutAgent:
 
         has_explicit_date = bool(re.search(r"\d{1,2}月\d{1,2}日", text))
         if has_explicit_date and not is_today and not is_tmr:
-            return {"valid": False, "is_today": False, "is_tmr": False, "scope": scope}
+            return {"valid": False, "is_today": False, "is_tmr": False, "scope": scope, "stale_filtered": True}
         if not has_explicit_date and not is_today and not is_tmr:
-            return {"valid": False, "is_today": False, "is_tmr": False, "scope": scope}
-        return {"valid": True, "is_today": is_today, "is_tmr": is_tmr, "scope": scope}
+            return {"valid": False, "is_today": False, "is_tmr": False, "scope": scope, "stale_filtered": False}
+        return {"valid": True, "is_today": is_today, "is_tmr": is_tmr, "scope": scope, "stale_filtered": False}
 
     def fetch_facebook_announcement(self) -> dict:
         if not self.fb_page_token or not self.fb_page_id:
             return None
         url = f"https://graph.facebook.com/v18.0/{self.fb_page_id}/published_posts"
-        params = {"access_token": self.fb_page_token, "limit": 2, "fields": "message,created_time"}
+        params = {"access_token": self.fb_page_token, "limit": 3, "fields": "message,created_time"}
         now_cst = datetime.now(CST)
         try:
             resp = requests.get(url, params=params, timeout=4)
             if resp.status_code == 200:
                 for post in resp.json().get("data", []):
                     msg = post.get("message", "")
+                    created_raw = post.get("created_time", "")
+                    pub_dt = None
+                    if created_raw:
+                        try:
+                            pub_dt = datetime.fromisoformat(created_raw.replace("Z", "+00:00")).astimezone(CST)
+                        except Exception:
+                            pub_dt = None
                     if "龜山島" in msg and re.search(r"(封島|暫停開放|不開放登島)", msg):
-                        rel = self._check_date_relevance(msg, now_cst)
+                        rel = self._check_date_relevance(msg, now_cst, pub_dt=pub_dt)
                         if rel["valid"]:
                             return {
                                 "official_veto": 1 if rel["is_today"] else 0,
@@ -58,7 +84,7 @@ class GemScoutAgent:
                                 "title": f"【FB 社群公告】{msg[:36]}...",
                                 "body": msg,
                                 "source": "facebook_api",
-                                "published_at": post.get("created_time", "")
+                                "published_at": pub_dt.strftime("%Y-%m-%d %H:%M CST") if pub_dt else created_raw
                             }
         except Exception:
             pass
@@ -99,10 +125,14 @@ class GemScoutAgent:
             try:
                 resp = requests.get(url, headers=headers, timeout=5)
                 if resp.status_code == 200:
-                    soup = BeautifulSoup(resp.text, 'html.parser')
-                    candidates = [el.get_text(" ", strip=True) for el in soup.find_all(["a", "li", "h2", "h3", "div"]) if "龜山島" in el.get_text()]
+                    if HAS_BS4:
+                        soup = BeautifulSoup(resp.text, 'html.parser')
+                        candidates = [el.get_text(" ", strip=True) for el in soup.find_all(["a", "li", "h2", "h3", "div"]) if "龜山島" in el.get_text()]
+                    else:
+                        clean_txt = re.sub(r"<[^>]+>", "\n", resp.text)
+                        candidates = [ln.strip() for ln in clean_txt.splitlines() if "龜山島" in ln]
                     for snippet in candidates:
-                        if len(snippet) > 160:
+                        if len(snippet) > 180:
                             continue
                         if re.search(r"(封島|禁止靠泊|浪潮蓋碼頭|暫停開放|不開放登島)", snippet):
                             rel = self._check_date_relevance(snippet, now)
@@ -214,7 +244,7 @@ class GemScoutAgent:
                 pm_hs_max = round(max([hs] + pm_hs_vals) if pm_hs_vals else hs, 2)
                 pm_tp_max = round(max([tp] + pm_tp_vals) if pm_tp_vals else tp, 1)
 
-                kd_s_pm = 0.75 if pm_tp_max >= 12.0 else 0.55
+                kd_s_pm = 1.00 if pm_tp_max >= 12.0 else 0.72
                 pm_hs_south = pm_hs_max * kd_s_pm
                 afternoon_risk = bool(
                     (pm_tp_max >= 12.0 and pm_hs_south > 1.13)
@@ -261,21 +291,43 @@ class GemScoutAgent:
         return res
 
     def fetch_typhoon_status(self, pressure: float) -> dict:
+        emergency_centers = {"central": "未開設", "yilan": "未開設", "new_taipei": "未開設"}
         if self.cwa_api_key:
-            try:
-                url = f"https://opendata.cwa.gov.tw/api/v1/rest/datastore/W-C0034-005?Authorization={self.cwa_api_key}"
-                r = requests.get(url, timeout=4)
-                if r.status_code == 200:
-                    records = r.json().get("records", {}).get("tropicalCyclones", {}).get("tropicalCyclone", [])
-                    if records:
-                        tc = records[0]
-                        name = tc.get("cwaTyphoonName") or tc.get("typhoonName") or "熱帶氣旋"
-                        return {"warning": "🔴 颱風警報發布中", "name": name, "distance": "監測警戒區內", "eta": "請依海陸警通報"}
-            except Exception:
-                pass
+            for dataset_id in ["W-C0034-001", "W-C0034-005"]:
+                try:
+                    url = f"https://opendata.cwa.gov.tw/api/v1/rest/datastore/{dataset_id}?Authorization={self.cwa_api_key}"
+                    r = requests.get(url, timeout=4)
+                    if r.status_code == 200:
+                        records = r.json().get("records", {}).get("tropicalCyclones", {}).get("tropicalCyclone", [])
+                        if records:
+                            tc = records[0]
+                            name = tc.get("cwaTyphoonName") or tc.get("typhoonName") or "熱帶氣旋"
+                            dist_km = 450.0
+                            fix = tc.get("analysisData", {}).get("fix", [])
+                            if fix:
+                                last_fix = fix[-1]
+                                coord_str = last_fix.get("coordinate", "")
+                                parts = [float(x) for x in re.findall(r"[\d.]+", coord_str)]
+                                if len(parts) >= 2:
+                                    lon_tc, lat_tc = (parts[0], parts[1]) if parts[0] > 60 else (parts[1], parts[0])
+                                    dist_km = self._haversine_km(self.lat, self.lon, lat_tc, lon_tc)
+                            if dist_km < 150.0:
+                                emergency_centers = {"central": "一級開設", "yilan": "一級開設", "new_taipei": "一級開設"}
+                            elif dist_km < 300.0:
+                                emergency_centers = {"central": "二級開設", "yilan": "二級開設", "new_taipei": "二級開設"}
+                            return {
+                                "warning": "🔴 颱風警報發布中",
+                                "name": name,
+                                "distance": f"{dist_km:.1f} km",
+                                "dist_km": dist_km,
+                                "eta": "請依海陸警通報",
+                                "emergency_centers": emergency_centers
+                            }
+                except Exception:
+                    continue
         if pressure < 1002.0:
-            return {"warning": "🟡 低壓擾動注意", "name": "熱帶/鋒面低壓系統", "distance": "< 450 km", "eta": "約 12.0 小時"}
-        return {"warning": "🟢 無警報 (未發布)", "name": "無近臺熱帶氣旋", "distance": "> 1,200 km", "eta": "無暴風圈威脅"}
+            return {"warning": "🟡 低壓擾動注意", "name": "熱帶/鋒面低壓系統", "distance": "< 450 km", "dist_km": 450.0, "eta": "約 12.0 小時", "emergency_centers": emergency_centers}
+        return {"warning": "🟢 無警報 (未發布)", "name": "無近臺熱帶氣旋", "distance": "> 1,200 km", "dist_km": 1200.0, "eta": "無暴風圈威脅", "emergency_centers": emergency_centers}
 
     def estimate_swell_macro_dynamics(self, hs: float, tp: float, tide: float, pm_forecast: dict = None) -> dict:
         g = 9.81
@@ -285,18 +337,18 @@ class GemScoutAgent:
         pm_forecast = pm_forecast or {}
 
         now = datetime.now(CST)
-        is_swell_alert = (tp >= 11.5 and hs >= 1.35) or bool(pm_forecast.get("afternoon_risk", False))
+        is_swell_alert = (tp >= 12.0 and hs >= 1.13) or bool(pm_forecast.get("afternoon_risk", False))
 
-        if tp >= 11.5 and hs >= 1.35:
+        if tp >= 12.0 and hs >= 1.13:
             start_impact = now + timedelta(hours=1.0)
             end_impact = start_impact + timedelta(hours=3.5)
-            status_tag = "🔴 高度漫頂風險期" if (hs >= 1.60 and tp >= 12.0) else "🟡 湧浪越浪警戒期"
-            timeline_str = f"{start_impact.strftime('%H:%M')} - {end_impact.strftime('%H:%M')} CST (長浪湧浪峰值)"
-            advice = f"長浪週期 Tp={tp}s (群速 {cg_knots:.1f}節, 能量流 {energy_flux:.1f}) 產生繞射穿透，嚴防引橋越浪與港池共振。"
+            status_tag = "🔴 高度漫頂共振期 (Kd=1.00)"
+            timeline_str = f"{start_impact.strftime('%H:%M')} - {end_impact.strftime('%H:%M')} CST (長浪共振峰值)"
+            advice = f"長浪週期 Tp={tp}s >= 12.0s (群速 {cg_knots:.1f}節, 能量流 {energy_flux:.1f}) 消能崩解，嚴防港池共振與引橋越浪。"
         elif pm_forecast.get("afternoon_risk"):
             status_tag = "🟡 午後長浪湧升預警"
-            timeline_str = "12:00 - 17:00 CST (逐時波譜顯示午後轉惡)"
-            advice = f"目前波高 Hs={hs}m 尚可，但未來 3h 斜率 {pm_forecast.get('hs_slope_3h', 0):+.2f}m，午後預估達 Hs={pm_forecast.get('pm_hs_max')}m / Tp={pm_forecast.get('pm_tp_max')}s，嚴防下午臨時封島。"
+            timeline_str = "11:20 止登 / 14:20 強制清島 (逐時波譜顯示午後轉惡)"
+            advice = f"目前波高 Hs={hs}m 尚可，但未來 3h 斜率 {pm_forecast.get('hs_slope_3h', 0):+.2f}m，午後預估達 Hs={pm_forecast.get('pm_hs_max')}m / Tp={pm_forecast.get('pm_tp_max')}s，啟動 Q3 動態開窗防範午後臨時封島。"
         else:
             status_tag = "🟢 海象平穩受控"
             timeline_str = "無明顯長浪湧浪漫頂威脅"
@@ -330,6 +382,9 @@ class GemScoutAgent:
             "hs": hs, "tp": tp, "w": w, "wind_dir": live_wx.get("wind_dir", 45.0),
             "tide": tide, "monsoon_angle": monsoon_angle, "pressure": pressure,
             "pressure_3h": pressure_3h, "cctv_cv_rate": cctv_cv_rate,
+            "v_speed_kts": float(raw_input.get("v_speed_kts", 12.5)),
+            "passenger_count": int(raw_input.get("passenger_count", 150)),
+            "high_tide_hour": float(raw_input.get("high_tide_hour", 10.0)),
             "daily_forecast": live_wx.get("daily_forecast", []),
             "pm_forecast": pm_forecast,
             "data_source": live_wx.get("data_source", "live"),
@@ -337,7 +392,7 @@ class GemScoutAgent:
             "official_announcement": announcement,
             "swell_forecast": self.estimate_swell_macro_dynamics(hs, tp, tide, pm_forecast)
         }
-        for k in ["wufu_lat", "wufu_lon", "wufu_sog"]:
+        for k in ["wufu_lat", "wufu_lon", "wufu_sog", "tsunami_pulse_alert", "local_pga_gal", "visibility_m"]:
             if k in raw_input:
                 res[k] = raw_input[k]
         return res

@@ -13,12 +13,12 @@ class GemMacroRLOrchestrator:
         hs = live_telemetry.get("hs", 1.0)
         tp = live_telemetry.get("tp", 8.5)
         pm_risk = live_telemetry.get("pm_forecast", {}).get("afternoon_risk", False)
-        if hs > 1.8 or (hs >= 1.5 and tp >= 11.8):
+        if hs > 1.8 or (hs >= 1.5 and tp >= 12.0):
             msg = "🔴 Safe RL 警戒：長湧浪能量吻合 11:17 午後臨時封島案例，啟動剛性熔斷。"
         elif pm_risk:
-            msg = "🟡 Safe RL 預警：逐時波譜顯示午後長湧浪抬升，建議縮短上午登島時窗並備妥撤離。"
+            msg = "🟡 Safe RL 預警：逐時波譜顯示午後長湧浪抬升，建議執行 Q3 動態開窗 (11:20 止登 / 14:20 清島)。"
         elif hs > 1.0:
-            msg = "🟡 Safe RL 建議：外海湧浪偏高但風速平穩，評估南岸機動調撥開窗。"
+            msg = "🟡 Safe RL 建議：外海湧浪偏高但風速平穩，評估 Q2 南岸機動調撥開窗 (限速 <= 3.0 kts)。"
         else:
-            msg = "🟢 Safe RL 建議：海象平穩吻合常規開窗案例，維持北岸常態靠泊。"
+            msg = "🟢 Safe RL 建議：海象平穩吻合常規開窗案例，維持 Q1 北岸常態靠泊。"
         return {"match_score": 96.4, "has_suggestion": True, "suggestion": msg}

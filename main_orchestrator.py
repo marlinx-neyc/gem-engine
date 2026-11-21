@@ -85,6 +85,27 @@ class GemConsensusOrchestrator:
             physics_res=physics_res, consensus_res=consensus_res, announcement=announcement,
             vessel_res=vessel_res, swell_res=swell_res, cctv_res=cctv_res, telemetry=telemetry
         )
+        # 注入 V66.5 標準化擴充欄位 (同步支援 AI 戰術中樞 Prompt 與雙端看板)
+        m_v665 = physics_res.get("metrics", {})
+        ty_info = telemetry.get("typhoon_info", {})
+        live_payload["spec_version"] = "GEM-ENG-SPEC-2026-V66.5-UNIFIED"
+        live_payload["action_id"] = physics_res.get("action_id", 0)
+        live_payload["decision_code"] = f"Q{physics_res.get('action_id', 0)}" if physics_res.get("action_id") in [1,2,3] else "Q4"
+        live_payload["emergency_centers"] = ty_info.get("emergency_centers", {"central": "未開設", "yilan": "未開設", "new_taipei": "未開設"})
+        live_payload["physics_metrics"] = {
+            "hs_pier_m": m_v665.get("hs_pier_south", 0.0),
+            "hs_pier_north_m": m_v665.get("hs_pier_north", 0.0),
+            "w_local_ms": m_v665.get("weff", 0.0),
+            "ukc_m": m_v665.get("ukc_south", 0.0),
+            "fb_pier_m": m_v665.get("fb_south", 0.0),
+            "s_squat_m": m_v665.get("squat_south_3kt", 0.0),
+            "e_net": m_v665.get("e_net", 0.0),
+            "p_veto": m_v665.get("p_veto", 0.0),
+            "evac_minutes": m_v665.get("evac_minutes", 20),
+            "milk_sea_peak": m_v665.get("milk_sea_peak", "13:30"),
+            "has_veto": physics_res.get("hard_veto", False),
+            "is_tier0": physics_res.get("is_tier0", False)
+        }
 
         new_hash = self._compute_semantic_state_hash(live_payload)
         live_payload["state_hash"] = new_hash

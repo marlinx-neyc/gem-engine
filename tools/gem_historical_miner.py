@@ -13,7 +13,7 @@ class GemHistoricalDataMiner:
             {"time": "2026-11-15 11:17", "hs": 1.65, "tp": 12.8, "w": 11.2, "tide": 0.85, "cv": 1.20, "action": "🔴 盤中長湧浪湧升 (Tp=12.8s)，五福號返航執行午後封島"}
         ]
         intel_db = {
-            "metadata": {"trained_at": datetime.now(CST).strftime("%Y-%m-%d %H:%M:%S CST")},
+            "metadata": {"trained_at": datetime.now(CST).strftime("%Y-%m-%d %H:%M:%S CST"), "spec": "GEM-ENG-SPEC-2026-V66.5-UNIFIED"},
             "historical_cases": raw_cases
         }
         with open("data/calibrated_intel_db.json", "w", encoding="utf-8") as f:
