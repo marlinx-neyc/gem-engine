@@ -1,10 +1,17 @@
 import os
+import ssl
 import json
 import math
 import time
 import requests
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, List, Optional
+
+try:
+    import paho.mqtt.client as mqtt
+    HAS_PAHO_MQTT = True
+except ImportError:
+    HAS_PAHO_MQTT = False
 
 CST = timezone(timedelta(hours=8))
 
@@ -14,12 +21,18 @@ class GemVesselAgent:
         track_db_path: str = "data/wufu_track.json",
         ais_api_url: str = None,
         tdx_client_id: str = None,
-        tdx_client_secret: str = None
+        tdx_client_secret: str = None,
+        tdx_mm_id: str = None,
+        tdx_mm_username: str = None,
+        tdx_mm_pw: str = None
     ):
         self.track_db_path = track_db_path
-        self.ais_api_url = ais_api_url or os.environ.get("AIS_API_URL")
-        self.tdx_client_id = tdx_client_id or os.environ.get("TDX_CLIENT_ID")
-        self.tdx_client_secret = tdx_client_secret or os.environ.get("TDX_CLIENT_SECRET")
+        self.ais_api_url = (ais_api_url or os.environ.get("AIS_API_URL") or "").strip() or None
+        self.tdx_client_id = (tdx_client_id or os.environ.get("TDX_CLIENT_ID") or "").strip() or None
+        self.tdx_client_secret = (tdx_client_secret or os.environ.get("TDX_CLIENT_SECRET") or "").strip() or None
+        self.tdx_mm_id = (tdx_mm_id or os.environ.get("TDX_MMID") or "").strip() or None
+        self.tdx_mm_username = (tdx_mm_username or os.environ.get("TDX_MMUsername") or "").strip() or None
+        self.tdx_mm_pw = (tdx_mm_pw or os.environ.get("TDX_MMPW") or "").strip() or None
         self._tdx_token_cache = {"token": None, "expires_at": 0.0}
         self.official_vessel = {
             "name": "東北角五福號", "mmsi": "416017708", "call_sign": "BR5216",
@@ -150,7 +163,7 @@ class GemVesselAgent:
         return None
 
     def fetch_tdx_ais_realtime(self, diag_logs: list) -> Optional[dict]:
-        # 介接交通部 TDX 航港 AIS 即時動態 API，鎖定五福號 (416017708) 與烏石港-龜山島船隊群集
+        """通道 1：TDX OAuth2 REST API (v3 / v2 雙版本端點查詢)"""
         token = self._get_tdx_access_token(diag_logs)
         if not token:
             return None
@@ -158,9 +171,11 @@ class GemVesselAgent:
         headers = {"Authorization": f"Bearer {token}", "Accept": "application/json"}
         spatial_filter = "Lat ge 24.78 and Lat le 24.92 and Lon ge 121.80 and Lon le 122.00"
         tdx_endpoints = [
-            f"https://tdx.transportdata.tw/api/basic/v2/Maritime/AIS/RealTime?$filter={spatial_filter}&$format=JSON",
+            "https://tdx.transportdata.tw/api/basic/v3/Maritime/AIS/RealTime?$filter=MMSI eq '416017708'&$format=JSON",
             "https://tdx.transportdata.tw/api/basic/v2/Maritime/AIS/RealTime?$filter=MMSI eq '416017708'&$format=JSON",
-            f"https://tdx.transportdata.tw/api/basic/v3/Maritime/AIS/RealTime?$filter={spatial_filter}&$format=JSON"
+            f"https://tdx.transportdata.tw/api/basic/v3/Maritime/AIS/RealTime?$filter={spatial_filter}&$format=JSON",
+            f"https://tdx.transportdata.tw/api/basic/v2/Maritime/AIS/RealTime?$filter={spatial_filter}&$format=JSON",
+            "https://tdx.transportdata.tw/api/basic/v3/Maritime/AIS/RealTime?$top=300&$format=JSON"
         ]
         for idx, ep in enumerate(tdx_endpoints):
             try:
@@ -169,17 +184,86 @@ class GemVesselAgent:
                 if resp.status_code == 200:
                     data = resp.json()
                     records = data if isinstance(data, list) else (data.get("AIS") or data.get("data") or data.get("value") or [])
-                    parsed = self._parse_ais_vessel_records(records, "TDX_AIS即時")
+                    parsed = self._parse_ais_vessel_records(records, "TDX_REST即時")
                     if parsed:
                         return parsed
             except Exception as e:
                 diag_logs.append(f"tdx_ais_{idx+1}:ERR({type(e).__name__})")
         return None
 
+    def fetch_tdx_mqtt_ais_burst(self, diag_logs: list, listen_sec: float = 3.5) -> Optional[dict]:
+        """通道 2：TDX MQTT Broker (mqtt.transportdata.tw:8883 TLS) 短時視窗訂閱備援"""
+        if not (self.tdx_mm_id and self.tdx_mm_username and self.tdx_mm_pw):
+            diag_logs.append("tdx_mqtt:NO_CREDENTIALS")
+            return None
+        if not HAS_PAHO_MQTT:
+            diag_logs.append("tdx_mqtt:NO_PAHO_LIB")
+            return None
+
+        collected_records = []
+        conn_state = {"rc": None}
+
+        def on_connect(client, userdata, flags, reason_code, properties=None):
+            conn_state["rc"] = str(reason_code)
+            if str(reason_code) in ["0", "Success"]:
+                for topic in [
+                    "TDX/Maritime/AIS/RealTime/#",
+                    "v2/Maritime/AIS/RealTime/#",
+                    "v3/Maritime/AIS/RealTime/#"
+                ]:
+                    client.subscribe(topic, qos=0)
+
+        def on_message(client, userdata, msg):
+            try:
+                payload = json.loads(msg.payload.decode("utf-8", errors="ignore"))
+                if isinstance(payload, list):
+                    collected_records.extend(payload)
+                elif isinstance(payload, dict):
+                    recs = payload.get("AIS") or payload.get("data") or payload.get("value")
+                    if isinstance(recs, list):
+                        collected_records.extend(recs)
+                    else:
+                        collected_records.append(payload)
+            except Exception:
+                pass
+
+        try:
+            client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=self.tdx_mm_id, protocol=mqtt.MQTTv311)
+        except Exception:
+            client = mqtt.Client(client_id=self.tdx_mm_id)
+
+        client.username_pw_set(self.tdx_mm_username, self.tdx_mm_pw)
+        client.tls_set(cert_reqs=ssl.CERT_REQUIRED)
+        client.on_connect = on_connect
+        client.on_message = on_message
+
+        try:
+            client.connect("mqtt.transportdata.tw", 8883, keepalive=15)
+            client.loop_start()
+            deadline = time.time() + listen_sec
+            while time.time() < deadline:
+                if any(str(r.get("MMSI") or r.get("mmsi") or "") == "416017708" for r in collected_records if isinstance(r, dict)):
+                    break
+                time.sleep(0.25)
+            client.loop_stop()
+            client.disconnect()
+            diag_logs.append(f"tdx_mqtt:rc={conn_state['rc']},msgs={len(collected_records)}")
+        except Exception as e:
+            diag_logs.append(f"tdx_mqtt:ERR({type(e).__name__})")
+            return None
+
+        if collected_records:
+            return self._parse_ais_vessel_records(collected_records, "TDX_MQTT即時推播")
+        return None
+
     def fetch_realtime_ais_api(self, diag_logs: list) -> Optional[dict]:
         tdx_res = self.fetch_tdx_ais_realtime(diag_logs)
         if tdx_res:
             return tdx_res
+
+        mqtt_res = self.fetch_tdx_mqtt_ais_burst(diag_logs)
+        if mqtt_res:
+            return mqtt_res
 
         if not self.ais_api_url:
             diag_logs.append("custom_ais:NO_URL")
@@ -227,9 +311,19 @@ class GemVesselAgent:
             os.replace(tmp_path, self.track_db_path)
         return history
 
-    def analyze_trajectory_vector(self, track_history: List[dict], is_real_ais: bool) -> Dict[str, Any]:
+    def analyze_trajectory_vector(self, track_history: List[dict], is_real_ais: bool, ais_diag: List[str] = None) -> Dict[str, Any]:
+        ais_diag = ais_diag or []
         if not is_real_ais:
-            return {"vector_state": "HYDRO_FALLBACK", "vector_desc": "🛰️ 未接通TDX/AIS金鑰 (目前為水文推演備援)", "delta_dist_m": 0.0, "cog_deg": None}
+            has_rest = bool(self.tdx_client_id and self.tdx_client_secret)
+            has_mqtt = bool(self.tdx_mm_id and self.tdx_mm_username and self.tdx_mm_pw)
+            if not has_rest and not has_mqtt:
+                desc = "🛰️ 未設定TDX(REST/MQTT)金鑰 (水文推演備援)"
+            elif any("tdx_auth:200" in d or "tdx_mqtt:rc=0" in d or "tdx_mqtt:rc=Success" in d for d in ais_diag):
+                desc = "📡 TDX雙通道已連線·海域暫無AIS回傳 (水文推演備援)"
+            else:
+                desc = f"⚠️ TDX認證/連線異常 ({','.join(ais_diag[:3])}) · 水文推演備援"
+            return {"vector_state": "HYDRO_FALLBACK", "vector_desc": desc, "delta_dist_m": 0.0, "cog_deg": None}
+
         if len(track_history) < 2:
             return {"vector_state": "INITIAL_POINT", "vector_desc": "📡 TDX/AIS首筆定位建立中 (待累積軌跡)", "delta_dist_m": 0.0, "cog_deg": None}
 
@@ -334,7 +428,7 @@ class GemVesselAgent:
                 lat, lon, sog, tag, is_real_ais = inferred["lat"], inferred["lon"], inferred["sog"], inferred["source_tag"], False
 
         track_history = self._update_and_load_track(lat, lon, sog, tag, is_real_ais, dt)
-        traj_eval = self.analyze_trajectory_vector(track_history, is_real_ais)
+        traj_eval = self.analyze_trajectory_vector(track_history, is_real_ais, ais_diag)
         dock_eval = self.evaluate_docking_status(lat, lon, sog, tag, is_real_ais, dt)
 
         return {

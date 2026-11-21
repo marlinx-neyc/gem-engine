@@ -17,7 +17,7 @@ jobs:
         with:
           python-version: '3.10'
       - name: Install dependencies
-        run: pip install requests beautifulsoup4 numpy
+        run: pip install requests beautifulsoup4 numpy paho-mqtt
       - name: Run main orchestrator
         env:
           CWA_API_KEY: ${{ secrets.CWA_API_KEY }}
@@ -26,6 +26,9 @@ jobs:
           AIS_API_URL: ${{ secrets.AIS_API_URL }}
           TDX_CLIENT_ID: ${{ secrets.TDX_CLIENT_ID }}
           TDX_CLIENT_SECRET: ${{ secrets.TDX_CLIENT_SECRET }}
+          TDX_MMID: ${{ secrets.TDX_MMID }}
+          TDX_MMUsername: ${{ secrets.TDX_MMUsername }}
+          TDX_MMPW: ${{ secrets.TDX_MMPW }}
         run: python main_orchestrator.py
       - name: Auto Push updates to GitHub (Only on State Hash Change)
         run: |

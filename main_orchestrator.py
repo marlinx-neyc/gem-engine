@@ -24,13 +24,24 @@ def purge_and_atomic_write(target_filepath: str, new_payload: dict) -> None:
     os.replace(tmp_filepath, target_filepath)
 
 class GemConsensusOrchestrator:
-    def __init__(self, cwa_key: str = None, fb_tok: str = None, fb_id: str = None, ais_url: str = None, tdx_id: str = None, tdx_secret: str = None):
+    def __init__(
+        self, cwa_key: str = None, fb_tok: str = None, fb_id: str = None,
+        ais_url: str = None, tdx_id: str = None, tdx_secret: str = None,
+        tdx_mm_id: str = None, tdx_mm_username: str = None, tdx_mm_pw: str = None
+    ):
         self.miner = GemHistoricalDataMiner()
         self.miner.generate_calibrated_intel_db()
         self.macro_rl = GemMacroRLOrchestrator()
         self.scout = GemScoutAgent(cwa_key, fb_tok, fb_id)
         self.cctv = GemCCTVPatternAgent()
-        self.vessel = GemVesselAgent(ais_api_url=ais_url, tdx_client_id=tdx_id, tdx_client_secret=tdx_secret)
+        self.vessel = GemVesselAgent(
+            ais_api_url=ais_url,
+            tdx_client_id=tdx_id,
+            tdx_client_secret=tdx_secret,
+            tdx_mm_id=tdx_mm_id,
+            tdx_mm_username=tdx_mm_username,
+            tdx_mm_pw=tdx_mm_pw
+        )
         self.physics = GemPhysicsEngine()
         self.consensus = GemMultiSourceConsensus()
         self.signal = GemSignalAgent()
@@ -145,6 +156,7 @@ class GemConsensusOrchestrator:
         return {
             "badge": consensus_res["trust_score"], "final_action": final_action,
             "vessel_status": consensus_res["dock_desc"], "vector_status": consensus_res["vector_desc"],
+            "ais_diagnostics": vessel_res.get("official_wufu", {}).get("ais_diagnostics", []),
             "pm_risk_label": pm_fc.get("risk_label", ""), "effective_official": consensus_res["effective_official_label"],
             "consensus_status": consensus_res["consensus_status"], "physics_res": physics_res,
             "scraper_diagnostics": announcement.get("scraper_diagnostics", {}),
@@ -153,4 +165,4 @@ class GemConsensusOrchestrator:
 
 if __name__ == "__main__":
     res = GemConsensusOrchestrator().execute_pipeline()
-    print(f"🎯 最終四維多重驗證裁示: {res['final_action']} (HASH={res['state_hash']}, 略過無變動寫入={res['skipped_write']})")
+    print(f"🎯 最終四維多重驗證裁示: {res['final_action']} (HASH={res['state_hash']}, AIS={res['ais_diagnostics']})")
