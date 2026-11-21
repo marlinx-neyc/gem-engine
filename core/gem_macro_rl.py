@@ -168,7 +168,13 @@ class GemMacroRLOrchestrator:
         if os.path.exists(self.intel_db_path):
             try:
                 with open(self.intel_db_path, "r", encoding="utf-8") as f:
-                    return json.load(f).get("historical_cases", [])
+                    db = json.load(f)
+                    learned_scales = db.get("learned_feature_scales", {})
+                    if learned_scales:
+                        for k, v in learned_scales.items():
+                            if isinstance(v, (list, tuple)) and len(v) == 2:
+                                self.feature_scales[k] = (float(v[0]), float(v[1]))
+                    return db.get("historical_cases", [])
             except Exception:
                 pass
         return []

@@ -1,3 +1,5 @@
+import os
+import json
 import math
 import numpy as np
 
@@ -15,6 +17,18 @@ class GemPhysicsEngine:
         fh = min(0.95, v_ms / math.sqrt(g * max(0.5, d_chart)))
         squat = (c_b * (v_speed_kts ** 2)) / (30.0 * (d_chart / d_draft)) * (1.0 / math.sqrt(max(0.05, 1.0 - fh ** 2))) * 0.50
         return round(squat, 2)
+
+    @staticmethod
+    def _load_learned_key_values(db_path: str = "data/calibrated_intel_db.json") -> dict:
+        defaults = {"hs_pier_north_crit": 0.95, "hs_pier_south_crit": 1.13, "tp_swell_crit": 12.0, "weff_north_crit": 8.50, "weff_south_crit": 10.17}
+        if os.path.exists(db_path):
+            try:
+                with open(db_path, "r", encoding="utf-8") as f:
+                    kv = json.load(f).get("learned_key_values", {})
+                    defaults.update(kv)
+            except Exception:
+                pass
+        return defaults
 
     def evaluate_physics(self, telemetry: dict, cctv_res: dict) -> dict:
         if telemetry.get("tsunami_pulse_alert"):
@@ -38,9 +52,13 @@ class GemPhysicsEngine:
         high_tide_hour = float(telemetry.get("high_tide_hour", 10.0))
         alpha_tune = float(telemetry.get("alpha_tune", 0.85))
         south_closed = bool(telemetry.get("official_announcement", {}).get("south_pier_closed_damage", True))
+        kv = self._load_learned_key_values()
+        hs_n_crit = float(kv.get("hs_pier_north_crit", 0.95))
+        tp_crit = float(kv.get("tp_swell_crit", 12.0))
+        weff_n_crit = float(kv.get("weff_north_crit", 8.50))
 
-        kd_north = 1.00 if tp >= 12.0 else 0.883
-        kd_south = 1.00 if tp >= 12.0 else 0.72
+        kd_north = 1.00 if tp >= tp_crit else 0.883
+        kd_south = 1.00 if tp >= tp_crit else 0.72
         hs_pier_north = round(hs * kd_north, 2)
         hs_pier_south = round(hs * kd_south, 2)
 
@@ -55,7 +73,7 @@ class GemPhysicsEngine:
         fb_north = float(cctv_res.get("fb_north_override", 0.15 if cv_rate > 0.0 else round(3.20 - tide, 2)))
         fb_south = float(cctv_res.get("fb_south_override", 0.15 if cv_rate > 0.0 else round(3.20 - tide, 2)))
 
-        north_usable = (hs_pier_north <= 0.95) and (weff <= 8.50) and (ukc_north >= 1.50) and (fb_north >= 0.50)
+        north_usable = (hs_pier_north <= hs_n_crit) and (weff <= weff_n_crit) and (ukc_north >= 1.50) and (fb_north >= 0.50)
         south_hydro_ok = (not south_closed) and (hs_pier_south <= 1.13) and (weff <= 10.17) and (ukc_south >= 1.50)
         south_usable = south_hydro_ok and (fb_south >= 0.50)
 

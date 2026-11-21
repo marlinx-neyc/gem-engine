@@ -29,8 +29,8 @@ class GemConsensusOrchestrator:
         ais_url: str = None, tdx_id: str = None, tdx_secret: str = None,
         tdx_mm_id: str = None, tdx_mm_username: str = None, tdx_mm_pw: str = None
     ):
-        self.miner = GemHistoricalDataMiner()
-        self.miner.generate_calibrated_intel_db()
+        self.miner = GemHistoricalDataMiner(cwa_api_key=cwa_key)
+        self.rl_training_state = self.miner.run_autonomous_rl_training_cycle(force_deep_mine=False)
         self.macro_rl = GemMacroRLOrchestrator()
         self.scout = GemScoutAgent(cwa_key, fb_tok, fb_id)
         self.cctv = GemCCTVPatternAgent()
@@ -126,6 +126,8 @@ class GemConsensusOrchestrator:
         ty_info = telemetry.get("typhoon_info", {})
         live_payload["spec_version"] = "GEM-ENG-SPEC-2026-V66.5-QIMEN-RL-V110"
         live_payload["rl_intel_match"] = rl_res
+        live_payload["rl_training_plan"] = self.rl_training_state.get("training_plan_report", {})
+        live_payload["learned_key_values"] = self.rl_training_state.get("learned_key_values", {})
         live_payload["qimen_matrix"] = rl_res.get("qimen_matrix", {})
         live_payload["action_id"] = physics_res.get("action_id", 0)
         live_payload["decision_code"] = f"Q{physics_res.get('action_id', 0)}" if physics_res.get("action_id") in [1,2,3] else "Q4"
