@@ -38,10 +38,11 @@ class GemMultiSourceConsensus:
 
     def arbitrate_consensus(
         self, announcement: dict, vessel_res: dict, physics_res: dict,
-        cctv_res: dict, pm_forecast: dict = None, existing_state: dict = None, dt: datetime = None
+        cctv_res: dict, pm_forecast: dict = None, existing_state: dict = None, dt: datetime = None, rl_res: dict = None
     ) -> Dict[str, Any]:
         dt = dt or datetime.now(CST)
         pm_forecast = pm_forecast or {}
+        rl_res = rl_res or {}
         win = self.get_official_window(dt)
         wufu = vessel_res.get("official_wufu", {})
 
@@ -113,6 +114,17 @@ class GemMultiSourceConsensus:
             effective_official_title = announcement.get("title", "【風管處公告】今日龜山島實施封島")
             consensus_status = f"🔴【官方公告封島】{effective_official_title} ｜ 日期面板 D0 已同步修正為封島！"
             trust_score, final_action = "100.0% (官方正式公告)", f"🔴 0.0% 物理 VETO 熔斷（{scope_txt}）"
+
+        # 3.5 Safe RL 智庫 >= 80% 高置信度灰色地帶坍縮（例行性封島 / 例外封島精準判別）
+        elif rl_res.get("rl_veto_triggered"):
+            effective_official_veto = 1
+            rl_score = rl_res.get("match_score", 80.0)
+            rl_label = rl_res.get("matched_label", "例外封島原型")
+            effective_official_label = f"🔴 實質封島 (RL智庫 {rl_score}% 精準收斂)"
+            effective_official_title = f"【Safe RL 智庫判別·封島】匹配度 {rl_score}% 吻合「{rl_label}」"
+            consensus_status = f"🧠【Safe RL 智庫精準收斂 {rl_score}% ≥ 80%】匹配「{rl_label}」，將灰色地帶坍縮為剛性封島！"
+            trust_score = f"{rl_score}% (Safe RL 智庫>=80%精準判別)"
+            final_action = "🔴 0.0% 物理 VETO 熔斷（RL智庫例外封島收斂）" if in_boat_hours else "🌙 夜間休整期（預警：🔴 RL智庫封島）"
 
         # 4. 矛盾辯證熔斷（關鍵修復！）：
         #    (A) 全島無可用泊位（南岸封閉＋北岸波/風超標）

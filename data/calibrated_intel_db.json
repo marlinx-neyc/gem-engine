@@ -1,35 +1,89 @@
 {
   "metadata": {
-    "trained_at": "2026-11-21 14:22:57 CST",
-    "spec": "GEM-ENG-SPEC-2026-V66.5-UNIFIED"
+    "updated_at": "2026-11-21 14:32:59 CST",
+    "spec": "GEM-ENG-SPEC-2026-V66.5-RL-INTEL",
+    "total_cases": 5
   },
   "historical_cases": [
     {
+      "case_id": "SEED_ROUTINE_01",
       "time": "2026-11-05 07:30",
+      "category": "ROUTINE_CLOSURE",
+      "label": "例行性封島（東北季風巨浪蓋頂）",
       "hs": 2.35,
       "tp": 12.1,
-      "w": 16.2,
+      "weff": 12.8,
+      "pressure_3h": -1.2,
       "tide": 0.62,
-      "cv": 2.4,
+      "south_closed": 1,
+      "wufu_in_port": 1,
+      "veto": 1,
+      "weight": 1.0,
       "action": "🔴 浪潮蓋頂剛性封島"
     },
     {
-      "time": "2026-11-06 07:30",
-      "hs": 1.44,
-      "tp": 9.2,
-      "w": 3.5,
-      "tide": 1.05,
-      "cv": 0.15,
-      "action": "🟡 啟動權宜調撥 (移防南岸靠泊 / 五福號駐島)"
+      "case_id": "SEED_EXCEPTION_01",
+      "time": "2026-11-15 11:17",
+      "category": "EXCEPTION_CLOSURE",
+      "label": "例外封島（盤中長湧浪湧升／外海未達巨浪但碼頭湧浪過大）",
+      "hs": 1.55,
+      "tp": 12.6,
+      "weff": 7.5,
+      "pressure_3h": -1.5,
+      "tide": 0.85,
+      "south_closed": 1,
+      "wufu_in_port": 1,
+      "veto": 1,
+      "weight": 1.15,
+      "action": "🔴 盤中長湧浪湧升，五福號返航執行臨時封島"
     },
     {
-      "time": "2026-11-15 11:17",
-      "hs": 1.65,
-      "tp": 12.8,
-      "w": 11.2,
-      "tide": 0.85,
-      "cv": 1.2,
-      "action": "🔴 盤中長湧浪湧升 (Tp=12.8s)，五福號返航執行午後封島"
+      "case_id": "SEED_EXCEPTION_02",
+      "time": "2026-11-21 09:00",
+      "category": "EXCEPTION_CLOSURE",
+      "label": "例外封島（鋒面低壓過境＋南岸災損封閉＋北岸波高壓線超標）",
+      "hs": 1.14,
+      "tp": 6.0,
+      "weff": 2.5,
+      "pressure_3h": -1.6,
+      "tide": 1.2,
+      "south_closed": 1,
+      "wufu_in_port": 1,
+      "veto": 1,
+      "weight": 1.25,
+      "action": "🔴 現場視訊碼頭浪潮過大且南岸封閉，宣布例外封島"
+    },
+    {
+      "case_id": "SEED_GRAY_OPEN_01",
+      "time": "2026-11-06 07:30",
+      "category": "GRAY_ZONE_OPEN",
+      "label": "灰色地帶開島（微浪低風＋五福號駐島戒護）",
+      "hs": 0.82,
+      "tp": 8.2,
+      "weff": 3.5,
+      "pressure_3h": 0.2,
+      "tide": 1.05,
+      "south_closed": 1,
+      "wufu_in_port": 0,
+      "veto": 0,
+      "weight": 1.0,
+      "action": "🟢 北岸單泊位安全開窗（五福號駐島）"
+    },
+    {
+      "case_id": "RL_20261121",
+      "time": "2026-11-21 14:32",
+      "category": "EXCEPTION_CLOSURE",
+      "label": "例外封島（【Safe RL 智庫判別·封島】匹配度 99.5% 吻）",
+      "hs": 1.12,
+      "tp": 5.6,
+      "weff": 2.29,
+      "pressure_3h": -1.6,
+      "tide": 1.24,
+      "south_closed": 1,
+      "wufu_in_port": 1,
+      "veto": 1,
+      "weight": 1.1,
+      "action": "【Safe RL 智庫判別·封島】匹配度 99.5% 吻合「例外封島（鋒面低壓過境＋南岸災損封閉＋北岸波高壓線超標）」"
     }
   ]
 }
