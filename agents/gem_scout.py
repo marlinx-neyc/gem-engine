@@ -34,7 +34,7 @@ class GemScoutAgent:
             "https://www.necoast-nsa.gov.tw/"
         ]
         self.news_rss_urls = [
-            "https://news.google.com/rss/search?q=%E9%BE%9C%E5%B1%B1%E5%B3%B6+%E5%B0%81%E5%B3%B6&hl=zh-TW&gl=TW&ceid=TW:zh-Hant",
+            "https://news.google.com/rss/search?q=%E9%BE%9C%E5%B1%B1%E5%B3%B6+(%E5%B0%81%E5%B3%B6+OR+%E5%81%9C%E8%88%AA+OR+%E6%9D%B1%E5%8C%97%E8%A7%92%E9%A2%A8%E7%AE%A1%E8%99%95)+when:1d&hl=zh-TW&gl=TW&ceid=TW:zh-Hant",
             "https://news.google.com/rss/search?q=site:facebook.com+%E6%9D%B1%E5%8C%97%E8%A7%92%E4%B9%8B%E5%8F%8B+%E9%BE%9C%E5%B1%B1%E5%B3%B6&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
         ]
 

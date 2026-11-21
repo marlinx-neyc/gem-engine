@@ -171,11 +171,11 @@ class GemVesselAgent:
         headers = {"Authorization": f"Bearer {token}", "Accept": "application/json"}
         spatial_filter = "Lat ge 24.78 and Lat le 24.92 and Lon ge 121.80 and Lon le 122.00"
         tdx_endpoints = [
-            "https://tdx.transportdata.tw/api/basic/v3/Maritime/AIS/RealTime?$filter=MMSI eq '416017708'&$format=JSON",
-            "https://tdx.transportdata.tw/api/basic/v2/Maritime/AIS/RealTime?$filter=MMSI eq '416017708'&$format=JSON",
-            f"https://tdx.transportdata.tw/api/basic/v3/Maritime/AIS/RealTime?$filter={spatial_filter}&$format=JSON",
-            f"https://tdx.transportdata.tw/api/basic/v2/Maritime/AIS/RealTime?$filter={spatial_filter}&$format=JSON",
-            "https://tdx.transportdata.tw/api/basic/v3/Maritime/AIS/RealTime?$top=300&$format=JSON"
+            "https://tdx.transportdata.tw/api/basic/v3/Ship/AIS/RealTime?$filter=MMSI eq '416017708'&$format=JSON",
+            "https://tdx.transportdata.tw/api/basic/v2/Ship/AIS/RealTime?$filter=MMSI eq '416017708'&$format=JSON",
+            f"https://tdx.transportdata.tw/api/basic/v3/Ship/AIS/RealTime?$filter={spatial_filter}&$format=JSON",
+            f"https://tdx.transportdata.tw/api/basic/v2/Ship/AIS/RealTime?$filter={spatial_filter}&$format=JSON",
+            "https://tdx.transportdata.tw/api/basic/v3/Ship/AIS/RealTime?$top=300&$format=JSON"
         ]
         for idx, ep in enumerate(tdx_endpoints):
             try:
@@ -207,9 +207,9 @@ class GemVesselAgent:
             conn_state["rc"] = str(reason_code)
             if str(reason_code) in ["0", "Success"]:
                 for topic in [
-                    "TDX/Maritime/AIS/RealTime/#",
-                    "v2/Maritime/AIS/RealTime/#",
-                    "v3/Maritime/AIS/RealTime/#"
+                    "TDX/Ship/AIS/RealTime/#",
+                    "v2/Ship/AIS/RealTime/#",
+                    "v3/Ship/AIS/RealTime/#"
                 ]:
                     client.subscribe(topic, qos=0)
 

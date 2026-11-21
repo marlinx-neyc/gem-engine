@@ -37,6 +37,7 @@ class GemPhysicsEngine:
         passenger_count = int(telemetry.get("passenger_count", 150))
         high_tide_hour = float(telemetry.get("high_tide_hour", 10.0))
         alpha_tune = float(telemetry.get("alpha_tune", 0.85))
+        south_closed = bool(telemetry.get("official_announcement", {}).get("south_pier_closed_damage", True))
 
         kd_north = 1.00 if tp >= 12.0 else 0.883
         kd_south = 1.00 if tp >= 12.0 else 0.72
@@ -54,17 +55,16 @@ class GemPhysicsEngine:
         fb_north = float(cctv_res.get("fb_north_override", 0.15 if cv_rate > 0.0 else round(3.20 - tide, 2)))
         fb_south = float(cctv_res.get("fb_south_override", 0.15 if cv_rate > 0.0 else round(3.20 - tide, 2)))
 
-        hard_veto = bool(
-            (hs_pier_north > 1.13 and hs_pier_south > 1.13)
-            or weff > 10.17
-            or (ukc_north < 1.50 and ukc_south < 1.50)
-            or (fb_north < 0.50 and fb_south < 0.50)
-        )
+        # 雙岸各自獨立可用性檢核（南岸若災損封閉則直接視為不可用）
+        north_usable = (hs_pier_north <= 0.95) and (weff <= 8.50) and (ukc_north >= 1.50) and (fb_north >= 0.50)
+        south_usable = (not south_closed) and (hs_pier_south <= 1.13) and (weff <= 10.17) and (ukc_south >= 1.50) and (fb_south >= 0.50)
 
-        active_hs = hs_pier_north if hs_pier_north <= 1.13 else hs_pier_south
-        active_ukc = ukc_north if hs_pier_north <= 1.13 else ukc_south
-        active_fb = fb_north if hs_pier_north <= 1.13 else fb_south
-        active_squat = squat_north if hs_pier_north <= 1.13 else squat_south_3kt
+        hard_veto = bool((not north_usable) and (not south_usable))
+
+        active_hs = hs_pier_north if north_usable else hs_pier_south
+        active_ukc = ukc_north if north_usable else ukc_south
+        active_fb = fb_north if north_usable else fb_south
+        active_squat = squat_north if north_usable else squat_south_3kt
 
         k_flux = round(active_hs + (weff * 0.1) + active_squat, 4)
         v_impedance = round(max(0.05, 0.5 * active_ukc + 0.5 * active_fb), 4)
@@ -72,18 +72,24 @@ class GemPhysicsEngine:
         p_veto = round(1.0 / (1.0 + math.exp(-(e_net - 1.00) / (0.25 * alpha_tune))), 4)
 
         if hard_veto or p_veto > 0.80:
-            if cv_rate > 1.0 and hs_pier_south <= 1.13 and weff <= 10.17 and ukc_south >= 1.50:
+            if cv_rate > 1.0 and south_usable:
                 action_id = 3
                 action_mode = "⏱️ Q3 動態開窗 (11:20 剛性止登 / 14:20 強制清島)"
                 badge = "⏱️ Q3 動態開窗"
             else:
                 action_id = 0
-                action_mode = "🔴 0.0% 物理 VETO 熔斷（禁止靠泊）"
+                reason_tag = "南岸災損封閉且北岸浪/風超標" if south_closed and not north_usable else "禁止靠泊"
+                action_mode = f"🔴 0.0% 物理 VETO 熔斷（{reason_tag}）"
                 badge = "🔴 0.0% 物理 VETO 熔斷"
-        elif (0.20 <= p_veto <= 0.80) or (tide < 0.40) or (35.0 <= delta_theta < 45.0) or (hs_pier_north > 1.13 and hs_pier_south <= 1.13):
-            action_id = 1
-            action_mode = "🟡 Q2 游擊調撥 (移防南岸靠泊 / 限速 <= 3.0 kts)"
-            badge = "🟡 Q2 游擊調撥"
+        elif (not north_usable and south_usable) or (0.20 <= p_veto <= 0.80) or (tide < 0.40) or (35.0 <= delta_theta < 45.0):
+            if south_usable:
+                action_id = 1
+                action_mode = "🟡 Q2 游擊調撥 (移防南岸靠泊 / 限速 <= 3.0 kts)"
+                badge = "🟡 Q2 游擊調撥"
+            else:
+                action_id = 0
+                action_mode = "🔴 0.0% 物理 VETO 熔斷（南岸封閉且北岸超限）"
+                badge = "🔴 0.0% 物理 VETO 熔斷"
         else:
             action_id = 2
             action_mode = "🟢 100.0% Q1 全線開放 (靠泊北岸主泊位)"
@@ -113,6 +119,7 @@ class GemPhysicsEngine:
                 "ukc_north": ukc_north, "ukc_south": ukc_south,
                 "fb_north": fb_north, "fb_south": fb_south,
                 "cv_rate": cv_rate,
+                "south_pier_closed": south_closed,
                 "k_flux": k_flux, "v_impedance": v_impedance,
                 "e_net": e_net, "p_veto": p_veto,
                 "evac_minutes": evac_minutes, "milk_sea_peak": milk_sea_peak
