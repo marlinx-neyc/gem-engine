@@ -4,7 +4,6 @@ class GemCCTVPatternAgent:
         tide = float(raw_cv_data.get("tide", 0.95))
         t_overtop_pct = round(min(100.0, cv_rate * 12.5), 1)
         base_fb = round(3.20 - tide, 2)
-        # V66.5 第 2.3 節與第 3 節：一旦檢測到 CV > 0.0 p/min，強制覆寫 FB = 0.15m
         fb_north_override = 0.15 if cv_rate > 0.0 else base_fb
         fb_south_override = 0.15 if cv_rate > 0.0 else base_fb
         is_overtopping = (cv_rate > 0.0)

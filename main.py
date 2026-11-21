@@ -71,7 +71,10 @@ class GemConsensusOrchestrator:
         announcement = telemetry["official_announcement"]
         swell_res = telemetry.get("swell_forecast", {})
         pm_fc = telemetry.get("pm_forecast", {})
-        cctv_res = self.cctv.process_cctv_frame_features({"cctv_cv_rate": telemetry["cctv_cv_rate"]})
+        cctv_res = self.cctv.process_cctv_frame_features({
+            "cctv_cv_rate": telemetry["cctv_cv_rate"],
+            "tide": telemetry["tide"]
+        })
         vessel_res = self.vessel.track_and_back_calculate(telemetry)
         physics_res = self.physics.evaluate_physics(telemetry, cctv_res)
 
@@ -85,7 +88,7 @@ class GemConsensusOrchestrator:
             physics_res=physics_res, consensus_res=consensus_res, announcement=announcement,
             vessel_res=vessel_res, swell_res=swell_res, cctv_res=cctv_res, telemetry=telemetry
         )
-        # 注入 V66.5 標準化擴充欄位 (同步支援 AI 戰術中樞 Prompt 與雙端看板)
+
         m_v665 = physics_res.get("metrics", {})
         ty_info = telemetry.get("typhoon_info", {})
         live_payload["spec_version"] = "GEM-ENG-SPEC-2026-V66.5-UNIFIED"
@@ -97,8 +100,12 @@ class GemConsensusOrchestrator:
             "hs_pier_north_m": m_v665.get("hs_pier_north", 0.0),
             "w_local_ms": m_v665.get("weff", 0.0),
             "ukc_m": m_v665.get("ukc_south", 0.0),
+            "ukc_north_m": m_v665.get("ukc_north", 0.0),
             "fb_pier_m": m_v665.get("fb_south", 0.0),
             "s_squat_m": m_v665.get("squat_south_3kt", 0.0),
+            "s_squat_north_m": m_v665.get("squat_north", 0.0),
+            "k_flux": m_v665.get("k_flux", 0.0),
+            "v_impedance": m_v665.get("v_impedance", 0.0),
             "e_net": m_v665.get("e_net", 0.0),
             "p_veto": m_v665.get("p_veto", 0.0),
             "evac_minutes": m_v665.get("evac_minutes", 20),
@@ -140,6 +147,7 @@ class GemConsensusOrchestrator:
             "vessel_status": consensus_res["dock_desc"], "vector_status": consensus_res["vector_desc"],
             "pm_risk_label": pm_fc.get("risk_label", ""), "effective_official": consensus_res["effective_official_label"],
             "consensus_status": consensus_res["consensus_status"], "physics_res": physics_res,
+            "scraper_diagnostics": announcement.get("scraper_diagnostics", {}),
             "data_source": telemetry.get("data_source", "live"), "state_hash": new_hash[:12], "skipped_write": skipped_write
         }
 

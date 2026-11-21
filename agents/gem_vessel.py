@@ -42,7 +42,6 @@ class GemVesselAgent:
         return round((math.degrees(math.atan2(y, x)) + 360.0) % 360.0, 1)
 
     def fetch_realtime_ais_api(self) -> Optional[dict]:
-        '''優先讀取即時 AIS API (五福號 416017708 為主，並統計島周賞鯨船隊群集數量)'''
         if not self.ais_api_url:
             return None
         try:
@@ -155,6 +154,7 @@ class GemVesselAgent:
         tp = float(telemetry.get("tp", 8.5))
         w = float(telemetry.get("w", 5.5))
         theta = float(telemetry.get("monsoon_angle", 35.0))
+        web_veto = int(telemetry.get("official_announcement", {}).get("official_veto", 0)) == 1
 
         kd_n = 1.00 if tp >= 12.0 else 0.883
         kd_s = 1.00 if tp >= 12.0 else 0.72
@@ -162,7 +162,7 @@ class GemVesselAgent:
         kw = 0.78 if theta < 35.0 else (0.88 if theta < 45.0 else 1.00)
         weff = w * abs(math.cos(math.radians(theta))) * kw
 
-        if self.is_operational_boat_hours(dt):
+        if not web_veto and self.is_operational_boat_hours(dt):
             if hs_n <= 0.95 and weff <= 8.50:
                 return {"lat": 24.84375, "lon": 121.94378, "sog": 0.1, "source_tag": "水文推演備援·北岸"}
             elif hs_s <= 1.13 and weff <= 10.17:

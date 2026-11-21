@@ -1,14 +1,19 @@
 import re
 import time
 import math
+import urllib3
 import requests
 import numpy as np
+import xml.etree.ElementTree as ET
+from email.utils import parsedate_to_datetime
 try:
     from bs4 import BeautifulSoup
     HAS_BS4 = True
 except ImportError:
     HAS_BS4 = False
 from datetime import datetime, timedelta, timezone
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 CST = timezone(timedelta(hours=8))
 
@@ -19,10 +24,15 @@ class GemScoutAgent:
         self.fb_page_id = fb_page_id
         self.lat = 24.8425
         self.lon = 121.9510
+        # 依即時性排序：登島申請系統首頁跑馬燈 -> 最新消息 -> 封島專頁 -> 風管處主首頁
         self.official_urls = [
-            "https://www.necoast-nsa.gov.tw/",
-            "https://www.necoast-nsa.gov.tw/News.aspx?n=88"
+            "https://events.necoast-nsa.gov.tw/coast/",
+            "https://events.necoast-nsa.gov.tw/coast/index.aspx",
+            "https://www.necoast-nsa.gov.tw/Articles.aspx?a=5&l=1",
+            "https://www.necoast-nsa.gov.tw/Articles.aspx?a=319&l=1",
+            "https://www.necoast-nsa.gov.tw/"
         ]
+        self.news_rss_url = "https://news.google.com/rss/search?q=%E9%BE%9C%E5%B1%B1%E5%B3%B6+%E5%B0%81%E5%B3%B6&hl=zh-TW&gl=TW&ceid=TW:zh-Hant"
 
     @staticmethod
     def _haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -33,36 +43,78 @@ class GemScoutAgent:
         a = math.sin(dp / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
         return round(R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a)), 1)
 
+    @staticmethod
+    def _extract_closure_windows(raw_text: str) -> list:
+        '''從長段落或導覽列混合文字中精準切割出包含『龜山島』與封島關鍵字的前後視窗'''
+        normalized = re.sub(r"\s+", " ", raw_text).strip()
+        windows = []
+        for m in re.finditer(r"龜山島", normalized):
+            start = max(0, m.start() - 60)
+            end = min(len(normalized), m.end() + 110)
+            seg = normalized[start:end].strip()
+            if re.search(r"(封島|禁止靠泊|浪潮蓋碼頭|暫停開放|不開放登島|暫停登島|停止開放)", seg):
+                if seg not in windows:
+                    windows.append(seg)
+        return windows
+
     def _check_date_relevance(self, text: str, now_cst: datetime, pub_dt: datetime = None) -> dict:
         today_m, today_d = now_cst.month, now_cst.day
+        roc_y = now_cst.year - 1911
         tmr = now_cst + timedelta(days=1)
         tmr_m, tmr_d = tmr.month, tmr.day
 
-        # 若貼文/公告帶有發布時間且已超過 18 小時，除非明確寫出今日日期或「續封」，否則視為歷史過期公告
+        today_pat = (
+            rf"(本日封島|今日封島|今天封島|當日封島|下午封島|封島半天|午後封島|"
+            rf"今\s*[\(（]?\s*0?{today_d}\s*[\)）]?\s*日|"
+            rf"0?{today_m}\s*月\s*0?{today_d}\s*日|"
+            rf"(?<![\d/])0?{today_m}/0?{today_d}(?![\d/])|"
+            rf"{roc_y}[./-]0?{today_m}[./-]0?{today_d}|"
+            rf"{now_cst.year}[./-]0?{today_m}[./-]0?{today_d})"
+        )
+        tmr_pat = (
+            rf"(明日封島|明天封島|續封島|次日封島|"
+            rf"明\s*[\(（]?\s*0?{tmr_d}\s*[\)）]?\s*日|"
+            rf"0?{tmr_m}\s*月\s*0?{tmr_d}\s*日|"
+            rf"(?<![\d/])0?{tmr_m}/0?{tmr_d}(?![\d/])|"
+            rf"{roc_y}[./-]0?{tmr_m}[./-]0?{tmr_d})"
+        )
+
+        # 若帶有發布時間戳記且超過 18 小時，除非明確寫出今日日期或「續封」，否則視為過期歷史公告
         if pub_dt is not None:
             age_hours = (now_cst - pub_dt).total_seconds() / 3600.0
-            if age_hours > 18.0 and not re.search(rf"({today_m}月{today_d}日|{today_m}/{today_d}|續封)", text):
-                return {"valid": False, "is_today": False, "is_tmr": False, "scope": "FULL_DAY", "stale_filtered": True}
+            if age_hours > 18.0 and not re.search(rf"({today_pat}|續封)", text):
+                return {"valid": False, "is_today": False, "is_tmr": False, "scope": "FULL_DAY", "stale_filtered": True, "reason": f"expired_{age_hours:.1f}h"}
 
-        is_today = bool(re.search(rf"(本日封島|今日封島|今天封島|下午封島|封島半天|今\({today_d}\)日|{today_m}月{today_d}日|{today_m}/{today_d})", text))
-        is_tmr = bool(re.search(rf"(明日封島|明天封島|續封島|明\({tmr_d}\)日|{tmr_m}月{tmr_d}日|{tmr_m}/{tmr_d})", text))
+        is_today = bool(re.search(today_pat, text))
+        is_tmr = bool(re.search(tmr_pat, text))
         scope = "AFTERNOON" if re.search(r"(下午封島|封島半天|午後封島|12:00)", text) else "FULL_DAY"
 
-        has_explicit_date = bool(re.search(r"\d{1,2}月\d{1,2}日", text))
-        if has_explicit_date and not is_today and not is_tmr:
-            return {"valid": False, "is_today": False, "is_tmr": False, "scope": scope, "stale_filtered": True}
-        if not has_explicit_date and not is_today and not is_tmr:
-            return {"valid": False, "is_today": False, "is_tmr": False, "scope": scope, "stale_filtered": False}
-        return {"valid": True, "is_today": is_today, "is_tmr": is_tmr, "scope": scope, "stale_filtered": False}
+        # 檢查是否帶有明確「非今日、非明日」的歷史或遠期日期（例如 10月5日、11/12）
+        explicit_dates = re.findall(r"(0?\d{1,2})\s*月\s*(0?\d{1,2})\s*日", text)
+        explicit_slashes = re.findall(r"(?<!\d)(0?\d{1,2})/(0?\d{1,2})(?!\d)", text)
+        all_md = [(int(m), int(d)) for m, d in (explicit_dates + explicit_slashes) if 1 <= int(m) <= 12 and 1 <= int(d) <= 31]
+
+        if all_md:
+            has_other_date = any((m, d) not in [(today_m, today_d), (tmr_m, tmr_d)] for m, d in all_md)
+            if has_other_date and not is_today and not is_tmr:
+                return {"valid": False, "is_today": False, "is_tmr": False, "scope": scope, "stale_filtered": True, "reason": f"other_date_{all_md}"}
+
+        # 關鍵修復：若官方首頁跑馬燈發布「受...影響，龜山島封島一日 / 暫停開放登島」且未寫具體月日，視為當日即時有效公告
+        if not all_md and not is_today and not is_tmr:
+            if re.search(r"(封島一日|封島一天|實施封島|宣布封島|公告封島|暫停開放登島|不開放登島|暫停登島)", text):
+                return {"valid": True, "is_today": True, "is_tmr": False, "scope": scope, "stale_filtered": False, "reason": "dateless_active_banner"}
+            return {"valid": False, "is_today": False, "is_tmr": False, "scope": scope, "stale_filtered": False, "reason": "no_date_and_ambiguous"}
+
+        return {"valid": True, "is_today": is_today, "is_tmr": is_tmr, "scope": scope, "stale_filtered": False, "reason": "matched_date"}
 
     def fetch_facebook_announcement(self) -> dict:
         if not self.fb_page_token or not self.fb_page_id:
             return None
         url = f"https://graph.facebook.com/v18.0/{self.fb_page_id}/published_posts"
-        params = {"access_token": self.fb_page_token, "limit": 3, "fields": "message,created_time"}
+        params = {"access_token": self.fb_page_token, "limit": 5, "fields": "message,created_time"}
         now_cst = datetime.now(CST)
         try:
-            resp = requests.get(url, params=params, timeout=4)
+            resp = requests.get(url, params=params, timeout=5)
             if resp.status_code == 200:
                 for post in resp.json().get("data", []):
                     msg = post.get("message", "")
@@ -73,7 +125,7 @@ class GemScoutAgent:
                             pub_dt = datetime.fromisoformat(created_raw.replace("Z", "+00:00")).astimezone(CST)
                         except Exception:
                             pub_dt = None
-                    if "龜山島" in msg and re.search(r"(封島|暫停開放|不開放登島)", msg):
+                    if "龜山島" in msg and re.search(r"(封島|暫停開放|不開放登島|暫停登島)", msg):
                         rel = self._check_date_relevance(msg, now_cst, pub_dt=pub_dt)
                         if rel["valid"]:
                             return {
@@ -81,7 +133,7 @@ class GemScoutAgent:
                                 "tomorrow_veto": 1 if rel["is_tmr"] else 0,
                                 "scope": rel["scope"],
                                 "wave_warning": True,
-                                "title": f"【FB 社群公告】{msg[:36]}...",
+                                "title": f"【FB 社群公告】{msg[:40]}...",
                                 "body": msg,
                                 "source": "facebook_api",
                                 "published_at": pub_dt.strftime("%Y-%m-%d %H:%M CST") if pub_dt else created_raw
@@ -90,16 +142,59 @@ class GemScoutAgent:
             pass
         return None
 
+    def _fetch_google_news_rss_fallback(self, now_cst: datetime, diag_logs: list) -> dict:
+        '''穿透海外機房 IP 限制：透過 Google News 台灣新聞 RSS 捕捉風管處最新封島快訊'''
+        try:
+            resp = requests.get(self.news_rss_url, headers={"User-Agent": "Mozilla/5.0"}, timeout=6)
+            diag_logs.append(f"news_rss:{resp.status_code}")
+            if resp.status_code == 200:
+                root = ET.fromstring(resp.text)
+                for item in root.findall(".//item")[:8]:
+                    title = (item.findtext("title") or "").strip()
+                    pub_raw = (item.findtext("pubDate") or "").strip()
+                    pub_dt = None
+                    if pub_raw:
+                        try:
+                            pub_dt = parsedate_to_datetime(pub_raw).astimezone(CST)
+                        except Exception:
+                            pub_dt = None
+                    if "龜山島" in title and re.search(r"(封島|暫停開放|不開放登島|暫停登島)", title):
+                        rel = self._check_date_relevance(title, now_cst, pub_dt=pub_dt)
+                        if rel["valid"] and rel["is_today"]:
+                            return {
+                                "official_veto": 1,
+                                "tomorrow_veto": 1 if rel["is_tmr"] else 0,
+                                "scope": rel["scope"],
+                                "wave_warning": True,
+                                "title": f"【官方/媒體快訊】{title[:55]}",
+                                "body": f"{title} ({pub_dt.strftime('%Y-%m-%d %H:%M CST') if pub_dt else pub_raw})",
+                                "source": "google_news_rss",
+                                "matched_url": self.news_rss_url,
+                                "filter_reason": rel["reason"]
+                            }
+        except Exception as e:
+            diag_logs.append(f"news_rss:ERR({type(e).__name__})")
+        return None
+
     def fetch_official_announcement(self, override_announcement: dict = None) -> dict:
         if override_announcement:
             return override_announcement
-        fb_res = self.fetch_facebook_announcement()
-        if fb_res and (fb_res.get("official_veto") == 1 or fb_res.get("tomorrow_veto") == 1):
-            return fb_res
 
         now = datetime.now(CST)
         current_day = now.day
         tomorrow_day = (now + timedelta(days=1)).day
+        diag_logs = []
+
+        fb_res = self.fetch_facebook_announcement()
+        if fb_res and (fb_res.get("official_veto") == 1 or fb_res.get("tomorrow_veto") == 1):
+            fb_res["scraper_diagnostics"] = {
+                "checked_at": now.strftime("%Y-%m-%d %H:%M:%S CST"),
+                "matched_url": "facebook_graph_api",
+                "http_statuses": ["fb:200"],
+                "raw_snippet": fb_res.get("body", "")[:140],
+                "filter_reason": "fb_matched"
+            }
+            return fb_res
 
         default_payload = {
             "official_veto": 0,
@@ -110,48 +205,116 @@ class GemScoutAgent:
             "body": "東北角暨宜蘭海岸國家風景區管理處：龜山島今日無當日封島通告，依實船軌跡與海象動態開放登島。",
             "published_at": now.strftime("%Y-%m-%d %H:%M CST"),
             "extracted_day": current_day,
-            "source": "official_web"
+            "source": "official_web",
+            "scraper_diagnostics": {
+                "checked_at": now.strftime("%Y-%m-%d %H:%M:%S CST"),
+                "matched_url": "none",
+                "http_statuses": diag_logs,
+                "raw_snippet": "未檢出今日有效封島公告",
+                "filter_reason": "no_active_closure_found"
+            }
         }
 
         headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.8",
             "Cache-Control": "no-cache, no-store, must-revalidate",
             "Pragma": "no-cache"
         }
         buster = int(time.time())
+        tmr_candidate = None
+
+        # 逐一掃描所有官方端點，絕不因第一個端點回傳 200 就提前 break！
         for base_url in self.official_urls:
             sep = "&" if "?" in base_url else "?"
             url = f"{base_url}{sep}_t={buster}"
             try:
-                resp = requests.get(url, headers=headers, timeout=5)
+                resp = requests.get(url, headers=headers, timeout=6, verify=False)
+                diag_logs.append(f"{base_url.split('//')[1][:24]}:{resp.status_code}")
                 if resp.status_code == 200:
+                    resp.encoding = resp.apparent_encoding or "utf-8"
                     if HAS_BS4:
                         soup = BeautifulSoup(resp.text, 'html.parser')
-                        candidates = [el.get_text(" ", strip=True) for el in soup.find_all(["a", "li", "h2", "h3", "div"]) if "龜山島" in el.get_text()]
+                        raw_blocks = [
+                            el.get_text(" ", strip=True)
+                            for el in soup.find_all(["a", "li", "h1", "h2", "h3", "p", "marquee", "span", "div"])
+                            if "龜山島" in el.get_text()
+                        ]
                     else:
                         clean_txt = re.sub(r"<[^>]+>", "\n", resp.text)
-                        candidates = [ln.strip() for ln in clean_txt.splitlines() if "龜山島" in ln]
-                    for snippet in candidates:
-                        if len(snippet) > 180:
-                            continue
-                        if re.search(r"(封島|禁止靠泊|浪潮蓋碼頭|暫停開放|不開放登島)", snippet):
-                            rel = self._check_date_relevance(snippet, now)
-                            if rel["valid"]:
-                                target_d = current_day if rel["is_today"] else tomorrow_day
-                                scope_txt = "下午封島半天" if rel["scope"] == "AFTERNOON" else "實施封島"
-                                default_payload.update({
-                                    "official_veto": 1 if rel["is_today"] else 0,
-                                    "tomorrow_veto": 1 if rel["is_tmr"] else 0,
-                                    "scope": rel["scope"],
-                                    "wave_warning": True,
-                                    "title": f"【風管處公告】受海浪影響，({target_d})日龜山島{scope_txt}",
-                                    "body": snippet,
-                                    "extracted_day": target_d
-                                })
-                                return default_payload
-                    break
-            except Exception:
+                        raw_blocks = [ln.strip() for ln in clean_txt.splitlines() if "龜山島" in ln]
+
+                    windows = []
+                    for blk in raw_blocks:
+                        windows.extend(self._extract_closure_windows(blk))
+
+                    for snippet in windows:
+                        rel = self._check_date_relevance(snippet, now)
+                        if rel["valid"] and rel["is_today"]:
+                            scope_txt = "下午封島半天" if rel["scope"] == "AFTERNOON" else "實施封島"
+                            default_payload.update({
+                                "official_veto": 1,
+                                "tomorrow_veto": 1 if rel["is_tmr"] else 0,
+                                "scope": rel["scope"],
+                                "wave_warning": True,
+                                "title": f"【風管處公告】受海象影響，({current_day})日龜山島{scope_txt}",
+                                "body": snippet,
+                                "extracted_day": current_day,
+                                "source": "official_web_live",
+                                "scraper_diagnostics": {
+                                    "checked_at": now.strftime("%Y-%m-%d %H:%M:%S CST"),
+                                    "matched_url": base_url,
+                                    "http_statuses": diag_logs,
+                                    "raw_snippet": snippet[:140],
+                                    "filter_reason": rel["reason"]
+                                }
+                            })
+                            return default_payload
+                        elif rel["valid"] and rel["is_tmr"] and tmr_candidate is None:
+                            tmr_candidate = (base_url, snippet, rel)
+            except Exception as e:
+                diag_logs.append(f"{base_url.split('//')[1][:20]}:ERR({type(e).__name__})")
                 continue
+
+        # 若官網直連均未命中當日封島（例如海外 IP 遭 WAF 阻擋），啟動 Google News RSS 穿透補盲
+        rss_hit = self._fetch_google_news_rss_fallback(now, diag_logs)
+        if rss_hit:
+            default_payload.update({
+                "official_veto": 1,
+                "tomorrow_veto": rss_hit["tomorrow_veto"],
+                "scope": rss_hit["scope"],
+                "wave_warning": True,
+                "title": rss_hit["title"],
+                "body": rss_hit["body"],
+                "extracted_day": current_day,
+                "source": rss_hit["source"],
+                "scraper_diagnostics": {
+                    "checked_at": now.strftime("%Y-%m-%d %H:%M:%S CST"),
+                    "matched_url": rss_hit["matched_url"],
+                    "http_statuses": diag_logs,
+                    "raw_snippet": rss_hit["body"][:140],
+                    "filter_reason": rss_hit["filter_reason"]
+                }
+            })
+            return default_payload
+
+        if tmr_candidate:
+            base_url, snippet, rel = tmr_candidate
+            default_payload.update({
+                "tomorrow_veto": 1,
+                "wave_warning": True,
+                "title": f"【風管處預告】明日({tomorrow_day})日龜山島實施封島",
+                "body": snippet,
+                "extracted_day": tomorrow_day,
+                "scraper_diagnostics": {
+                    "checked_at": now.strftime("%Y-%m-%d %H:%M:%S CST"),
+                    "matched_url": base_url,
+                    "http_statuses": diag_logs,
+                    "raw_snippet": snippet[:140],
+                    "filter_reason": rel["reason"]
+                }
+            })
         return default_payload
 
     def fetch_cwa_buoy_realtime(self) -> dict:

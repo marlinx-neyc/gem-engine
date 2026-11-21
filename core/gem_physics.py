@@ -10,7 +10,6 @@ class GemPhysicsEngine:
 
     @staticmethod
     def compute_squat(v_speed_kts: float, d_chart: float, d_draft: float = 1.20, c_b: float = 0.65) -> float:
-        '''V66.5 第 2.2 節：動態淺水蹲沉方程 (Squat)'''
         g = 9.80665
         v_ms = v_speed_kts * 0.514444
         fh = min(0.95, v_ms / math.sqrt(g * max(0.5, d_chart)))
@@ -18,7 +17,6 @@ class GemPhysicsEngine:
         return round(squat, 2)
 
     def evaluate_physics(self, telemetry: dict, cctv_res: dict) -> dict:
-        # Tier-0 災難級絕對熔斷
         if telemetry.get("tsunami_pulse_alert"):
             return {"hard_veto": True, "is_tier0": True, "tier0_reason": "[Tier-0] 海嘯預警！", "action_id": 0, "p_veto": 1.0,
                     "action_mode": "🔴 0.0% 物理 VETO 熔斷（海嘯預警）", "badge": "🔴 Tier-0 海嘯熔斷", "metrics": {}}
@@ -40,27 +38,22 @@ class GemPhysicsEngine:
         high_tide_hour = float(telemetry.get("high_tide_hour", 10.0))
         alpha_tune = float(telemetry.get("alpha_tune", 0.85))
 
-        # 第一層【太陽・波能】：Tp >= 12.0s 消能瓦解 Kd = 1.00
         kd_north = 1.00 if tp >= 12.0 else 0.883
         kd_south = 1.00 if tp >= 12.0 else 0.72
         hs_pier_north = round(hs * kd_north, 2)
         hs_pier_south = round(hs * kd_south, 2)
 
-        # 第二層【少陽・風能】：Weff = W * |cos(Δθ)| * Kw <= 10.17 m/s
         kw = 0.78 if delta_theta < 35.0 else (0.88 if delta_theta < 45.0 else 1.00)
         weff = round(w * abs(math.cos(math.radians(delta_theta))) * kw, 2)
 
-        # 第三層【少陰・底阻】：含動態蹲沉 S_squat 之安全裕深 UKC >= 1.50m
         squat_north = self.compute_squat(v_speed_kts, self.d_chart_north, self.d_draft, self.c_b)
         squat_south_3kt = self.compute_squat(3.0, self.d_chart_south, self.d_draft, self.c_b)
         ukc_north = round((self.d_chart_north + tide) - (self.d_draft + squat_north) - hs_pier_north, 2)
         ukc_south = round((self.d_chart_south + tide) - (self.d_draft + squat_south_3kt) - hs_pier_south, 2)
 
-        # 第四層【太陰・頂阻】：預留乾舷高程 FB = 3.20 - η >= 0.50m (CV > 0 強制覆寫為 0.15m)
         fb_north = float(cctv_res.get("fb_north_override", 0.15 if cv_rate > 0.0 else round(3.20 - tide, 2)))
         fb_south = float(cctv_res.get("fb_south_override", 0.15 if cv_rate > 0.0 else round(3.20 - tide, 2)))
 
-        # 以南岸權宜碼頭為底線之 Hard VETO 判定
         hard_veto = bool(
             (hs_pier_north > 1.13 and hs_pier_south > 1.13)
             or weff > 10.17
@@ -68,7 +61,6 @@ class GemPhysicsEngine:
             or (fb_north < 0.50 and fb_south < 0.50)
         )
 
-        # 全域能量張量 E_net 與 Fermi-Dirac 相變機率 P_veto (V66.5 第 4 節)
         active_hs = hs_pier_north if hs_pier_north <= 1.13 else hs_pier_south
         active_ukc = ukc_north if hs_pier_north <= 1.13 else ukc_south
         active_fb = fb_north if hs_pier_north <= 1.13 else fb_south
@@ -79,7 +71,6 @@ class GemPhysicsEngine:
         e_net = round(k_flux / v_impedance, 4)
         p_veto = round(1.0 / (1.0 + math.exp(-(e_net - 1.00) / (0.25 * alpha_tune))), 4)
 
-        # 四態戰術行動坍縮 (Action 0 / 1 / 2 / 3)
         if hard_veto or p_veto > 0.80:
             if cv_rate > 1.0 and hs_pier_south <= 1.13 and weff <= 10.17 and ukc_south >= 1.50:
                 action_id = 3
@@ -87,15 +78,15 @@ class GemPhysicsEngine:
                 badge = "⏱️ Q3 動態開窗"
             else:
                 action_id = 0
-                action_mode = "🔴 全線剛性熔斷（禁止靠泊）"
+                action_mode = "🔴 0.0% 物理 VETO 熔斷（禁止靠泊）"
                 badge = "🔴 0.0% 物理 VETO 熔斷"
         elif (0.20 <= p_veto <= 0.80) or (tide < 0.40) or (35.0 <= delta_theta < 45.0) or (hs_pier_north > 1.13 and hs_pier_south <= 1.13):
             action_id = 1
-            action_mode = "🟡 戰術機動調撥 (移防南岸靠泊 Q2 / 限速 <= 3.0 kts)"
+            action_mode = "🟡 Q2 游擊調撥 (移防南岸靠泊 / 限速 <= 3.0 kts)"
             badge = "🟡 Q2 游擊調撥"
         else:
             action_id = 2
-            action_mode = "🟢 常態開放靠泊 (北岸 Q1)"
+            action_mode = "🟢 100.0% Q1 全線開放 (靠泊北岸主泊位)"
             badge = "🟢 100.0% Q1 全線開放"
 
         evac_minutes = int(math.ceil(passenger_count / 10.0 + max(0.0, (active_squat - 0.50) * 15.0) + 5.0))

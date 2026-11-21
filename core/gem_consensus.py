@@ -73,7 +73,7 @@ class GemMultiSourceConsensus:
                 "effective_official_title": f"【現場群組緊急通告】{ov_reason}",
                 "consensus_status": f"🔒【人工覆寫鎖生效中】{ov_reason} (鎖定至 {active_ov.get('expires_at', '17:30 CST')})",
                 "trust_score": "100.0% (指揮官人工覆寫鎖)",
-                "final_action": f"🔴 全線剛性熔斷（{scope_tag}）" if is_ov_veto else "🟢 現場放行（覆寫解鎖）",
+                "final_action": f"🔴 0.0% 物理 VETO 熔斷（{scope_tag}）" if is_ov_veto else "🟢 現場放行（覆寫解鎖）",
                 "vessel_docked": vessel_docked, "dock_desc": dock_desc, "vector_desc": vector_desc,
                 "four_way_summary": {"pos": dock_desc, "traj": vector_desc, "phys": physics_res["badge"], "off": f"🔒 {scope_tag}"}
             }
@@ -83,7 +83,7 @@ class GemMultiSourceConsensus:
             effective_official_label = "🔴 實質封島 (AIS路徑確認撤離)"
             effective_official_title = "【四維仲裁·臨時封島】五福號實船軌跡顯示返航烏石港/試靠失敗，現場執行封島疏散"
             consensus_status = f"🔴【四維路徑鐵證·封島】{vector_desc} ｜ 官網文字未更新前提前觸發熔斷！"
-            trust_score, final_action = "99.5% (真實AIS路徑實證)", "🔴 全線剛性熔斷（路徑確認撤離）"
+            trust_score, final_action = "99.5% (真實AIS路徑實證)", "🔴 0.0% 物理 VETO 熔斷（路徑確認撤離）"
         elif is_real_ais and in_boat_hours and vessel_docked:
             effective_official_veto = 0
             if web_veto:
@@ -102,28 +102,28 @@ class GemMultiSourceConsensus:
             effective_official_label = "🔴 實質封島 (AIS確認未出港)"
             effective_official_title = "【動態修正·實質封島】船班時段五福號停泊烏石港未出港，官方實質判定暫停登島"
             consensus_status = "🔴【實船未出港預警·封島】五福號於船班時段滯留烏石港母港，判定實質封島！"
-            trust_score, final_action = "98.5% (真實AIS未出港)", "🔴 全線剛性熔斷（禁止靠泊）"
+            trust_score, final_action = "98.5% (真實AIS未出港)", "🔴 0.0% 物理 VETO 熔斷（禁止靠泊）"
         elif web_veto:
             effective_official_veto = 1
             scope_txt = "下午封島半天" if ann_scope == "AFTERNOON" else "官方公告封島"
             effective_official_label = f"🔴 {scope_txt}"
             effective_official_title = announcement.get("title", "【風管處公告】今日龜山島實施封島")
             consensus_status = f"🔴【官方公告封島】{effective_official_title} ｜ 日期面板 D0 已同步修正為封島！"
-            trust_score, final_action = "100.0% (官方正式公告)", f"🔴 全線剛性熔斷（{scope_txt}）"
+            trust_score, final_action = "100.0% (官方正式公告)", f"🔴 0.0% 物理 VETO 熔斷（{scope_txt}）"
         elif phys_veto:
             effective_official_veto = 1
             effective_official_label = "🔴 物理預警熔斷 (待船隻確認)"
             effective_official_title = f"【物理模型預警】港池折算波高超標 (Hs={m.get('hs')}m, Tp={m.get('tp')}s)，預警封島"
             consensus_status = f"🔴【物理領先預警·熔斷】水動力越浪超標 (Hs={m.get('hs')}m, Tp={m.get('tp')}s)，GEM 啟動熔斷！"
             trust_score = "97.2% (水動力領先預警)"
-            final_action = "🔴 物理預警熔斷（禁止靠泊）" if in_boat_hours else "🌙 夜間休整期（預警：🔴 物理 VETO 熔斷）"
+            final_action = "🔴 0.0% 物理 VETO 熔斷（禁止靠泊）" if in_boat_hours else "🌙 夜間休整期（預警：🔴 物理 VETO 熔斷）"
         else:
             effective_official_veto = 0
             effective_official_label = "🟢 常態營運" if in_boat_hours else "🌙 夜間休整 (海象合規)"
             effective_official_title = announcement.get("title", "【風管處通告】全島常規開放營運中")
             if pm_risk and in_boat_hours:
                 consensus_status = f"🟡【午前可航·午後封島預警】{pm_forecast.get('risk_label', '')} ｜ 建議縮短上午登島時窗"
-                trust_score, final_action = "95.5% (逐時波譜前瞻預警)", "🟡 上午限時開窗 (午後湧浪高風險預警)"
+                trust_score, final_action = "95.5% (逐時波譜前瞻預警)", "⏱️ Q3 動態開窗 (11:20 剛性止登 / 14:20 強制清島)"
             elif not in_boat_hours:
                 consensus_status = f"🌙【夜間休整離峰期】非船班時段 ｜ 實時浪高 Hs={m.get('hs')}m、週期 Tp={m.get('tp')}s 符合安全基準"
                 trust_score, final_action = "94.5% (夜間水動力持續監測)", f"🌙 夜間休整期（預估開窗：{physics_res['action_mode']}）"

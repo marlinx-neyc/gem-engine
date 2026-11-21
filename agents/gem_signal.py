@@ -48,6 +48,8 @@ class GemSignalAgent:
             "four_way_summary": consensus_res.get("four_way_summary", {}),
             "effective_official_label": official_label, "official_title": official_title,
             "official_body": announcement.get("body", ""),
+            "announcement_source": announcement.get("source", "official_web"),
+            "scraper_diagnostics": announcement.get("scraper_diagnostics", {}),
             "official_wufu_lat": off_v.get("lat", 24.86872),
             "official_wufu_lon": off_v.get("lon", 121.84154),
             "official_wufu_position": off_v.get("coord_str", "24.86872° N, 121.84154° E"),

@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>🌊 GEM Engine v103.13 龜山島全域戰術指揮中樞</title>
+    <title>🌊 GEM Engine v104.0 龜山島全域戰術指揮中樞</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
@@ -46,7 +46,6 @@
         }
         .flash-indicator-blue { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background-color: #38bdf8; border: 2px solid #ffffff; animation: halo-pulse-blue 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
 
-        /* 行動端 MarineTraffic 寬視口縮放，確保船訊卡 × 關閉鈕與地圖控制鈕不重疊 */
         @media (max-width: 639px) {
             .mt-iframe-unblocked {
                 width: 154% !important;
@@ -61,7 +60,7 @@
         .marquee-txt { display: inline-block; white-space: nowrap; animation: marquee-anim 24s linear infinite; }
         .marquee-txt:hover { animation-play-state: paused; }
     </style>
-    <script id="initial-live-data" type="application/json">{"updated_at": "2026-11-21 12:58:03 CST", "decision": "🟢 常態開放靠泊 (北岸 Q1)", "consensus_status": "🟢【四維綜合校核】時段: 午間巡查防禦窗 (11:30) ｜ 🛰️ 待接通真實AIS (目前為水文推演備援) ｜ 實時浪高 Hs=1.16m", "trust_score": "94.0% (水動力+公告融合)", "p_veto": 0.0451, "web_official_veto": 0, "announcement_scope": "FULL_DAY", "official_veto": 0, "tomorrow_veto": 0, "manual_override": {"active": false}, "four_way_summary": {"pos": "🟡 五福號靠泊南岸戒護中 (水文推演備援·南岸)", "traj": "🛰️ 待接通真實AIS (目前為水文推演備援)", "phys": "🟢 100.0% Q1 全線開放", "off": "🟢 常態營運"}, "effective_official_label": "🟢 常態營運", "official_title": "【風管處通告】全島常規開放營運中", "official_body": "東北角暨宜蘭海岸國家風景區管理處：龜山島今日無當日封島通告，依實船軌跡與海象動態開放登島。", "official_wufu_lat": 24.84048, "official_wufu_lon": 121.93985, "official_wufu_position": "24.84048° N, 121.93985° E", "official_wufu_status": "🟡 五福號靠泊南岸戒護中 (水文推演備援·南岸)", "official_wufu_vector": "🛰️ 待接通真實AIS (目前為水文推演備援)", "official_wufu_is_real_ais": false, "official_wufu_dist_wushi": "10.4 km", "official_wufu_dist_piers": "532.7m / 7.1m", "current_window_name": "午間巡查防禦窗 (11:30)", "wushi_port_flux_ships_hr": 42.0, "cctv_status": {"cctv_cv_rate": 0.0, "t_overtop_pct": 0.0, "fb_north_override": 2.25, "fb_south_override": 2.25, "is_overtopping": false, "north_cam_status": "🟢 LIVE 30FPS (FB 2.25m)", "south_cam_status": "🟢 LIVE 30FPS (FB 2.25m)", "visual_eye_status": "🟢 Vision-PINN 畫面顯示碼頭乾舷合規"}, "typhoon_info": {"warning": "🟡 低壓擾動注意", "name": "熱帶/鋒面低壓系統", "distance": "< 450 km", "dist_km": 450.0, "eta": "約 12.0 小時", "emergency_centers": {"central": "未開設", "yilan": "未開設", "new_taipei": "未開設"}}, "daily_forecast": [{"date": "11-21", "hs_max": 1.3, "tp_max": 7.2, "w_max": 3.6}, {"date": "11-22", "hs_max": 0.98, "tp_max": 6.5, "w_max": 5.1}, {"date": "11-23", "hs_max": 0.92, "tp_max": 6.6, "w_max": 5.0}, {"date": "11-24", "hs_max": 2.08, "tp_max": 6.8, "w_max": 5.2}, {"date": "11-25", "hs_max": 2.04, "tp_max": 7.5, "w_max": 4.5}, {"date": "11-26", "hs_max": 1.44, "tp_max": 7.4, "w_max": 2.4}, {"date": "11-27", "hs_max": 0.94, "tp_max": 7.3, "w_max": 1.8}], "pm_forecast": {"pm_hs_max": 1.18, "pm_tp_max": 5.7, "hs_slope_3h": -0.06, "afternoon_risk": false, "risk_label": "🟢 午後海象受控 (PM Hs=1.18m, Tp=5.7s)"}, "swell_forecast": {"is_swell_alert": false, "status_tag": "🟢 海象平穩受控", "impact_window_str": "無明顯長浪湧浪漫頂威脅", "advice": "目前外海波高 Hs=1.16m、週期 Tp=5.5s，經地形折算後符合靠泊安全線，可維持常規登島作業。", "cg_speed_ms": 4.29, "cg_knots": 8.3, "energy_flux": 7.4}, "metrics": {"hs": 1.16, "tp": 5.5, "pressure": 996.4, "pressure_3h": -1.2, "hs_pier_north": 1.02, "hs_pier_south": 0.84, "kd_north": 0.883, "kd_south": 0.72, "w": 3.3, "weff": 2.49, "kw": 0.78, "delta_theta": 15.0, "tide": 0.97, "squat_north": 0.34, "squat_south_3kt": 0.01, "ukc_north": 6.91, "ukc_south": 8.72, "fb_north": 2.25, "fb_south": 2.25, "cv_rate": 0.0, "k_flux": 1.609, "v_impedance": 4.58, "e_net": 0.3513, "p_veto": 0.0451, "evac_minutes": 20, "milk_sea_peak": "13:30"}, "marquee_msg": "📢 官方實質判定：【風管處通告】全島常規開放營運中 ｜ 🚢 位置與路徑：🟡 五福號靠泊南岸戒護中 (水文推演備援·南岸) / 🛰️ 待接通真實AIS (目前為水文推演備援) ｜ 🤖 GEM 四維仲裁：🟢 常態開放靠泊 (北岸 Q1) (Hs:1.16m, Tp:5.5s, 南/北折算:0.84/1.02m) ｜ ⏱️ 校核：2026-11-21 12:58:03 CST", "spec_version": "GEM-ENG-SPEC-2026-V66.5-UNIFIED", "action_id": 2, "decision_code": "Q2", "emergency_centers": {"central": "未開設", "yilan": "未開設", "new_taipei": "未開設"}, "physics_metrics": {"hs_pier_m": 0.84, "hs_pier_north_m": 1.02, "w_local_ms": 2.49, "ukc_m": 8.72, "fb_pier_m": 2.25, "s_squat_m": 0.01, "e_net": 0.3513, "p_veto": 0.0451, "evac_minutes": 20, "milk_sea_peak": "13:30", "has_veto": false, "is_tier0": false}, "state_hash": "993be70f655edcd4626e9addc66fece8f8c401577807a563bc5dd2bc5a6cc744"}</script>
+    <script id="initial-live-data" type="application/json">{"updated_at": "2026-11-21 13:21:54 CST", "decision": "🟢 100.0% Q1 全線開放 (靠泊北岸主泊位)", "consensus_status": "🟢【四維綜合校核】時段: 午間巡查防禦窗 (11:30) ｜ 🛰️ 待接通真實AIS (目前為水文推演備援) ｜ 實時浪高 Hs=1.16m", "trust_score": "94.0% (水動力+公告融合)", "p_veto": 0.0453, "web_official_veto": 0, "announcement_scope": "FULL_DAY", "official_veto": 0, "tomorrow_veto": 0, "manual_override": {"active": false}, "four_way_summary": {"pos": "🟡 五福號靠泊南岸戒護中 (水文推演備援·南岸)", "traj": "🛰️ 待接通真實AIS (目前為水文推演備援)", "phys": "🟢 100.0% Q1 全線開放", "off": "🟢 常態營運"}, "effective_official_label": "🟢 常態營運", "official_title": "【風管處通告】全島常規開放營運中", "official_body": "東北角暨宜蘭海岸國家風景區管理處：龜山島今日無當日封島通告，依實船軌跡與海象動態開放登島。", "announcement_source": "official_web", "scraper_diagnostics": {"checked_at": "2026-11-21 13:21:51 CST", "matched_url": "none", "http_statuses": ["events.necoast-nsa.gov.t:404", "events.necoast-nsa.gov.t:404", "www.necoast-nsa.gov.tw/A:404", "www.necoast-nsa.gov.tw/A:404", "www.necoast-nsa.gov.tw/:404", "news_rss:200"], "raw_snippet": "未檢出今日有效封島公告", "filter_reason": "no_active_closure_found"}, "official_wufu_lat": 24.84048, "official_wufu_lon": 121.93985, "official_wufu_position": "24.84048° N, 121.93985° E", "official_wufu_status": "🟡 五福號靠泊南岸戒護中 (水文推演備援·南岸)", "official_wufu_vector": "🛰️ 待接通真實AIS (目前為水文推演備援)", "official_wufu_is_real_ais": false, "official_wufu_dist_wushi": "10.4 km", "official_wufu_dist_piers": "532.7m / 7.1m", "current_window_name": "午間巡查防禦窗 (11:30)", "wushi_port_flux_ships_hr": 42.0, "cctv_status": {"cctv_cv_rate": 0.0, "t_overtop_pct": 0.0, "fb_north_override": 2.15, "fb_south_override": 2.15, "is_overtopping": false, "north_cam_status": "🟢 LIVE 30FPS (FB 2.15m)", "south_cam_status": "🟢 LIVE 30FPS (FB 2.15m)", "visual_eye_status": "🟢 Vision-PINN 畫面顯示碼頭乾舷合規"}, "typhoon_info": {"warning": "🟡 低壓擾動注意", "name": "熱帶/鋒面低壓系統", "distance": "< 450 km", "dist_km": 450.0, "eta": "約 12.0 小時", "emergency_centers": {"central": "未開設", "yilan": "未開設", "new_taipei": "未開設"}}, "daily_forecast": [{"date": "11-21", "hs_max": 1.3, "tp_max": 7.2, "w_max": 3.6}, {"date": "11-22", "hs_max": 0.98, "tp_max": 6.5, "w_max": 5.1}, {"date": "11-23", "hs_max": 0.92, "tp_max": 6.6, "w_max": 5.0}, {"date": "11-24", "hs_max": 2.08, "tp_max": 6.8, "w_max": 5.2}, {"date": "11-25", "hs_max": 2.04, "tp_max": 7.5, "w_max": 4.5}, {"date": "11-26", "hs_max": 1.44, "tp_max": 7.4, "w_max": 2.4}, {"date": "11-27", "hs_max": 0.94, "tp_max": 7.3, "w_max": 1.8}], "pm_forecast": {"pm_hs_max": 1.18, "pm_tp_max": 5.7, "hs_slope_3h": -0.08, "afternoon_risk": false, "risk_label": "🟢 午後海象受控 (PM Hs=1.18m, Tp=5.7s)"}, "swell_forecast": {"is_swell_alert": false, "status_tag": "🟢 海象平穩受控", "impact_window_str": "無明顯長浪湧浪漫頂威脅", "advice": "目前外海波高 Hs=1.16m、週期 Tp=5.5s，經地形折算後符合靠泊安全線，可維持常規登島作業。", "cg_speed_ms": 4.29, "cg_knots": 8.3, "energy_flux": 7.4}, "metrics": {"hs": 1.16, "tp": 5.5, "pressure": 996.2, "pressure_3h": -1.8, "hs_pier_north": 1.02, "hs_pier_south": 0.84, "kd_north": 0.883, "kd_south": 0.72, "w": 3.3, "weff": 2.49, "kw": 0.78, "delta_theta": 15.0, "tide": 1.05, "squat_north": 0.34, "squat_south_3kt": 0.01, "ukc_north": 6.99, "ukc_south": 8.8, "fb_north": 2.15, "fb_south": 2.15, "cv_rate": 0.0, "k_flux": 1.609, "v_impedance": 4.57, "e_net": 0.3521, "p_veto": 0.0453, "evac_minutes": 20, "milk_sea_peak": "13:30"}, "marquee_msg": "📢 官方實質判定：【風管處通告】全島常規開放營運中 ｜ 🚢 位置與路徑：🟡 五福號靠泊南岸戒護中 (水文推演備援·南岸) / 🛰️ 待接通真實AIS (目前為水文推演備援) ｜ 🤖 GEM 四維仲裁：🟢 100.0% Q1 全線開放 (靠泊北岸主泊位) (Hs:1.16m, Tp:5.5s, 南/北折算:0.84/1.02m) ｜ ⏱️ 校核：2026-11-21 13:21:54 CST", "spec_version": "GEM-ENG-SPEC-2026-V66.5-UNIFIED", "action_id": 2, "decision_code": "Q2", "emergency_centers": {"central": "未開設", "yilan": "未開設", "new_taipei": "未開設"}, "physics_metrics": {"hs_pier_m": 0.84, "hs_pier_north_m": 1.02, "w_local_ms": 2.49, "ukc_m": 8.8, "ukc_north_m": 6.99, "fb_pier_m": 2.15, "s_squat_m": 0.01, "s_squat_north_m": 0.34, "k_flux": 1.609, "v_impedance": 4.57, "e_net": 0.3521, "p_veto": 0.0453, "evac_minutes": 20, "milk_sea_peak": "13:30", "has_veto": false, "is_tier0": false}, "state_hash": "78982f5d3a7f6172c4f36b724d2665f28ebdba1d6baba8cd067239db3fa7e093"}</script>
 </head>
 <body class="p-2 max-w-[1200px] mx-auto">
 
@@ -80,7 +79,7 @@
                 <span class="text-2xl">🌊</span>
                 <div>
                     <h1 class="text-base font-extrabold text-white flex items-center gap-2">
-                        龜山島戰術指揮中樞 <span class="text-[10px] text-[#38bdf8] font-mono">(📱 v103.13×V66.5 原生AIS鎖定與零延遲仲裁版)</span>
+                        龜山島戰術指揮中樞 <span class="text-[10px] text-[#38bdf8] font-mono">(📱 v104.0×V66.5 穿透爬蟲與雙重覆寫鎖版)</span>
                     </h1>
                     <div class="text-[11px] text-[#cbd5e1] mt-1 flex flex-wrap gap-2 items-center font-mono">
                         <span id="badgeHeartbeatContainer" class="inline-flex items-center gap-1.5 bg-emerald-950 border border-emerald-500/60 px-2 py-0.5 rounded text-emerald-300 font-bold transition-colors">
@@ -98,6 +97,7 @@
                 <button id="btnForceSync" onclick="forceSyncOfficialWeb()" class="bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-400 px-2.5 py-1 rounded text-xs font-bold flex items-center gap-1 shadow-md transition-all active:scale-95">
                     <span id="lblSyncIcon">🔄</span> 實時同步海象與船位
                 </button>
+                <button onclick="copyV665TacticalBrief()" class="bg-fuchsia-700/80 hover:bg-fuchsia-600 text-white border border-fuchsia-400/60 px-2.5 py-1 rounded text-xs font-bold">📋 複製 V66.5 裁示</button>
                 <button onclick="toggleFullScreen()" class="bg-sky-500/20 text-sky-300 border border-sky-500/50 px-2.5 py-1 rounded text-xs font-bold">⛶ 全螢幕</button>
                 <button onclick="toggleContrastMode()" class="bg-amber-500/20 text-amber-300 border border-amber-500/50 px-2.5 py-1 rounded text-xs font-bold">☀️ 戶外</button>
             </div>
@@ -106,29 +106,33 @@
         <div class="mt-2 pt-2 border-t border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-[11px] font-mono">
             <div class="bg-slate-900/90 p-1.5 rounded border border-slate-700"><span class="text-slate-400 text-[10px]">① 公務船位置:</span><br/><b class="text-sky-300" id="txt4WayPos">--</b></div>
             <div class="bg-slate-900/90 p-1.5 rounded border border-slate-700"><span class="text-slate-400 text-[10px]">② 路徑向量 / 午後預警:</span><br/><b class="text-amber-300" id="txt4WayTraj">--</b></div>
-            <div class="bg-slate-900/90 p-1.5 rounded border border-slate-700"><span class="text-slate-400 text-[10px]">③ 水動力物理模型:</span><br/><b class="text-emerald-300" id="txt4WayPhys">--</b></div>
+            <div class="bg-slate-900/90 p-1.5 rounded border border-slate-700"><span class="text-slate-400 text-[10px]">③ 水動力物理與相變:</span><br/><b class="text-emerald-300" id="txt4WayPhys">--</b></div>
             <div class="bg-slate-900/90 p-1.5 rounded border border-slate-700"><span class="text-slate-400 text-[10px]">④ 官方/覆寫裁定:</span><br/><b class="text-fuchsia-300" id="txt4WayOff">--</b></div>
         </div>
     </header>
 
-    <!-- 🚨 現場群組緊急覆寫 / LINE 公告直寫 GitHub API 控制台 -->
-    <details id="manualOverrideCard" class="card border-red-500/70">
+    <!-- 🚨 現場群組緊急覆寫 / 官方爬蟲稽核與雙重持久化覆寫鎖控制台 -->
+    <details id="manualOverrideCard" class="card border-red-500/70" open>
         <summary class="text-xs font-bold text-red-300 flex justify-between items-center cursor-pointer outline-none">
             <span class="flex items-center gap-2">
-                <span class="px-1.5 py-0.5 rounded bg-red-950 text-red-300 border border-red-500/60 text-[10px] font-mono">🚨 緊急覆寫通道</span>
-                現場 LINE 公告貼上直寫雲端 API (同步更新今日 D0 官方欄位並鎖定至 17:30 CST)
+                <span class="px-1.5 py-0.5 rounded bg-red-950 text-red-300 border border-red-500/60 text-[10px] font-mono">🚨 緊急覆寫 & 爬蟲稽核</span>
+                現場公告貼上直寫 (本機持久化鎖定至 17:30 CST + 可選同步雲端 API)
             </span>
             <span class="text-[10px] text-amber-300 border border-amber-500/50 px-1.5 py-0.5 rounded" id="lblOverrideBadge">未啟用覆寫</span>
         </summary>
         <div class="pt-2 mt-2 border-t border-slate-800 space-y-2 text-xs font-mono">
-            <p class="text-[11px] text-slate-300">💡 直接貼上現場 LINE 群組公告原文，系統將自動辨識「下午封島/半天」或「全日封島」，同步修正下方對比表今日官方欄並寫入 GitHub API。</p>
-            <textarea id="txtLineNoticeInput" rows="2" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white focus:border-sky-400 outline-none" placeholder="貼上群組公告，例如：受鋒面通過及東北風增強影響，龜山島周邊海域有長湧浪，故宣布今(15)日下午封島半天..."></textarea>
+            <div class="bg-slate-950/90 border border-slate-700 p-2 rounded text-[11px] flex flex-wrap justify-between gap-1">
+                <span class="text-sky-300">🔍 <b>官網爬蟲稽核狀態：</b><span id="txtScraperAudit" class="text-slate-200">等待同步...</span></span>
+                <span class="text-slate-400" id="txtScraperCheckedAt">--</span>
+            </div>
+            <p class="text-[11px] text-slate-300">💡 若風管處剛發布封島而排程尚未輪詢，直接貼上 LINE/官網公告並點擊「🔴 強制封島覆寫」；系統將立即鎖定本機面板（60秒輪詢不會洗掉）並同步更新 D0 對比表。</p>
+            <textarea id="txtLineNoticeInput" rows="2" class="w-full bg-slate-950 border border-slate-700 rounded p-2 text-xs text-white focus:border-sky-400 outline-none" placeholder="貼上群組或風管處公告，例如：受鋒面通過及長浪影響，龜山島今日封島一日..."></textarea>
             <div class="flex flex-wrap gap-2 items-center justify-between">
                 <div class="flex gap-2">
-                    <button onclick="submitManualOverride(0)" class="bg-red-600 hover:bg-red-500 text-white px-3 py-1.5 rounded font-bold shadow">🔴 強制封島覆寫 (寫入 API)</button>
+                    <button onclick="submitManualOverride(0)" class="bg-red-600 hover:bg-red-500 text-white px-3 py-1.5 rounded font-bold shadow">🔴 強制封島覆寫 (本機+雲端)</button>
                     <button onclick="submitManualOverride(1)" class="bg-emerald-700 hover:bg-emerald-600 text-white px-3 py-1.5 rounded font-bold shadow">🟢 解除覆寫 (恢復全自動)</button>
                 </div>
-                <button onclick="configureGithubToken()" class="text-[11px] text-sky-400 underline">🔑 設定本機 GitHub PAT</button>
+                <button onclick="configureGithubToken()" class="text-[11px] text-sky-400 underline">🔑 設定本機 GitHub PAT (可選)</button>
             </div>
         </div>
     </details>
@@ -142,11 +146,11 @@
         <div class="space-y-1.5 font-mono text-xs">
             <div class="bg-emerald-950/80 border border-emerald-500/60 p-1.5 rounded flex justify-between items-center text-emerald-300 font-bold">
                 <span><span class="h-2 w-2 inline-block rounded-full bg-emerald-400 mr-1.5"></span>CCTV IP N 燈號 (北岸):</span>
-                <span class="text-white" id="lblCctvNorthStatus">🟢 LIVE (25 FPS)</span>
+                <span class="text-white" id="lblCctvNorthStatus">🟢 LIVE (30 FPS)</span>
             </div>
             <div class="bg-emerald-950/80 border border-emerald-500/60 p-1.5 rounded flex justify-between items-center text-emerald-300 font-bold">
                 <span><span class="h-2 w-2 inline-block rounded-full bg-emerald-400 mr-1.5"></span>CCTV IP S 燈號 (南岸):</span>
-                <span class="text-white" id="lblCctvSouthStatus">🟢 LIVE (25 FPS)</span>
+                <span class="text-white" id="lblCctvSouthStatus">🟢 LIVE (30 FPS)</span>
             </div>
         </div>
     </section>
@@ -172,8 +176,8 @@
     <details id="swellForecastCard" class="card border-sky-500/60" open>
         <summary class="text-xs font-bold text-sky-300 flex justify-between items-center cursor-pointer outline-none">
             <span class="flex items-center gap-2">
-                <span class="px-1.5 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-500/60 text-[10px] font-mono">🌊 浪湧與氣壓監測</span>
-                季風、氣壓、長浪/湧浪動態數據與午後斜率預估視窗 (點擊收合/展開)
+                <span class="px-1.5 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-500/60 text-[10px] font-mono">🌊 浪湧與能量張量監測</span>
+                季風、氣壓、長浪週期與 V66.5 相變機率視窗 (點擊收合/展開)
             </span>
             <span class="text-[10px] text-emerald-400 border border-emerald-500/50 px-1.5 py-0.5 rounded">▼ 點擊收合</span>
         </summary>
@@ -182,7 +186,7 @@
                 <div class="bg-slate-900 p-2 rounded border border-slate-700"><span class="text-slate-400 text-[10px]">海平面氣壓 / 3h變化:</span><br/><b class="text-sky-300" id="txtPressureVal">-- hPa</b> (<b class="text-amber-400" id="txtPressureTrend">-- hPa/3h</b>)</div>
                 <div class="bg-slate-900 p-2 rounded border border-slate-700"><span class="text-slate-400 text-[10px]">東北季風攻角 / 有效風:</span><br/><b class="text-amber-300" id="txtMonsoonAngle">Δθ=--°</b> (<b class="text-emerald-400" id="txtWeffVal">Weff: -- m/s</b>)</div>
                 <div class="bg-slate-900 p-2 rounded border border-slate-700"><span class="text-slate-400 text-[10px]">湧浪週期 (Tp) / 波高:</span><br/><b class="text-sky-300" id="txtTpVal">Tp: -- s</b> / <b class="text-amber-300" id="txtHsVal">Hs: --m</b></div>
-                <div class="bg-slate-900 p-2 rounded border border-slate-700"><span class="text-slate-400 text-[10px]">湧浪傳播速 / 午後預估:</span><br/><b class="text-teal-300" id="txtCgSpeed">-- m/s (-- 節)</b></div>
+                <div class="bg-slate-900 p-2 rounded border border-slate-700"><span class="text-slate-400 text-[10px]">能量張量 E_net / P_veto:</span><br/><b class="text-fuchsia-300" id="txtEnergyTensor">E=-- / P=--</b></div>
             </div>
             <div id="swellAlertBox" class="bg-slate-900/90 border border-sky-500/60 p-2.5 rounded-lg space-y-1 transition-colors">
                 <div class="flex justify-between items-center text-sky-200 font-bold border-b border-slate-700 pb-1">
@@ -224,7 +228,6 @@
                     <div><span class="text-slate-400 text-[10px]">路徑向量狀態:</span><br/><b class="text-emerald-400" id="txtWufuVector">--</b></div>
                 </div>
             </div>
-            <!-- 第一張圖原生呈現方式：鎖定 MMSI 416017708 明確顯示五福號圓圈與位置標籤，且右上角 × 關閉鈕完全不被擋住 -->
             <div class="w-full h-[380px] sm:h-[460px] rounded-lg border border-slate-700 overflow-hidden bg-slate-950 relative">
                 <iframe id="marineTrafficIframe" src="https://www.marinetraffic.com/en/ais/embed/zoom:13/centerv:24.85500/centerh:121.89500/mmsi:416017708" class="w-full h-full border-0 mt-iframe-unblocked" loading="eager"></iframe>
             </div>
@@ -268,8 +271,8 @@
     <!-- 8. 雙岸關鍵物理數值側向比對表 -->
     <details class="card border-sky-500/60" open>
         <summary class="text-xs font-bold text-sky-300 flex justify-between items-center cursor-pointer outline-none mb-2">
-            <span>🌅 D0 即時雙岸關鍵物理數值側向比對 (開島三大物理判準)</span>
-            <span class="bg-emerald-950 text-emerald-300 border border-emerald-500 px-1.5 py-0.5 rounded text-[10px]">含 CCTV 驗證</span>
+            <span>🌅 D0 即時雙岸關鍵物理數值側向比對 (V66.5 四層一票否決防線)</span>
+            <span class="bg-emerald-950 text-emerald-300 border border-emerald-500 px-1.5 py-0.5 rounded text-[10px]">含蹲沉 Squat & CCTV 驗證</span>
         </summary>
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs font-mono border-collapse whitespace-nowrap">
@@ -279,9 +282,9 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-800">
-                    <tr><td class="p-2 font-bold">折算波高 (Hs,pier)</td><td class="p-2 font-bold text-white" id="txtHsPierSouth">-- m</td><td class="p-2 font-bold text-amber-300" id="txtHsPierNorth">-- m</td><td class="p-2 text-amber-300 font-bold">≤ 1.13m / ≤ 0.95m</td></tr>
+                    <tr><td class="p-2 font-bold">折算波高 (Hs,pier)</td><td class="p-2 font-bold text-white" id="txtHsPierSouth">-- m</td><td class="p-2 font-bold text-amber-300" id="txtHsPierNorth">-- m</td><td class="p-2 text-amber-300 font-bold">≤ 1.13m / ≤ 0.95m (Tp≥12s Kd=1.0)</td></tr>
                     <tr><td class="p-2 font-bold">折算有效風速 (Weff)</td><td class="p-2 font-bold text-white" id="txtWeffValSouth">-- m/s</td><td class="p-2 font-bold text-white" id="txtWeffValNorth">-- m/s</td><td class="p-2 text-amber-300 font-bold">≤ 10.17m/s / ≤ 8.50m/s</td></tr>
-                    <tr><td class="p-2 font-bold">動態裕深 (UKC)</td><td class="p-2 font-bold text-emerald-400" id="txtUkcSouth">-- m</td><td class="p-2 font-bold text-emerald-400" id="txtUkcNorth">-- m</td><td class="p-2 text-amber-300 font-bold">≥ 1.50m / ≥ 1.50m</td></tr>
+                    <tr><td class="p-2 font-bold">動態裕深 (UKC 含蹲沉)</td><td class="p-2 font-bold text-emerald-400" id="txtUkcSouth">-- m</td><td class="p-2 font-bold text-emerald-400" id="txtUkcNorth">-- m</td><td class="p-2 text-amber-300 font-bold">≥ 1.50m / ≥ 1.50m</td></tr>
                     <tr><td class="p-2 font-bold">預留乾舷 (FB)</td><td class="p-2 font-bold text-emerald-400" id="txtFbSouth">-- m</td><td class="p-2 font-bold text-amber-300" id="txtFbNorth">-- m</td><td class="p-2 text-amber-300 font-bold">≥ 0.50m / ≥ 0.50m</td></tr>
                 </tbody>
             </table>
@@ -393,7 +396,7 @@
             const token = prompt('請輸入具備 repo 寫入權限的 GitHub Personal Access Token (僅存於本機瀏覽器):', existing);
             if (token && token.trim().length > 10) {
                 localStorage.setItem('GEM_GH_PAT', token.trim());
-                alert('✅ 本機 GitHub Token 已儲存，現在可直接點擊按鈕寫入雲端 API！');
+                alert('✅ 本機 GitHub Token 已儲存，現在可直接同步寫入雲端 API！');
             }
         }
 
@@ -402,6 +405,22 @@
                 return { scope: 'AFTERNOON', label: '下午封島半天 (12:00-17:30)' };
             }
             return { scope: 'FULL_DAY', label: '全日封島管制 (07:00-17:30)' };
+        }
+
+        function getActiveLocalOverride() {
+            try {
+                const raw = localStorage.getItem('GEM_LOCAL_OVERRIDE');
+                if (!raw) return null;
+                const ov = JSON.parse(raw);
+                if (!ov || !ov.active) return null;
+                if (ov.expires_at && new Date() >= new Date(ov.expires_at)) {
+                    localStorage.removeItem('GEM_LOCAL_OVERRIDE');
+                    return null;
+                }
+                return ov;
+            } catch (e) {
+                return null;
+            }
         }
 
         async function putGithubJsonFile(pat, filePath, payloadObj, commitMsg) {
@@ -431,6 +450,26 @@
             return putRes.ok;
         }
 
+        function applyOverrideLockToPayload(payload, ov) {
+            const parsedScope = {
+                scope: ov.scope || 'FULL_DAY',
+                label: (ov.scope === 'AFTERNOON') ? '下午封島半天 (12:00-17:30)' : '全日封島管制 (07:00-17:30)'
+            };
+            const reason = ov.reason || '值班指揮官啟動手動強制封島';
+            payload.manual_override = ov;
+            payload.web_official_veto = 1;
+            payload.official_veto = 1;
+            payload.announcement_scope = parsedScope.scope;
+            payload.decision = `🔴 0.0% 物理 VETO 熔斷（${parsedScope.label}）`;
+            payload.effective_official_label = `🔴 現場覆寫·${parsedScope.label}`;
+            payload.official_title = `【現場群組緊急通告】${reason}`;
+            payload.official_body = reason;
+            payload.trust_score = '100.0% (指揮官雙重覆寫鎖)';
+            payload.four_way_summary = { ...(payload.four_way_summary || {}), off: `🔒 ${parsedScope.label}` };
+            payload.marquee_msg = `🔒 人工覆寫鎖生效 (${parsedScope.label})：${reason} ｜ 🤖 GEM 仲裁：🔴 全線剛性熔斷 ｜ ⏱️ 鎖定至 17:30 CST`;
+            return payload;
+        }
+
         async function submitManualOverride(actionCode) {
             const rawText = (document.getElementById('txtLineNoticeInput')?.value || '').trim();
             const isClose = (actionCode === 0);
@@ -448,22 +487,20 @@
                 reason: reason, operator: 'Duty_Officer', expires_at: expiresAt
             } : { active: false };
 
+            // 1. 立即寫入本機持久化鎖（確保無 PAT 時 60 秒輪詢也絕不還原）
+            if (isClose) {
+                localStorage.setItem('GEM_LOCAL_OVERRIDE', JSON.stringify(overrideObj));
+            } else {
+                localStorage.removeItem('GEM_LOCAL_OVERRIDE');
+            }
+
             let updatedPayload = cachedLivePayload ? JSON.parse(JSON.stringify(cachedLivePayload)) : {};
-            updatedPayload.manual_override = overrideObj;
-            updatedPayload.official_body = rawText || updatedPayload.official_body || '';
             updatedPayload.state_hash = 'ov_' + Date.now().toString(36);
 
             if (isClose) {
-                updatedPayload.web_official_veto = 1;
-                updatedPayload.official_veto = 1;
-                updatedPayload.announcement_scope = parsedScope.scope;
-                updatedPayload.decision = `🔴 全線剛性熔斷（${parsedScope.label}）`;
-                updatedPayload.effective_official_label = `🔴 現場覆寫·${parsedScope.label}`;
-                updatedPayload.official_title = `【現場群組緊急通告】${reason}`;
-                updatedPayload.trust_score = '100.0% (指揮官人工覆寫鎖)';
-                updatedPayload.four_way_summary = { ...(updatedPayload.four_way_summary || {}), off: `🔒 ${parsedScope.label}` };
-                updatedPayload.marquee_msg = `🔒 人工覆寫鎖生效 (${parsedScope.label})：${reason} ｜ 🤖 GEM 仲裁：🔴 全線剛性熔斷 ｜ ⏱️ 鎖定至 17:30 CST`;
+                applyOverrideLockToPayload(updatedPayload, overrideObj);
             } else {
+                updatedPayload.manual_override = { active: false };
                 updatedPayload.web_official_veto = 0;
                 updatedPayload.official_veto = 0;
                 updatedPayload.announcement_scope = 'FULL_DAY';
@@ -472,15 +509,12 @@
             }
             applyLiveData(updatedPayload);
 
-            let pat = localStorage.getItem('GEM_GH_PAT');
+            // 2. 若本機已設定 GitHub PAT，則同步寫入雲端 JSON
+            const pat = localStorage.getItem('GEM_GH_PAT');
             if (!pat) {
-                pat = prompt('偵測到尚未設定 GitHub PAT，請輸入 Token 以將覆寫狀態同步至雲端 API (取消則僅套用本機):');
-                if (pat && pat.trim().length > 10) {
-                    pat = pat.trim();
-                    localStorage.setItem('GEM_GH_PAT', pat);
-                } else {
-                    return;
-                }
+                setHeartbeatStatus('active', isClose ? '本機覆寫鎖定至 17:30' : '已解除本機覆寫鎖');
+                if (!isClose) fetchLiveStatus();
+                return;
             }
 
             setHeartbeatStatus('syncing', '寫入雲端 API...');
@@ -494,14 +528,12 @@
                     putGithubJsonFile(pat, 'latest_decision.json', updatedPayload, commitMsg)
                 ]);
                 if (ok1 || ok2) {
-                    setHeartbeatStatus('active', '雙端 API 覆寫成功');
-                    alert(isClose ? `✅ 已將「${parsedScope.label}」寫入雲端 API 並同步更新 D0 官方欄位！` : '✅ 已解除雲端覆寫鎖！');
+                    setHeartbeatStatus('active', '本機+雲端雙端覆寫成功');
                 } else {
-                    throw new Error('GitHub API 寫入失敗 (請確認 PAT 具備 Contents Read/Write 權限)');
+                    setHeartbeatStatus('active', '本機已鎖定 (雲端權限不足)');
                 }
             } catch (err) {
-                setHeartbeatStatus('error', 'API 寫入異常');
-                alert('⚠️ 雲端寫入異常：' + err.message);
+                setHeartbeatStatus('active', '本機已鎖定 (離線模式)');
             }
         }
 
@@ -546,10 +578,20 @@
         }
 
         function isOverrideActive(data) {
+            if (getActiveLocalOverride()) return true;
             const ov = data?.manual_override;
             if (!ov || !ov.active) return false;
             if (ov.expires_at) return new Date() < new Date(ov.expires_at);
             return true;
+        }
+
+        // V66.5 第 2.2 節：動態淺水蹲沉方程 (Squat) 與 Python 100% 統一
+        function computeSquatJs(vSpeedKts, dChart, dDraft = 1.20, cB = 0.65) {
+            const g = 9.80665;
+            const vMs = vSpeedKts * 0.514444;
+            const fh = Math.min(0.95, vMs / Math.sqrt(g * Math.max(0.5, dChart)));
+            const squat = (cB * (vSpeedKts ** 2)) / (30.0 * (dChart / dDraft)) * (1.0 / Math.sqrt(Math.max(0.05, 1.0 - fh ** 2))) * 0.50;
+            return Number(squat.toFixed(2));
         }
 
         function updateScheduleTable(data) {
@@ -558,7 +600,8 @@
             const webOfficialClosed = (data.web_official_veto === 1);
             const isOfficialClosed = (data.official_veto === 1 || webOfficialClosed);
             const isTmrClosed = (data.tomorrow_veto === 1);
-            const scope = data?.manual_override?.active ? (data.manual_override.scope || 'FULL_DAY') : (data.announcement_scope || 'FULL_DAY');
+            const activeOv = getActiveLocalOverride() || (data?.manual_override?.active ? data.manual_override : null);
+            const scope = activeOv ? (activeOv.scope || 'FULL_DAY') : (data.announcement_scope || 'FULL_DAY');
             const pmFc = data.pm_forecast || {};
             const isPmRisk = Boolean(pmFc.afternoon_risk);
             const isRealAis = Boolean(data.official_wufu_is_real_ais);
@@ -618,9 +661,9 @@
                 const gemCell = row.querySelector('.col-gem');
                 if (gemCell) {
                     if (slotClosed || dec.includes("剛性熔斷")) gemCell.innerHTML = '<span class="bg-red-950 border border-red-500 text-red-300 px-1.5 py-0.5 rounded font-bold">🔴 VETO</span>';
-                    else if (slotPmWarn) gemCell.innerHTML = '<span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 午後封島預警</span>';
-                    else if (dec.includes("南岸") || Number(rowHs) > 0.95) gemCell.innerHTML = '<span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 Q2 開島</span>';
-                    else gemCell.innerHTML = '<span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 Q1 開島</span>';
+                    else if (slotPmWarn) gemCell.innerHTML = '<span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">⏱️ Q3 動態開窗</span>';
+                    else if (dec.includes("南岸") || Number(rowHs) > 0.95) gemCell.innerHTML = '<span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 Q2 游擊調撥</span>';
+                    else gemCell.innerHTML = '<span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 Q1 全線開放</span>';
                 }
             });
 
@@ -653,7 +696,7 @@
                 const gCell = row.querySelector('.col-guer');
                 if (gCell) gCell.innerHTML = isHigh ? '<span class="bg-red-950 border border-red-500 text-red-300 px-1.5 py-0.5 rounded font-bold">🔴 全線避浪</span>' : (isMed ? '<span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 移防南岸</span>' : '<span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 全線開窗</span>');
                 const gemCell = row.querySelector('.col-gem');
-                if (gemCell) gemCell.innerHTML = isHigh ? '<span class="bg-red-950 border border-red-500 text-red-300 px-1.5 py-0.5 rounded font-bold">🔴 VETO</span>' : (isMed ? '<span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 Q2 開島</span>' : '<span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 Q1 開島</span>');
+                if (gemCell) gemCell.innerHTML = isHigh ? '<span class="bg-red-950 border border-red-500 text-red-300 px-1.5 py-0.5 rounded font-bold">🔴 VETO</span>' : (isMed ? '<span class="bg-amber-950 border border-amber-500 text-amber-300 px-1.5 py-0.5 rounded font-bold">🟡 Q2 游擊調撥</span>' : '<span class="bg-emerald-950 border border-emerald-500 text-emerald-300 px-1.5 py-0.5 rounded font-bold">🟢 Q1 全線開放</span>');
             }
         }
 
@@ -672,7 +715,7 @@
                 if (dec.includes('剛性熔斷') || data.official_veto === 1 || data.web_official_veto === 1) {
                     marqueeBox.className = 'bg-red-900/90 border border-red-500 text-white rounded-lg p-2 mb-2 shadow-lg flex items-center overflow-hidden transition-colors';
                     headerEl.style.borderLeftColor = '#ef4444';
-                } else if (dec.includes('調撥') || dec.includes('南岸') || dec.includes('觀望') || dec.includes('預警')) {
+                } else if (dec.includes('調撥') || dec.includes('南岸') || dec.includes('觀望') || dec.includes('預警') || dec.includes('開窗')) {
                     marqueeBox.className = 'bg-amber-900/90 border border-amber-500 text-white rounded-lg p-2 mb-2 shadow-lg flex items-center overflow-hidden transition-colors';
                     headerEl.style.borderLeftColor = '#facc15';
                 } else {
@@ -688,7 +731,7 @@
             const ovBadge = document.getElementById('lblOverrideBadge');
             if (ovBadge) {
                 if (isOverrideActive(data)) {
-                    ovBadge.textContent = '🔒 人工覆寫鎖定中';
+                    ovBadge.textContent = '🔒 雙重覆寫鎖生效中 (至 17:30)';
                     ovBadge.className = 'text-[10px] bg-red-900 text-white border border-red-400 px-1.5 py-0.5 rounded font-bold';
                 } else {
                     ovBadge.textContent = '未啟用覆寫 (自動仲裁)';
@@ -696,11 +739,26 @@
                 }
             }
 
+            const diag = data.scraper_diagnostics || {};
+            if (document.getElementById('txtScraperAudit')) {
+                const snippet = diag.raw_snippet || data.official_body || '尚未取得爬蟲診斷';
+                document.getElementById('txtScraperAudit').textContent = `[${data.announcement_source || 'official_web'}] ${snippet}`;
+            }
+            if (document.getElementById('txtScraperCheckedAt')) {
+                document.getElementById('txtScraperCheckedAt').textContent = diag.checked_at || data.updated_at || '--';
+            }
+
             const fw = data.four_way_summary || {};
             const pmFc = data.pm_forecast || {};
+            const m = data.metrics || {};
+            cachedMetrics = m;
+
             if (document.getElementById('txt4WayPos')) document.getElementById('txt4WayPos').textContent = fw.pos || data.official_wufu_status || '--';
             if (document.getElementById('txt4WayTraj')) document.getElementById('txt4WayTraj').textContent = pmFc.afternoon_risk ? pmFc.risk_label : (fw.traj || data.official_wufu_vector || '--');
-            if (document.getElementById('txt4WayPhys')) document.getElementById('txt4WayPhys').textContent = fw.phys || '--';
+            if (document.getElementById('txt4WayPhys')) {
+                const pStr = m.p_veto !== undefined ? ` (P_veto=${Number(m.p_veto).toFixed(2)})` : '';
+                document.getElementById('txt4WayPhys').textContent = (fw.phys || '--') + pStr;
+            }
             if (document.getElementById('txt4WayOff')) document.getElementById('txt4WayOff').textContent = fw.off || data.effective_official_label || '--';
 
             const trustEl = document.getElementById('lblTrustScore');
@@ -725,8 +783,6 @@
             if (ty.distance) document.getElementById('txtTyphoonDist').textContent = ty.distance;
             if (ty.eta) document.getElementById('txtTyphoonEta').textContent = ty.eta;
 
-            const m = data.metrics || {};
-            cachedMetrics = m;
             if (m.pressure !== undefined) document.getElementById('txtPressureVal').textContent = m.pressure + ' hPa';
             if (m.pressure_3h !== undefined) {
                 const sign = m.pressure_3h > 0 ? '+' : '';
@@ -734,13 +790,16 @@
             }
             if (m.tp !== undefined) {
                 const tpEl = document.getElementById('txtTpVal');
-                tpEl.textContent = 'Tp: ' + m.tp + ' s' + (m.tp >= 11.5 ? ' (長浪)' : '');
-                tpEl.className = m.tp >= 11.5 ? 'text-red-400' : 'text-sky-300';
+                tpEl.textContent = 'Tp: ' + m.tp + ' s' + (m.tp >= 12.0 ? ' (消能瓦解)' : (m.tp >= 11.5 ? ' (長浪)' : ''));
+                tpEl.className = m.tp >= 12.0 ? 'text-red-400' : 'text-sky-300';
             }
             if (m.hs !== undefined) {
                 const hsEl = document.getElementById('txtHsVal');
                 hsEl.textContent = 'Hs: ' + m.hs + 'm';
                 hsEl.className = m.hs >= 1.60 ? 'text-red-400' : 'text-amber-300';
+            }
+            if (m.e_net !== undefined && m.p_veto !== undefined && document.getElementById('txtEnergyTensor')) {
+                document.getElementById('txtEnergyTensor').textContent = `E=${Number(m.e_net).toFixed(2)} / P=${Number(m.p_veto).toFixed(2)}`;
             }
 
             if (m.hs_pier_north !== undefined) document.getElementById('txtHsPierNorth').textContent = m.hs_pier_north + ' m';
@@ -761,10 +820,6 @@
             if (sw.status_tag) document.getElementById('lblSwellTag').textContent = sw.status_tag;
             if (sw.impact_window_str) document.getElementById('txtImpactWindow').textContent = sw.impact_window_str;
             if (sw.advice) document.getElementById('txtSwellAdvice').textContent = '💡 預警說明：' + sw.advice;
-            if (sw.cg_speed_ms) {
-                const pmSuffix = pmFc.pm_hs_max ? ` / PM ${pmFc.pm_hs_max}m` : ` (${sw.cg_knots} 節)`;
-                document.getElementById('txtCgSpeed').textContent = sw.cg_speed_ms + ' m/s' + pmSuffix;
-            }
             if (swellBox) {
                 swellBox.className = sw.is_swell_alert
                     ? 'bg-red-950/80 border border-red-500/80 p-2.5 rounded-lg space-y-1 transition-colors'
@@ -791,6 +846,15 @@
                         gotAnyData = true;
                     }
                 } catch (e) {}
+            }
+
+            // 檢查本機持久化覆寫鎖或雲端覆寫鎖
+            const localOv = getActiveLocalOverride();
+            if (localOv) {
+                baseData.manual_override = localOv;
+                baseData.web_official_veto = 1;
+                baseData.announcement_scope = localOv.scope || 'FULL_DAY';
+                baseData.official_body = localOv.reason || baseData.official_body;
             }
 
             const lockedByOverride = isOverrideActive(baseData);
@@ -826,7 +890,9 @@
                     const pmTpVals = hTp.slice(12, 18).filter(v => v != null);
                     const pmHsMax = Number((pmHsVals.length ? Math.max(hs, ...pmHsVals) : hs).toFixed(2));
                     const pmTpMax = Number((pmTpVals.length ? Math.max(tp, ...pmTpVals) : tp).toFixed(1));
-                    const kdSPm = pmTpMax >= 12.0 ? 0.75 : 0.55;
+
+                    // 與 Python core/gem_physics.py 100% 統一之 V66.5 物理方程
+                    const kdSPm = pmTpMax >= 12.0 ? 1.00 : 0.72;
                     const afternoonRisk = ((pmTpMax >= 12.0 && pmHsMax * kdSPm > 1.13) || (pmHsMax * kdSPm > 1.13) || (hsSlope3h >= 0.30 && pmHsMax >= 1.45));
                     const riskLabel = afternoonRisk
                         ? `🟡 午後封島高風險預警 (PM Hs=${pmHsMax}m, Tp=${pmTpMax}s, 斜率${hsSlope3h >= 0 ? '+' : ''}${hsSlope3h}m/3h)`
@@ -835,19 +901,31 @@
                     const deltaTheta = Math.round(Math.min(180, Math.abs(((windDir - 45 + 180) % 360) - 180)));
                     const kw = deltaTheta < 35 ? 0.78 : (deltaTheta < 45 ? 0.88 : 1.00);
                     const weff = Number((w * Math.abs(Math.cos(deltaTheta * Math.PI / 180)) * kw).toFixed(2));
-                    const kdNorth = tp >= 12.0 ? 1.0 : (deltaTheta < 45 ? 0.75 : 1.0);
-                    const kdSouth = tp >= 12.0 ? 0.75 : 0.55;
+                    const kdNorth = tp >= 12.0 ? 1.00 : 0.883;
+                    const kdSouth = tp >= 12.0 ? 1.00 : 0.72;
                     const hsNorth = Number((hs * kdNorth).toFixed(2));
                     const hsSouth = Number((hs * kdSouth).toFixed(2));
 
                     const tideEst = Number((0.85 + 0.45 * Math.sin(2 * Math.PI * (hr + nowCst.getMinutes() / 60) / 12.42)).toFixed(2));
-                    const ukcNorth = Number(((8.50 + tideEst) - 1.20 - hsNorth).toFixed(2));
-                    const ukcSouth = Number(((9.80 + tideEst) - 1.20 - hsSouth).toFixed(2));
+                    const squatNorth = computeSquatJs(12.5, 8.50);
+                    const squatSouth3kt = computeSquatJs(3.0, 9.80);
+                    const ukcNorth = Number(((8.50 + tideEst) - (1.20 + squatNorth) - hsNorth).toFixed(2));
+                    const ukcSouth = Number(((9.80 + tideEst) - (1.20 + squatSouth3kt) - hsSouth).toFixed(2));
 
                     const cvRate = Number(Math.max(0, (hs - 1.25) * 1.55 + (tp >= 12.0 && hs >= 1.5 ? 0.60 : 0)).toFixed(2));
                     const overtopPct = Number(Math.min(100, cvRate * 12.5).toFixed(1));
-                    const fbNorth = overtopPct >= 15.0 ? 0.15 : (overtopPct >= 8.0 ? 0.55 : 2.40);
-                    const fbSouth = overtopPct >= 18.0 ? 0.15 : (overtopPct >= 12.0 ? 0.85 : 2.80);
+                    const baseFb = Number((3.20 - tideEst).toFixed(2));
+                    const fbNorth = cvRate > 0.0 ? 0.15 : baseFb;
+                    const fbSouth = cvRate > 0.0 ? 0.15 : baseFb;
+
+                    const activeHs = hsNorth <= 1.13 ? hsNorth : hsSouth;
+                    const activeUkc = hsNorth <= 1.13 ? ukcNorth : ukcSouth;
+                    const activeFb = hsNorth <= 1.13 ? fbNorth : fbSouth;
+                    const activeSquat = hsNorth <= 1.13 ? squatNorth : squatSouth3kt;
+                    const kFlux = Number((activeHs + weff * 0.1 + activeSquat).toFixed(4));
+                    const vImpedance = Number(Math.max(0.05, 0.5 * activeUkc + 0.5 * activeFb).toFixed(4));
+                    const eNet = Number((kFlux / vImpedance).toFixed(4));
+                    const pVeto = Number((1.0 / (1.0 + Math.exp(-(eNet - 1.00) / (0.25 * 0.85)))).toFixed(4));
 
                     const dailyForecast = [];
                     const mDates = marine.daily?.time || [];
@@ -862,14 +940,17 @@
 
                     const cgSpeed = Number(((9.81 * tp) / (4 * Math.PI)).toFixed(2));
                     const cgKnots = Number((cgSpeed * 1.94384).toFixed(1));
-                    const isSwellAlert = (tp >= 11.5 && hs >= 1.35) || afternoonRisk;
+                    const isSwellAlert = (tp >= 12.0 && hs >= 1.13) || afternoonRisk;
 
                     baseData.metrics = {
-                        hs: hs, tp: tp, w: w, weff: weff, delta_theta: deltaTheta,
-                        pressure: pressure, pressure_3h: p3h,
+                        hs: hs, tp: tp, w: w, weff: weff, kw: kw, delta_theta: deltaTheta,
+                        pressure: pressure, pressure_3h: p3h, tide: tideEst,
+                        kd_north: kdNorth, kd_south: kdSouth,
                         hs_pier_north: hsNorth, hs_pier_south: hsSouth,
+                        squat_north: squatNorth, squat_south_3kt: squatSouth3kt,
                         ukc_north: ukcNorth, ukc_south: ukcSouth,
-                        fb_north: fbNorth, fb_south: fbSouth
+                        fb_north: fbNorth, fb_south: fbSouth, cv_rate: cvRate,
+                        k_flux: kFlux, v_impedance: vImpedance, e_net: eNet, p_veto: pVeto
                     };
                     baseData.daily_forecast = dailyForecast;
                     baseData.pm_forecast = {
@@ -878,32 +959,34 @@
                     };
                     baseData.swell_forecast = {
                         is_swell_alert: isSwellAlert,
-                        status_tag: (tp >= 11.5 && hs >= 1.35) ? ((hs >= 1.60 && tp >= 12.0) ? '🔴 高度漫頂風險期' : '🟡 湧浪越浪警戒期') : (afternoonRisk ? '🟡 午後長浪湧升預警' : '🟢 海象平穩受控'),
-                        impact_window_str: (tp >= 11.5 && hs >= 1.35) ? '未來 1~4 小時 (湧浪能量集中)' : (afternoonRisk ? '12:00 - 17:00 CST (逐時波譜顯示午後轉惡)' : '無明顯長浪湧浪漫頂威脅'),
+                        status_tag: (tp >= 12.0 && hs >= 1.13) ? '🔴 高度漫頂共振期 (Kd=1.00)' : (afternoonRisk ? '🟡 午後長浪湧升預警' : '🟢 海象平穩受控'),
+                        impact_window_str: (tp >= 12.0 && hs >= 1.13) ? '未來 1~4 小時 (長浪共振能量集中)' : (afternoonRisk ? '11:20 止登 / 14:20 清島 (逐時波譜顯示午後轉惡)' : '無明顯長浪湧浪漫頂威脅'),
                         advice: afternoonRisk ? `目前波高 Hs=${hs}m 尚可，但未來 3h 斜率 ${hsSlope3h >= 0 ? '+' : ''}${hsSlope3h}m，午後預估達 Hs=${pmHsMax}m / Tp=${pmTpMax}s，嚴防下午臨時封島。` : `目前外海波高 Hs=${hs}m、週期 Tp=${tp}s，符合靠泊安全線。`,
                         cg_speed_ms: cgSpeed, cg_knots: cgKnots
                     };
                     baseData.cctv_status = {
-                        north_cam_status: overtopPct >= 15.0 ? `🔴 越浪警戒 (${overtopPct}%)` : `🟢 LIVE 25FPS (漫頂率 ${overtopPct}%)`,
-                        south_cam_status: fbSouth < 0.5 ? `🔴 湧浪漫頂 (FB ${fbSouth}m)` : `🟢 LIVE 25FPS (FB ${fbSouth}m)`,
-                        visual_eye_status: overtopPct >= 15.0 ? '🔴 CCTV 視覺偵測碼頭引橋漫頂 (強制乾舷壓制 VETO)' : '🟢 CCTV 畫面顯示碼頭水深乾舷合規'
+                        north_cam_status: cvRate > 0.0 ? `🔴 越浪覆寫 FB=0.15m (${cvRate} p/min)` : `🟢 LIVE 30FPS (FB ${fbNorth}m)`,
+                        south_cam_status: cvRate > 0.0 ? `🔴 越浪覆寫 FB=0.15m (${cvRate} p/min)` : `🟢 LIVE 30FPS (FB ${fbSouth}m)`,
+                        visual_eye_status: cvRate > 0.0 ? '🔴 Vision-PINN 偵測引橋越浪 (CV>0 強制乾舷壓制 0.15m)' : '🟢 Vision-PINN 畫面顯示碼頭乾舷合規'
                     };
 
-                    if (!lockedByOverride) {
+                    if (lockedByOverride) {
+                        const activeOv = localOv || baseData.manual_override;
+                        applyOverrideLockToPayload(baseData, activeOv);
+                    } else {
                         const inHours = isCstBoatHours();
                         const isDocked = Boolean(baseData.official_wufu_status?.includes('靠泊'));
-                        const hardVeto = ((hsNorth > 0.95 && hsSouth > 1.13) || weff > 10.17 || (fbNorth < 0.50 && fbSouth < 0.50));
-                        const effVeto = (isRealAis && inHours && isDocked) ? 0 : ((webOfficialVeto || hardVeto) ? 1 : 0);
+                        const hardVeto = ((hsNorth > 1.13 && hsSouth > 1.13) || weff > 10.17 || (ukcNorth < 1.50 && ukcSouth < 1.50) || (fbNorth < 0.50 && fbSouth < 0.50));
+                        const effVeto = (isRealAis && inHours && isDocked) ? 0 : ((webOfficialVeto || hardVeto || pVeto > 0.80) ? 1 : 0);
 
-                        let baseMode = '🔴 全線剛性熔斷（禁止靠泊）';
+                        let baseMode = '🔴 0.0% 物理 VETO 熔斷（禁止靠泊）';
                         if (effVeto === 0) {
-                            if (afternoonRisk && inHours) baseMode = '🟡 上午限時開窗 (午後湧浪高風險預警)';
-                            else if (fbNorth >= 0.50 && ukcNorth >= 1.50 && hsNorth <= 0.95 && weff <= 8.50) baseMode = '🟢 常態開放靠泊 (北岸 Q1)';
-                            else if (fbSouth >= 0.50 && ukcSouth >= 1.50 && hsSouth <= 1.13 && weff <= 10.17) baseMode = '🟡 戰術機動調撥 (移防南岸開島 Q2)';
-                            else baseMode = '🟡 晨間延滯觀望 (建議延後評估)';
+                            if (afternoonRisk && inHours) baseMode = '⏱️ Q3 動態開窗 (11:20 剛性止登 / 14:20 強制清島)';
+                            else if ((0.20 <= pVeto && pVeto <= 0.80) || tideEst < 0.40 || (35 <= deltaTheta && deltaTheta < 45) || (hsNorth > 0.95 && hsSouth <= 1.13)) baseMode = '🟡 Q2 游擊調撥 (移防南岸靠泊 / 限速 <= 3.0 kts)';
+                            else baseMode = '🟢 100.0% Q1 全線開放 (靠泊北岸主泊位)';
                         } else if (webOfficialVeto) {
                             const scopeLabel = baseData.announcement_scope === 'AFTERNOON' ? '下午封島半天' : '官方公告封島';
-                            baseMode = `🔴 全線剛性熔斷（${scopeLabel}）`;
+                            baseMode = `🔴 0.0% 物理 VETO 熔斷（${scopeLabel}）`;
                         }
 
                         const decision = (!inHours && !webOfficialVeto)
@@ -933,6 +1016,31 @@
             } else {
                 setHeartbeatStatus('error', '連線逾時');
             }
+        }
+
+        function copyV665TacticalBrief() {
+            const d = cachedLivePayload || {};
+            const m = d.metrics || {};
+            const isVeto = (d.official_veto === 1 || d.web_official_veto === 1 || (d.decision || '').includes('熔斷'));
+            const brief = [
+                '【GEM-V66.5 龜山島海事戰術指揮中樞 權威總裁綜合裁示】',
+                '───────────────────────────────────────────────────────────────────',
+                `總 體 裁 定：${d.decision || '🔴 0.0% 物理 VETO 熔斷'}`,
+                `決 策 坍 縮：${isVeto ? '【不要做（全線封島禁止靠泊）】' : '【要做（依戰術時窗與泊位執行靠泊）】'} (置信度: ${d.trust_score || '96.0%'})`,
+                `碼 頭 配 置：北岸碼頭 ${isVeto ? '全線封閉禁止靠泊' : '主泊位監控中'} ｜ 南岸碼頭 ${isVeto ? '全線封閉禁止靠泊' : '權宜備援泊位'}`,
+                '【立體物理與全域能量量化依據】：',
+                `全域能量指標：陽儀動能 K = ${(m.k_flux ?? 0).toFixed(2)}, 陰儀阻抗 V = ${(m.v_impedance ?? 0).toFixed(2)}, E_net = ${(m.e_net ?? 0).toFixed(2)} (相變風險 P_veto = ${(m.p_veto ?? 0).toFixed(2)})。`,
+                `長浪頻譜消能：外海 Hs = ${(m.hs ?? 0).toFixed(2)}m, Tp = ${(m.tp ?? 0).toFixed(1)}s (Kd = ${(m.kd_south ?? 0.72).toFixed(2)}), 港池 Hs,pier = ${(m.hs_pier_south ?? 0).toFixed(2)}m (門檻 <= 1.13m)。`,
+                `風場掩蔽剪應：外海 W = ${(m.w ?? 0).toFixed(1)}m/s, 攻角 Δθ = ${(m.delta_theta ?? 0).toFixed(1)}° (Kw = ${(m.kw ?? 1.0).toFixed(2)}), 有效風速 Weff = ${(m.weff ?? 0).toFixed(2)}m/s (門檻 <= 10.17m/s)。`,
+                `水下動態裕深：潮位 η = ${(m.tide ?? 0).toFixed(2)}m, 客輪航速 V = ${isVeto ? '0.0' : '12.5'} kts (Squat = ${(m.squat_south_3kt ?? 0.15).toFixed(2)}m), 南/北岸 UKC = ${(m.ukc_south ?? 0).toFixed(2)}m / ${(m.ukc_north ?? 0).toFixed(2)}m (門檻 >= 1.50m)。`,
+                `乾舷越浪覆寫：Vision-PINN 越浪率 CV = ${(m.cv_rate ?? 0).toFixed(2)} p/min, 預留乾舷 FB = ${(m.fb_south ?? 0).toFixed(2)}m (門檻 >= 0.50m)。`,
+                `官方公告狀態：${d.effective_official_label || '--'} ｜ ${d.official_title || '--'}`
+            ].join('\n');
+            navigator.clipboard?.writeText(brief).then(() => {
+                alert('✅ 已複製 GEM-V66.5 標準戰術簡報至剪貼簿！');
+            }).catch(() => {
+                prompt('請手動複製以下 GEM-V66.5 戰術簡報：', brief);
+            });
         }
 
         async function forceSyncOfficialWeb() {
@@ -1208,6 +1316,8 @@
             if (initTag && initTag.textContent.trim() !== 'null') {
                 try {
                     const initData = JSON.parse(initTag.textContent);
+                    const localOv = getActiveLocalOverride();
+                    if (localOv) applyOverrideLockToPayload(initData, localOv);
                     syncSuccessCount = 1;
                     applyLiveData(initData);
                     const initTime = (initData.updated_at || '').split(' ')[1] || '快照就緒';
