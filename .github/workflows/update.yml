@@ -2,22 +2,35 @@ name: GEM Engine V66.5 Anti-Lag Sync (CST)
 
 on:
   schedule:
-    # 台灣時間 06:30-17:30 (UTC 22:30-09:30) 每 10 分鐘高頻對算，消除官方公告時間差盲區
+    # 台灣時間 06:00-17:50 (UTC 22:00-09:50) 每 10 分鐘高頻對算，消除官方公告時間差盲區
     - cron: '*/10 22,23,0,1,2,3,4,5,6,7,8,9 * * *'
   workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gem-engine-sync-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   scheduled-sync:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: '3.11'
+
       - name: Install dependencies
-        run: pip install requests beautifulsoup4 numpy paho-mqtt
+        run: pip install --no-cache-dir requests beautifulsoup4 numpy paho-mqtt
+
       - name: Run main orchestrator
         env:
           CWA_API_KEY: ${{ secrets.CWA_API_KEY }}
@@ -30,10 +43,19 @@ jobs:
           TDX_MMUsername: ${{ secrets.TDX_MMUsername }}
           TDX_MMPW: ${{ secrets.TDX_MMPW }}
         run: python main_orchestrator.py
+
       - name: Auto Push updates to GitHub (Only on State Hash Change)
         run: |
           git config --global user.name "GEM Engine Bot"
           git config --global user.email "bot@gem-engine.local"
-          git add data/live_status.json latest_decision.json data/wufu_track.json index.html web/index.html mobile.html desktop.html DASHBOARD_SPEC.md
-          git diff-index --quiet HEAD || git commit -m "🤖 [Auto Cron] 狀態相變與即時海氣象同步"
-          git push
+          TARGETS="data/live_status.json latest_decision.json data/wufu_track.json index.html web/index.html mobile.html desktop.html DASHBOARD_SPEC.md"
+          for f in $TARGETS; do
+            [ -e "$f" ] && git add "$f"
+          done
+          if ! git diff --cached --quiet; then
+            git commit -m "🤖 [Auto Cron] 狀態相變與即時海氣象同步"
+            git pull --rebase --autostash origin main || true
+            git push origin main
+          else
+            echo "ℹ️ 狀態雜湊未變動，略過推送。"
+          fi
