@@ -24,6 +24,8 @@ jobs:
           FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
           AIS_API_URL: ${{ secrets.AIS_API_URL }}
+          TDX_CLIENT_ID: ${{ secrets.TDX_CLIENT_ID }}
+          TDX_CLIENT_SECRET: ${{ secrets.TDX_CLIENT_SECRET }}
         run: python main_orchestrator.py
       - name: Auto Push updates to GitHub (Only on State Hash Change)
         run: |

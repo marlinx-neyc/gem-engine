@@ -1,6 +1,7 @@
 import os
 import json
 import math
+import time
 import requests
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, List, Optional
@@ -8,11 +9,18 @@ from typing import Dict, Any, List, Optional
 CST = timezone(timedelta(hours=8))
 
 class GemVesselAgent:
-    def __init__(self, track_db_path: str = "data/wufu_track.json", ais_api_url: str = None):
+    def __init__(
+        self,
+        track_db_path: str = "data/wufu_track.json",
+        ais_api_url: str = None,
+        tdx_client_id: str = None,
+        tdx_client_secret: str = None
+    ):
         self.track_db_path = track_db_path
         self.ais_api_url = ais_api_url or os.environ.get("AIS_API_URL")
-        self.tdx_client_id = os.environ.get("TDX_CLIENT_ID")
-        self.tdx_client_secret = os.environ.get("TDX_CLIENT_SECRET")
+        self.tdx_client_id = tdx_client_id or os.environ.get("TDX_CLIENT_ID")
+        self.tdx_client_secret = tdx_client_secret or os.environ.get("TDX_CLIENT_SECRET")
+        self._tdx_token_cache = {"token": None, "expires_at": 0.0}
         self.official_vessel = {
             "name": "東北角五福號", "mmsi": "416017708", "call_sign": "BR5216",
             "kind": "公務小船", "draft_m": 1.20
@@ -41,47 +49,150 @@ class GemVesselAgent:
              math.sin(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.cos(math.radians(lon2 - lon1)))
         return round((math.degrees(math.atan2(y, x)) + 360.0) % 360.0, 1)
 
-    def fetch_realtime_ais_api(self) -> Optional[dict]:
+    def _get_tdx_access_token(self, diag_logs: list) -> Optional[str]:
+        if not self.tdx_client_id or not self.tdx_client_secret:
+            diag_logs.append("tdx_auth:NO_CREDENTIALS")
+            return None
+        now_ts = time.time()
+        if self._tdx_token_cache["token"] and now_ts < self._tdx_token_cache["expires_at"] - 60:
+            return self._tdx_token_cache["token"]
+        auth_url = "https://tdx.transportdata.tw/auth/realms/TDXConnect/protocol/openid-connect/token"
+        try:
+            resp = requests.post(
+                auth_url,
+                headers={"Content-Type": "application/x-www-form-urlencoded"},
+                data={
+                    "grant_type": "client_credentials",
+                    "client_id": self.tdx_client_id,
+                    "client_secret": self.tdx_client_secret
+                },
+                timeout=6
+            )
+            diag_logs.append(f"tdx_auth:{resp.status_code}")
+            if resp.status_code == 200:
+                tok_data = resp.json()
+                token = tok_data.get("access_token")
+                expires_in = int(tok_data.get("expires_in", 86400))
+                if token:
+                    self._tdx_token_cache = {"token": token, "expires_at": now_ts + expires_in}
+                    return token
+        except Exception as e:
+            diag_logs.append(f"tdx_auth:ERR({type(e).__name__})")
+        return None
+
+    def _parse_ais_vessel_records(self, records: list, source_label: str) -> Optional[dict]:
+        wufu_rec = None
+        island_fleet = []
+        wushi_fleet = []
+        for item in records:
+            if not isinstance(item, dict):
+                continue
+            lat_raw = item.get("Lat") if "Lat" in item else item.get("lat")
+            lon_raw = item.get("Lon") if "Lon" in item else item.get("lon")
+            if lat_raw is None or lon_raw is None:
+                pos_obj = item.get("Position") or item.get("VesselPosition") or {}
+                lat_raw = pos_obj.get("PositionLat") or pos_obj.get("Lat") or pos_obj.get("lat")
+                lon_raw = pos_obj.get("PositionLon") or pos_obj.get("Lon") or pos_obj.get("lon")
+            if lat_raw is None or lon_raw is None:
+                continue
+            try:
+                lat_v, lon_v = float(lat_raw), float(lon_raw)
+            except Exception:
+                continue
+
+            if not (24.78 <= lat_v <= 24.92 and 121.80 <= lon_v <= 122.00):
+                continue
+
+            mmsi = str(item.get("MMSI") or item.get("mmsi") or "").strip()
+            sog = float(item.get("SOG") or item.get("sog") or item.get("Speed") or item.get("speed") or 0.0)
+            cog = item.get("COG") if "COG" in item else item.get("cog")
+            vessel_name = str(item.get("VesselName") or item.get("ShipName") or item.get("name") or "").strip()
+
+            d_island = min(
+                self._haversine_distance(lat_v, lon_v, self.pier_north["lat"], self.pier_north["lon"]),
+                self._haversine_distance(lat_v, lon_v, self.pier_south["lat"], self.pier_south["lon"])
+            )
+            d_wushi = self._haversine_distance(lat_v, lon_v, self.pier_wushi["lat"], self.pier_wushi["lon"])
+
+            if d_island <= 850.0:
+                island_fleet.append({"mmsi": mmsi, "name": vessel_name, "sog": sog, "dist_m": round(d_island, 1)})
+            if d_wushi <= 1200.0:
+                wushi_fleet.append({"mmsi": mmsi, "name": vessel_name, "sog": sog})
+
+            if mmsi == "416017708" or "五福" in vessel_name:
+                wufu_rec = {
+                    "lat": lat_v, "lon": lon_v, "sog": sog, "cog": cog,
+                    "source_tag": source_label, "match_type": "DIRECT_MMSI_416017708"
+                }
+
+        if wufu_rec:
+            wufu_rec["island_fleet_count"] = len(island_fleet)
+            wufu_rec["wushi_fleet_count"] = len(wushi_fleet)
+            return wufu_rec
+
+        if island_fleet:
+            return {
+                "lat": self.pier_north["lat"], "lon": self.pier_north["lon"], "sog": 0.2,
+                "source_tag": f"{source_label}·賞鯨船隊群集({len(island_fleet)}艘駐島)",
+                "match_type": "FLEET_CLUSTER_OPEN",
+                "island_fleet_count": len(island_fleet),
+                "wushi_fleet_count": len(wushi_fleet)
+            }
+
+        if records:
+            return {
+                "lat": self.pier_wushi["lat"], "lon": self.pier_wushi["lon"], "sog": 0.0,
+                "source_tag": f"{source_label}·島周0船(船隊滯港)",
+                "match_type": "FLEET_CLUSTER_CLOSED",
+                "island_fleet_count": 0,
+                "wushi_fleet_count": len(wushi_fleet)
+            }
+        return None
+
+    def fetch_tdx_ais_realtime(self, diag_logs: list) -> Optional[dict]:
+        # 介接交通部 TDX 航港 AIS 即時動態 API，鎖定五福號 (416017708) 與烏石港-龜山島船隊群集
+        token = self._get_tdx_access_token(diag_logs)
+        if not token:
+            return None
+
+        headers = {"Authorization": f"Bearer {token}", "Accept": "application/json"}
+        spatial_filter = "Lat ge 24.78 and Lat le 24.92 and Lon ge 121.80 and Lon le 122.00"
+        tdx_endpoints = [
+            f"https://tdx.transportdata.tw/api/basic/v2/Maritime/AIS/RealTime?$filter={spatial_filter}&$format=JSON",
+            "https://tdx.transportdata.tw/api/basic/v2/Maritime/AIS/RealTime?$filter=MMSI eq '416017708'&$format=JSON",
+            f"https://tdx.transportdata.tw/api/basic/v3/Maritime/AIS/RealTime?$filter={spatial_filter}&$format=JSON"
+        ]
+        for idx, ep in enumerate(tdx_endpoints):
+            try:
+                resp = requests.get(ep, headers=headers, timeout=6)
+                diag_logs.append(f"tdx_ais_{idx+1}:{resp.status_code}")
+                if resp.status_code == 200:
+                    data = resp.json()
+                    records = data if isinstance(data, list) else (data.get("AIS") or data.get("data") or data.get("value") or [])
+                    parsed = self._parse_ais_vessel_records(records, "TDX_AIS即時")
+                    if parsed:
+                        return parsed
+            except Exception as e:
+                diag_logs.append(f"tdx_ais_{idx+1}:ERR({type(e).__name__})")
+        return None
+
+    def fetch_realtime_ais_api(self, diag_logs: list) -> Optional[dict]:
+        tdx_res = self.fetch_tdx_ais_realtime(diag_logs)
+        if tdx_res:
+            return tdx_res
+
         if not self.ais_api_url:
+            diag_logs.append("custom_ais:NO_URL")
             return None
         try:
             resp = requests.get(self.ais_api_url, timeout=4)
+            diag_logs.append(f"custom_ais:{resp.status_code}")
             if resp.status_code == 200:
                 payload = resp.json()
                 records = payload if isinstance(payload, list) else payload.get("data", [payload])
-                wufu_rec = None
-                island_fleet_count = 0
-                for item in records:
-                    if "lat" not in item or "lon" not in item:
-                        continue
-                    lat_v, lon_v = float(item["lat"]), float(item["lon"])
-                    d_island = min(
-                        self._haversine_distance(lat_v, lon_v, self.pier_north["lat"], self.pier_north["lon"]),
-                        self._haversine_distance(lat_v, lon_v, self.pier_south["lat"], self.pier_south["lon"])
-                    )
-                    if d_island <= 600.0:
-                        island_fleet_count += 1
-                    if str(item.get("mmsi", "")) == "416017708":
-                        wufu_rec = {
-                            "lat": lat_v,
-                            "lon": lon_v,
-                            "sog": float(item.get("sog", item.get("speed", 0.0))),
-                            "source_tag": "AIS即時API",
-                            "island_fleet_count": island_fleet_count
-                        }
-                if wufu_rec:
-                    wufu_rec["island_fleet_count"] = island_fleet_count
-                    return wufu_rec
-                if records and "lat" in records[0] and "lon" in records[0]:
-                    return {
-                        "lat": float(records[0]["lat"]),
-                        "lon": float(records[0]["lon"]),
-                        "sog": float(records[0].get("sog", records[0].get("speed", 0.0))),
-                        "source_tag": "AIS即時API",
-                        "island_fleet_count": island_fleet_count
-                    }
-        except Exception:
-            pass
+                return self._parse_ais_vessel_records(records, "自訂AIS即時API")
+        except Exception as e:
+            diag_logs.append(f"custom_ais:ERR({type(e).__name__})")
         return None
 
     def _update_and_load_track(self, lat: float, lon: float, sog: float, tag: str, is_real_ais: bool, dt: datetime) -> List[dict]:
@@ -118,9 +229,9 @@ class GemVesselAgent:
 
     def analyze_trajectory_vector(self, track_history: List[dict], is_real_ais: bool) -> Dict[str, Any]:
         if not is_real_ais:
-            return {"vector_state": "HYDRO_FALLBACK", "vector_desc": "🛰️ 待接通真實AIS (目前為水文推演備援)", "delta_dist_m": 0.0, "cog_deg": None}
+            return {"vector_state": "HYDRO_FALLBACK", "vector_desc": "🛰️ 未接通TDX/AIS金鑰 (目前為水文推演備援)", "delta_dist_m": 0.0, "cog_deg": None}
         if len(track_history) < 2:
-            return {"vector_state": "INITIAL_POINT", "vector_desc": "📡 AIS首筆定位建立中 (待累積軌跡)", "delta_dist_m": 0.0, "cog_deg": None}
+            return {"vector_state": "INITIAL_POINT", "vector_desc": "📡 TDX/AIS首筆定位建立中 (待累積軌跡)", "delta_dist_m": 0.0, "cog_deg": None}
 
         p_prev, p_curr = track_history[-2], track_history[-1]
         d_prev = min(
@@ -154,7 +265,9 @@ class GemVesselAgent:
         tp = float(telemetry.get("tp", 8.5))
         w = float(telemetry.get("w", 5.5))
         theta = float(telemetry.get("monsoon_angle", 35.0))
-        web_veto = int(telemetry.get("official_announcement", {}).get("official_veto", 0)) == 1
+        ann = telemetry.get("official_announcement", {})
+        web_veto = int(ann.get("official_veto", 0)) == 1
+        south_closed = bool(ann.get("south_pier_closed_damage", True))
 
         kd_n = 1.00 if tp >= 12.0 else 0.883
         kd_s = 1.00 if tp >= 12.0 else 0.72
@@ -165,7 +278,7 @@ class GemVesselAgent:
         if not web_veto and self.is_operational_boat_hours(dt):
             if hs_n <= 0.95 and weff <= 8.50:
                 return {"lat": 24.84375, "lon": 121.94378, "sog": 0.1, "source_tag": "水文推演備援·北岸"}
-            elif hs_s <= 1.13 and weff <= 10.17:
+            elif not south_closed and hs_s <= 1.13 and weff <= 10.17:
                 return {"lat": 24.84048, "lon": 121.93985, "sog": 0.1, "source_tag": "水文推演備援·南岸"}
         return {"lat": 24.86872, "lon": 121.84154, "sog": 0.0, "source_tag": "水文推演備援·母港"}
 
@@ -207,10 +320,12 @@ class GemVesselAgent:
         dt = dt or datetime.now(CST)
         off = self.official_vessel
         fleet_cnt = 0
+        ais_diag = []
         if "wufu_lat" in telemetry and "wufu_lon" in telemetry:
             lat, lon, sog, tag, is_real_ais = float(telemetry["wufu_lat"]), float(telemetry["wufu_lon"]), float(telemetry.get("wufu_sog", 0.2)), "AIS即時傳入", True
+            ais_diag.append("direct_telemetry_ais:OK")
         else:
-            live_ais = self.fetch_realtime_ais_api()
+            live_ais = self.fetch_realtime_ais_api(ais_diag)
             if live_ais:
                 lat, lon, sog, tag, is_real_ais = live_ais["lat"], live_ais["lon"], live_ais["sog"], live_ais["source_tag"], True
                 fleet_cnt = live_ais.get("island_fleet_count", 0)
@@ -227,6 +342,7 @@ class GemVesselAgent:
                 "name": off["name"], "mmsi": off["mmsi"],
                 "coord_str": f"{lat:.5f}° N, {lon:.5f}° E", "sog_knots": sog,
                 "island_fleet_count": fleet_cnt,
+                "ais_diagnostics": ais_diag,
                 **dock_eval, **traj_eval
             },
             "wushi_port_fleet_flux": {"v_flux_ships_per_hour": 42.0 if dock_eval["implied_official_open"] else 0.0}

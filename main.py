@@ -24,13 +24,13 @@ def purge_and_atomic_write(target_filepath: str, new_payload: dict) -> None:
     os.replace(tmp_filepath, target_filepath)
 
 class GemConsensusOrchestrator:
-    def __init__(self, cwa_key: str = None, fb_tok: str = None, fb_id: str = None, ais_url: str = None):
+    def __init__(self, cwa_key: str = None, fb_tok: str = None, fb_id: str = None, ais_url: str = None, tdx_id: str = None, tdx_secret: str = None):
         self.miner = GemHistoricalDataMiner()
         self.miner.generate_calibrated_intel_db()
         self.macro_rl = GemMacroRLOrchestrator()
         self.scout = GemScoutAgent(cwa_key, fb_tok, fb_id)
         self.cctv = GemCCTVPatternAgent()
-        self.vessel = GemVesselAgent(ais_api_url=ais_url)
+        self.vessel = GemVesselAgent(ais_api_url=ais_url, tdx_client_id=tdx_id, tdx_client_secret=tdx_secret)
         self.physics = GemPhysicsEngine()
         self.consensus = GemMultiSourceConsensus()
         self.signal = GemSignalAgent()

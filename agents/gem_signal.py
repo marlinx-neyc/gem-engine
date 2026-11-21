@@ -55,6 +55,7 @@ class GemSignalAgent:
             "official_wufu_position": off_v.get("coord_str", "24.86872° N, 121.84154° E"),
             "official_wufu_status": vessel_msg, "official_wufu_vector": vector_msg,
             "official_wufu_is_real_ais": off_v.get("is_real_ais", False),
+            "ais_diagnostics": off_v.get("ais_diagnostics", []),
             "official_wufu_dist_wushi": f"{off_v.get('dist_wushi_m', 0.0) / 1000.0:.1f} km",
             "official_wufu_dist_piers": f"{off_v.get('dist_north_m', 10678.6)}m / {off_v.get('dist_south_m', 10400.2)}m",
             "current_window_name": win["name"],
