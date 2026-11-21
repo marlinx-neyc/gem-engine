@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-21 19:49:32 CST",
+  "updated_at": "2026-11-21 19:53:07 CST",
   "decision": "🌙 夜間休整期（預估開窗：🟢 100.0% Q1 全線開放 (靠泊北岸主泊位)）",
   "consensus_status": "🌙【夜間休整離峰期】非船班時段 ｜ 實時浪高 Hs=1.04m、週期 Tp=5.4s 符合安全基準",
   "trust_score": "94.5% (夜間水動力持續監測)",
@@ -22,7 +22,7 @@
   "official_body": "東北角暨宜蘭海岸國家風景區管理處：今日未檢出全島封島通告（註：南岸碼頭及401步道因薔琵颱風災損暫停開放）。",
   "announcement_source": "official_web",
   "scraper_diagnostics": {
-    "checked_at": "2026-11-21 19:49:14 CST",
+    "checked_at": "2026-11-21 19:52:46 CST",
     "matched_url": "none",
     "http_statuses": [
       "fb_graph:NO_TOKEN",
@@ -75,11 +75,11 @@
   "cctv_status": {
     "cctv_cv_rate": 0.0,
     "t_overtop_pct": 0.0,
-    "fb_north_override": 2.6,
-    "fb_south_override": 2.6,
+    "fb_north_override": 2.62,
+    "fb_south_override": 2.62,
     "is_overtopping": false,
-    "north_cam_status": "🟢 LIVE 30FPS (FB 2.6m)",
-    "south_cam_status": "🟢 LIVE 30FPS (FB 2.6m)",
+    "north_cam_status": "🟢 LIVE 30FPS (FB 2.62m)",
+    "south_cam_status": "🟢 LIVE 30FPS (FB 2.62m)",
     "visual_eye_status": "🟢 Vision-PINN 畫面顯示碼頭乾舷合規"
   },
   "typhoon_info": {
@@ -171,13 +171,13 @@
     "weff": 2.07,
     "kw": 0.78,
     "delta_theta": 11.0,
-    "tide": 0.6,
+    "tide": 0.58,
     "squat_north": 0.34,
     "squat_south_3kt": 0.01,
-    "ukc_north": 6.64,
-    "ukc_south": 8.44,
-    "fb_north": 2.6,
-    "fb_south": 2.6,
+    "ukc_north": 6.62,
+    "ukc_south": 8.42,
+    "fb_north": 2.62,
+    "fb_south": 2.62,
     "cv_rate": 0.0,
     "south_pier_closed": true,
     "k_flux": 1.467,
@@ -187,35 +187,36 @@
     "evac_minutes": 20,
     "milk_sea_peak": "13:30"
   },
-  "marquee_msg": "📢 官方實質判定：【風管處通告】北岸開放常規營運（南岸碼頭災損封閉中） ｜ 🚢 位置與路徑：🌙 五福號非營運時段停泊烏石港母港 (水文推演備援·母港) / 📡 TDX雙通道已連線·海域暫無AIS回傳 (水文推演備援) ｜ 🤖 GEM 四維仲裁：🌙 夜間休整期（預估開窗：🟢 100.0% Q1 全線開放 (靠泊北岸主泊位)） (Hs:1.04m, Tp:5.4s, 南/北折算:0.75/0.92m) ｜ ⏱️ 校核：2026-11-21 19:49:32 CST",
+  "marquee_msg": "📢 官方實質判定：【風管處通告】北岸開放常規營運（南岸碼頭災損封閉中） ｜ 🚢 位置與路徑：🌙 五福號非營運時段停泊烏石港母港 (水文推演備援·母港) / 📡 TDX雙通道已連線·海域暫無AIS回傳 (水文推演備援) ｜ 🤖 GEM 四維仲裁：🌙 夜間休整期（預估開窗：🟢 100.0% Q1 全線開放 (靠泊北岸主泊位)） (Hs:1.04m, Tp:5.4s, 南/北折算:0.75/0.92m) ｜ ⏱️ 校核：2026-11-21 19:53:07 CST",
   "spec_version": "GEM-ENG-SPEC-2026-V66.5-QIMEN-RL-V110",
   "rl_intel_match": {
-    "match_score": 78.9,
+    "match_score": 88.5,
     "has_suggestion": true,
-    "is_decisive_80": false,
+    "is_decisive_80": true,
+    "is_decisive_85": true,
     "rl_veto_triggered": false,
-    "rl_open_triggered": false,
-    "matched_category": "EXCEPTION_CLOSURE",
-    "matched_case_id": "MINED_20251130",
-    "matched_label": "2025例外封島（讓生態休養生息宜蘭縣地標─龜山島 12/1封）",
+    "rl_open_triggered": true,
+    "matched_category": "GRAY_ZONE_OPEN",
+    "matched_case_id": "DECADE_2025_0415",
+    "matched_label": "2025清明穀雨交界開島（南岸封閉但北岸波低穩態）",
     "qimen_matrix": {
-      "w_qimen": 0.52,
+      "w_qimen": 0.601,
       "qimen_gate": "休門 (夜間休整養息)",
       "qimen_deity": "太陰/六合 (常態微幅波動)",
-      "qimen_heaven": "陰遁·立冬下元 (戌時, 月齡11.4日, 引潮係數0.559)",
+      "qimen_heaven": "陰遁·立冬下元 (戌時, 月齡11.4日, 引潮係數0.56)",
       "qimen_earth": "離宮(南岸)災損封閉，單靠坎宮(北岸)獨撐",
       "qimen_summary": "陰遁·立冬下元｜休門｜太陰/六合",
       "qimen_vector": {
-        "q_heaven_tide": 0.657,
-        "q_earth_berth": 0.55,
-        "q_human_gate": 0.65,
-        "q_deity_anomaly": 0.4
+        "q_heaven_tide": 0.658,
+        "q_earth_berth": 0.62,
+        "q_human_gate": 0.8,
+        "q_deity_anomaly": 0.25
       }
     },
-    "suggestion": "🟡 11D奇門RL智庫觀望 (78.9% < 80%)：【陰遁·立冬下元｜休門｜太陰/六合】，最接近【2025例外封島（讓生態休養生息宜蘭縣地標─龜山島 12/1封）】。"
+    "suggestion": "🟢 11D奇門RL智庫高置信收斂 (88.5% >= 85%)：【陰遁·立冬下元｜休門｜太陰/六合】吻合【2025清明穀雨交界開島（南岸封閉但北岸波低穩態）】，支援安全開窗作業。"
   },
   "rl_training_plan": {
-    "last_trained_at": "2026-11-21 19:49:14 CST",
+    "last_trained_at": "2026-11-21 19:52:46 CST",
     "last_deep_trained_date": "2026-11-21",
     "time_horizon_span": "2016–2026 (近十年跨尺度樣本庫)",
     "years_covered": [
@@ -261,20 +262,20 @@
     "weff_south_crit": 10.17,
     "pressure_3h_crit": -1.2,
     "cv_overtop_crit": 0.1,
-    "rl_decisive_match_pct": 80.0
+    "rl_decisive_match_pct": 85.0
   },
   "qimen_matrix": {
-    "w_qimen": 0.52,
+    "w_qimen": 0.601,
     "qimen_gate": "休門 (夜間休整養息)",
     "qimen_deity": "太陰/六合 (常態微幅波動)",
-    "qimen_heaven": "陰遁·立冬下元 (戌時, 月齡11.4日, 引潮係數0.559)",
+    "qimen_heaven": "陰遁·立冬下元 (戌時, 月齡11.4日, 引潮係數0.56)",
     "qimen_earth": "離宮(南岸)災損封閉，單靠坎宮(北岸)獨撐",
     "qimen_summary": "陰遁·立冬下元｜休門｜太陰/六合",
     "qimen_vector": {
-      "q_heaven_tide": 0.657,
-      "q_earth_berth": 0.55,
-      "q_human_gate": 0.65,
-      "q_deity_anomaly": 0.4
+      "q_heaven_tide": 0.658,
+      "q_earth_berth": 0.62,
+      "q_human_gate": 0.8,
+      "q_deity_anomaly": 0.25
     }
   },
   "action_id": 2,
@@ -288,9 +289,9 @@
     "hs_pier_m": 0.75,
     "hs_pier_north_m": 0.92,
     "w_local_ms": 2.07,
-    "ukc_m": 8.44,
-    "ukc_north_m": 6.64,
-    "fb_pier_m": 2.6,
+    "ukc_m": 8.42,
+    "ukc_north_m": 6.62,
+    "fb_pier_m": 2.62,
     "s_squat_m": 0.01,
     "s_squat_north_m": 0.34,
     "k_flux": 1.467,

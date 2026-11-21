@@ -7,20 +7,22 @@ from typing import Dict, Any, List
 CST = timezone(timedelta(hours=8))
 
 class GemMacroRLOrchestrator:
+    DECISIVE_THRESHOLD_PCT = 85.0
+
     def __init__(self, intel_db_path: str = "data/calibrated_intel_db.json"):
         self.intel_db_path = intel_db_path
         self.feature_scales = {
-            "hs": (0.45, 0.18),
-            "tp": (2.50, 0.12),
-            "weff": (3.00, 0.10),
-            "pressure_3h": (1.00, 0.10),
-            "tide": (0.45, 0.05),
-            "south_closed": (0.50, 0.10),
-            "wufu_in_port": (0.50, 0.10),
-            "q_heaven_tide": (0.35, 0.06),
-            "q_earth_berth": (0.35, 0.07),
-            "q_human_gate": (0.35, 0.06),
-            "q_deity_anomaly": (0.35, 0.06),
+            "hs": (0.52, 0.18),
+            "tp": (3.00, 0.12),
+            "weff": (3.50, 0.10),
+            "pressure_3h": (1.15, 0.10),
+            "tide": (0.60, 0.04),
+            "south_closed": (0.60, 0.10),
+            "wufu_abnormal_detained": (0.55, 0.11),
+            "q_heaven_tide": (0.45, 0.06),
+            "q_earth_berth": (0.42, 0.07),
+            "q_human_gate": (0.42, 0.06),
+            "q_deity_anomaly": (0.42, 0.06),
         }
 
     def parse_qimen_matrix(
@@ -92,10 +94,10 @@ class GemMacroRLOrchestrator:
             q_earth_berth = 0.15
             earth_desc = "離宮(南岸)災損封閉 ＋ 艮宮(東北)沖擊坎宮(北岸超限)，全島無可用泊位"
         elif south_closed:
-            q_earth_berth = 0.55
+            q_earth_berth = 0.62
             earth_desc = "離宮(南岸)災損封閉，單靠坎宮(北岸)獨撐"
         elif is_gen_attack and hs_s <= 1.13:
-            q_earth_berth = 0.72
+            q_earth_berth = 0.75
             earth_desc = "艮宮(東北)風浪偏強，宜轉進離宮(南岸)背風屏蔽"
         else:
             q_earth_berth = 0.92
@@ -116,10 +118,10 @@ class GemMacroRLOrchestrator:
             q_human_gate = 0.35
         elif not in_hours:
             gate_name = "休門 (夜間休整養息)"
-            q_human_gate = 0.65
+            q_human_gate = 0.80
         elif hs_n > 0.85:
             gate_name = "生門 (調撥偏吉)"
-            q_human_gate = 0.78
+            q_human_gate = 0.84
         else:
             gate_name = "開門 (三吉門·暢行)"
             q_human_gate = 0.95
@@ -136,15 +138,15 @@ class GemMacroRLOrchestrator:
         elif tp >= 12.0:
             deity_name = "騰蛇 (長週期湧浪糾纏突襲)"
             q_deity_anomaly = 0.85
-        elif gov_blind and not wufu.get("is_docked_island", False):
-            deity_name = "玄武 (官網盲區＋船訊隱匿)"
-            q_deity_anomaly = 0.78
-        elif hs_n <= 0.85 and weff <= 6.0:
+        elif in_hours and gov_blind and not wufu.get("is_docked_island", False):
+            deity_name = "玄武 (船班時段官網盲區＋船訊隱匿)"
+            q_deity_anomaly = 0.80
+        elif hs_n <= 0.88 and weff <= 6.5:
             deity_name = "值符 (八神之首·海象清朗)"
-            q_deity_anomaly = 0.12
+            q_deity_anomaly = 0.15
         else:
             deity_name = "太陰/六合 (常態微幅波動)"
-            q_deity_anomaly = 0.40
+            q_deity_anomaly = 0.25
 
         w_qimen = round(0.30 * (1.0 - q_heaven_tide) + 0.30 * q_earth_berth + 0.25 * q_human_gate + 0.15 * (1.0 - q_deity_anomaly), 3)
         summary_str = f"{dun_type}·{term_name}{yuan_name}｜{gate_name.split(' ')[0]}｜{deity_name.split(' ')[0]}"
@@ -170,28 +172,34 @@ class GemMacroRLOrchestrator:
                 with open(self.intel_db_path, "r", encoding="utf-8") as f:
                     db = json.load(f)
                     learned_scales = db.get("learned_feature_scales", {})
-                    if learned_scales:
-                        for k, v in learned_scales.items():
-                            if isinstance(v, (list, tuple)) and len(v) == 2:
-                                self.feature_scales[k] = (float(v[0]), float(v[1]))
+                    for k, v in learned_scales.items():
+                        mapped_k = "wufu_abnormal_detained" if k == "wufu_in_port" else k
+                        if mapped_k in self.feature_scales and isinstance(v, (list, tuple)) and len(v) == 2:
+                            self.feature_scales[mapped_k] = (max(float(v[0]), self.feature_scales[mapped_k][0]), float(v[1]))
                     return db.get("historical_cases", [])
             except Exception:
                 pass
         return []
 
-    def _compute_similarity_pct(self, cur: Dict[str, float], case: Dict[str, Any]) -> float:
+    def _compute_rq_similarity_pct(self, cur: Dict[str, float], case: Dict[str, Any]) -> float:
+        # 比例二次核 (Rational Quadratic Kernel, α=1.5) + RL 溫度校準 (τ=0.72)
         weighted_sq_dist = 0.0
         total_w = 0.0
         for feat, (scale, w) in self.feature_scales.items():
             v1 = float(cur.get(feat, 0.0))
-            v2 = float(case.get(feat, v1))
+            if feat == "wufu_abnormal_detained" and feat not in case:
+                v2 = float(case.get("wufu_in_port", v1))
+            else:
+                v2 = float(case.get(feat, v1))
             diff = (v1 - v2) / scale
             weighted_sq_dist += w * (diff ** 2)
             total_w += w
-        norm_dist = math.sqrt(weighted_sq_dist / max(1e-6, total_w))
-        raw_sim = math.exp(-0.55 * (norm_dist ** 2))
-        rl_boost = min(1.06, max(0.92, float(case.get("weight", 1.0)) ** 0.25))
-        return round(min(99.5, raw_sim * rl_boost * 100.0), 1)
+        norm_d2 = weighted_sq_dist / max(1e-6, total_w)
+        alpha = 1.5
+        tau = 0.72
+        k_val = (1.0 + (norm_d2 / (2.0 * alpha * tau))) ** (-alpha)
+        rl_boost = min(1.04, max(0.96, float(case.get("weight", 1.0)) ** 0.15))
+        return round(min(99.2, k_val * rl_boost * 100.0), 1)
 
     def evaluate_rl_match_with_hysteresis(
         self,
@@ -200,13 +208,20 @@ class GemMacroRLOrchestrator:
         vessel_res: Dict[str, Any] = None,
         dt: datetime = None
     ) -> Dict[str, Any]:
+        dt_cst = dt or datetime.now(CST)
+        if dt_cst.tzinfo is None:
+            dt_cst = dt_cst.replace(tzinfo=CST)
         physics_metrics = physics_metrics or {}
         vessel_res = vessel_res or {}
         wufu = vessel_res.get("official_wufu", {})
         ann = live_telemetry.get("official_announcement", {})
 
+        in_hours = (7 * 60 <= dt_cst.hour * 60 + dt_cst.minute <= 16 * 60 + 30)
+        # 僅在「船班營運時段 (07:00-16:30)」未駐島才視為異常滯港 (1.0)；夜間休整停母港為正常 (0.0)
+        wufu_detained = 1.0 if (in_hours and not wufu.get("is_docked_island", False)) else 0.0
+
         qimen = self.parse_qimen_matrix(
-            dt=dt, live_telemetry=live_telemetry, physics_metrics=physics_metrics, vessel_res=vessel_res
+            dt=dt_cst, live_telemetry=live_telemetry, physics_metrics=physics_metrics, vessel_res=vessel_res
         )
         qv = qimen["qimen_vector"]
 
@@ -217,7 +232,7 @@ class GemMacroRLOrchestrator:
             "pressure_3h": float(physics_metrics.get("pressure_3h", live_telemetry.get("pressure_3h", 0.0))),
             "tide": float(physics_metrics.get("tide", live_telemetry.get("tide", 0.9))),
             "south_closed": 1.0 if ann.get("south_pier_closed_damage", True) else 0.0,
-            "wufu_in_port": 0.0 if wufu.get("is_docked_island", False) else 1.0,
+            "wufu_abnormal_detained": wufu_detained,
             "q_heaven_tide": qv["q_heaven_tide"],
             "q_earth_berth": qv["q_earth_berth"],
             "q_human_gate": qv["q_human_gate"],
@@ -233,27 +248,35 @@ class GemMacroRLOrchestrator:
 
         scored = []
         for c in cases:
-            sim = self._compute_similarity_pct(cur_vec, c)
+            sim = self._compute_rq_similarity_pct(cur_vec, c)
             scored.append((sim, c))
         scored.sort(key=lambda x: x[0], reverse=True)
 
         best_score, best_case = scored[0]
-        is_decisive = best_score >= 80.0
+        # 同類 Top-2 原型加權融合平滑（消除單一歷史樣本雜訊）
+        same_class_scores = [s for s, c in scored if int(c.get("veto", 0)) == int(best_case.get("veto", 0))]
+        if len(same_class_scores) >= 2:
+            fused_score = round(min(99.2, 0.78 * same_class_scores[0] + 0.22 * same_class_scores[1] + 1.8), 1)
+        else:
+            fused_score = best_score
+
+        is_decisive = fused_score >= self.DECISIVE_THRESHOLD_PCT
         matched_veto = int(best_case.get("veto", 0)) == 1
         cat = best_case.get("category", "UNKNOWN")
         cat_label = best_case.get("label", "歷史案例")
 
         if is_decisive and matched_veto:
-            msg = f"🔴 11D奇門RL智庫收斂 ({best_score}% >= 80%)：【{qimen['qimen_summary']}】高度吻合【{cat_label}】，灰色地帶坍縮為 VETO！"
+            msg = f"🔴 11D奇門RL智庫高置信收斂 ({fused_score}% >= 85%)：【{qimen['qimen_summary']}】吻合【{cat_label}】，灰色地帶坍縮為 VETO！"
         elif is_decisive and not matched_veto:
-            msg = f"🟢 11D奇門RL智庫收斂 ({best_score}% >= 80%)：【{qimen['qimen_summary']}】高度吻合【{cat_label}】，支援安全開窗。"
+            msg = f"🟢 11D奇門RL智庫高置信收斂 ({fused_score}% >= 85%)：【{qimen['qimen_summary']}】吻合【{cat_label}】，支援安全開窗作業。"
         else:
-            msg = f"🟡 11D奇門RL智庫觀望 ({best_score}% < 80%)：【{qimen['qimen_summary']}】，最接近【{cat_label}】。"
+            msg = f"🟡 11D奇門RL智庫觀望 ({fused_score}% < 85%)：【{qimen['qimen_summary']}】，最接近【{cat_label}】。"
 
         return {
-            "match_score": best_score,
+            "match_score": fused_score,
             "has_suggestion": True,
             "is_decisive_80": is_decisive,
+            "is_decisive_85": is_decisive,
             "rl_veto_triggered": bool(is_decisive and matched_veto),
             "rl_open_triggered": bool(is_decisive and not matched_veto),
             "matched_category": cat,

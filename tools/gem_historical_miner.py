@@ -138,7 +138,7 @@ class GemHistoricalDataMiner:
             "weff_south_crit": 10.17,
             "pressure_3h_crit": -1.40,
             "cv_overtop_crit": 0.10,
-            "rl_decisive_match_pct": 80.0
+            "rl_decisive_match_pct": 85.0
         }
 
     @staticmethod
@@ -459,7 +459,7 @@ class GemHistoricalDataMiner:
             "weff_south_crit": 10.17,
             "pressure_3h_crit": p3h_crit,
             "cv_overtop_crit": 0.10,
-            "rl_decisive_match_pct": 80.0
+            "rl_decisive_match_pct": 85.0
         }
 
         learned_scales, loocv_acc = self._optimize_11d_rl_weights(cases)

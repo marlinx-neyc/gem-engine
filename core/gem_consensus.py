@@ -120,8 +120,8 @@ class GemMultiSourceConsensus:
             qm_sum = rl_res.get("qimen_matrix", {}).get("qimen_summary", "")
             effective_official_label = f"🔴 實質封島 (11D奇門RL {rl_score}% 收斂)"
             effective_official_title = f"【11D奇門RL判別·封島】匹配度 {rl_score}% ({qm_sum}) 吻合「{rl_label}」"
-            consensus_status = f"🧠【11D奇門RL智庫收斂 {rl_score}% ≥ 80%】[{qm_sum}] 吻合「{rl_label}」，六十二卦灰色地帶坍縮為剛性封島！"
-            trust_score = f"{rl_score}% (11D奇門+RL智庫>=80%精準判別)"
+            consensus_status = f"🧠【11D奇門RL智庫收斂 {rl_score}% ≥ 85%】[{qm_sum}] 吻合「{rl_label}」，六十二卦灰色地帶坍縮為剛性封島！"
+            trust_score = f"{rl_score}% (11D奇門+RL智庫>=85%精準判別)"
             final_action = "🔴 0.0% 物理 VETO 熔斷（11D奇門RL例外封島收斂）" if in_boat_hours else "🌙 夜間休整期（預警：🔴 11D奇門RL封島）"
 
         elif phys_veto or bh_rough or (ais_absent_in_hours and (gov_unreachable or float(m.get("hs_pier_north", 0)) > 0.90)):

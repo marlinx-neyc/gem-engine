@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "updated_at": "2026-11-21 19:49:14 CST",
+    "updated_at": "2026-11-21 19:52:46 CST",
     "spec": "GEM-ENG-SPEC-2026-V66.5-10YR-RL-V112",
     "horizon": "2016–2026 (近十年跨尺度樣本庫)",
     "total_cases": 25
@@ -13,7 +13,7 @@
     "weff_south_crit": 10.17,
     "pressure_3h_crit": -1.2,
     "cv_overtop_crit": 0.1,
-    "rl_decisive_match_pct": 80.0
+    "rl_decisive_match_pct": 85.0
   },
   "learned_feature_scales": {
     "hs": [
@@ -62,7 +62,7 @@
     ]
   },
   "training_plan_report": {
-    "last_trained_at": "2026-11-21 19:49:14 CST",
+    "last_trained_at": "2026-11-21 19:52:46 CST",
     "last_deep_trained_date": "2026-11-21",
     "time_horizon_span": "2016–2026 (近十年跨尺度樣本庫)",
     "years_covered": [
