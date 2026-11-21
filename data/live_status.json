@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-21 14:32:59 CST",
+  "updated_at": "2026-11-21 14:38:50 CST",
   "decision": "🔴 0.0% 物理 VETO 熔斷（RL智庫例外封島收斂）",
   "consensus_status": "🧠【Safe RL 智庫精準收斂 99.5% ≥ 80%】匹配「例外封島（鋒面低壓過境＋南岸災損封閉＋北岸波高壓線超標）」，將灰色地帶坍縮為剛性封島！",
   "trust_score": "99.5% (Safe RL 智庫>=80%精準判別)",
@@ -22,7 +22,7 @@
   "official_body": "東北角暨宜蘭海岸國家風景區管理處：今日未檢出全島封島通告（註：南岸碼頭及401步道因薔琵颱風災損暫停開放）。",
   "announcement_source": "official_web",
   "scraper_diagnostics": {
-    "checked_at": "2026-11-21 14:32:46 CST",
+    "checked_at": "2026-11-21 14:38:42 CST",
     "matched_url": "none",
     "http_statuses": [
       "fb_graph:NO_TOKEN",
@@ -62,11 +62,11 @@
   "cctv_status": {
     "cctv_cv_rate": 0.0,
     "t_overtop_pct": 0.0,
-    "fb_north_override": 1.96,
-    "fb_south_override": 1.96,
+    "fb_north_override": 1.95,
+    "fb_south_override": 1.95,
     "is_overtopping": false,
-    "north_cam_status": "🟢 LIVE 30FPS (FB 1.96m)",
-    "south_cam_status": "🟢 LIVE 30FPS (FB 1.96m)",
+    "north_cam_status": "🟢 LIVE 30FPS (FB 1.95m)",
+    "south_cam_status": "🟢 LIVE 30FPS (FB 1.95m)",
     "visual_eye_status": "🟢 Vision-PINN 畫面顯示碼頭乾舷合規"
   },
   "typhoon_info": {
@@ -154,13 +154,13 @@
     "weff": 2.29,
     "kw": 0.78,
     "delta_theta": 19.0,
-    "tide": 1.24,
+    "tide": 1.25,
     "squat_north": 0.34,
     "squat_south_3kt": 0.01,
-    "ukc_north": 7.21,
-    "ukc_south": 9.02,
-    "fb_north": 1.96,
-    "fb_south": 1.96,
+    "ukc_north": 7.22,
+    "ukc_south": 9.03,
+    "fb_north": 1.95,
+    "fb_south": 1.95,
     "cv_rate": 0.0,
     "south_pier_closed": true,
     "k_flux": 1.049,
@@ -170,8 +170,8 @@
     "evac_minutes": 20,
     "milk_sea_peak": "13:30"
   },
-  "marquee_msg": "📢 官方實質判定：【Safe RL 智庫判別·封島】匹配度 99.5% 吻合「例外封島（鋒面低壓過境＋南岸災損封閉＋北岸波高壓線超標）」 ｜ 🚢 位置與路徑：🔴 五福號船班時段停泊烏石港未出港 (水文推演備援·母港) / 📡 TDX雙通道已連線·海域暫無AIS回傳 (水文推演備援) ｜ 🤖 GEM 四維仲裁：🔴 0.0% 物理 VETO 熔斷（RL智庫例外封島收斂） (Hs:1.12m, Tp:5.6s, 南/北折算:0.81/0.99m) ｜ ⏱️ 校核：2026-11-21 14:32:59 CST",
-  "spec_version": "GEM-ENG-SPEC-2026-V66.5-RL-V107",
+  "marquee_msg": "📢 官方實質判定：【Safe RL 智庫判別·封島】匹配度 99.5% 吻合「例外封島（鋒面低壓過境＋南岸災損封閉＋北岸波高壓線超標）」 ｜ 🚢 位置與路徑：🔴 五福號船班時段停泊烏石港未出港 (水文推演備援·母港) / 📡 TDX雙通道已連線·海域暫無AIS回傳 (水文推演備援) ｜ 🤖 GEM 四維仲裁：🔴 0.0% 物理 VETO 熔斷（RL智庫例外封島收斂） (Hs:1.12m, Tp:5.6s, 南/北折算:0.81/0.99m) ｜ ⏱️ 校核：2026-11-21 14:38:50 CST",
+  "spec_version": "GEM-ENG-SPEC-2026-V66.5-QIMEN-RL-V108",
   "rl_intel_match": {
     "match_score": 99.5,
     "has_suggestion": true,
@@ -181,7 +181,35 @@
     "matched_category": "EXCEPTION_CLOSURE",
     "matched_case_id": "SEED_EXCEPTION_02",
     "matched_label": "例外封島（鋒面低壓過境＋南岸災損封閉＋北岸波高壓線超標）",
-    "suggestion": "🔴 Safe RL 智庫精準收斂 (99.5% >= 80%)：高度吻合【例外封島（鋒面低壓過境＋南岸災損封閉＋北岸波高壓線超標）】，灰色地帶坍縮為 VETO 封島！"
+    "qimen_matrix": {
+      "w_qimen": 0.203,
+      "qimen_gate": "死門/驚門 (凶門熔斷)",
+      "qimen_deity": "白虎/玄武 (鋒面氣壓驟降＋情報暗湧)",
+      "qimen_heaven": "陰遁·立冬下元 (未時, 月齡11.1日, 引潮係數0.512)",
+      "qimen_earth": "離宮(南岸)災損封閉 ＋ 艮宮(東北)沖擊坎宮(北岸超限)，全島無可用泊位",
+      "qimen_summary": "陰遁·立冬下元｜死門/驚門｜白虎/玄武",
+      "qimen_vector": {
+        "q_heaven_tide": 0.632,
+        "q_earth_berth": 0.15,
+        "q_human_gate": 0.12,
+        "q_deity_anomaly": 0.88
+      }
+    },
+    "suggestion": "🔴 11D奇門RL智庫收斂 (99.5% >= 80%)：【陰遁·立冬下元｜死門/驚門｜白虎/玄武】高度吻合【例外封島（鋒面低壓過境＋南岸災損封閉＋北岸波高壓線超標）】，灰色地帶坍縮為 VETO！"
+  },
+  "qimen_matrix": {
+    "w_qimen": 0.203,
+    "qimen_gate": "死門/驚門 (凶門熔斷)",
+    "qimen_deity": "白虎/玄武 (鋒面氣壓驟降＋情報暗湧)",
+    "qimen_heaven": "陰遁·立冬下元 (未時, 月齡11.1日, 引潮係數0.512)",
+    "qimen_earth": "離宮(南岸)災損封閉 ＋ 艮宮(東北)沖擊坎宮(北岸超限)，全島無可用泊位",
+    "qimen_summary": "陰遁·立冬下元｜死門/驚門｜白虎/玄武",
+    "qimen_vector": {
+      "q_heaven_tide": 0.632,
+      "q_earth_berth": 0.15,
+      "q_human_gate": 0.12,
+      "q_deity_anomaly": 0.88
+    }
   },
   "action_id": 0,
   "decision_code": "Q4",
@@ -194,9 +222,9 @@
     "hs_pier_m": 0.81,
     "hs_pier_north_m": 0.99,
     "w_local_ms": 2.29,
-    "ukc_m": 9.02,
-    "ukc_north_m": 7.21,
-    "fb_pier_m": 1.96,
+    "ukc_m": 9.03,
+    "ukc_north_m": 7.22,
+    "fb_pier_m": 1.95,
     "s_squat_m": 0.01,
     "s_squat_north_m": 0.34,
     "k_flux": 1.049,

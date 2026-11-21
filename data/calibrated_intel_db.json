@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "updated_at": "2026-11-21 14:32:59 CST",
-    "spec": "GEM-ENG-SPEC-2026-V66.5-RL-INTEL",
+    "updated_at": "2026-11-21 14:38:50 CST",
+    "spec": "GEM-ENG-SPEC-2026-V66.5-QIMEN-RL-V108",
     "total_cases": 5
   },
   "historical_cases": [
@@ -71,16 +71,21 @@
     },
     {
       "case_id": "RL_20261121",
-      "time": "2026-11-21 14:32",
+      "time": "2026-11-21 14:38",
       "category": "EXCEPTION_CLOSURE",
-      "label": "例外封島（【Safe RL 智庫判別·封島】匹配度 99.5% 吻）",
+      "label": "例外封島（【Safe RL 智庫判別·封島】匹配度 99.5%）",
       "hs": 1.12,
       "tp": 5.6,
       "weff": 2.29,
       "pressure_3h": -1.6,
-      "tide": 1.24,
+      "tide": 1.25,
       "south_closed": 1,
       "wufu_in_port": 1,
+      "q_heaven_tide": 0.632,
+      "q_earth_berth": 0.15,
+      "q_human_gate": 0.12,
+      "q_deity_anomaly": 0.88,
+      "qimen_summary": "陰遁·立冬下元｜死門/驚門｜白虎/玄武",
       "veto": 1,
       "weight": 1.1,
       "action": "【Safe RL 智庫判別·封島】匹配度 99.5% 吻合「例外封島（鋒面低壓過境＋南岸災損封閉＋北岸波高壓線超標）」"

@@ -89,7 +89,9 @@ class GemConsensusOrchestrator:
         vessel_res = self.vessel.track_and_back_calculate(telemetry)
         physics_res = self.physics.evaluate_physics(telemetry, cctv_res)
         rl_res = self.macro_rl.evaluate_rl_match_with_hysteresis(
-            live_telemetry=telemetry, physics_metrics=physics_res.get("metrics", {}), vessel_res=vessel_res
+            live_telemetry=telemetry,
+            physics_metrics=physics_res.get("metrics", {}),
+            vessel_res=vessel_res
         )
 
         consensus_res = self.consensus.arbitrate_consensus(
@@ -97,7 +99,6 @@ class GemConsensusOrchestrator:
             cctv_res=cctv_res, pm_forecast=pm_fc, existing_state=existing_state, rl_res=rl_res
         )
 
-        # 自主強化學習回饋寫入智庫（官方公告/人工覆寫/四維辯證封島自動沉澱）
         is_confirmed_signal = bool(
             announcement.get("official_veto", 0) == 1
             or consensus_res.get("manual_override", {}).get("active", False)
@@ -109,6 +110,7 @@ class GemConsensusOrchestrator:
                 physics_metrics=physics_res.get("metrics", {}),
                 final_veto=int(consensus_res.get("effective_official_veto", 0)),
                 reason_label=consensus_res.get("effective_official_title", consensus_res.get("final_action", "")),
+                qimen_matrix=rl_res.get("qimen_matrix", {}),
                 is_manual_or_official=bool(announcement.get("official_veto", 0) == 1 or consensus_res.get("manual_override", {}).get("active", False))
             )
 
@@ -120,10 +122,11 @@ class GemConsensusOrchestrator:
 
         m_v665 = physics_res.get("metrics", {})
         ty_info = telemetry.get("typhoon_info", {})
-        live_payload["spec_version"] = "GEM-ENG-SPEC-2026-V66.5-RL-V107"
+        live_payload["spec_version"] = "GEM-ENG-SPEC-2026-V66.5-QIMEN-RL-V108"
         live_payload["rl_intel_match"] = rl_res
+        live_payload["qimen_matrix"] = rl_res.get("qimen_matrix", {})
         live_payload["action_id"] = physics_res.get("action_id", 0)
-        live_payload["decision_code"] = f"Q{physics_res.get('action_id', 0)}" if physics_res.get("action_id") in [1,2,3] else "Q4"
+        live_payload["decision_code"] = f"Q{physics_res.get('action_id', 0)}" if physics_res.get('action_id') in [1,2,3] else "Q4"
         live_payload["emergency_centers"] = ty_info.get("emergency_centers", {"central": "未開設", "yilan": "未開設", "new_taipei": "未開設"})
         live_payload["physics_metrics"] = {
             "hs_pier_m": m_v665.get("hs_pier_south", 0.0),
@@ -184,4 +187,4 @@ class GemConsensusOrchestrator:
 
 if __name__ == "__main__":
     res = GemConsensusOrchestrator().execute_pipeline()
-    print(f"🎯 最終四維多重驗證裁示: {res['final_action']} (HASH={res['state_hash']}, AIS={res['ais_diagnostics']})")
+    print(f"🎯 最終四維多重驗證裁示: {res['final_action']} (HASH={res['state_hash']})")
