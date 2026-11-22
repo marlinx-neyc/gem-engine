@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "updated_at": "2026-11-22 17:24:59 CST",
+    "updated_at": "2026-11-23 01:17:51 CST",
     "spec": "GEM-ENG-SPEC-2026-V66.5-10YR-RL-V112",
     "horizon": "2016–2026 (近十年跨尺度樣本庫)",
     "total_cases": 25
@@ -62,7 +62,7 @@
     ]
   },
   "training_plan_report": {
-    "last_trained_at": "2026-11-22 17:24:59 CST",
+    "last_trained_at": "2026-11-23 01:17:51 CST",
     "last_deep_trained_date": "2026-11-21",
     "time_horizon_span": "2016–2026 (近十年跨尺度樣本庫)",
     "years_covered": [
@@ -88,8 +88,8 @@
     "new_mined_official_cases": 0,
     "tdx_behavior_summary": {
       "total_points": 15,
-      "docked_ratio": 0.6,
-      "in_port_ratio": 0.4,
+      "docked_ratio": 0.53,
+      "in_port_ratio": 0.47,
       "retreat_events": 0
     },
     "loocv_accuracy_pct": 100.0,
