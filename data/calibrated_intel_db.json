@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "updated_at": "2026-11-21 21:21:41 CST",
+    "updated_at": "2026-11-22 09:55:18 CST",
     "spec": "GEM-ENG-SPEC-2026-V66.5-10YR-RL-V112",
     "horizon": "2016–2026 (近十年跨尺度樣本庫)",
     "total_cases": 25
@@ -62,7 +62,7 @@
     ]
   },
   "training_plan_report": {
-    "last_trained_at": "2026-11-21 21:21:41 CST",
+    "last_trained_at": "2026-11-22 09:55:18 CST",
     "last_deep_trained_date": "2026-11-21",
     "time_horizon_span": "2016–2026 (近十年跨尺度樣本庫)",
     "years_covered": [
