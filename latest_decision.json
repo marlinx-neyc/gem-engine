@@ -1,61 +1,41 @@
 {
-  "updated_at": "2026-11-23 10:17:25 CST",
-  "decision": "🟢 100.0% Q1 全線開放 (靠泊北岸主泊位)",
-  "consensus_status": "🟢【四維綜合校核】時段: 日間船班營運時段 (07:00-16:30) ｜ 📡 TDX雙通道已連線·海域暫無AIS回傳 (水文推演備援) ｜ 實時浪高 Hs=1.0m",
-  "trust_score": "94.0% (水動力+公告融合)",
-  "p_veto": 0.039,
-  "web_official_veto": 0,
+  "updated_at": "2026-11-23 18:55:21 CST",
+  "decision": "🔴 0.0% 物理 VETO 熔斷（官方公告封島）",
+  "consensus_status": "🔴【官方公告封島】【風管處公告】受海象影響，(23)日龜山島實施封島 ｜ 日期面板 D0 已同步修正為封島！",
+  "trust_score": "100.0% (官方正式公告)",
+  "p_veto": 0.0373,
+  "web_official_veto": 1,
   "announcement_scope": "FULL_DAY",
-  "official_veto": 0,
-  "tomorrow_veto": 0,
+  "official_veto": 1,
+  "tomorrow_veto": 1,
   "manual_override": {
     "active": false
   },
   "four_way_summary": {
-    "pos": "🟢 五福號靠泊北岸戒護中 (水文推演備援·北岸)",
+    "pos": "🌙 五福號非營運時段停泊烏石港母港 (水文推演備援·母港)",
     "traj": "📡 TDX雙通道已連線·海域暫無AIS回傳 (水文推演備援)",
     "phys": "🟢 100.0% Q1 全線開放",
-    "off": "🟢 常態營運"
+    "off": "🔴 官方公告封島"
   },
-  "effective_official_label": "🟢 常態營運",
-  "official_title": "【風管處通告】北岸開放常規營運（南岸碼頭災損封閉中）",
-  "official_body": "東北角暨宜蘭海岸國家風景區管理處：今日未檢出全島封島通告（註：南岸碼頭及401步道因薔琵颱風災損暫停開放）。",
-  "announcement_source": "official_web",
+  "effective_official_label": "🔴 官方公告封島",
+  "official_title": "【風管處公告】受海象影響，(23)日龜山島實施封島",
+  "official_body": "島 探索龜山島 登島須知 線上申請 登島線上申請 近兩月登島人數 申請查詢 船舶資訊 相關法規 龜山島生態旅遊申請須知 龜山島生態旅遊作業管理要點 登島收費辦法及基準表 表單下載 Guishan Island Info For Overseas Visitors 龜山島海外旅客專區 ::: 封島訊息： 115年11月24日，受東北季風影響，今日封島一天，不便之處，",
+  "announcement_source": "official_web_live",
   "scraper_diagnostics": {
-    "checked_at": "2026-11-23 10:16:45 CST",
-    "matched_url": "none",
+    "checked_at": "2026-11-23 18:55:05 CST",
+    "matched_url": "https://events.necoast-nsa.gov.tw/coast/",
     "http_statuses": [
       "fb_graph:NO_TOKEN",
       "fb_mbasic:200",
-      "events.necoast-nsa.gov.tw/coas:200",
-      "events.necoast-nsa.gov.tw/coas:200",
-      "www.necoast-nsa.gov.tw/News.as:404",
-      "r.jina.ai/https::200",
-      "www.necoast-nsa.gov.tw/Article:200",
-      "www.necoast-nsa.gov.tw/Article:200",
-      "www.necoast-nsa.gov.tw/:200",
-      "events.necoast-nsa.gov.tw/coas:200",
-      "events.necoast-nsa.gov.tw/coas:200",
-      "events.necoast-nsa.gov.tw/coas:200",
-      "events.necoast-nsa.gov.tw/coas:200",
-      "events.necoast-nsa.gov.tw/coas:200",
-      "www.necoast-nsa.gov.tw/Article:200",
-      "www.necoast-nsa.gov.tw/News-Co:200",
-      "www.necoast-nsa.gov.tw/Article:200",
-      "www.necoast-nsa.gov.tw/Article:200",
-      "www.necoast-nsa.gov.tw/Article:200",
-      "www.necoast-nsa.gov.tw/Article:200",
-      "www.necoast-nsa.gov.tw/Article:200",
-      "rss_1:200",
-      "rss_2:200"
+      "events.necoast-nsa.gov.tw/coas:200"
     ],
-    "raw_snippet": "未檢出今日全島封島公告",
-    "filter_reason": "no_active_closure_found"
+    "raw_snippet": "島 探索龜山島 登島須知 線上申請 登島線上申請 近兩月登島人數 申請查詢 船舶資訊 相關法規 龜山島生態旅遊申請須知 龜山島生態旅遊作業管理要點 登島收費辦法及基準表 表單下載 Guishan Island Info For Overseas Visitors 龜山島海外旅客專",
+    "filter_reason": "matched_date"
   },
-  "official_wufu_lat": 24.84375,
-  "official_wufu_lon": 121.94378,
-  "official_wufu_position": "24.84375° N, 121.94378° E",
-  "official_wufu_status": "🟢 五福號靠泊北岸戒護中 (水文推演備援·北岸)",
+  "official_wufu_lat": 24.86872,
+  "official_wufu_lon": 121.84154,
+  "official_wufu_position": "24.86872° N, 121.84154° E",
+  "official_wufu_status": "🌙 五福號非營運時段停泊烏石港母港 (水文推演備援·母港)",
   "official_wufu_vector": "📡 TDX雙通道已連線·海域暫無AIS回傳 (水文推演備援)",
   "official_wufu_is_real_ais": false,
   "ais_diagnostics": [
@@ -68,18 +48,18 @@
     "tdx_mqtt:rc=Success,msgs=0",
     "custom_ais:NO_URL"
   ],
-  "official_wufu_dist_wushi": "10.7 km",
-  "official_wufu_dist_piers": "5.5m / 545.1m",
-  "current_window_name": "日間船班營運時段 (07:00-16:30)",
-  "wushi_port_flux_ships_hr": 42.0,
+  "official_wufu_dist_wushi": "0.0 km",
+  "official_wufu_dist_piers": "10678.6m / 10400.2m",
+  "current_window_name": "夜間休整離峰期",
+  "wushi_port_flux_ships_hr": 0.0,
   "cctv_status": {
     "cctv_cv_rate": 0.0,
     "t_overtop_pct": 0.0,
-    "fb_north_override": 2.75,
-    "fb_south_override": 2.75,
+    "fb_north_override": 2.42,
+    "fb_south_override": 2.42,
     "is_overtopping": false,
-    "north_cam_status": "🟢 LIVE 30FPS (FB 2.75m)",
-    "south_cam_status": "🟢 LIVE 30FPS (FB 2.75m)",
+    "north_cam_status": "🟢 LIVE 30FPS (FB 2.42m)",
+    "south_cam_status": "🟢 LIVE 30FPS (FB 2.42m)",
     "visual_eye_status": "🟢 Vision-PINN 畫面顯示碼頭乾舷合規"
   },
   "typhoon_info": {
@@ -103,49 +83,49 @@
       "date": "11-23",
       "hs_max": 1.08,
       "tp_max": 6.7,
-      "w_max": 5.8
+      "w_max": 4.8
     },
     {
       "date": "11-24",
       "hs_max": 2.08,
       "tp_max": 7.2,
-      "w_max": 5.7
+      "w_max": 5.5
     },
     {
       "date": "11-25",
       "hs_max": 2.06,
       "tp_max": 7.7,
-      "w_max": 4.7
+      "w_max": 4.4
     },
     {
       "date": "11-26",
       "hs_max": 1.48,
       "tp_max": 7.6,
-      "w_max": 2.3
+      "w_max": 2.5
     },
     {
       "date": "11-27",
       "hs_max": 1.06,
       "tp_max": 7.3,
-      "w_max": 2.5
+      "w_max": 2.3
     },
     {
       "date": "11-28",
       "hs_max": 1.16,
       "tp_max": 7.1,
-      "w_max": 4.0
+      "w_max": 4.3
     },
     {
       "date": "11-29",
       "hs_max": 1.36,
       "tp_max": 6.5,
-      "w_max": 4.3
+      "w_max": 4.6
     }
   ],
   "pm_forecast": {
     "pm_hs_max": 1.08,
     "pm_tp_max": 5.6,
-    "hs_slope_3h": 0.08,
+    "hs_slope_3h": -0.02,
     "afternoon_risk": false,
     "risk_label": "🟢 午後海象受控 (PM Hs=1.08m, Tp=5.6s)"
   },
@@ -153,71 +133,71 @@
     "is_swell_alert": false,
     "status_tag": "🟢 海象平穩受控",
     "impact_window_str": "無明顯長浪湧浪漫頂威脅",
-    "advice": "目前外海波高 Hs=1.0m、週期 Tp=5.2s，經地形折算後符合靠泊安全線，可維持常規登島作業。",
-    "cg_speed_ms": 4.06,
-    "cg_knots": 7.9,
-    "energy_flux": 5.2
+    "advice": "目前外海波高 Hs=1.06m、週期 Tp=5.6s，經地形折算後符合靠泊安全線，可維持常規登島作業。",
+    "cg_speed_ms": 4.37,
+    "cg_knots": 8.5,
+    "energy_flux": 6.29
   },
   "metrics": {
-    "hs": 1.0,
-    "tp": 5.2,
-    "pressure": 994.9,
-    "pressure_3h": 0.3,
-    "hs_pier_north": 0.88,
-    "hs_pier_south": 0.72,
+    "hs": 1.06,
+    "tp": 5.6,
+    "pressure": 991.9,
+    "pressure_3h": 0.1,
+    "hs_pier_north": 0.94,
+    "hs_pier_south": 0.76,
     "kd_north": 0.883,
     "kd_south": 0.72,
-    "w": 4.3,
-    "weff": 2.59,
+    "w": 3.6,
+    "weff": 1.46,
     "kw": 1.0,
-    "delta_theta": 127.0,
-    "tide": 0.45,
+    "delta_theta": 114.0,
+    "tide": 0.78,
     "squat_north": 0.34,
     "squat_south_3kt": 0.01,
-    "ukc_north": 6.53,
-    "ukc_south": 8.32,
-    "fb_north": 2.75,
-    "fb_south": 2.75,
+    "ukc_north": 6.8,
+    "ukc_south": 8.61,
+    "fb_north": 2.42,
+    "fb_south": 2.42,
     "cv_rate": 0.0,
     "south_pier_closed": true,
-    "k_flux": 1.479,
-    "v_impedance": 4.64,
-    "e_net": 0.3188,
-    "p_veto": 0.039,
+    "k_flux": 1.426,
+    "v_impedance": 4.61,
+    "e_net": 0.3093,
+    "p_veto": 0.0373,
     "evac_minutes": 20,
     "milk_sea_peak": "13:30"
   },
-  "marquee_msg": "📢 官方實質判定：【風管處通告】北岸開放常規營運（南岸碼頭災損封閉中） ｜ 🚢 位置與路徑：🟢 五福號靠泊北岸戒護中 (水文推演備援·北岸) / 📡 TDX雙通道已連線·海域暫無AIS回傳 (水文推演備援) ｜ 🤖 GEM 四維仲裁：🟢 100.0% Q1 全線開放 (靠泊北岸主泊位) (Hs:1.0m, Tp:5.2s, 南/北折算:0.72/0.88m) ｜ ⏱️ 校核：2026-11-23 10:17:25 CST",
+  "marquee_msg": "📢 官方實質判定：【風管處公告】受海象影響，(23)日龜山島實施封島 ｜ 🚢 位置與路徑：🌙 五福號非營運時段停泊烏石港母港 (水文推演備援·母港) / 📡 TDX雙通道已連線·海域暫無AIS回傳 (水文推演備援) ｜ 🤖 GEM 四維仲裁：🔴 0.0% 物理 VETO 熔斷（官方公告封島） (Hs:1.06m, Tp:5.6s, 南/北折算:0.76/0.94m) ｜ ⏱️ 校核：2026-11-23 18:55:21 CST",
   "spec_version": "GEM-ENG-SPEC-2026-V66.5-QIMEN-RL-V110",
   "rl_intel_match": {
-    "match_score": 92.5,
+    "match_score": 91.9,
     "has_suggestion": true,
     "is_decisive_80": true,
     "is_decisive_85": true,
     "rl_veto_triggered": false,
     "rl_open_triggered": true,
     "matched_category": "GRAY_ZONE_OPEN",
-    "matched_case_id": "DECADE_2025_0415",
-    "matched_label": "2025清明穀雨交界開島（南岸封閉但北岸波低穩態）",
+    "matched_case_id": "SEED_GRAY_OPEN_01",
+    "matched_label": "灰色地帶開島（微浪低風＋五福號駐島戒護）",
     "qimen_matrix": {
-      "w_qimen": 0.575,
-      "qimen_gate": "生門 (調撥偏吉)",
-      "qimen_deity": "值符 (八神之首·海象清朗)",
-      "qimen_heaven": "陰遁·小雪上元 (巳時, 月齡13.0日, 引潮係數0.871)",
+      "w_qimen": 0.542,
+      "qimen_gate": "休門 (夜間休整養息)",
+      "qimen_deity": "太陰/六合 (常態微幅波動)",
+      "qimen_heaven": "陰遁·小雪上元 (酉時, 月齡13.4日, 引潮係數0.92)",
       "qimen_earth": "離宮(南岸)災損封閉，單靠坎宮(北岸)獨撐",
-      "qimen_summary": "陰遁·小雪上元｜生門｜值符",
+      "qimen_summary": "陰遁·小雪上元｜休門｜太陰/六合",
       "qimen_vector": {
-        "q_heaven_tide": 0.829,
+        "q_heaven_tide": 0.856,
         "q_earth_berth": 0.62,
-        "q_human_gate": 0.84,
-        "q_deity_anomaly": 0.15
+        "q_human_gate": 0.8,
+        "q_deity_anomaly": 0.25
       }
     },
-    "suggestion": "🟢 11D奇門RL智庫高置信收斂 (92.5% >= 85%)：【陰遁·小雪上元｜生門｜值符】吻合【2025清明穀雨交界開島（南岸封閉但北岸波低穩態）】，支援安全開窗作業。"
+    "suggestion": "🟢 11D奇門RL智庫高置信收斂 (91.9% >= 85%)：【陰遁·小雪上元｜休門｜太陰/六合】吻合【灰色地帶開島（微浪低風＋五福號駐島戒護）】，支援安全開窗作業。"
   },
   "rl_training_plan": {
-    "last_trained_at": "2026-11-23 10:16:45 CST",
-    "last_deep_trained_date": "2026-11-21",
+    "last_trained_at": "2026-11-23 18:55:00 CST",
+    "last_deep_trained_date": "2026-11-23",
     "time_horizon_span": "2016–2026 (近十年跨尺度樣本庫)",
     "years_covered": [
       2016,
@@ -233,25 +213,25 @@
       2026
     ],
     "schedule_policy": "即時線上增量學習 ＋ 每日 18:00 CST 近十年 (2016-2026) 四源深度回溯訓練",
-    "total_training_samples": 25,
+    "total_training_samples": 28,
     "category_breakdown": {
-      "routine_closure": 11,
+      "routine_closure": 14,
       "exception_closure": 10,
       "gray_zone_open": 4
     },
-    "new_mined_official_cases": 0,
+    "new_mined_official_cases": 3,
     "tdx_behavior_summary": {
       "total_points": 15,
-      "docked_ratio": 0.53,
-      "in_port_ratio": 0.47,
+      "docked_ratio": 0.6,
+      "in_port_ratio": 0.4,
       "retreat_events": 0
     },
     "loocv_accuracy_pct": 100.0,
     "key_value_youden_j": {
-      "hs_pier_north_crit": "0.95m (J=0.881)",
-      "tp_swell_crit": "11.2s (J=0.491)",
-      "pressure_3h_crit": "-1.2hPa/3h (J=0.556)",
-      "weff_north_crit": "7.5m/s (J=0.437)"
+      "hs_pier_north_crit": "0.95m (J=0.899)",
+      "tp_swell_crit": "11.2s (J=0.468)",
+      "pressure_3h_crit": "-1.2hPa/3h (J=0.484)",
+      "weff_north_crit": "7.5m/s (J=0.377)"
     }
   },
   "learned_key_values": {
@@ -265,17 +245,17 @@
     "rl_decisive_match_pct": 85.0
   },
   "qimen_matrix": {
-    "w_qimen": 0.575,
-    "qimen_gate": "生門 (調撥偏吉)",
-    "qimen_deity": "值符 (八神之首·海象清朗)",
-    "qimen_heaven": "陰遁·小雪上元 (巳時, 月齡13.0日, 引潮係數0.871)",
+    "w_qimen": 0.542,
+    "qimen_gate": "休門 (夜間休整養息)",
+    "qimen_deity": "太陰/六合 (常態微幅波動)",
+    "qimen_heaven": "陰遁·小雪上元 (酉時, 月齡13.4日, 引潮係數0.92)",
     "qimen_earth": "離宮(南岸)災損封閉，單靠坎宮(北岸)獨撐",
-    "qimen_summary": "陰遁·小雪上元｜生門｜值符",
+    "qimen_summary": "陰遁·小雪上元｜休門｜太陰/六合",
     "qimen_vector": {
-      "q_heaven_tide": 0.829,
+      "q_heaven_tide": 0.856,
       "q_earth_berth": 0.62,
-      "q_human_gate": 0.84,
-      "q_deity_anomaly": 0.15
+      "q_human_gate": 0.8,
+      "q_deity_anomaly": 0.25
     }
   },
   "action_id": 2,
@@ -286,22 +266,22 @@
     "new_taipei": "未開設"
   },
   "physics_metrics": {
-    "hs_pier_m": 0.72,
-    "hs_pier_north_m": 0.88,
-    "w_local_ms": 2.59,
-    "ukc_m": 8.32,
-    "ukc_north_m": 6.53,
-    "fb_pier_m": 2.75,
+    "hs_pier_m": 0.76,
+    "hs_pier_north_m": 0.94,
+    "w_local_ms": 1.46,
+    "ukc_m": 8.61,
+    "ukc_north_m": 6.8,
+    "fb_pier_m": 2.42,
     "s_squat_m": 0.01,
     "s_squat_north_m": 0.34,
-    "k_flux": 1.479,
-    "v_impedance": 4.64,
-    "e_net": 0.3188,
-    "p_veto": 0.039,
+    "k_flux": 1.426,
+    "v_impedance": 4.61,
+    "e_net": 0.3093,
+    "p_veto": 0.0373,
     "evac_minutes": 20,
     "milk_sea_peak": "13:30",
     "has_veto": false,
     "is_tier0": false
   },
-  "state_hash": "5ca7f19998ee941b753cad608a31b605adf960e7fff734c38e37574fb4423aa5"
+  "state_hash": "ab2852efd85b7d10ae306d81aa27dc5ffc4374169379d5dfed6ac7763caef888"
 }
