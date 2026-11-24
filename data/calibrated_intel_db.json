@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "updated_at": "2026-11-23 18:55:21 CST",
+    "updated_at": "2026-11-24 13:45:22 CST",
     "spec": "GEM-ENG-SPEC-2026-V66.5-10YR-RL-V112",
     "horizon": "2016–2026 (近十年跨尺度樣本庫)",
-    "total_cases": 29
+    "total_cases": 30
   },
   "learned_key_values": {
     "hs_pier_north_crit": 0.93,
@@ -18,51 +18,51 @@
   "learned_feature_scales": {
     "hs": [
       0.517,
-      0.2155
+      0.2167
     ],
     "tp": [
       2.875,
-      0.0973
+      0.0948
     ],
     "weff": [
       3.45,
-      0.0766
+      0.076
     ],
     "pressure_3h": [
       1.15,
-      0.0996
+      0.1011
     ],
     "tide": [
       0.517,
-      0.0343
+      0.0345
     ],
     "south_closed": [
       0.575,
-      0.0679
+      0.068
     ],
     "wufu_in_port": [
       0.575,
-      0.1582
+      0.158
     ],
     "q_heaven_tide": [
       0.402,
-      0.0404
+      0.0403
     ],
     "q_earth_berth": [
       0.402,
-      0.0482
+      0.0484
     ],
     "q_human_gate": [
       0.402,
-      0.067
+      0.0672
     ],
     "q_deity_anomaly": [
       0.402,
-      0.0949
+      0.0948
     ]
   },
   "training_plan_report": {
-    "last_trained_at": "2026-11-23 18:55:21 CST",
+    "last_trained_at": "2026-11-24 13:45:22 CST",
     "last_deep_trained_date": "2026-11-23",
     "time_horizon_span": "2016–2026 (近十年跨尺度樣本庫)",
     "years_covered": [
@@ -79,9 +79,9 @@
       2026
     ],
     "schedule_policy": "即時線上增量學習 ＋ 每日 18:00 CST 近十年 (2016-2026) 四源深度回溯訓練",
-    "total_training_samples": 29,
+    "total_training_samples": 30,
     "category_breakdown": {
-      "routine_closure": 14,
+      "routine_closure": 15,
       "exception_closure": 11,
       "gray_zone_open": 4
     },
@@ -94,10 +94,10 @@
     },
     "loocv_accuracy_pct": 100.0,
     "key_value_youden_j": {
-      "hs_pier_north_crit": "0.93m (J=0.904)",
-      "tp_swell_crit": "11.2s (J=0.446)",
-      "pressure_3h_crit": "-1.2hPa/3h (J=0.462)",
-      "weff_north_crit": "7.5m/s (J=0.359)"
+      "hs_pier_north_crit": "0.93m (J=0.909)",
+      "tp_swell_crit": "11.2s (J=0.425)",
+      "pressure_3h_crit": "-1.2hPa/3h (J=0.485)",
+      "weff_north_crit": "7.5m/s (J=0.342)"
     }
   },
   "historical_cases": [
@@ -761,6 +761,30 @@
       "veto": 1,
       "weight": 1.35,
       "action": "【風管處公告】受海象影響，(23)日龜山島實施封島"
+    },
+    {
+      "case_id": "RL_20261124",
+      "time": "2026-11-24 13:45",
+      "year": 2026,
+      "category": "ROUTINE_CLOSURE",
+      "label": "例行性封島（【風管處公告】受海象影響，(24)日龜山島實施封島）",
+      "hs": 1.82,
+      "hs_pier_north": 1.61,
+      "tp": 6.2,
+      "weff": 3.47,
+      "pressure_3h": -1.4,
+      "tide": 1.13,
+      "cv_rate": 0.88,
+      "south_closed": 1,
+      "wufu_in_port": 1,
+      "q_heaven_tide": 0.894,
+      "q_earth_berth": 0.15,
+      "q_human_gate": 0.12,
+      "q_deity_anomaly": 0.88,
+      "qimen_summary": "陰遁·小雪上元｜死門/驚門｜白虎/玄武",
+      "veto": 1,
+      "weight": 1.35,
+      "action": "【風管處公告】受海象影響，(24)日龜山島實施封島"
     }
   ]
 }
