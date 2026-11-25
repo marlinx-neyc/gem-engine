@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "updated_at": "2026-11-25 12:47:56 CST",
+    "updated_at": "2026-11-25 23:03:11 CST",
     "spec": "GEM-ENG-SPEC-2026-V66.5-10YR-RL-V112",
     "horizon": "2016–2026 (近十年跨尺度樣本庫)",
     "total_cases": 31
@@ -18,11 +18,11 @@
   "learned_feature_scales": {
     "hs": [
       0.517,
-      0.2174
+      0.2168
     ],
     "tp": [
       2.875,
-      0.0928
+      0.0934
     ],
     "weff": [
       3.45,
@@ -30,40 +30,40 @@
     ],
     "pressure_3h": [
       1.15,
-      0.103
+      0.1012
     ],
     "tide": [
       0.517,
-      0.0343
+      0.034
     ],
     "south_closed": [
       0.575,
-      0.0682
+      0.0685
     ],
     "wufu_in_port": [
       0.575,
-      0.1578
+      0.1586
     ],
     "q_heaven_tide": [
       0.402,
-      0.0404
+      0.0405
     ],
     "q_earth_berth": [
       0.402,
-      0.0486
+      0.0488
     ],
     "q_human_gate": [
       0.402,
-      0.0674
+      0.0677
     ],
     "q_deity_anomaly": [
       0.402,
-      0.0947
+      0.0951
     ]
   },
   "training_plan_report": {
-    "last_trained_at": "2026-11-25 12:47:56 CST",
-    "last_deep_trained_date": "2026-11-23",
+    "last_trained_at": "2026-11-25 23:03:11 CST",
+    "last_deep_trained_date": "2026-11-25",
     "time_horizon_span": "2016–2026 (近十年跨尺度樣本庫)",
     "years_covered": [
       2016,
@@ -81,8 +81,8 @@
     "schedule_policy": "即時線上增量學習 ＋ 每日 18:00 CST 近十年 (2016-2026) 四源深度回溯訓練",
     "total_training_samples": 31,
     "category_breakdown": {
-      "routine_closure": 16,
-      "exception_closure": 11,
+      "routine_closure": 15,
+      "exception_closure": 12,
       "gray_zone_open": 4
     },
     "new_mined_official_cases": 0,
@@ -96,7 +96,7 @@
     "key_value_youden_j": {
       "hs_pier_north_crit": "0.93m (J=0.912)",
       "tp_swell_crit": "11.2s (J=0.409)",
-      "pressure_3h_crit": "-1.2hPa/3h (J=0.503)",
+      "pressure_3h_crit": "-1.2hPa/3h (J=0.468)",
       "weff_north_crit": "7.5m/s (J=0.328)"
     }
   },
@@ -788,27 +788,27 @@
     },
     {
       "case_id": "RL_20261125",
-      "time": "2026-11-25 12:47",
+      "time": "2026-11-25 23:03",
       "year": 2026,
-      "category": "ROUTINE_CLOSURE",
-      "label": "例行性封島（【11D奇門RL判別·封島】匹配度 98.5% (陰）",
-      "hs": 1.74,
-      "hs_pier_north": 1.54,
-      "tp": 6.3,
-      "weff": 3.15,
-      "pressure_3h": -1.7,
-      "tide": 0.93,
-      "cv_rate": 0.76,
+      "category": "EXCEPTION_CLOSURE",
+      "label": "例外封島（【四維辯證·實質封島】南岸封閉且北岸浪高 1.36m）",
+      "hs": 1.54,
+      "hs_pier_north": 1.36,
+      "tp": 6.5,
+      "weff": 1.66,
+      "pressure_3h": -0.5,
+      "tide": 0.5,
+      "cv_rate": 0.45,
       "south_closed": 1,
       "wufu_in_port": 1,
-      "q_heaven_tide": 0.892,
+      "q_heaven_tide": 0.874,
       "q_earth_berth": 0.15,
       "q_human_gate": 0.12,
-      "q_deity_anomaly": 0.88,
-      "qimen_summary": "陰遁·小雪上元｜死門/驚門｜白虎/玄武",
+      "q_deity_anomaly": 0.25,
+      "qimen_summary": "陰遁·小雪上元｜死門/驚門｜太陰/六合",
       "veto": 1,
       "weight": 1.15,
-      "action": "【11D奇門RL判別·封島】匹配度 98.5% (陰遁·小雪上元｜死門/驚門｜白虎/玄武) 吻合「例行性封島（【風管處公告】受海象影響，(24)日龜山島實施封島）」"
+      "action": "【四維辯證·實質封島】南岸封閉且北岸浪高 1.36m > 0.95m"
     }
   ]
 }
